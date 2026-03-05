@@ -7,18 +7,23 @@ import { toLocalYMD } from '@/lib/utils';
 import '@/app/style.css';
 import { MonthSection } from '@/app/_components/MonthSection';
 import { GigCard } from '@/app/_components/GigCard';
-import type { Event, V1GigGetResponseBody, V1GigGetResponseBodyGig } from '@/lib/types';
+import type { Event, V1GigGetResponseBody } from '@/lib/types';
 import { apiRequest } from '@/lib/api';
 import { useT } from '@/lib/i18n/I18nProvider';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
+import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
+import { gigToEvent } from '@/lib/feed.mapper';
 
 type FeedClientProps = {
   country: string; // ISO like "es"
   city: string; // slug like "barcelona"
+  initialEvents?: Event[];
+  initialPage?: number;
+  initialHasMore?: boolean;
 };
 
 const DEFAULT_LOCALE = 'en-US';
-const PAGE_SIZE = 30;
+const PAGE_SIZE = FEED_PAGE_SIZE;
 
 const formatMonthTitle = (date: string): string => {
   return (
@@ -57,45 +62,21 @@ function useHeaderHeight(selector = '[data-app-header]', fallback = 44) {
   return h; // value in pixels
 }
 
-const gigDateToYMD = (date: V1GigGetResponseBodyGig['date']): string => {
-  if (typeof date === 'number') {
-    return toLocalYMD(new Date(toMs(date)));
-  }
+export default function FeedClient(props: FeedClientProps) {
+  const { country, city, initialEvents, initialPage, initialHasMore } = props;
 
-  const s = String(date).trim();
-
-  // "1705257600000" or "1705257600"
-  if (/^\d+$/.test(s)) {
-    const n = Number(s);
-    return toLocalYMD(new Date(toMs(n)));
-  }
-
-  // ISO "2026-01-14T19:00:00.000Z"
-  if (s.includes('T')) return s.slice(0, 10);
-
-  // "YYYY-MM-DD"
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-
-  // last resort parse
-  const d = new Date(s);
-  if (!Number.isNaN(d.getTime())) return toLocalYMD(d);
-
-  return s;
-};
-
-const toMs = (n: number) => (n < 1_000_000_000_000 ? n * 1000 : n); // seconds -> ms (heuristic)
-
-export default function FeedClient({ country, city }: FeedClientProps) {
   const t = useT();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 44
 
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState<Event[]>(() => initialEvents ?? []);
+  const [loading, setLoading] = useState(() => initialEvents === undefined);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(() => initialPage ?? 1);
+  const [hasMore, setHasMore] = useState(() =>
+    initialEvents !== undefined ? (initialHasMore ?? initialEvents.length === PAGE_SIZE) : true,
+  );
   // Raw date from observer (updates on every scroll tick)
   const [rawVisibleEventDate, setRawVisibleEventDate] = useState<string | undefined>();
   // Debounced date passed to the header (stabilized)
@@ -153,27 +134,9 @@ export default function FeedClient({ country, city }: FeedClientProps) {
 
         const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
 
-        const mapped = res.gigs.map((gig): Event => {
-          const date = gigDateToYMD(gig.date);
-          const endDate = gig.endDate ? gigDateToYMD(gig.endDate) : undefined;
-
-          return {
-            id: gig.id,
-            date,
-            endDate,
-            poster: gig.posterUrl,
-            title: gig.title,
-            venue: gig.venue,
-            city: gig.city,
-            country: {
-              iso: gig.country,
-              name: gig.country ? t('country', gig.country) : '',
-            },
-            ticketsUrl: gig.ticketsUrl,
-            calendarUrl: gig.calendarUrl,
-            postUrl: gig.postUrl,
-          };
-        });
+        const mapped: Event[] = res.gigs.map((gig) =>
+          gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
+        );
 
         setEvents((prev) => {
           const merged = mode === 'replace' ? mapped : [...prev, ...mapped];
@@ -196,10 +159,21 @@ export default function FeedClient({ country, city }: FeedClientProps) {
     [city, country, t],
   );
 
-  // Initial load (refetch when params change)
+  // Initial load (or hydrate from server) + refetch when params change
   useEffect(() => {
+    if (initialEvents !== undefined) {
+      setEvents(initialEvents);
+      setPage(initialPage ?? 1);
+      setHasMore(initialHasMore ?? initialEvents.length === PAGE_SIZE);
+      setError(null);
+      setLoading(false);
+      setLoadingMore(false);
+      inFlightRef.current = false;
+      return;
+    }
+
     fetchPage(1, 'replace');
-  }, [fetchPage]);
+  }, [country, city, fetchPage, initialEvents, initialHasMore, initialPage]);
 
   // When opening a URL that already contains a hash, the browser tries to scroll
   // before the feed items exist (because we load them client-side). Re-try once
