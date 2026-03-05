@@ -163,6 +163,25 @@ export default function CreateGigFormClient({ countries }: CreateGigFormClientPr
       if (data.ticketsUrl) {
         form.setValue('ticketsUrl', data.ticketsUrl, { shouldDirty: true });
       }
+      if (data.posterUrl) {
+        const nextPosterUrl = data.posterUrl.trim();
+        try {
+          new URL(nextPosterUrl);
+          clearPosterFileInput();
+          setPosterMode('url');
+          setPosterUrl(nextPosterUrl);
+        } catch {
+          // Still surface what the model returned so it can be corrected manually.
+          clearPosterFileInput();
+          setPosterMode('url');
+          setPosterUrl(nextPosterUrl);
+          toast({
+            title: 'Invalid poster URL',
+            description: 'Poster mode was switched to URL — please review/fix the link.',
+            variant: 'destructive',
+          });
+        }
+      }
 
       toast({ title: 'Filled from AI', description: 'Fields were updated from lookup results.' });
     } catch (e) {
