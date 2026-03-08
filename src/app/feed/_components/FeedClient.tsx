@@ -7,12 +7,13 @@ import { toLocalYMD } from '@/lib/utils';
 import '@/app/style.css';
 import { MonthSection } from '@/app/_components/MonthSection';
 import { GigCard } from '@/app/_components/GigCard';
-import type { Event, V1GigGetResponseBody } from '@/lib/types';
+import type { Event, V1GigDatesGetResponseBody, V1GigGetResponseBody } from '@/lib/types';
 import { apiRequest } from '@/lib/api';
 import { useT } from '@/lib/i18n/I18nProvider';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
+import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
 import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
-import { gigToEvent } from '@/lib/feed.mapper';
+import { gigDateToYMD, gigToEvent } from '@/lib/feed.mapper';
 
 type FeedClientProps = {
   country: string; // ISO like "es"
@@ -62,6 +63,17 @@ function useHeaderHeight(selector = '[data-app-header]', fallback = 44) {
   return h; // value in pixels
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isV1GigDatesGetResponseBody(value: unknown): value is V1GigDatesGetResponseBody {
+  if (!isRecord(value)) return false;
+  const dates = value['dates'];
+  if (!Array.isArray(dates)) return false;
+  return dates.every((x) => typeof x === 'string' || typeof x === 'number');
+}
+
 export default function FeedClient(props: FeedClientProps) {
   const { country, city, initialEvents, initialPage, initialHasMore } = props;
 
@@ -70,6 +82,9 @@ export default function FeedClient(props: FeedClientProps) {
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 44
 
   const [events, setEvents] = useState<Event[]>(() => initialEvents ?? []);
+  const [calendarAvailableDates, setCalendarAvailableDates] = useState<string[] | undefined>();
+  const [calendarDatesStatus, setCalendarDatesStatus] = useState<CalendarDatesStatus>('loading');
+  const [calendarDatesError, setCalendarDatesError] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(() => initialEvents === undefined);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,13 +106,74 @@ export default function FeedClient(props: FeedClientProps) {
   const hasUserScrolledRef = useRef(false);
   const lastAutoScrolledHashRef = useRef<string | null>(null);
   const autoHighlightTimeoutRef = useRef<number | undefined>(undefined);
+  const calendarAbortRef = useRef<AbortController | null>(null);
+  const calendarRequestSeqRef = useRef<number>(0);
+  const calendarDatesLoadedForLocationRef = useRef<string | null>(null);
 
-  // list of dates that actually have events (YYYY-MM-DD) — used to disable other days in the calendar
-  const availableDates = useMemo(() => {
-    const set = new Set<string>();
-    for (const e of events) set.add(e.date);
-    return Array.from(set).sort();
-  }, [events]);
+  // Load all future event dates for this location to power the calendar (independent from feed pagination).
+  useEffect(() => {
+    // Lazy: only start after the primary feed has loaded.
+    if (loading) return;
+    if (error) return;
+
+    const locationKey = `${country}|${city}`;
+    if (calendarDatesLoadedForLocationRef.current === locationKey) return;
+
+    const ac = new AbortController();
+    calendarAbortRef.current?.abort();
+    calendarAbortRef.current = ac;
+    const seq = (calendarRequestSeqRef.current += 1);
+    const timeoutId = window.setTimeout(() => {
+      ac.abort();
+    }, 15_000);
+
+    setCalendarDatesStatus('loading');
+    setCalendarDatesError(undefined);
+    setCalendarAvailableDates(undefined);
+
+    const run = async () => {
+      try {
+        const qs = new URLSearchParams();
+        if (country) qs.set('country', country);
+        if (city) qs.set('city', city);
+
+        const res = await apiRequest<unknown>(`v1/gig/dates?${qs.toString()}`, 'GET', undefined, {
+          signal: ac.signal,
+        });
+
+        if (!isV1GigDatesGetResponseBody(res)) {
+          throw new Error('Invalid API response: expected { dates: (string | number)[] }');
+        }
+
+        const ymd = res.dates.map((x) => gigDateToYMD(String(x)));
+        const unique = Array.from(new Set(ymd)).sort();
+
+        if (ac.signal.aborted) return;
+        if (seq !== calendarRequestSeqRef.current) return;
+
+        setCalendarAvailableDates(unique);
+        setCalendarDatesStatus('ready');
+        calendarDatesLoadedForLocationRef.current = locationKey;
+      } catch (e) {
+        if (ac.signal.aborted) return;
+        if (seq !== calendarRequestSeqRef.current) return;
+
+        const message = e instanceof Error ? e.message : 'Failed to load calendar dates.';
+        setCalendarDatesStatus('error');
+        setCalendarDatesError(message);
+        setCalendarAvailableDates(undefined);
+      } finally {
+        window.clearTimeout(timeoutId);
+        if (calendarAbortRef.current === ac) calendarAbortRef.current = null;
+      }
+    };
+
+    void run();
+    return () => {
+      window.clearTimeout(timeoutId);
+      ac.abort();
+    };
+  }, [city, country, error, loading]);
 
   // Debounce raw visible date changes to avoid header jitter while scrolling
   useEffect(() => {
@@ -357,14 +433,23 @@ export default function FeedClient(props: FeedClientProps) {
   useEffect(() => {
     setHeaderConfig({
       earliestEventDate: visibleEventDate,
-      availableDates,
+      availableDates: calendarDatesStatus === 'ready' ? calendarAvailableDates : undefined,
+      calendarDatesStatus,
+      calendarDatesError,
       onDayClick: handleDayClick,
     });
 
     return () => {
       setHeaderConfig({});
     };
-  }, [availableDates, handleDayClick, setHeaderConfig, visibleEventDate]);
+  }, [
+    calendarAvailableDates,
+    calendarDatesError,
+    calendarDatesStatus,
+    handleDayClick,
+    setHeaderConfig,
+    visibleEventDate,
+  ]);
 
   if (loading) {
     return (

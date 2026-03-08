@@ -32,6 +32,10 @@ export interface V1GigGetResponseBody {
   gigs: V1GigGetResponseBodyGig[];
 }
 
+export interface V1GigDatesGetResponseBody {
+  dates: string[];
+}
+
 export interface V1GigGetResponseBodyGig {
   id: string;
   title: string;
