@@ -15,13 +15,12 @@ import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider
 import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
 import { gigDateToYMD, gigToEvent } from '@/lib/feed.mapper';
 
-type FeedClientProps = {
+interface FeedClientProps {
   country: string; // ISO like "es"
   city: string; // slug like "barcelona"
   initialEvents?: Event[];
-  initialPage?: number;
-  initialHasMore?: boolean;
-};
+  initialNextCursor?: string;
+}
 
 const DEFAULT_LOCALE = 'en-US';
 const PAGE_SIZE = FEED_PAGE_SIZE;
@@ -75,7 +74,7 @@ function isV1GigDatesGetResponseBody(value: unknown): value is V1GigDatesGetResp
 }
 
 export default function FeedClient(props: FeedClientProps) {
-  const { country, city, initialEvents, initialPage, initialHasMore } = props;
+  const { country, city, initialEvents, initialNextCursor } = props;
 
   const t = useT();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
@@ -88,10 +87,7 @@ export default function FeedClient(props: FeedClientProps) {
   const [loading, setLoading] = useState(() => initialEvents === undefined);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(() => initialPage ?? 1);
-  const [hasMore, setHasMore] = useState(() =>
-    initialEvents !== undefined ? (initialHasMore ?? initialEvents.length === PAGE_SIZE) : true,
-  );
+  const [nextCursor, setNextCursor] = useState<string | undefined>(() => initialNextCursor);
   // Raw date from observer (updates on every scroll tick)
   const [rawVisibleEventDate, setRawVisibleEventDate] = useState<string | undefined>();
   // Debounced date passed to the header (stabilized)
@@ -190,13 +186,14 @@ export default function FeedClient(props: FeedClientProps) {
   }, [headerH]);
 
   const fetchPage = useCallback(
-    async (nextPage: number, mode: 'replace' | 'append') => {
+    async (mode: 'replace' | 'append', options?: Readonly<{ cursor?: string }>) => {
       if (inFlightRef.current) return;
       inFlightRef.current = true;
 
       const qs = new URLSearchParams();
-      qs.set('page', String(nextPage));
-      qs.set('size', String(PAGE_SIZE));
+      qs.set('limit', String(PAGE_SIZE));
+      const cursor = options?.cursor;
+      if (cursor) qs.set('cursor', cursor);
       if (country) qs.set('country', country);
       if (city) qs.set('city', city);
 
@@ -221,9 +218,7 @@ export default function FeedClient(props: FeedClientProps) {
           return merged;
         });
 
-        setPage(nextPage);
-        // Stop when backend returns fewer than requested (or nothing).
-        setHasMore(res.gigs.length === PAGE_SIZE);
+        setNextCursor(res.nextCursor);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -239,8 +234,7 @@ export default function FeedClient(props: FeedClientProps) {
   useEffect(() => {
     if (initialEvents !== undefined) {
       setEvents(initialEvents);
-      setPage(initialPage ?? 1);
-      setHasMore(initialHasMore ?? initialEvents.length === PAGE_SIZE);
+      setNextCursor(initialNextCursor);
       setError(null);
       setLoading(false);
       setLoadingMore(false);
@@ -248,8 +242,8 @@ export default function FeedClient(props: FeedClientProps) {
       return;
     }
 
-    fetchPage(1, 'replace');
-  }, [country, city, fetchPage, initialEvents, initialHasMore, initialPage]);
+    fetchPage('replace');
+  }, [country, city, fetchPage, initialEvents, initialNextCursor]);
 
   // When opening a URL that already contains a hash, the browser tries to scroll
   // before the feed items exist (because we load them client-side). Re-try once
@@ -308,8 +302,8 @@ export default function FeedClient(props: FeedClientProps) {
         const hit = entries.some((e) => e.isIntersecting);
         if (!hit) return;
         if (!hasUserScrolledRef.current) return;
-        if (loading || loadingMore || !hasMore) return;
-        fetchPage(page + 1, 'append');
+        if (loading || loadingMore || !nextCursor) return;
+        fetchPage('append', { cursor: nextCursor });
       },
       {
         root: null, // viewport (works with window scroll)
@@ -320,7 +314,7 @@ export default function FeedClient(props: FeedClientProps) {
 
     io.observe(el);
     return () => io.disconnect();
-  }, [loading, loadingMore, hasMore, page, fetchPage]);
+  }, [loading, loadingMore, nextCursor, fetchPage]);
 
   const eventsByMonth = useMemo(() => {
     const grouped: Record<string, Event[]> = {};
