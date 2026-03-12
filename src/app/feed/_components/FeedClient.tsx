@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import styles from '@/app/page.module.css';
 import { toLocalYMD } from '@/lib/utils';
 import '@/app/style.css';
@@ -19,6 +19,8 @@ import { useHashAutoScroll } from './feed-client/useHashAutoScroll';
 import { useInfiniteScroll } from './feed-client/useInfiniteScroll';
 import { useVisibleEventDateOnScroll } from './feed-client/useVisibleEventDateOnScroll';
 import { isV1GigAroundGetResponseBody } from './feed-client/utils';
+import { createInitialFeedLoadingState, feedLoadingReducer } from './feed-client/feedLoading';
+import type { FeedLoadingState } from './feed-client/feedLoading';
 
 interface ScrollAnchor {
   readonly eventId: string;
@@ -51,10 +53,11 @@ export default function FeedClient(props: FeedClientProps) {
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 44
 
   const [events, setEvents] = useState<Event[]>(() => initialEvents ?? []);
-  const [isLoading, setIsLoading] = useState(() => initialEvents === undefined);
-  const [isLoadingNext, setIsLoadingNext] = useState(false);
-  const [isLoadingPrev, setIsLoadingPrev] = useState(false);
-  const [isJumpLoading, setIsJumpLoading] = useState(false);
+  const [loading, dispatchLoading] = useReducer(
+    feedLoadingReducer,
+    initialEvents !== undefined,
+    (hasInitialEvents): FeedLoadingState => createInitialFeedLoadingState({ hasInitialEvents }),
+  );
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | undefined>(() => initialNextCursor);
   const [prevCursor, setPrevCursor] = useState<string | undefined>(() => initialPrevCursor);
@@ -111,7 +114,7 @@ export default function FeedClient(props: FeedClientProps) {
     if (city) qs.set('city', city);
 
     try {
-      setIsLoadingNext(true);
+      dispatchLoading({ type: 'next:start' });
       const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
       const mapped: Event[] = res.gigs.map((gig) =>
         gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
@@ -122,7 +125,7 @@ export default function FeedClient(props: FeedClientProps) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
-      setIsLoadingNext(false);
+      dispatchLoading({ type: 'next:end' });
       inFlightNextRef.current = false;
     }
   }, [city, country, mergeUniqueSorted, nextCursor, t]);
@@ -143,18 +146,28 @@ export default function FeedClient(props: FeedClientProps) {
     if (city) qs.set('city', city);
 
     try {
-      setIsLoadingPrev(true);
+      dispatchLoading({ type: 'prev:start' });
       const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
       const mapped: Event[] = res.gigs.map((gig) =>
         gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
       );
 
+      if (mapped.length === 0) {
+        pendingScrollRestoreRef.current = null;
+        setPrevCursor(undefined);
+        return;
+      }
+
       setEvents((prev) => mergeUniqueSorted(prev, mapped));
+      if (!res.prevCursor || res.prevCursor === prevCursor) {
+        setPrevCursor(undefined);
+        return;
+      }
       setPrevCursor(res.prevCursor);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
-      setIsLoadingPrev(false);
+      dispatchLoading({ type: 'prev:end' });
       inFlightPrevRef.current = false;
     }
   }, [captureScrollAnchor, city, country, mergeUniqueSorted, prevCursor, t]);
@@ -168,7 +181,7 @@ export default function FeedClient(props: FeedClientProps) {
       if (city) qs.set('city', city);
 
       try {
-        setIsLoading(true);
+        dispatchLoading({ type: 'initial:start' });
         setError(null);
         const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
         setPrevCursor(res.prevCursor);
@@ -182,9 +195,10 @@ export default function FeedClient(props: FeedClientProps) {
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
-        setIsLoading(false);
-        setIsLoadingNext(false);
-        setIsLoadingPrev(false);
+        dispatchLoading({ type: 'initial:end' });
+        dispatchLoading({ type: 'next:end' });
+        dispatchLoading({ type: 'prev:end' });
+        dispatchLoading({ type: 'jump:end' });
         inFlightNextRef.current = false;
         inFlightPrevRef.current = false;
         inFlightJumpRef.current = false;
@@ -198,11 +212,8 @@ export default function FeedClient(props: FeedClientProps) {
       setEvents(initialEvents);
       setNextCursor(initialNextCursor);
       setError(null);
-      setIsLoading(false);
-      setIsLoadingNext(false);
-      setIsLoadingPrev(false);
-      setIsJumpLoading(false);
       setPrevCursor(initialPrevCursor);
+      dispatchLoading({ type: 'reset' });
       inFlightNextRef.current = false;
       inFlightPrevRef.current = false;
       inFlightJumpRef.current = false;
@@ -222,7 +233,7 @@ export default function FeedClient(props: FeedClientProps) {
   } = useCalendarAvailableDates({
     country,
     city,
-    enabled: !isLoading && !error,
+    enabled: !loading.initial && !error,
   });
 
   const { visibleEventDate } = useVisibleEventDateOnScroll({
@@ -234,16 +245,16 @@ export default function FeedClient(props: FeedClientProps) {
 
   const { sentinelRef: bottomSentinelRef } = useInfiniteScroll({
     isEnabled: true,
-    canLoadMore: hasMore && !isLoading && !isLoadingNext && !isJumpLoading,
-    isLoading: isLoading || isLoadingNext || isJumpLoading,
+    canLoadMore: hasMore && !loading.initial && !loading.next && !loading.jump,
+    isLoading: loading.initial || loading.next || loading.jump,
     onLoadMore: fetchNextPage,
     resetUserScrollKey: userScrollSessionKey,
   });
 
   const { sentinelRef: topSentinelRef } = useInfiniteScroll({
     isEnabled: true,
-    canLoadMore: hasPrev && !isLoading && !isLoadingPrev && !isJumpLoading,
-    isLoading: isLoading || isLoadingPrev || isJumpLoading,
+    canLoadMore: hasPrev && !loading.initial && !loading.prev && !loading.jump,
+    isLoading: loading.initial || loading.prev || loading.jump,
     onLoadMore: fetchPrevPage,
     rootMargin: '400px 0px',
     resetUserScrollKey: userScrollSessionKey,
@@ -301,7 +312,7 @@ export default function FeedClient(props: FeedClientProps) {
       // 2) Not loaded yet — fetch a chunk around the date and then scroll.
       if (inFlightJumpRef.current) return;
       inFlightJumpRef.current = true;
-      setIsJumpLoading(true);
+      dispatchLoading({ type: 'jump:start' });
       setError(null);
       setUserScrollSessionKey((x) => x + 1);
 
@@ -348,7 +359,7 @@ export default function FeedClient(props: FeedClientProps) {
         const message = e instanceof Error ? e.message : 'Failed to jump to date.';
         setError(message);
       } finally {
-        setIsJumpLoading(false);
+        dispatchLoading({ type: 'jump:end' });
         inFlightJumpRef.current = false;
       }
     },
@@ -364,7 +375,7 @@ export default function FeedClient(props: FeedClientProps) {
     onDayClick: handleDayClick,
   });
 
-  if (isLoading) {
+  if (loading.initial) {
     return (
       <div className="min-h-[100svh]">
         <main className={styles.main}>
@@ -392,7 +403,7 @@ export default function FeedClient(props: FeedClientProps) {
     <div className="min-h-[100svh]">
       <main className={styles.main}>
         <div className="px-8 md:px-8 py-8">
-          {isJumpLoading ? (
+          {loading.jump ? (
             <div
               className="fixed left-1/2 -translate-x-1/2 z-50"
               style={{ top: 'calc(var(--header-h, 44px) + 8px)' }}
@@ -404,13 +415,13 @@ export default function FeedClient(props: FeedClientProps) {
             </div>
           ) : null}
           <div ref={topSentinelRef} className="h-px" aria-hidden />
-          {isLoadingPrev ? (
+          {loading.prev ? (
             <div className="py-4 text-center text-gray-500">Loading previous…</div>
           ) : null}
           <FeedMonths events={events} registerEventRef={registerEventRef} />
 
           <div ref={bottomSentinelRef} className="h-12" aria-hidden />
-          {isLoadingNext ? (
+          {loading.next ? (
             <div className="py-4 text-center text-gray-500">Loading more…</div>
           ) : null}
         </div>
