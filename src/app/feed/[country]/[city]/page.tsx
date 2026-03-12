@@ -47,6 +47,7 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
         country={country}
         city={city}
         initialEvents={initialEvents}
+        initialPrevCursor={feed.prevCursor}
         initialNextCursor={feed.nextCursor}
       />
     </I18nProvider>

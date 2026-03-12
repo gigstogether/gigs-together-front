@@ -29,6 +29,7 @@ interface FeedClientProps {
   country: string; // ISO like "es"
   city: string; // slug like "barcelona"
   initialEvents?: Event[];
+  initialPrevCursor?: string;
   initialNextCursor?: string;
 }
 
@@ -43,7 +44,7 @@ function sortEventsAsc(input: Event[]): Event[] {
 }
 
 export default function FeedClient(props: FeedClientProps) {
-  const { country, city, initialEvents, initialNextCursor } = props;
+  const { country, city, initialEvents, initialPrevCursor, initialNextCursor } = props;
 
   const t = useT();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
@@ -56,7 +57,7 @@ export default function FeedClient(props: FeedClientProps) {
   const [isJumpLoading, setIsJumpLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | undefined>(() => initialNextCursor);
-  const [prevCursor, setPrevCursor] = useState<string | undefined>(undefined);
+  const [prevCursor, setPrevCursor] = useState<string | undefined>(() => initialPrevCursor);
   const [userScrollSessionKey, setUserScrollSessionKey] = useState(0);
 
   const eventRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -169,9 +170,8 @@ export default function FeedClient(props: FeedClientProps) {
       try {
         setIsLoading(true);
         setError(null);
-        setPrevCursor(undefined);
-
         const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
+        setPrevCursor(res.prevCursor);
 
         const mapped: Event[] = res.gigs.map((gig) =>
           gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
@@ -202,7 +202,7 @@ export default function FeedClient(props: FeedClientProps) {
       setIsLoadingNext(false);
       setIsLoadingPrev(false);
       setIsJumpLoading(false);
-      setPrevCursor(undefined);
+      setPrevCursor(initialPrevCursor);
       inFlightNextRef.current = false;
       inFlightPrevRef.current = false;
       inFlightJumpRef.current = false;
