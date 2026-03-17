@@ -43,7 +43,8 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   icons: {
-    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    icon: [{ url: '/logo-circle-96x96.png', type: 'image/png', sizes: '96x96' }],
+    apple: [{ url: '/logo-circle-180x180.png', sizes: '180x180' }],
   },
   openGraph: {
     type: 'website',
