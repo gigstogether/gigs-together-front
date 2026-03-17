@@ -4,6 +4,9 @@ import type { V1TranslationsByNamespace } from '@/lib/translations.server';
 
 const NS = 'about';
 
+export const dynamic = 'force-static';
+export const revalidate = 3600; // ISR: regenerate every hour when translations change
+
 const t = (translations: V1TranslationsByNamespace, key: string): string =>
   translations?.[NS]?.[key]?.value ?? '';
 
