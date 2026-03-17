@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import FeedClient from '../../_components/FeedClient';
 import { getTranslations } from '@/lib/translations.server';
 import { I18nProvider } from '@/lib/i18n/I18nProvider';
@@ -43,13 +44,17 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
 
   return (
     <I18nProvider locale={i18n.locale} translations={i18n.translations}>
-      <FeedClient
-        country={country}
-        city={city}
-        initialEvents={initialEvents}
-        initialPrevCursor={feed.prevCursor}
-        initialNextCursor={feed.nextCursor}
-      />
+      <Suspense
+        fallback={<div className="min-h-[100svh] flex justify-center items-center">Loading…</div>}
+      >
+        <FeedClient
+          country={country}
+          city={city}
+          initialEvents={initialEvents}
+          initialPrevCursor={feed.prevCursor}
+          initialNextCursor={feed.nextCursor}
+        />
+      </Suspense>
     </I18nProvider>
   );
 }
