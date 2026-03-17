@@ -14,6 +14,7 @@ export default function HeaderActions(props: {
   const { locationLabel, telegramUrl, githubUrl, suggestGigUrl } = props;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const [locationTipOpen, setLocationTipOpen] = useState(false);
 
   return (
@@ -66,6 +67,21 @@ export default function HeaderActions(props: {
             <FaGithub className="text-xl text-black-500 hover:text-black-700" />
           </a>
         )}
+
+        <Popover open={desktopMenuOpen} onOpenChange={setDesktopMenuOpen}>
+          <PopoverTrigger type="button" aria-label="Menu" className="py-1.5 px-0">
+            <FaBars className="text-base text-black-500 hover:text-black-700" />
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-48 p-2">
+            <a
+              href="/about"
+              className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
+              onClick={() => setDesktopMenuOpen(false)}
+            >
+              About
+            </a>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Mobile menu */}
@@ -132,6 +148,16 @@ export default function HeaderActions(props: {
                   GitHub
                 </a>
               )}
+
+              <div className="my-0.5 h-px w-full bg-border/40" aria-hidden />
+              <a
+                href="/about"
+                className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="About"
+              >
+                About
+              </a>
             </div>
           </PopoverContent>
         </Popover>
