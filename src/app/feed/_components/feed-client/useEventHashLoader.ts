@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { toLocalYMD } from '@/lib/utils';
 import type { FeedLoadingAction } from './feedLoading';
 
 export interface UseEventHashLoaderParams {
@@ -15,6 +17,9 @@ export interface UseEventHashLoaderParams {
 }
 
 export function useEventHashLoader(params: UseEventHashLoaderParams): void {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const {
     isEnabled,
     isBusyRef,
@@ -57,6 +62,14 @@ export function useEventHashLoader(params: UseEventHashLoaderParams): void {
 
     try {
       const anchorYmd = await resolveAnchorYmdByEventId(id);
+      const todayYmd = toLocalYMD(new Date());
+      // Past events: redirect to same URL without anchor (feed shows only upcoming)
+      if (anchorYmd < todayYmd) {
+        const search = searchParams.toString() ? `?${searchParams.toString()}` : '';
+        const href = `${pathname ?? ''}${search}`;
+        router.replace(href as Parameters<typeof router.replace>[0]);
+        return;
+      }
       await loadAroundAndReplace(anchorYmd);
 
       await new Promise<void>((r) => requestAnimationFrame(() => r()));
@@ -77,7 +90,10 @@ export function useEventHashLoader(params: UseEventHashLoaderParams): void {
     isBusyRef,
     isEnabled,
     loadAroundAndReplace,
+    pathname,
     resolveAnchorYmdByEventId,
+    router,
+    searchParams,
     setError,
     setIsBusy,
   ]);
