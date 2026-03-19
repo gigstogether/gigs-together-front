@@ -72,14 +72,20 @@ export function useEventHashLoader(params: UseEventHashLoaderParams): void {
       }
       await loadAroundAndReplace(anchorYmd);
 
-      await new Promise<void>((r) => requestAnimationFrame(() => r()));
+      // Double rAF: React may not have committed the DOM update after setState in a single frame.
+      // First rAF runs before next paint; second gives React time to flush and render the new list.
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
       const after = document.getElementById(id);
       if (!after) {
         throw new Error(`Failed to locate target event after load: ${id}`);
       }
-    } catch (e) {
-      const message = e instanceof Error ? e.message : 'Failed to load event anchor.';
-      setError(message);
+    } catch {
+      // On any error: clear hash, clear error, show current feed.
+      lastMissingHashTargetRef.current = null;
+      setError(null);
+      const search = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      const url = `${pathname ?? ''}${search}`;
+      window.history.replaceState(null, '', url);
     } finally {
       dispatchLoading({ type: 'jump:end' });
       setIsBusy(false);
