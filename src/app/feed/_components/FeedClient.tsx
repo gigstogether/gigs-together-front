@@ -397,7 +397,7 @@ export default function FeedClient(props: FeedClientProps) {
               style={{ top: 'calc(var(--header-h, 44px) + 8px)' }}
               aria-live="polite"
             >
-              <div className="rounded-md bg-white/90 backdrop-blur px-3 py-1 text-sm text-gray-700 shadow">
+              <div className="jump-toast-pulse rounded-lg border border-border bg-popover px-5 py-2.5 text-base text-popover-foreground shadow-lg">
                 Jumping…
               </div>
             </div>

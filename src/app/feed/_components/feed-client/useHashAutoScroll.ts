@@ -23,6 +23,22 @@ export function useHashAutoScroll(params: UseHashAutoScrollParams) {
   const lastAutoScrolledHashRef = useRef<string | null>(null);
   const autoHighlightTimeoutRef = useRef<number | undefined>(undefined);
 
+  // When a user clicks a hash link (e.g. event title), the browser scrolls natively.
+  // We must mark that hash as "handled" so we don't re-scroll when events change.
+  useEffect(() => {
+    const syncHashHandled = () => {
+      const hash = window.location.hash;
+      if (!hash) return;
+      const id = hash.startsWith('#') ? hash.slice(1) : hash;
+      if (id && document.getElementById(id)) {
+        lastAutoScrolledHashRef.current = hash;
+      }
+    };
+    window.addEventListener('hashchange', syncHashHandled);
+    syncHashHandled();
+    return () => window.removeEventListener('hashchange', syncHashHandled);
+  }, []);
+
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash) {
