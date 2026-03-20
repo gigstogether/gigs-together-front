@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 export interface ImageLightboxProps {
@@ -44,7 +44,7 @@ export function ImageLightbox(props: ImageLightboxProps) {
     return () => window.clearTimeout(id);
   }, [open]);
 
-  const label = useMemo(() => (alt?.trim() ? alt : 'Image preview'), [alt]);
+  const label = alt?.trim() ? alt : 'Image preview';
 
   if (!open) return null;
   if (typeof document === 'undefined') return null;

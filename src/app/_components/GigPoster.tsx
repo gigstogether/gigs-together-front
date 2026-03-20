@@ -1,10 +1,10 @@
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ImageLightbox } from '@/app/_components/ImageLightbox';
 
-export type GigPosterProps = {
+export interface GigPosterProps {
   poster: string;
   title: string;
-};
+}
 
 export function GigPoster({ poster, title }: GigPosterProps) {
   const [loadedPoster, setLoadedPoster] = useState<string | null>(null);

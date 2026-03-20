@@ -1,7 +1,7 @@
 'use client';
 
 import type { MouseEvent } from 'react';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { cn, toLocalYMD } from '@/lib/utils';
 import { FaRegCalendar } from 'react-icons/fa';
 import { Calendar } from '@/components/ui/calendar';
@@ -26,14 +26,11 @@ const formatDisplayMonth = (dateString?: string) => {
   return `${d.toLocaleString('en-US', { month: 'long' })} ${y}`;
 };
 
-const TopForm = ({
-  visibleEventDate,
-  onDayClick,
-  availableDates,
-  calendarDatesStatus,
-  calendarDatesError,
-}: TopFormProps) => {
-  const availableSet = useMemo(() => new Set(availableDates ?? []), [availableDates]);
+const TopForm = (props: TopFormProps) => {
+  const { visibleEventDate, onDayClick, availableDates, calendarDatesStatus, calendarDatesError } =
+    props;
+
+  const availableSet = new Set(availableDates ?? []);
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState<Date | undefined>(undefined);
 
