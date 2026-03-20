@@ -51,7 +51,20 @@ export default tseslint.config(
       ...nextPlugin.configs['core-web-vitals'].rules,
       ...reactHooks.configs.flat.recommended.rules,
       ...react.configs.flat.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
+          allowExportNames: [
+            'metadata',
+            'generateMetadata',
+            'generateStaticParams',
+            'dynamic',
+            'revalidate',
+            'dynamicParams',
+          ],
+        },
+      ],
       'react/react-in-jsx-scope': 'off',
       'react/jsx-tag-spacing': [
         'error',
