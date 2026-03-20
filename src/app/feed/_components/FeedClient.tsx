@@ -144,7 +144,7 @@ export default function FeedClient(props: FeedClientProps) {
       dispatchLoading({ type: 'next:end' });
       inFlightNextRef.current = false;
     }
-  }, [city, country, mergeUniqueSorted, nextCursor, t]);
+  }, [city, country, nextCursor, t]);
 
   const fetchPrevPage = useCallback(async () => {
     if (!prevCursor) return;
@@ -236,7 +236,7 @@ export default function FeedClient(props: FeedClientProps) {
     }
 
     void fetchInitial();
-  }, [country, city, fetchInitial, initialEvents, initialNextCursor]);
+  }, [country, city, fetchInitial, initialEvents, initialNextCursor, initialPrevCursor]);
 
   const hasMore = Boolean(nextCursor);
   const hasPrev = Boolean(prevCursor);
@@ -351,7 +351,7 @@ export default function FeedClient(props: FeedClientProps) {
         inFlightJumpRef.current = false;
       }
     },
-    [events, fetchAroundAndReplace, headerH],
+    [events, fetchAroundAndReplace, headerH, bumpUserScrollSessionKey],
   );
 
   useFeedHeaderConfigSync({
