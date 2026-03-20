@@ -43,6 +43,7 @@ export function GigPoster({ poster, title }: GigPosterProps) {
         ) : null}
 
         {/* TODO: Consider using `<Image />` from `next/image`  */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className={`h-full w-full object-cover transition-opacity duration-200 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
