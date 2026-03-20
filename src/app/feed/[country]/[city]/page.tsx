@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import FeedClient from '../../_components/FeedClient';
 import { getTranslations } from '@/lib/translations.server';
-import { I18nProvider } from '@/lib/i18n/I18nProvider';
+import { I18nProvider } from '@/lib/i18n';
 import { getFeed } from '@/lib/feed.server';
 import type { V1TranslationsByNamespace } from '@/lib/translations.server';
 import { FEED_PAGE_SIZE } from '@/lib/feed.constants';

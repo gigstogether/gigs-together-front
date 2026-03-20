@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { Country } from '@/lib/countries.server';
-import { useT } from '@/lib/i18n/I18nProvider';
+import { useT } from '@/lib/i18n';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
 

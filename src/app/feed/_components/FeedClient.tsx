@@ -6,7 +6,7 @@ import { toLocalYMD } from '@/lib/utils';
 import '@/app/style.css';
 import type { Event } from '@/lib/types';
 import type { V1GigGetResponseBody } from '@/lib/types';
-import { useT } from '@/lib/i18n/I18nProvider';
+import { useT } from '@/lib/i18n';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
 import { FeedMonths } from './feed-client/FeedMonths';
 import { useCalendarAvailableDates } from './feed-client/useCalendarAvailableDates';

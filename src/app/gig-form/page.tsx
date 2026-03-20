@@ -1,7 +1,7 @@
 import GigFormClient from '@/app/gig-form/GigFormClient';
 import { getCountries } from '@/lib/countries.server';
 import { getTranslations } from '@/lib/translations.server';
-import { I18nProvider } from '@/lib/i18n/I18nProvider';
+import { I18nProvider } from '@/lib/i18n';
 
 export default async function Page() {
   const countries = await getCountries();

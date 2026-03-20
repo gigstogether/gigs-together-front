@@ -1,29 +1,10 @@
 'use client';
 
-import { createContext, useContext, useMemo, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { V1TranslationsByNamespace } from '@/lib/translations.server';
-
-export type TParams = Readonly<Record<string, string | number | boolean | null | undefined>>;
-
-export type TFunction = (namespace: string, key: string, params?: TParams) => string;
-
-interface I18nContextValue {
-  readonly locale: string;
-  readonly translations: V1TranslationsByNamespace;
-  readonly t: TFunction;
-}
-
-const I18nContext = createContext<I18nContextValue | null>(null);
-
-function interpolate(template: string, params?: TParams): string {
-  if (!params) return template;
-  return template.replace(/\{(\w+)\}/g, (match, rawKey: string) => {
-    const v = params[rawKey];
-    if (v === null || v === undefined) return match;
-    return String(v);
-  });
-}
+import type { I18nContextValue, TFunction } from './i18n-context';
+import { I18nContext, interpolate } from './i18n-context';
 
 export function I18nProvider(props: {
   locale: string;
@@ -50,21 +31,4 @@ export function I18nProvider(props: {
   );
 
   return <I18nContext.Provider value={ctx}>{children}</I18nContext.Provider>;
-}
-
-export function useI18n(): I18nContextValue {
-  const ctx = useContext(I18nContext);
-  if (!ctx) {
-    // Safe fallback (so components won't crash if provider isn't mounted yet).
-    const t: TFunction = (_ns, key, params) => {
-      void params;
-      return key;
-    };
-    return { locale: 'en', translations: {}, t };
-  }
-  return ctx;
-}
-
-export function useT(): TFunction {
-  return useI18n().t;
 }
