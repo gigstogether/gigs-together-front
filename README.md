@@ -217,6 +217,6 @@ Send the `x-revalidate-secret` header and make sure it matches `FEED_REVALIDATE_
 
 The server is missing `FEED_REVALIDATE_SECRET`.
 
----
+## License
 
-This README focuses on installation, build, run, and current tooling. A separate contributor guide can build on top of it.
+This repository is marked `UNLICENSED` in `package.json`.
