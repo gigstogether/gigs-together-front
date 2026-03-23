@@ -1,6 +1,9 @@
 {
   "name": "gigs-together-front",
   "version": "1.0.0",
+  "description": "Next.js frontend for browsing gigs, submitting events, and managing content.",
+  "private": false,
+  "author": "Arina M",
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
