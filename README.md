@@ -198,6 +198,16 @@ npm run build
 
 ## Troubleshooting
 
+### Telegram Mini App behaves strangely
+
+If the Mini App UI behaves inconsistently, buttons do not react, or the page looks out of sync after frontend changes, first try a hard refresh without cache.
+
+```text
+Ctrl/Cmd+Shift+R
+```
+
+This is the first thing to try before debugging tunnel, HMR, or Telegram-specific issues.
+
 ### `Missing NEXT_PUBLIC_APP_API_BASE_URL for direct API calls`
 
 Set `NEXT_PUBLIC_APP_API_BASE_URL` in your local env file and restart the dev server.
