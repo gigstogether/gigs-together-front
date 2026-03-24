@@ -33,10 +33,11 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
     redirect(DEFAULT_FEED_ROUTE);
   }
 
-  const i18n = await getTranslations('en', 'country');
+  const [i18n, feed] = await Promise.all([
+    getTranslations('en', 'country'),
+    getFeed({ limit: PAGE_SIZE, country, city }),
+  ]);
   const tCountry = tFromTranslations(i18n.translations, 'country');
-
-  const feed = await getFeed({ limit: PAGE_SIZE, country, city });
   const initialEvents: Event[] = feed.gigs.map((gig) =>
     gigToEvent(gig, { resolveCountryName: (iso) => tCountry(iso) }),
   );
