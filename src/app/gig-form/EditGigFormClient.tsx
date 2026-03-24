@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import type { Country } from '@/lib/countries.server';
@@ -291,37 +290,35 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
             <CardDescription>Update gig details.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <GigFormFields
-                  form={form}
-                  countries={countries}
-                  isLookingUp={isLookingUp}
-                  isSubmitting={isSubmitting}
-                  isLoading={isLoadingGig}
-                  onLookup={onLookup}
-                />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <GigFormFields
+                form={form}
+                countries={countries}
+                isLookingUp={isLookingUp}
+                isSubmitting={isSubmitting}
+                isLoading={isLoadingGig}
+                onLookup={onLookup}
+              />
 
-                <PosterField
-                  variant="edit"
-                  posterFile={posterFile}
-                  onPosterFileChange={setPosterFile}
-                  posterUrl={posterUrl}
-                  onPosterUrlChange={setPosterUrl}
-                  onClearPoster={clearPoster}
-                  posterFileInputRef={posterFileInputRef}
-                  existingPosterUrl={existingPosterUrl}
-                />
+              <PosterField
+                variant="edit"
+                posterFile={posterFile}
+                onPosterFileChange={setPosterFile}
+                posterUrl={posterUrl}
+                onPosterUrlChange={setPosterUrl}
+                onClearPoster={clearPoster}
+                posterFileInputRef={posterFileInputRef}
+                existingPosterUrl={existingPosterUrl}
+              />
 
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || isLoadingGig || !gigPublicId}
-                  style={{ width: '100%' }}
-                >
-                  {isSubmitting ? 'Submitting...' : 'Save changes'}
-                </Button>
-              </form>
-            </Form>
+              <Button
+                type="submit"
+                disabled={isSubmitting || isLoadingGig || !gigPublicId}
+                style={{ width: '100%' }}
+              >
+                {isSubmitting ? 'Submitting...' : 'Save changes'}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       )}

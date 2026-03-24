@@ -1,11 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useMemo } from 'react';
-import type { ClipboardEvent, RefObject } from 'react';
-import { FormControl, FormDescription, FormItem } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import type { ChangeEvent, ClipboardEvent, RefObject } from 'react';
+
 import { GigPoster } from '@/app/_components/GigPoster';
+import { Button } from '@/components/ui/button';
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 
 interface PosterFieldProps {
   posterFile: File | null;
@@ -33,13 +34,18 @@ export default function PosterField(props: PosterFieldProps) {
   const isEdit = variant === 'edit';
 
   const localPreviewUrl = useMemo(() => {
-    if (!posterFile) return null;
+    if (!posterFile) {
+      return null;
+    }
+
     return URL.createObjectURL(posterFile);
   }, [posterFile]);
 
   useEffect(() => {
     return () => {
-      if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
+      if (localPreviewUrl) {
+        URL.revokeObjectURL(localPreviewUrl);
+      }
     };
   }, [localPreviewUrl]);
 
@@ -51,25 +57,30 @@ export default function PosterField(props: PosterFieldProps) {
         ? existingPosterUrl
         : undefined;
 
-  const hasPoster = !!posterFile || !!posterUrl?.trim();
+  const isPosterSelected = !!posterFile || !!posterUrl?.trim();
 
   const handlePaste = useCallback(
-    (e: ClipboardEvent<HTMLDivElement | HTMLInputElement>) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+    (event: ClipboardEvent<HTMLDivElement | HTMLInputElement>) => {
+      const items = event.clipboardData?.items;
+      if (!items) {
+        return;
+      }
+
+      for (let index = 0; index < items.length; index += 1) {
+        const item = items[index];
         if (item.kind === 'file' && item.type.startsWith('image/')) {
           const file = item.getAsFile();
-          if (file) {
-            e.preventDefault();
-            onPosterUrlChange('');
-            onPosterFileChange(file);
-            if (posterFileInputRef.current) {
-              posterFileInputRef.current.value = '';
-            }
-            break;
+          if (!file) {
+            continue;
           }
+
+          event.preventDefault();
+          onPosterUrlChange('');
+          onPosterFileChange(file);
+          if (posterFileInputRef.current) {
+            posterFileInputRef.current.value = '';
+          }
+          break;
         }
       }
     },
@@ -77,8 +88,8 @@ export default function PosterField(props: PosterFieldProps) {
   );
 
   const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0] ?? null;
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0] ?? null;
       onPosterFileChange(file);
       if (file) {
         onPosterUrlChange('');
@@ -92,40 +103,45 @@ export default function PosterField(props: PosterFieldProps) {
     : 'Upload an image file (max 10MB), paste URL, or paste image from clipboard.';
 
   return (
-    <FormItem>
-      <div className="text-sm font-medium leading-none">Poster:</div>
+    <Field>
+      <FieldLabel htmlFor="poster-file">Poster:</FieldLabel>
 
-      <FormControl>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <Input
-              ref={posterFileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            <Button type="button" variant="secondary" onClick={onClearPoster} disabled={!hasPoster}>
-              Clear
-            </Button>
-          </div>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
           <Input
-            type="url"
-            placeholder="Or paste poster URL or image (Ctrl+V)"
-            value={posterUrl ?? ''}
-            onChange={(e) => {
-              const v = e.target.value;
-              onPosterUrlChange(v);
-              if (v.trim()) {
-                onPosterFileChange(null);
-                if (posterFileInputRef.current) {
-                  posterFileInputRef.current.value = '';
-                }
-              }
-            }}
-            onPaste={handlePaste}
+            id="poster-file"
+            ref={posterFileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
           />
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClearPoster}
+            disabled={!isPosterSelected}
+          >
+            Clear
+          </Button>
         </div>
-      </FormControl>
+
+        <Input
+          type="url"
+          placeholder="Or paste poster URL or image (Ctrl+V)"
+          value={posterUrl ?? ''}
+          onChange={(event) => {
+            const nextValue = event.target.value;
+            onPosterUrlChange(nextValue);
+            if (nextValue.trim()) {
+              onPosterFileChange(null);
+              if (posterFileInputRef.current) {
+                posterFileInputRef.current.value = '';
+              }
+            }
+          }}
+          onPaste={handlePaste}
+        />
+      </div>
 
       {previewSrc ? (
         <div className="mt-2">
@@ -133,10 +149,10 @@ export default function PosterField(props: PosterFieldProps) {
         </div>
       ) : null}
 
-      <FormDescription>
-        {isEdit && existingPosterUrl ? (
-          <>
-            <span>
+      <FieldDescription>
+        <span>
+          {isEdit && existingPosterUrl ? (
+            <>
               Current poster:{' '}
               <a
                 href={existingPosterUrl}
@@ -147,13 +163,11 @@ export default function PosterField(props: PosterFieldProps) {
                 open
               </a>
               .{' '}
-            </span>
-            {description}
-          </>
-        ) : (
-          description
-        )}
-      </FormDescription>
-    </FormItem>
+            </>
+          ) : null}
+          {description}
+        </span>
+      </FieldDescription>
+    </Field>
   );
 }

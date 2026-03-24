@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import type { Country } from '@/lib/countries.server';
@@ -203,31 +202,29 @@ export default function CreateGigFormClient({ countries }: CreateGigFormClientPr
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <GigFormFields
-                form={form}
-                countries={countries}
-                isLookingUp={isLookingUp}
-                isSubmitting={isSubmitting}
-                onLookup={onLookup}
-              />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <GigFormFields
+              form={form}
+              countries={countries}
+              isLookingUp={isLookingUp}
+              isSubmitting={isSubmitting}
+              onLookup={onLookup}
+            />
 
-              <PosterField
-                variant="create"
-                posterFile={posterFile}
-                onPosterFileChange={setPosterFile}
-                posterUrl={posterUrl}
-                onPosterUrlChange={setPosterUrl}
-                onClearPoster={clearPoster}
-                posterFileInputRef={posterFileInputRef}
-              />
+            <PosterField
+              variant="create"
+              posterFile={posterFile}
+              onPosterFileChange={setPosterFile}
+              posterUrl={posterUrl}
+              onPosterUrlChange={setPosterUrl}
+              onClearPoster={clearPoster}
+              posterFileInputRef={posterFileInputRef}
+            />
 
-              <Button type="submit" disabled={isSubmitting} style={{ width: '100%' }}>
-                {isSubmitting ? 'Submitting...' : 'Suggest'}
-              </Button>
-            </form>
-          </Form>
+            <Button type="submit" disabled={isSubmitting} style={{ width: '100%' }}>
+              {isSubmitting ? 'Submitting...' : 'Suggest'}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </>
