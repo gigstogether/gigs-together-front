@@ -145,7 +145,10 @@ export default function PosterField(props: PosterFieldProps) {
 
       {previewSrc ? (
         <div className="mt-2">
-          <GigPoster poster={previewSrc} title="Poster preview" />
+          <GigPoster
+            poster={previewSrc}
+            title="Poster preview"
+          />
         </div>
       ) : null}
 

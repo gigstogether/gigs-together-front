@@ -43,7 +43,10 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
   );
 
   return (
-    <I18nProvider locale={i18n.locale} translations={i18n.translations}>
+    <I18nProvider
+      locale={i18n.locale}
+      translations={i18n.translations}
+    >
       <FeedClient
         country={country}
         city={city}

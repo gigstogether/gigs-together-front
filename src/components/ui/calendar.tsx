@@ -58,6 +58,7 @@ function Calendar({
 
   const MonthCaption = ({
     calendarMonth,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     displayIndex: _displayIndex,
     className: captionClassName,
     ...captionProps
@@ -84,7 +85,11 @@ function Calendar({
         )}
         {...captionProps}
       >
-        <div className="select-none text-sm font-medium" aria-live="polite" role="presentation">
+        <div
+          className="select-none text-sm font-medium"
+          aria-live="polite"
+          role="presentation"
+        >
           {caption}
         </div>
         <div className="absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1">
@@ -93,7 +98,10 @@ function Calendar({
               title={disabledMonthNavTitle.prev}
               className={cn(navButtonDisabled, 'inline-flex')}
             >
-              <ChevronLeftIcon className="size-4" aria-hidden />
+              <ChevronLeftIcon
+                className="size-4"
+                aria-hidden
+              />
             </span>
           ) : (
             <button
@@ -116,7 +124,10 @@ function Calendar({
               title={disabledMonthNavTitle.next}
               className={cn(navButtonDisabled, 'inline-flex')}
             >
-              <ChevronRightIcon className="size-4" aria-hidden />
+              <ChevronRightIcon
+                className="size-4"
+                aria-hidden
+              />
             </span>
           ) : (
             <button
@@ -186,10 +197,7 @@ function Calendar({
           defaultClassNames.weekday,
         ),
         week: cn('mt-2 flex w-full', defaultClassNames.week),
-        week_number_header: cn(
-          'w-[--cell-size] select-none',
-          defaultClassNames.week_number_header,
-        ),
+        week_number_header: cn('w-[--cell-size] select-none', defaultClassNames.week_number_header),
         week_number: cn(
           'text-muted-foreground select-none text-[0.8rem]',
           defaultClassNames.week_number,
@@ -227,19 +235,41 @@ function Calendar({
 }
 
 function CalendarRoot({ className, rootRef, ...props }: CalendarRootProps) {
-  return <div data-slot="calendar" ref={rootRef} className={cn(className)} {...props} />;
+  return (
+    <div
+      data-slot="calendar"
+      ref={rootRef}
+      className={cn(className)}
+      {...props}
+    />
+  );
 }
 
 function CalendarChevron({ className, orientation, ...props }: CalendarChevronProps) {
   if (orientation === 'left') {
-    return <ChevronLeftIcon className={cn('size-4', className)} {...props} />;
+    return (
+      <ChevronLeftIcon
+        className={cn('size-4', className)}
+        {...props}
+      />
+    );
   }
 
   if (orientation === 'right') {
-    return <ChevronRightIcon className={cn('size-4', className)} {...props} />;
+    return (
+      <ChevronRightIcon
+        className={cn('size-4', className)}
+        {...props}
+      />
+    );
   }
 
-  return <ChevronDownIcon className={cn('size-4', className)} {...props} />;
+  return (
+    <ChevronDownIcon
+      className={cn('size-4', className)}
+      {...props}
+    />
+  );
 }
 
 function CalendarWeekNumber({ children, ...props }: CalendarWeekNumberProps) {
@@ -252,12 +282,7 @@ function CalendarWeekNumber({ children, ...props }: CalendarWeekNumberProps) {
   );
 }
 
-function CalendarDayButton({
-  className,
-  day,
-  modifiers,
-  ...props
-}: DayButtonProps) {
+function CalendarDayButton({ className, day, modifiers, ...props }: DayButtonProps) {
   const defaultClassNames = getDefaultClassNames();
   const ref = useRef<HTMLButtonElement>(null);
 

@@ -7,7 +7,10 @@ export default async function Page() {
   const [countries, i18n] = await Promise.all([getCountries(), getTranslations('en', 'country')]);
 
   return (
-    <I18nProvider locale={i18n.locale} translations={i18n.translations}>
+    <I18nProvider
+      locale={i18n.locale}
+      translations={i18n.translations}
+    >
       <GigFormClient countries={countries} />
     </I18nProvider>
   );

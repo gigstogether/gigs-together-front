@@ -76,13 +76,19 @@ const TopForm = (props: TopFormProps) => {
           if (nextOpen) setMonth(monthFromVisibleDate ?? new Date());
         }}
       >
-        <PopoverTrigger type="button" className="flex items-center gap-2 focus:outline-none">
+        <PopoverTrigger
+          type="button"
+          className="flex items-center gap-2 focus:outline-none"
+        >
           <span className="inline-flex items-center justify-center gap-2 text-base font-normal text-gray-800 px-2">
             <FaRegCalendar className="text-gray-600" />
             {formatDisplayMonth(visibleEventDate)}
           </span>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="center">
+        <PopoverContent
+          className="w-auto p-0"
+          align="center"
+        >
           {calendarDatesStatus === 'loading' ? (
             <div className="px-3 py-2 text-sm text-gray-600">Loading calendar…</div>
           ) : null}

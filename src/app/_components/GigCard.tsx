@@ -43,8 +43,14 @@ function GigDates(props: GigDateProps) {
 
   const dates = (
     <>
-      <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-      <span className="min-w-0 flex-1 truncate" title={title}>
+      <Calendar
+        className="h-4 w-4 shrink-0"
+        aria-hidden
+      />
+      <span
+        className="min-w-0 flex-1 truncate"
+        title={title}
+      >
         {datesStr}
       </span>
     </>
@@ -65,7 +71,10 @@ function GigDates(props: GigDateProps) {
   }
 
   return (
-    <div className="flex w-full min-w-0 flex-row gap-2 items-center text-gray-500" title="Date">
+    <div
+      className="flex w-full min-w-0 flex-row gap-2 items-center text-gray-500"
+      title="Date"
+    >
       {dates}
     </div>
   );
@@ -78,7 +87,10 @@ interface GigLocationProps {
 function GigLocation(props: GigLocationProps) {
   return (
     <>
-      <LocationIcon className="h-4 w-4 shrink-0" aria-hidden />
+      <LocationIcon
+        className="h-4 w-4 shrink-0"
+        aria-hidden
+      />
       <span className="min-w-0 flex-1 truncate">{props.venue}</span>
     </>
   );
@@ -94,9 +106,16 @@ export function GigCard({ gig }: GigCardProps) {
   return (
     <div className="flex w-full flex-col bg-white rounded-lg dark:bg-gray-800 dark:border-gray-700">
       {gig.poster ? (
-        <GigPoster key={gig.poster} poster={gig.poster} title={gig.title} />
+        <GigPoster
+          key={gig.poster}
+          poster={gig.poster}
+          title={gig.title}
+        />
       ) : (
-        <div className="w-full aspect-[3/4] rounded-lg bg-gray-100 dark:bg-gray-700" aria-hidden />
+        <div
+          className="w-full aspect-[3/4] rounded-lg bg-gray-100 dark:bg-gray-700"
+          aria-hidden
+        />
       )}
       <div className="p-2">
         <div className="flex min-w-0 flex-row gap-4 items-center">
@@ -109,7 +128,11 @@ export function GigCard({ gig }: GigCardProps) {
             >
               {gig.title}
             </a>
-            <GigDates date={gig.date} endDate={gig.endDate} calendarUrl={gig.calendarUrl} />
+            <GigDates
+              date={gig.date}
+              endDate={gig.endDate}
+              calendarUrl={gig.calendarUrl}
+            />
             <div
               className="flex w-full min-w-0 flex-row gap-2 items-center text-gray-500"
               title="Venue"
@@ -149,13 +172,19 @@ export function GigCard({ gig }: GigCardProps) {
                 className="flex min-w-0 flex-row gap-2 items-center transition-colors hover:text-gray-700 dark:hover:text-violet-400"
                 title="Open tickets"
               >
-                <Ticket className="h-4 w-4 shrink-0" aria-hidden />
+                <Ticket
+                  className="h-4 w-4 shrink-0"
+                  aria-hidden
+                />
                 <span className="min-w-0 truncate">Tickets</span>
               </a>
             ) : null}
 
             {gig.ticketsUrl && telegramUrl ? (
-              <span className="mx-3 h-4 w-px bg-gray-300 dark:bg-gray-600" aria-hidden />
+              <span
+                className="mx-3 h-4 w-px bg-gray-300 dark:bg-gray-600"
+                aria-hidden
+              />
             ) : null}
 
             {telegramUrl ? (
@@ -167,7 +196,10 @@ export function GigCard({ gig }: GigCardProps) {
                 title="Find company"
                 aria-label="Find company"
               >
-                <FaTelegramPlane className="h-4 w-4 shrink-0" aria-hidden />
+                <FaTelegramPlane
+                  className="h-4 w-4 shrink-0"
+                  aria-hidden
+                />
                 <span className="min-w-0 truncate">Find company</span>
               </a>
             ) : null}

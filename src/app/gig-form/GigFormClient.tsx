@@ -19,7 +19,12 @@ export default function GigFormClient({
     if (!gigPublicId) {
       return <div className="p-4 text-sm text-red-600">Missing gigPublicId</div>;
     }
-    return <EditGigFormClient countries={countries} gigPublicId={gigPublicId} />;
+    return (
+      <EditGigFormClient
+        countries={countries}
+        gigPublicId={gigPublicId}
+      />
+    );
   }
 
   return <CreateGigFormClient countries={countries} />;

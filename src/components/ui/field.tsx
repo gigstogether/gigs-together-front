@@ -50,11 +50,7 @@ interface FieldSeparatorProps extends ComponentProps<'div'> {
   children?: ReactNode;
 }
 
-function FieldSeparator({
-  children,
-  className,
-  ...props
-}: FieldSeparatorProps) {
+function FieldSeparator({ children, className, ...props }: FieldSeparatorProps) {
   return (
     <div
       data-slot="field-separator"
@@ -84,16 +80,9 @@ interface FieldErrorProps extends ComponentProps<'div'> {
 }
 
 function FieldError(props: FieldErrorProps) {
-  const {
-    className,
-    children,
-    errors,
-    ...restProps
-  } = props;
+  const { className, children, errors, ...restProps } = props;
   const content = useMemo(() => {
-    const messages = errors?.flatMap((error) => (
-      error?.message ? [error.message] : []
-    )) ?? [];
+    const messages = errors?.flatMap((error) => (error?.message ? [error.message] : [])) ?? [];
 
     if (children) {
       return children;

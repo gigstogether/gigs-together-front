@@ -402,13 +402,24 @@ export default function FeedClient(props: FeedClientProps) {
               </div>
             </div>
           ) : null}
-          <div ref={topSentinelRef} className="h-px" aria-hidden />
+          <div
+            ref={topSentinelRef}
+            className="h-px"
+            aria-hidden
+          />
           {loading.prev ? (
             <div className="py-4 text-center text-gray-500">Loading previous…</div>
           ) : null}
-          <FeedMonths events={events} registerEventRef={registerEventRef} />
+          <FeedMonths
+            events={events}
+            registerEventRef={registerEventRef}
+          />
 
-          <div ref={bottomSentinelRef} className="h-12" aria-hidden />
+          <div
+            ref={bottomSentinelRef}
+            className="h-12"
+            aria-hidden
+          />
           {loading.next ? (
             <div className="py-4 text-center text-gray-500">Loading more…</div>
           ) : null}

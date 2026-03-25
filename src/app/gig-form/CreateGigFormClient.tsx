@@ -89,7 +89,10 @@ export default function CreateGigFormClient({ countries }: CreateGigFormClientPr
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6"
+          >
             <GigFormFields
               form={form}
               countries={countries}
@@ -108,7 +111,11 @@ export default function CreateGigFormClient({ countries }: CreateGigFormClientPr
               posterFileInputRef={posterFileInputRef}
             />
 
-            <Button type="submit" disabled={isSubmitting} style={{ width: '100%' }}>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              style={{ width: '100%' }}
+            >
               {isSubmitting ? 'Submitting...' : 'Suggest'}
             </Button>
           </form>

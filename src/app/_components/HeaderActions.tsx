@@ -21,7 +21,10 @@ export default function HeaderActions(props: {
     <div className="min-w-0 justify-self-end flex items-center space-x-4">
       {/* Desktop actions */}
       <div className="hidden sm:flex items-center space-x-4">
-        <Popover open={locationTipOpen} onOpenChange={setLocationTipOpen}>
+        <Popover
+          open={locationTipOpen}
+          onOpenChange={setLocationTipOpen}
+        >
           <PopoverTrigger
             type="button"
             className="flex items-center gap-2 text-base font-normal text-gray-800"
@@ -31,7 +34,11 @@ export default function HeaderActions(props: {
             <LocationIcon className="h-4 w-4" />
             {locationLabel}
           </PopoverTrigger>
-          <PopoverContent className="w-auto px-3 py-2 text-sm" align="end" side="bottom">
+          <PopoverContent
+            className="w-auto px-3 py-2 text-sm"
+            align="end"
+            side="bottom"
+          >
             Currently, we only support one location: Barcelona.
           </PopoverContent>
         </Popover>
@@ -46,12 +53,20 @@ export default function HeaderActions(props: {
             title="Suggest a gig"
           >
             <span className="hidden lg:inline">Suggest a gig</span>
-            <FaRegLightbulb className="text-[1.05em] lg:hidden" aria-hidden />
+            <FaRegLightbulb
+              className="text-[1.05em] lg:hidden"
+              aria-hidden
+            />
           </a>
         )}
 
         {!!telegramUrl && (
-          <a href={telegramUrl} target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+          <a
+            href={telegramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Telegram"
+          >
             <FaTelegramPlane className="text-xl text-black-500 hover:text-black-700" />
           </a>
         )}
@@ -68,11 +83,21 @@ export default function HeaderActions(props: {
           </a>
         )}
 
-        <Popover open={desktopMenuOpen} onOpenChange={setDesktopMenuOpen}>
-          <PopoverTrigger type="button" aria-label="Menu" className="py-1.5 px-0">
+        <Popover
+          open={desktopMenuOpen}
+          onOpenChange={setDesktopMenuOpen}
+        >
+          <PopoverTrigger
+            type="button"
+            aria-label="Menu"
+            className="py-1.5 px-0"
+          >
             <FaBars className="text-base text-black-500 hover:text-black-700" />
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-48 p-2">
+          <PopoverContent
+            align="end"
+            className="w-48 p-2"
+          >
             <a
               href="/about"
               className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
@@ -86,11 +111,21 @@ export default function HeaderActions(props: {
 
       {/* Mobile menu */}
       <div className="sm:hidden">
-        <Popover open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <PopoverTrigger type="button" aria-label="Menu" className="py-1.5 px-0">
+        <Popover
+          open={mobileMenuOpen}
+          onOpenChange={setMobileMenuOpen}
+        >
+          <PopoverTrigger
+            type="button"
+            aria-label="Menu"
+            className="py-1.5 px-0"
+          >
             <FaBars className="text-base text-black-500 hover:text-black-700" />
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-56 p-2">
+          <PopoverContent
+            align="end"
+            className="w-56 p-2"
+          >
             <div className="flex flex-col gap-1">
               {!!suggestGigUrl && (
                 <>
@@ -105,7 +140,10 @@ export default function HeaderActions(props: {
                     <FaRegLightbulb className="h-4 w-4" />
                     Suggest a gig
                   </a>
-                  <div className="my-0.5 h-px w-full bg-border/40" aria-hidden />
+                  <div
+                    className="my-0.5 h-px w-full bg-border/40"
+                    aria-hidden
+                  />
                 </>
               )}
 
@@ -118,7 +156,11 @@ export default function HeaderActions(props: {
                   <LocationIcon className="h-4 w-4" />
                   {locationLabel}
                 </PopoverTrigger>
-                <PopoverContent className="w-64 px-3 py-2 text-sm" align="start" side="bottom">
+                <PopoverContent
+                  className="w-64 px-3 py-2 text-sm"
+                  align="start"
+                  side="bottom"
+                >
                   Currently, we only support one location: Barcelona.
                 </PopoverContent>
               </Popover>
@@ -149,7 +191,10 @@ export default function HeaderActions(props: {
                 </a>
               )}
 
-              <div className="my-0.5 h-px w-full bg-border/40" aria-hidden />
+              <div
+                className="my-0.5 h-px w-full bg-border/40"
+                aria-hidden
+              />
               <a
                 href="/about"
                 className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"

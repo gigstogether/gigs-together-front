@@ -5,10 +5,7 @@ import { cn } from '@/lib/utils';
 function Card({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
-      className={cn(
-        'rounded-xl border bg-card text-card-foreground shadow',
-        className,
-      )}
+      className={cn('rounded-xl border bg-card text-card-foreground shadow', className)}
       {...props}
     />
   );
@@ -42,7 +39,12 @@ function CardDescription({ className, ...props }: ComponentProps<'div'>) {
 }
 
 function CardContent({ className, ...props }: ComponentProps<'div'>) {
-  return <div className={cn('p-6 pt-0', className)} {...props} />;
+  return (
+    <div
+      className={cn('p-6 pt-0', className)}
+      {...props}
+    />
+  );
 }
 
 export { Card, CardHeader, CardTitle, CardDescription, CardContent };

@@ -25,9 +25,7 @@ function ToggleGroup({
       className={cn('flex items-center justify-center gap-1', className)}
       {...props}
     >
-      <ToggleGroupContext value={{ variant, size }}>
-        {children}
-      </ToggleGroupContext>
+      <ToggleGroupContext value={{ variant, size }}>{children}</ToggleGroupContext>
     </ToggleGroupPrimitive.Root>
   );
 }

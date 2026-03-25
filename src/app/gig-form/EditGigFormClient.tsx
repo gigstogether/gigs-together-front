@@ -166,7 +166,11 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
           </CardHeader>
           <CardContent>
             {loadGigError ? (
-              <Button type="button" variant="secondary" onClick={() => setReloadKey((x) => x + 1)}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setReloadKey((x) => x + 1)}
+              >
                 Retry
               </Button>
             ) : null}
@@ -179,7 +183,10 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
             <CardDescription>Update gig details.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6"
+            >
               <GigFormFields
                 form={form}
                 countries={countries}
