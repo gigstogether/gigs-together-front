@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { waitForTelegramInitData } from '@/lib/telegram-webapp';
 import type { GigUpsertPayload, PosterSelection } from '@/lib/gig-form-api';
@@ -19,6 +19,10 @@ interface UseGigSubmitParams {
 
 export function useGigSubmit({ posterFile, posterUrl, apiCall, onSuccess }: UseGigSubmitParams) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const posterFileRef = useRef(posterFile);
+  const posterUrlRef = useRef(posterUrl);
+  posterFileRef.current = posterFile;
+  posterUrlRef.current = posterUrl;
 
   async function onSubmit(values: GigFormValues) {
     setIsSubmitting(true);
@@ -35,10 +39,12 @@ export function useGigSubmit({ posterFile, posterUrl, apiCall, onSuccess }: UseG
         ticketsUrl: values.ticketsUrl,
       };
 
-      const posterMode = posterFile ? 'upload' : 'url';
-      if (posterMode === 'url' && posterUrl.trim()) {
+      const currentPosterFile = posterFileRef.current;
+      const currentPosterUrl = posterUrlRef.current;
+      const posterMode = currentPosterFile ? 'upload' : 'url';
+      if (posterMode === 'url' && currentPosterUrl.trim()) {
         try {
-          new URL(posterUrl.trim());
+          new URL(currentPosterUrl.trim());
         } catch {
           toast({
             title: 'Invalid poster URL',
@@ -52,7 +58,7 @@ export function useGigSubmit({ posterFile, posterUrl, apiCall, onSuccess }: UseG
       await apiCall({
         telegramInitDataString,
         gig,
-        poster: { mode: posterMode, file: posterFile, url: posterUrl },
+        poster: { mode: posterMode, file: currentPosterFile, url: currentPosterUrl },
       });
 
       onSuccess();

@@ -63,6 +63,8 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
     if (loadedGigRef.current === gigPublicId) return;
 
     setIsPrefilled(false);
+    setPosterFile(null);
+    setPosterUrl('');
     const ac = new AbortController();
     abortRef.current?.abort();
     abortRef.current = ac;
