@@ -58,7 +58,6 @@ function Calendar({
 
   const MonthCaption = ({
     calendarMonth,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     displayIndex: _displayIndex,
     className: captionClassName,
     ...captionProps

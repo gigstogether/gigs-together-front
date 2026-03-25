@@ -84,6 +84,14 @@ export default tseslint.config(
         },
       ],
       '@stylistic/quote-props': ['error', 'as-needed'],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/consistent-type-imports': [
         'warn',
         {
