@@ -11,15 +11,7 @@ import nextPlugin from '@next/eslint-plugin-next';
 
 export default tseslint.config(
   {
-    ignores: [
-      'dist',
-      '.next',
-      'next-env.d.ts',
-      'node_modules',
-      '**/*debug*',
-      'src/components/ui/**/*',
-      'tailwind.config.js',
-    ],
+    ignores: ['dist', '.next', 'next-env.d.ts', 'node_modules', '**/*debug*', 'tailwind.config.js'],
   },
 
   js.configs.recommended,
