@@ -4,6 +4,7 @@ import { useTransition } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { toast } from '@/hooks/use-toast';
 import { lookupGig } from '@/lib/gig-form-api';
+import { waitForTelegramInitData } from '@/lib/telegram-webapp';
 import { dateToYMD } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 
@@ -43,7 +44,8 @@ export function useGigLookup(
     if (!location) {
       throw new Error('Lookup requires "city" and "country"');
     }
-    const data = await lookupGig({ name, location });
+    const telegramInitDataString = await waitForTelegramInitData();
+    const data = await lookupGig({ name, location, telegramInitDataString });
 
     if (!data.date) {
       throw new Error('AI lookup did not return a date');
