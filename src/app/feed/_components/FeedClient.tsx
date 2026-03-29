@@ -13,7 +13,7 @@ import { useCalendarAvailableDates } from './feed-client/useCalendarAvailableDat
 import { useFeedHeaderConfigSync } from './feed-client/useFeedHeaderConfigSync';
 import { useHeaderHeight } from './feed-client/useHeaderHeight';
 import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
-import { gigToEvent } from '@/lib/feed.mapper';
+import { gigDateToYMD, gigToEvent } from '@/lib/feed.mapper';
 import { apiRequest } from '@/lib/api';
 import { useHashAutoScroll } from './feed-client/useHashAutoScroll';
 import { useInfiniteScroll } from './feed-client/useInfiniteScroll';
@@ -113,9 +113,9 @@ export default function FeedClient(props: FeedClientProps) {
         throw new Error('Invalid API response: expected { gig: { id, date } }');
       }
 
-      return gigToEvent(res.gig, { resolveCountryName: (iso) => t('country', iso) }).date;
+      return gigDateToYMD(res.gig.date);
     },
-    [city, country, t],
+    [city, country],
   );
 
   const fetchNextPage = useCallback(async () => {

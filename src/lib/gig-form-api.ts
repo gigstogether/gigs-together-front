@@ -200,7 +200,7 @@ async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TRe
 
 export async function fetchGigForEdit(params: FetchGigForEditParams): Promise<GigForEditData> {
   const raw = await apiRequest<unknown>(
-    'v1/receiver/gig/get',
+    'v1/gig/get',
     'POST',
     {
       publicId: params.publicId,
