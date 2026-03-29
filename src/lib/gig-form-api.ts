@@ -48,6 +48,33 @@ export interface UpdateGigResponse {
   publicId: string;
 }
 
+export interface GigUpsertApiParams {
+  telegramInitDataString: string;
+  gig: GigUpsertPayload;
+  poster: PosterSelection;
+}
+
+export interface FetchGigForEditParams {
+  publicId: string;
+  telegramInitDataString: string;
+  signal?: AbortSignal;
+}
+
+export interface LookupGigParams {
+  name: string;
+  location: string;
+  telegramInitDataString: string;
+  signal?: AbortSignal;
+}
+
+export interface UpdateGigParams extends GigUpsertApiParams {
+  publicId: string;
+}
+
+interface GigLookupApiResponseBody {
+  gig: unknown;
+}
+
 function isRecord(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === 'object' && !Array.isArray(v);
 }
@@ -134,13 +161,12 @@ function getPosterUrlOrUndefined(poster: PosterSelection): string | undefined {
 
 type SubmitGigMethod = 'POST' | 'PATCH';
 
-async function submitGig<TResponse = void>(params: {
+interface SubmitGigParams extends GigUpsertApiParams {
   endpoint: string;
   method: SubmitGigMethod;
-  telegramInitDataString: string;
-  gig: GigUpsertPayload;
-  poster: PosterSelection;
-}): Promise<TResponse> {
+}
+
+async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TResponse> {
   const gig: GigUpsertPayload = {
     title: params.gig.title,
     date: params.gig.date,
@@ -175,11 +201,7 @@ async function submitGig<TResponse = void>(params: {
   });
 }
 
-export async function fetchGigForEdit(params: {
-  publicId: string;
-  telegramInitDataString: string;
-  signal?: AbortSignal;
-}): Promise<GigForEditData> {
+export async function fetchGigForEdit(params: FetchGigForEditParams): Promise<GigForEditData> {
   const raw = await apiRequest<unknown>(
     'v1/receiver/gig/get',
     'POST',
@@ -192,11 +214,7 @@ export async function fetchGigForEdit(params: {
   return parseGigForEditData(raw);
 }
 
-export async function lookupGig(params: {
-  name: string;
-  location: string;
-  signal?: AbortSignal;
-}): Promise<GigLookupData> {
+export async function lookupGig(params: LookupGigParams): Promise<GigLookupData> {
   const name = params.name.trim();
   const location = params.location.trim();
   if (!name) {
@@ -205,23 +223,20 @@ export async function lookupGig(params: {
   if (!location) {
     throw new Error('Invalid lookup request: "location" is required');
   }
-  const raw = await apiRequest<{ gig: unknown }>(
+  const raw = await apiRequest<GigLookupApiResponseBody>(
     'v1/gig/lookup',
     'POST',
     {
       name,
       location,
+      telegramInitDataString: params.telegramInitDataString,
     },
     { signal: params.signal },
   );
   return parseGigLookupData(raw?.gig);
 }
 
-export async function createGig(params: {
-  telegramInitDataString: string;
-  gig: GigUpsertPayload;
-  poster: PosterSelection;
-}): Promise<void> {
+export async function createGig(params: GigUpsertApiParams): Promise<void> {
   await submitGig<void>({
     endpoint: 'v1/receiver/gig',
     method: 'POST',
@@ -231,12 +246,7 @@ export async function createGig(params: {
   });
 }
 
-export async function updateGig(params: {
-  publicId: string;
-  telegramInitDataString: string;
-  gig: GigUpsertPayload;
-  poster: PosterSelection;
-}): Promise<UpdateGigResponse> {
+export async function updateGig(params: UpdateGigParams): Promise<UpdateGigResponse> {
   return submitGig<UpdateGigResponse>({
     endpoint: `v1/receiver/gig/${encodeURIComponent(params.publicId)}`,
     method: 'PATCH',

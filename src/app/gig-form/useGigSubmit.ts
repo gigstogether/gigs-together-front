@@ -2,18 +2,14 @@
 
 import { useTransition } from 'react';
 import { toast } from '@/hooks/use-toast';
+import type { GigUpsertApiParams, GigUpsertPayload } from '@/lib/gig-form-api';
 import { waitForTelegramInitData } from '@/lib/telegram-webapp';
-import type { GigUpsertPayload, PosterSelection } from '@/lib/gig-form-api';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 
 interface UseGigSubmitParams {
   posterFile: File | null;
   posterUrl: string;
-  apiCall: (params: {
-    telegramInitDataString: string;
-    gig: GigUpsertPayload;
-    poster: PosterSelection;
-  }) => Promise<unknown>;
+  apiCall: (params: GigUpsertApiParams) => Promise<unknown>;
   onSuccess: () => void;
 }
 
