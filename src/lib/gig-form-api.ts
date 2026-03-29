@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/api';
+import { isRecord } from '@/lib/is-record';
 
 export type PosterMode = 'upload' | 'url';
 
@@ -73,10 +74,6 @@ export interface UpdateGigParams extends GigUpsertApiParams {
 
 interface GigLookupApiResponseBody {
   gig: unknown;
-}
-
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return !!v && typeof v === 'object' && !Array.isArray(v);
 }
 
 function asRecordOrThrow(raw: unknown): Record<string, unknown> {

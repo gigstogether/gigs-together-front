@@ -3,6 +3,7 @@ import type {
   V1GigByPublicIdGetResponseBody,
   V1GigDatesGetResponseBody,
 } from '@/lib/types';
+import { isRecord } from '@/lib/is-record';
 
 const DEFAULT_LOCALE = 'en-US';
 
@@ -11,10 +12,6 @@ export const formatMonthTitle = (date: string): string => {
     new Date(date).toLocaleString(DEFAULT_LOCALE, { month: 'long' }) + ' ' + date.split('-')[0]
   );
 };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
 
 export function isV1GigDatesGetResponseBody(value: unknown): value is V1GigDatesGetResponseBody {
   if (!isRecord(value)) return false;
