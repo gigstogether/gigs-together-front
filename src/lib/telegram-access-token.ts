@@ -1,7 +1,8 @@
 import { fetchApiJson } from '@/lib/api-core';
+import { TELEGRAM_INIT_DATA_HEADER } from '@/lib/telegram-init-data-header';
 import { waitForTelegramInitData } from '@/lib/telegram-webapp';
 
-const STORAGE_KEY = 'tg_access_token';
+const STORAGE_KEY = 'gt_tg_access_token';
 
 export interface TelegramExchangeResponse {
   accessToken: string;
@@ -62,9 +63,14 @@ export function isTelegramAccessTokenExpired(token: string, skewSec = 60): boole
 }
 
 export async function exchangeTelegramAccessToken(initData: string): Promise<void> {
-  const raw = await fetchApiJson<unknown>('v1/auth/telegram', 'POST', {
-    telegramInitDataString: initData,
-  });
+  const raw = await fetchApiJson<unknown>(
+    'v1/auth/telegram',
+    'POST',
+    {},
+    {
+      headers: { [TELEGRAM_INIT_DATA_HEADER]: initData },
+    },
+  );
   const { accessToken } = parseExchangeResponse(raw);
   setStoredTelegramAccessToken(accessToken);
 }
