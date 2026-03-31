@@ -3,8 +3,8 @@
 import { useTransition } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { toast } from '@/hooks/use-toast';
-import { isTelegramInitDataExpiredError } from '@/lib/api';
 import { lookupGig } from '@/lib/gig-form-api';
+import { toastTelegramInitDataExpired } from '@/lib/telegram-init-data-expired';
 import { waitForTelegramInitData } from '@/lib/telegram-webapp';
 import { dateToYMD } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
@@ -82,16 +82,7 @@ export function useGigLookup(
         await lookup();
         toast({ title: 'Filled from AI', description: 'Fields were updated from lookup results.' });
       } catch (e) {
-        if (isTelegramInitDataExpiredError(e)) {
-          toast({
-            title: 'Please reload the page',
-            description:
-              e instanceof Error
-                ? e.message
-                : 'Your Telegram session data is out of date. Reload so Telegram can send fresh data.',
-            variant: 'destructive',
-          });
-        } else {
+        if (!toastTelegramInitDataExpired(e)) {
           toast({
             title: 'Error',
             description: 'Failed to start AI lookup.',

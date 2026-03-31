@@ -11,8 +11,8 @@ import { useRouter } from 'next/navigation';
 import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
-import { isTelegramInitDataExpiredError } from '@/lib/api';
 import { fetchGigForEdit, updateGig } from '@/lib/gig-form-api';
+import { getTelegramInitDataExpiredToastContent } from '@/lib/telegram-init-data-expired';
 import { waitForTelegramInitData } from '@/lib/telegram-webapp';
 import { dateToYMD, defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
@@ -118,11 +118,9 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
         if (ac.signal.aborted) {
           return;
         }
-        const expired = isTelegramInitDataExpiredError(e);
-        const message = expired
-          ? e instanceof Error
-            ? e.message
-            : 'Your Telegram session data is out of date. Reload so Telegram can send fresh data.'
+        const expiredContent = getTelegramInitDataExpiredToastContent(e);
+        const message = expiredContent
+          ? expiredContent.description
           : e instanceof Error
             ? e.message
             : 'There was an error loading gig data for editing.';
@@ -130,11 +128,15 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
           setLoadGigError(message);
           setIsPrefilled(false);
         }
-        toast({
-          title: expired ? 'Please reload the page' : 'Couldn’t load gig',
-          description: message,
-          variant: 'destructive',
-        });
+        toast(
+          expiredContent
+            ? { ...expiredContent, variant: 'destructive' }
+            : {
+                title: 'Couldn’t load gig',
+                description: message,
+                variant: 'destructive',
+              },
+        );
         console.error(e);
       } finally {
         window.clearTimeout(timeoutId);
