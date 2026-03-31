@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
+import { isTelegramInitDataExpiredError } from '@/lib/api';
 import { fetchGigForEdit, updateGig } from '@/lib/gig-form-api';
 import { waitForTelegramInitData } from '@/lib/telegram-webapp';
 import { dateToYMD, defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
@@ -117,14 +118,20 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
         if (ac.signal.aborted) {
           return;
         }
-        const message =
-          e instanceof Error ? e.message : 'There was an error loading gig data for editing.';
+        const expired = isTelegramInitDataExpiredError(e);
+        const message = expired
+          ? e instanceof Error
+            ? e.message
+            : 'Your Telegram session data is out of date. Reload so Telegram can send fresh data.'
+          : e instanceof Error
+            ? e.message
+            : 'There was an error loading gig data for editing.';
         if (seq === requestSeqRef.current) {
           setLoadGigError(message);
           setIsPrefilled(false);
         }
         toast({
-          title: 'Couldn’t load gig',
+          title: expired ? 'Please reload the page' : 'Couldn’t load gig',
           description: message,
           variant: 'destructive',
         });

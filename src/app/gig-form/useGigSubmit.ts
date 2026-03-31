@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { isTelegramInitDataExpiredError } from '@/lib/api';
 import type { GigUpsertApiParams, GigUpsertPayload } from '@/lib/gig-form-api';
 import { waitForTelegramInitData } from '@/lib/telegram-webapp';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
@@ -62,6 +63,18 @@ export function useGigSubmit({ posterFile, posterUrl, apiCall, onSuccess }: UseG
         await submit(values, currentPosterFile, currentPosterUrl);
         onSuccess();
       } catch (e) {
+        if (isTelegramInitDataExpiredError(e)) {
+          toast({
+            title: 'Please reload the page',
+            description:
+              e instanceof Error
+                ? e.message
+                : 'Your Telegram session data is out of date. Reload so Telegram can send fresh data.',
+            variant: 'destructive',
+          });
+          console.error(e);
+          return;
+        }
         const message =
           e instanceof Error
             ? e.message
