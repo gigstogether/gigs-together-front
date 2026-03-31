@@ -1,8 +1,8 @@
 import { toast } from '@/hooks/use-toast';
-import { isTelegramInitDataExpiredError } from '@/lib/api';
+import { isTelegramInitDataExpiredError } from '@/lib/api-errors';
 
 const FALLBACK_DESCRIPTION =
-  'Your Telegram session data is out of date. Reload so Telegram can send fresh data.';
+  'Your Telegram authentication data is out of date. Reload so Telegram can send fresh data.';
 
 export const TELEGRAM_INIT_DATA_EXPIRED_TOAST_TITLE = 'Please reload the page' as const;
 

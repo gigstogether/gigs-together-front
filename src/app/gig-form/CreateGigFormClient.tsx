@@ -41,8 +41,7 @@ export default function CreateGigFormClient({ countries }: CreateGigFormClientPr
   const { isSubmitting, onSubmit } = useGigSubmit({
     posterFile,
     posterUrl,
-    apiCall: ({ telegramInitDataString, gig, poster }) =>
-      createGig({ telegramInitDataString, gig, poster }),
+    apiCall: ({ gig, poster }) => createGig({ gig, poster }),
     onSuccess: () => {
       toast({
         title: 'Sent!',

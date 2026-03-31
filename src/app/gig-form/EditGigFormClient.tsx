@@ -13,7 +13,6 @@ import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
 import { fetchGigForEdit, updateGig } from '@/lib/gig-form-api';
 import { getTelegramInitDataExpiredToastContent } from '@/lib/telegram-init-data-expired';
-import { waitForTelegramInitData } from '@/lib/telegram-webapp';
 import { dateToYMD, defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import { useGigLookup } from '@/app/gig-form/useGigLookup';
@@ -48,8 +47,7 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
   const { isSubmitting, onSubmit } = useGigSubmit({
     posterFile,
     posterUrl,
-    apiCall: ({ telegramInitDataString, gig, poster }) =>
-      updateGig({ publicId: gigPublicId, telegramInitDataString, gig, poster }),
+    apiCall: ({ gig, poster }) => updateGig({ publicId: gigPublicId, gig, poster }),
     onSuccess: () => {
       toast({
         title: 'Updated!',
@@ -80,11 +78,8 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
         setLoadGigError(null);
       }
       try {
-        const telegramInitDataString = await waitForTelegramInitData({ signal: ac.signal });
-
         const data = await fetchGigForEdit({
           publicId: gigPublicId,
-          telegramInitDataString,
           signal: ac.signal,
         });
 

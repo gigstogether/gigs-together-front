@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/api';
+import { ensureTelegramAccessToken } from '@/lib/telegram-access-token';
 import { isRecord } from '@/lib/is-record';
 
 export type PosterMode = 'upload' | 'url';
@@ -50,21 +51,18 @@ export interface UpdateGigResponse {
 }
 
 export interface GigUpsertApiParams {
-  telegramInitDataString: string;
   gig: GigUpsertPayload;
   poster: PosterSelection;
 }
 
 export interface FetchGigForEditParams {
   publicId: string;
-  telegramInitDataString: string;
   signal?: AbortSignal;
 }
 
 export interface LookupGigParams {
   name: string;
   location: string;
-  telegramInitDataString: string;
   signal?: AbortSignal;
 }
 
@@ -151,7 +149,6 @@ function getPosterUrlOrUndefined(poster: PosterSelection): string | undefined {
   if (poster.mode !== 'url') return undefined;
   const trimmed = (poster.url ?? '').trim();
   if (!trimmed) return undefined;
-  // Validate URL format (throws on invalid URLs)
   new URL(trimmed);
   return trimmed;
 }
@@ -164,6 +161,8 @@ interface SubmitGigParams extends GigUpsertApiParams {
 }
 
 async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TResponse> {
+  await ensureTelegramAccessToken();
+
   const gig: GigUpsertPayload = {
     title: params.gig.title,
     date: params.gig.date,
@@ -181,30 +180,27 @@ async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TRe
     const fd = new FormData();
     fd.append('posterFile', posterFile);
     fd.append('gig', JSON.stringify(gig));
-    fd.append('telegramInitDataString', params.telegramInitDataString);
     return apiRequest<TResponse, FormData>(params.endpoint, params.method, fd);
   }
 
   if (posterUrl) {
     return apiRequest<TResponse>(params.endpoint, params.method, {
       gig: { ...gig, posterUrl },
-      telegramInitDataString: params.telegramInitDataString,
     });
   }
 
   return apiRequest<TResponse>(params.endpoint, params.method, {
     gig,
-    telegramInitDataString: params.telegramInitDataString,
   });
 }
 
 export async function fetchGigForEdit(params: FetchGigForEditParams): Promise<GigForEditData> {
+  await ensureTelegramAccessToken({ signal: params.signal });
   const raw = await apiRequest<unknown>(
     'v1/gig/get',
     'POST',
     {
       publicId: params.publicId,
-      telegramInitDataString: params.telegramInitDataString,
     },
     { signal: params.signal },
   );
@@ -220,13 +216,13 @@ export async function lookupGig(params: LookupGigParams): Promise<GigLookupData>
   if (!location) {
     throw new Error('Invalid lookup request: "location" is required');
   }
+  await ensureTelegramAccessToken({ signal: params.signal });
   const raw = await apiRequest<GigLookupApiResponseBody>(
     'v1/gig/lookup',
     'POST',
     {
       name,
       location,
-      telegramInitDataString: params.telegramInitDataString,
     },
     { signal: params.signal },
   );
@@ -237,7 +233,6 @@ export async function createGig(params: GigUpsertApiParams): Promise<void> {
   await submitGig<void>({
     endpoint: 'v1/receiver/gig',
     method: 'POST',
-    telegramInitDataString: params.telegramInitDataString,
     gig: params.gig,
     poster: params.poster,
   });
@@ -247,7 +242,6 @@ export async function updateGig(params: UpdateGigParams): Promise<UpdateGigRespo
   return submitGig<UpdateGigResponse>({
     endpoint: `v1/receiver/gig/${encodeURIComponent(params.publicId)}`,
     method: 'PATCH',
-    telegramInitDataString: params.telegramInitDataString,
     gig: params.gig,
     poster: params.poster,
   });

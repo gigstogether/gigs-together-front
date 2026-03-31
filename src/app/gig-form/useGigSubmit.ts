@@ -4,7 +4,6 @@ import { useTransition } from 'react';
 import { toast } from '@/hooks/use-toast';
 import type { GigUpsertApiParams, GigUpsertPayload } from '@/lib/gig-form-api';
 import { toastTelegramInitDataExpired } from '@/lib/telegram-init-data-expired';
-import { waitForTelegramInitData } from '@/lib/telegram-webapp';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 
 interface UseGigSubmitParams {
@@ -22,8 +21,6 @@ export function useGigSubmit({ posterFile, posterUrl, apiCall, onSuccess }: UseG
     currentPosterFile: File | null,
     currentPosterUrl: string,
   ) {
-    const telegramInitDataString = await waitForTelegramInitData();
-
     const gig: GigUpsertPayload = {
       title: values.title,
       date: values.date,
@@ -49,7 +46,6 @@ export function useGigSubmit({ posterFile, posterUrl, apiCall, onSuccess }: UseG
     }
 
     await apiCall({
-      telegramInitDataString,
       gig,
       poster: { mode: posterMode, file: currentPosterFile, url: currentPosterUrl },
     });
