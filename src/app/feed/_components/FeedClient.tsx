@@ -98,25 +98,14 @@ export default function FeedClient(props: FeedClientProps) {
     [city, country, t],
   );
 
-  const fetchHashTargetAnchorYmd = useCallback(
-    async (publicId: string): Promise<string> => {
-      const qs = new URLSearchParams();
-      if (country) qs.set('country', country);
-      if (city) qs.set('city', city);
+  const fetchHashTargetAnchorYmd = useCallback(async (publicId: string): Promise<string> => {
+    const res = await apiRequest<unknown>(`v1/gig/date/${encodeURIComponent(publicId)}`, 'GET');
+    if (!isV1GigByPublicIdGetResponseBody(res)) {
+      throw new Error('Invalid API response: expected { date }');
+    }
 
-      const query = qs.toString();
-      const res = await apiRequest<unknown>(
-        `v1/gig/${encodeURIComponent(publicId)}${query ? `?${query}` : ''}`,
-        'GET',
-      );
-      if (!isV1GigByPublicIdGetResponseBody(res)) {
-        throw new Error('Invalid API response: expected { gig: { id, date } }');
-      }
-
-      return gigDateToYMD(res.gig.date);
-    },
-    [city, country],
-  );
+    return gigDateToYMD(res.date);
+  }, []);
 
   const fetchNextPage = useCallback(async () => {
     if (!nextCursor) return;

@@ -34,7 +34,5 @@ export function isV1GigByPublicIdGetResponseBody(
   value: unknown,
 ): value is V1GigByPublicIdGetResponseBody {
   if (!isRecord(value)) return false;
-  const gig = value['gig'];
-  if (!isRecord(gig)) return false;
-  return typeof gig['id'] === 'string' && typeof gig['date'] === 'string';
+  return typeof value['date'] === 'string';
 }

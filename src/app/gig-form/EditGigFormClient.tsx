@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
-import { fetchGigForEdit, updateGig } from '@/lib/gig-form-api';
+import { fetchGigByPublicId, updateGig } from '@/lib/gig-form-api';
 import { getTelegramInitDataExpiredToastContent } from '@/lib/telegram-init-data-expired';
 import { dateToYMD, defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
@@ -78,7 +78,7 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
         setLoadGigError(null);
       }
       try {
-        const data = await fetchGigForEdit({
+        const data = await fetchGigByPublicId({
           publicId: gigPublicId,
           signal: ac.signal,
         });

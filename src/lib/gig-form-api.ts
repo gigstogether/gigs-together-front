@@ -31,7 +31,7 @@ export interface GigDraftData {
   posterUrl?: string;
 }
 
-export interface GigForEditData extends GigDraftData {
+export interface GigFormData extends GigDraftData {
   publicId: string;
 }
 
@@ -55,7 +55,7 @@ export interface GigUpsertApiParams {
   poster: PosterSelection;
 }
 
-export interface FetchGigForEditParams {
+export interface FetchGigByPublicIdParams {
   publicId: string;
   signal?: AbortSignal;
 }
@@ -122,7 +122,7 @@ function parseGigDraftData(raw: unknown): GigDraftData {
   };
 }
 
-function parseGigForEditData(raw: unknown): GigForEditData {
+function parseGigFormData(raw: unknown): GigFormData {
   const obj = asRecordOrThrow(raw);
   const draft = parseGigDraftData(obj);
   return {
@@ -194,17 +194,12 @@ async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TRe
   });
 }
 
-export async function fetchGigForEdit(params: FetchGigForEditParams): Promise<GigForEditData> {
-  await ensureTelegramAccessToken({ signal: params.signal });
-  const raw = await apiRequest<unknown>(
-    'v1/gig/get',
-    'POST',
-    {
-      publicId: params.publicId,
-    },
-    { signal: params.signal },
-  );
-  return parseGigForEditData(raw);
+export async function fetchGigByPublicId(params: FetchGigByPublicIdParams): Promise<GigFormData> {
+  const publicId = encodeURIComponent(params.publicId.trim());
+  const raw = await apiRequest<unknown>(`v1/gig/${publicId}`, 'GET', undefined, {
+    signal: params.signal,
+  });
+  return parseGigFormData(raw);
 }
 
 export async function lookupGig(params: LookupGigParams): Promise<GigLookupData> {

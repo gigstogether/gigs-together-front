@@ -45,14 +45,9 @@ export interface V1GigAroundGetResponseBody {
   nextCursor?: string;
 }
 
-/** GET v1/gig/:publicId — minimal fields for hash anchor / deep links */
-export interface V1PublishedGigByPublicIdGig {
-  id: string;
-  date: string;
-}
-
+/** GET v1/gig/date/:publicId — anchor date for hash / deep links */
 export interface V1GigByPublicIdGetResponseBody {
-  gig: V1PublishedGigByPublicIdGig;
+  date: string;
 }
 
 export interface V1GigGetResponseBodyGig {
