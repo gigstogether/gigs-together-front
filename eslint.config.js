@@ -99,6 +99,8 @@ export default tseslint.config(
           fixStyle: 'separate-type-imports',
         },
       ],
+      // consistent-type-imports does not flag inline `import { value, type T }` (TS 4.5+); this rule does.
+      'import/consistent-type-specifier-style': ['warn', 'prefer-top-level'],
       'import/extensions': [
         'warn',
         'never',

@@ -13,11 +13,8 @@ import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
 import { createGig } from '@/lib/gig-form-api';
 import { getTelegramStartParam } from '@/lib/telegram-webapp';
-import {
-  defaultGigFormValues,
-  gigFormSchema,
-  type GigFormValues,
-} from '@/app/gig-form/gig-form.shared';
+import { defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
+import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import { useGigLookup } from '@/app/gig-form/useGigLookup';
 import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
 
