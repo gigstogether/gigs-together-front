@@ -8,15 +8,23 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { LocationIcon } from '@/components/ui/location-icon';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramSession } from '@/hooks/use-telegram-session';
+import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
+import { normalizeLocationTitle } from '@/lib/utils';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
-export default function HeaderActions(props: {
-  locationLabel: string;
-  telegramUrl?: string;
-  githubUrl?: string;
-  suggestGigUrl?: string;
-}) {
-  const { locationLabel, telegramUrl, githubUrl, suggestGigUrl } = props;
+export interface HeaderActionsProps {
+  readonly country: string;
+  readonly city: string;
+  readonly showSuggestGig?: boolean;
+}
+
+export default function HeaderActions(props: HeaderActionsProps) {
+  const { country, city, showSuggestGig = true } = props;
+
+  const locationLabel = city ? normalizeLocationTitle(city) : country.toUpperCase();
+  const telegramUrl = process.env.NEXT_PUBLIC_TELEGRAM_URL;
+  const githubUrl = process.env.NEXT_PUBLIC_GITHUB_URL;
+  const suggestGigUrl = showSuggestGig ? process.env.NEXT_PUBLIC_SUGGEST_GIG_LINK : undefined;
 
   const { session, login, logout } = useTelegramSession();
 
@@ -25,7 +33,7 @@ export default function HeaderActions(props: {
   const [locationTipOpen, setLocationTipOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
-  const telegramBotUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
+  const telegramBotUsername = getTelegramAuthBotUsername();
 
   const closeMenus = useCallback(() => {
     setDesktopMenuOpen(false);

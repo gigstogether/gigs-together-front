@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic';
 import type { Route } from 'next';
-import { normalizeLocationTitle } from '@/lib/utils';
 import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
 
 const TopForm = dynamic(() => import('@/app/_components/TopForm'), { ssr: false });
@@ -32,11 +31,6 @@ export default function Header(props: HeaderProps) {
     country,
     city,
   } = props;
-  // TODO: move those to HeaderActions
-  const telegramUrl = process.env.NEXT_PUBLIC_TELEGRAM_URL;
-  const githubUrl = process.env.NEXT_PUBLIC_GITHUB_URL;
-  const suggestGigUrl = showSuggestGig ? process.env.NEXT_PUBLIC_SUGGEST_GIG_LINK : undefined;
-  const locationLabel = city ? normalizeLocationTitle(city) : country.toUpperCase();
   const homeHref = (city ? `/feed/${country}/${city}` : `/feed/${country}`) as Route;
 
   return (
@@ -70,10 +64,9 @@ export default function Header(props: HeaderProps) {
             ) : null}
           </div>
           <HeaderActions
-            locationLabel={locationLabel}
-            telegramUrl={telegramUrl}
-            githubUrl={githubUrl}
-            suggestGigUrl={suggestGigUrl}
+            country={country}
+            city={city}
+            showSuggestGig={showSuggestGig}
           />
         </div>
       </div>
