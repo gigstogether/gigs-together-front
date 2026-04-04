@@ -1,0 +1,80 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+import { toast } from '@/hooks/use-toast';
+import type { TelegramWidgetUser } from '@/types/telegram-login';
+
+const TELEGRAM_WIDGET_SCRIPT_SRC = 'https://telegram.org/js/telegram-widget.js?22';
+
+declare global {
+  interface Window {
+    gigsTogetherTelegramAuth?: (user: TelegramWidgetUser) => void;
+  }
+}
+
+export interface TelegramLoginWidgetProps {
+  readonly botUsername: string;
+  readonly size?: 'small' | 'medium' | 'large';
+  readonly onAuth?: (user: TelegramWidgetUser) => void;
+  readonly className?: string;
+}
+
+function defaultOnAuth(user: TelegramWidgetUser): void {
+  const label = user.username ? `@${user.username}` : user.first_name;
+  toast({
+    title: 'Signed in',
+    description: label,
+  });
+}
+
+export default function TelegramLoginWidget(props: TelegramLoginWidgetProps) {
+  const { botUsername, size = 'small', onAuth, className } = props;
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const onAuthRef = useRef(onAuth ?? defaultOnAuth);
+
+  useEffect(() => {
+    onAuthRef.current = onAuth ?? defaultOnAuth;
+  }, [onAuth]);
+
+  // Load the widget by appending a <script> in an effect (not a static tag in JSX) so the bot name
+  // comes from props, the global auth callback exists before the script runs, work stays client-only,
+  // and we remove script + callback on unmount when the modal closes (clean reopen, no duplicates).
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !botUsername) {
+      return;
+    }
+
+    window.gigsTogetherTelegramAuth = (user: TelegramWidgetUser) => {
+      onAuthRef.current(user);
+    };
+
+    const script = document.createElement('script');
+    script.src = TELEGRAM_WIDGET_SCRIPT_SRC;
+    script.async = true;
+    script.setAttribute('data-telegram-login', botUsername);
+    script.setAttribute('data-size', size);
+    script.setAttribute('data-onauth', 'gigsTogetherTelegramAuth(user)');
+    script.setAttribute('data-request-access', 'write');
+
+    container.appendChild(script);
+
+    return () => {
+      container.replaceChildren();
+      delete window.gigsTogetherTelegramAuth;
+    };
+  }, [botUsername, size]);
+
+  if (!botUsername) {
+    return null;
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className={className}
+      data-telegram-login-widget
+    />
+  );
+}

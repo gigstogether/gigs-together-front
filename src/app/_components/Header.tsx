@@ -32,6 +32,7 @@ export default function Header(props: HeaderProps) {
     country,
     city,
   } = props;
+  // TODO: move those to HeaderActions
   const telegramUrl = process.env.NEXT_PUBLIC_TELEGRAM_URL;
   const githubUrl = process.env.NEXT_PUBLIC_GITHUB_URL;
   const suggestGigUrl = showSuggestGig ? process.env.NEXT_PUBLIC_SUGGEST_GIG_LINK : undefined;

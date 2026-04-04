@@ -1,9 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
+import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
+import LoginModal from '@/app/_components/LoginModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationIcon } from '@/components/ui/location-icon';
+import { toast } from '@/hooks/use-toast';
+import { useTelegramSession } from '@/hooks/use-telegram-session';
+import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 export default function HeaderActions(props: {
   locationLabel: string;
@@ -13,9 +18,48 @@ export default function HeaderActions(props: {
 }) {
   const { locationLabel, telegramUrl, githubUrl, suggestGigUrl } = props;
 
+  const { session, login, logout } = useTelegramSession();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const [locationTipOpen, setLocationTipOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+
+  const telegramBotUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
+
+  const closeMenus = useCallback(() => {
+    setDesktopMenuOpen(false);
+    setMobileMenuOpen(false);
+  }, []);
+
+  const handleAuthenticated = useCallback(
+    (user: TelegramWidgetUser) => {
+      login(user);
+      const label = user.username ? `@${user.username}` : user.first_name;
+      toast({
+        title: 'Signed in',
+        description: label,
+      });
+    },
+    [login],
+  );
+
+  const openLoginModal = useCallback(() => {
+    closeMenus();
+    setLoginModalOpen(true);
+  }, [closeMenus]);
+
+  const handleLogout = useCallback(() => {
+    logout();
+    closeMenus();
+  }, [logout, closeMenus]);
+
+  const authMenuProps = {
+    telegramBotUsername,
+    session,
+    onLoginClick: openLoginModal,
+    onLogout: handleLogout,
+  };
 
   return (
     <div className="min-w-0 justify-self-end flex items-center space-x-4">
@@ -96,8 +140,9 @@ export default function HeaderActions(props: {
           </PopoverTrigger>
           <PopoverContent
             align="end"
-            className="w-48 p-2"
+            className="w-auto min-w-[13rem] max-w-[min(100vw-2rem,20rem)] p-2"
           >
+            <HeaderAuthActions {...authMenuProps} />
             <a
               href="/about"
               className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
@@ -124,9 +169,11 @@ export default function HeaderActions(props: {
           </PopoverTrigger>
           <PopoverContent
             align="end"
-            className="w-56 p-2"
+            className="w-auto min-w-[14rem] max-w-[min(100vw-2rem,20rem)] p-2"
           >
             <div className="flex flex-col gap-1">
+              <HeaderAuthActions {...authMenuProps} />
+
               {!!suggestGigUrl && (
                 <>
                   <a
@@ -207,6 +254,13 @@ export default function HeaderActions(props: {
           </PopoverContent>
         </Popover>
       </div>
+
+      <LoginModal
+        isOpen={loginModalOpen}
+        onOpenChange={setLoginModalOpen}
+        telegramBotUsername={telegramBotUsername}
+        onAuthenticated={handleAuthenticated}
+      />
     </div>
   );
 }
