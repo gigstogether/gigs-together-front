@@ -59,17 +59,31 @@ function parseExchangeResponse(raw: unknown): TelegramExchangeResponse {
 }
 
 export function getStoredTelegramAccessToken(): string | null {
-  if (typeof sessionStorage === 'undefined') return null;
-  return sessionStorage.getItem(STORAGE_KEY);
+  if (typeof localStorage === 'undefined') return null;
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
 }
 
 export function setStoredTelegramAccessToken(token: string): void {
-  sessionStorage.setItem(STORAGE_KEY, token);
-  emitAccessTokenListeners();
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY, token);
+    emitAccessTokenListeners();
+  } catch {
+    /* quota / private mode */
+  }
 }
 
 export function clearStoredTelegramAccessToken(): void {
-  sessionStorage.removeItem(STORAGE_KEY);
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
   emitAccessTokenListeners();
 }
 
@@ -152,7 +166,7 @@ export async function exchangeTelegramAccessTokenFromWebApp(initData: string): P
 
 /**
  * Exchanges Telegram Login Widget callback data for an access JWT and persists it to
- * session storage (`gt_tg_access_token`), same as {@link exchangeTelegramAccessTokenFromWebApp} for the mini app.
+ * localStorage (`gt_tg_access_token`), same as {@link exchangeTelegramAccessTokenFromWebApp} for the mini app.
  */
 export async function exchangeTelegramAccessTokenFromLoginWidget(
   user: TelegramWidgetUser,
@@ -164,7 +178,7 @@ export async function exchangeTelegramAccessTokenFromLoginWidget(
 }
 
 /**
- * Ensures a valid JWT is in session storage, exchanging initData with the API when needed.
+ * Ensures a valid JWT is in localStorage, exchanging initData with the API when needed.
  */
 export async function ensureTelegramAccessToken(
   options?: EnsureTelegramAccessTokenOptions,

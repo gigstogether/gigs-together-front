@@ -1,4 +1,4 @@
-/** Client-side session derived from the same access JWT as the Telegram mini app (`gt_tg_access_token`). */
+/** Client-side session derived from the access JWT in `localStorage` (`gt_tg_access_token`), shared across tabs. */
 export interface TelegramAuthSession {
   readonly displayLabel: string;
 }
