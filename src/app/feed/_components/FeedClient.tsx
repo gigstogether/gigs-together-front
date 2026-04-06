@@ -52,7 +52,7 @@ export default function FeedClient(props: FeedClientProps) {
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | undefined>(() => initialNextCursor);
   const [prevCursor, setPrevCursor] = useState<string | undefined>(() => initialPrevCursor);
-  const [userScrollSessionKey, setUserScrollSessionKey] = useState(0);
+  const [infiniteScrollResetKey, setInfiniteScrollResetKey] = useState(0);
 
   const eventRefs = useRef<Map<string, HTMLElement>>(new Map());
   const inFlightNextRef = useRef(false);
@@ -63,8 +63,8 @@ export default function FeedClient(props: FeedClientProps) {
     headerOffsetPx: headerH ?? 0,
   });
 
-  const bumpUserScrollSessionKey = useCallback(() => {
-    setUserScrollSessionKey((x) => x + 1);
+  const bumpInfiniteScrollResetKey = useCallback(() => {
+    setInfiniteScrollResetKey((x) => x + 1);
   }, []);
 
   const fetchAroundAndReplace = useCallback(
@@ -254,7 +254,7 @@ export default function FeedClient(props: FeedClientProps) {
     },
     dispatchLoading,
     setError,
-    bumpUserScrollSessionKey,
+    bumpInfiniteScrollResetKey,
     resolveAnchorYmdByEventId: fetchHashTargetAnchorYmd,
     loadAroundAndReplace: async (anchorYmd) => {
       await fetchAroundAndReplace(anchorYmd);
@@ -266,7 +266,7 @@ export default function FeedClient(props: FeedClientProps) {
     canLoadMore: hasMore && !loading.initial && !loading.next && !loading.jump,
     isLoading: loading.initial || loading.next || loading.jump,
     onLoadMore: fetchNextPage,
-    resetUserScrollKey: userScrollSessionKey,
+    infiniteScrollResetKey,
   });
 
   const { sentinelRef: topSentinelRef } = useInfiniteScroll({
@@ -275,7 +275,7 @@ export default function FeedClient(props: FeedClientProps) {
     isLoading: loading.initial || loading.prev || loading.jump,
     onLoadMore: fetchPrevPage,
     rootMargin: '400px 0px',
-    resetUserScrollKey: userScrollSessionKey,
+    infiniteScrollResetKey,
   });
 
   const registerEventRef = useCallback((eventId: string, element: HTMLElement | null) => {
@@ -315,7 +315,7 @@ export default function FeedClient(props: FeedClientProps) {
       inFlightJumpRef.current = true;
       dispatchLoading({ type: 'jump:start' });
       setError(null);
-      bumpUserScrollSessionKey();
+      bumpInfiniteScrollResetKey();
 
       try {
         const windowEvents = await fetchAroundAndReplace(key);
@@ -340,7 +340,7 @@ export default function FeedClient(props: FeedClientProps) {
         inFlightJumpRef.current = false;
       }
     },
-    [events, fetchAroundAndReplace, headerH, bumpUserScrollSessionKey],
+    [events, fetchAroundAndReplace, headerH, bumpInfiniteScrollResetKey],
   );
 
   useFeedHeaderConfigSync({

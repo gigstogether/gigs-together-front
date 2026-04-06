@@ -9,7 +9,8 @@ export interface UseInfiniteScrollParams {
   readonly onLoadMore: () => void;
   readonly rootMargin?: string;
   readonly requiresUserScroll?: boolean;
-  readonly resetUserScrollKey?: string | number;
+  /** When this value changes, infinite scroll treats user scroll as fresh (see `hasUserScrolledRef`). */
+  readonly infiniteScrollResetKey?: string | number;
 }
 
 export interface UseInfiniteScrollResult {
@@ -24,7 +25,7 @@ export function useInfiniteScroll(params: UseInfiniteScrollParams): UseInfiniteS
     onLoadMore,
     rootMargin = '400px 0px',
     requiresUserScroll = true,
-    resetUserScrollKey,
+    infiniteScrollResetKey,
   } = params;
 
   const hasUserScrolledRef = useRef(false);
@@ -62,7 +63,7 @@ export function useInfiniteScroll(params: UseInfiniteScrollParams): UseInfiniteS
 
   useEffect(() => {
     hasUserScrolledRef.current = false;
-  }, [resetUserScrollKey]);
+  }, [infiniteScrollResetKey]);
 
   useEffect(() => {
     if (!isEnabled) return;
