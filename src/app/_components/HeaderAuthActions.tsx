@@ -1,6 +1,8 @@
 'use client';
 
+import { useLayoutEffect, useState } from 'react';
 import { LogIn, LogOut } from 'lucide-react';
+import { isTelegramMiniApp } from '@/lib/telegram-webapp';
 import type { TelegramAuthState } from '@/types/telegram-auth';
 
 const menuRowClass =
@@ -16,9 +18,22 @@ export interface HeaderAuthActionsProps {
 export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
   const { telegramBotUsername, authState, onLoginClick, onLogout } = props;
 
+  const [miniAppEnv, setMiniAppEnv] = useState<'unknown' | 'mini' | 'browser'>('unknown');
+  useLayoutEffect(() => {
+    const resolve = (): void => {
+      setMiniAppEnv(isTelegramMiniApp() ? 'mini' : 'browser');
+    };
+    resolve();
+    // Script from root layout may attach `Telegram.WebApp` shortly after first paint.
+    const timeouts = [50, 200, 600].map((ms) => window.setTimeout(resolve, ms));
+    return () => timeouts.forEach((id) => window.clearTimeout(id));
+  }, []);
+
   if (!telegramBotUsername?.trim()) {
     return null;
   }
+
+  const showLoginButton = !authState && miniAppEnv === 'browser';
 
   return (
     <>
@@ -55,7 +70,7 @@ export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
             />
           </button>
         </div>
-      ) : (
+      ) : showLoginButton ? (
         <button
           type="button"
           className={menuRowClass}
@@ -68,11 +83,13 @@ export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
           />
           Login
         </button>
+      ) : null}
+      {(authState || showLoginButton) && (
+        <div
+          className="my-0.5 h-px w-full bg-border/40"
+          aria-hidden
+        />
       )}
-      <div
-        className="my-0.5 h-px w-full bg-border/40"
-        aria-hidden
-      />
     </>
   );
 }

@@ -2,6 +2,17 @@ export function getTelegramInitData(): string {
   return window.Telegram?.WebApp?.initData ?? getTelegramInitDataFromLocation() ?? '';
 }
 
+/**
+ * Whether the app runs inside Telegram (Mini App). Uses initData / URL fallbacks and
+ * `initDataUnsafe.user` when the Web App script has run. Call only on the client.
+ */
+export function isTelegramMiniApp(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (getTelegramInitData()) return true;
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  return typeof user?.id === 'number';
+}
+
 function getTelegramInitDataFromLocation(): string | undefined {
   // Telegram Mini Apps commonly pass init data as `tgWebAppData` in the URL hash.
   // In some cases it can also be present in the query string.

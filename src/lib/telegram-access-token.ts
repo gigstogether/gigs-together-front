@@ -196,6 +196,7 @@ export async function exchangeTelegramAccessTokenFromLoginWidget(
 /**
  * Ensures a valid JWT is in localStorage, exchanging initData with the API when needed.
  */
+// TODO: this either should not happen or should happen with web version as well - not only in mini app
 export async function ensureTelegramAccessToken(
   options?: EnsureTelegramAccessTokenOptions,
 ): Promise<void> {

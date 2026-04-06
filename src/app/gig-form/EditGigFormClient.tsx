@@ -8,7 +8,6 @@ import { toast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
-import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
 import { fetchGigByPublicId, updateGig } from '@/lib/gig-form-api';
@@ -159,7 +158,6 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
 
   return (
     <>
-      <TelegramWebAppScript />
       {!isPrefilled ? (
         <Card className="w-full max-w-md m-auto border-0">
           <CardHeader>
