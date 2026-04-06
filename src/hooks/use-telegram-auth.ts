@@ -10,23 +10,23 @@ import {
   isTelegramAccessTokenExpired,
   subscribeTelegramAccessToken,
 } from '@/lib/telegram-access-token';
-import type { TelegramAuthSession } from '@/types/telegram-auth';
+import type { TelegramAuthState } from '@/types/telegram-auth';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
-export interface UseTelegramSessionResult {
-  readonly session: TelegramAuthSession | null;
+export interface UseTelegramAuthResult {
+  readonly authState: TelegramAuthState | null;
   readonly login: (user: TelegramWidgetUser) => Promise<TelegramExchangeResponse>;
   readonly logout: () => void;
 }
 
-export function useTelegramSession(): UseTelegramSessionResult {
+export function useTelegramAuth(): UseTelegramAuthResult {
   const tokenSnapshot = useSyncExternalStore(
     subscribeTelegramAccessToken,
     getTelegramAccessTokenSnapshot,
     () => null,
   );
 
-  const session = useMemo((): TelegramAuthSession | null => {
+  const authState = useMemo((): TelegramAuthState | null => {
     if (!tokenSnapshot || isTelegramAccessTokenExpired(tokenSnapshot)) {
       return null;
     }
@@ -45,5 +45,5 @@ export function useTelegramSession(): UseTelegramSessionResult {
     clearStoredTelegramAccessToken();
   }, []);
 
-  return { session, login, logout };
+  return { authState, login, logout };
 }

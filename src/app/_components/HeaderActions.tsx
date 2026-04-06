@@ -7,7 +7,7 @@ import LoginModal from '@/app/_components/LoginModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationIcon } from '@/components/ui/location-icon';
 import { toast } from '@/hooks/use-toast';
-import { useTelegramSession } from '@/hooks/use-telegram-session';
+import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { ApiError } from '@/lib/api-errors';
 import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
 import { getTelegramAccessDisplayLabelFromToken } from '@/lib/telegram-access-token';
@@ -28,7 +28,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const githubUrl = process.env.NEXT_PUBLIC_GITHUB_URL;
   const suggestGigUrl = showSuggestGig ? process.env.NEXT_PUBLIC_SUGGEST_GIG_LINK : undefined;
 
-  const { session, login, logout } = useTelegramSession();
+  const { authState, login, logout } = useTelegramAuth();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
@@ -78,7 +78,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
 
   const authMenuProps = {
     telegramBotUsername,
-    session,
+    authState,
     onLoginClick: openLoginModal,
     onLogout: handleLogout,
   };
