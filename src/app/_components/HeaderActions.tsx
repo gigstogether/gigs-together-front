@@ -8,7 +8,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { LocationIcon } from '@/components/ui/location-icon';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramSession } from '@/hooks/use-telegram-session';
+import { ApiError } from '@/lib/api-errors';
 import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
+import { getTelegramAccessDisplayLabelFromToken } from '@/lib/telegram-access-token';
 import { normalizeLocationTitle } from '@/lib/utils';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
@@ -41,13 +43,25 @@ export default function HeaderActions(props: HeaderActionsProps) {
   }, []);
 
   const handleAuthenticated = useCallback(
-    (user: TelegramWidgetUser) => {
-      login(user);
-      const label = user.username ? `@${user.username}` : user.first_name;
-      toast({
-        title: 'Signed in',
-        description: label,
-      });
+    async (user: TelegramWidgetUser) => {
+      try {
+        const { accessToken } = await login(user);
+        const label =
+          getTelegramAccessDisplayLabelFromToken(accessToken) ??
+          (user.username ? `@${user.username}` : user.first_name);
+        toast({
+          title: 'Signed in',
+          description: label,
+        });
+      } catch (e) {
+        const description =
+          e instanceof ApiError ? e.message : 'Could not complete login. Please try again.';
+        toast({
+          title: 'Sign in failed',
+          description,
+          variant: 'destructive',
+        });
+      }
     },
     [login],
   );

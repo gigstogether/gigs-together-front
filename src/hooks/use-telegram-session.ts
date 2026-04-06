@@ -1,26 +1,48 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
+import type { TelegramExchangeResponse } from '@/lib/telegram-access-token';
+import {
+  clearStoredTelegramAccessToken,
+  exchangeTelegramAccessTokenFromLoginWidget,
+  getTelegramAccessDisplayLabelFromToken,
+  getTelegramAccessTokenSnapshot,
+  isTelegramAccessTokenExpired,
+  subscribeTelegramAccessToken,
+} from '@/lib/telegram-access-token';
+import type { TelegramAuthSession } from '@/types/telegram-auth';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
-/**
- * In-memory session only: no sessionStorage until persistence is wired step by step.
- */
 export interface UseTelegramSessionResult {
-  readonly session: TelegramWidgetUser | null;
-  readonly login: (user: TelegramWidgetUser) => void;
+  readonly session: TelegramAuthSession | null;
+  readonly login: (user: TelegramWidgetUser) => Promise<TelegramExchangeResponse>;
   readonly logout: () => void;
 }
 
 export function useTelegramSession(): UseTelegramSessionResult {
-  const [session, setSession] = useState<TelegramWidgetUser | null>(null);
+  const tokenSnapshot = useSyncExternalStore(
+    subscribeTelegramAccessToken,
+    getTelegramAccessTokenSnapshot,
+    () => null,
+  );
 
-  const login = useCallback((user: TelegramWidgetUser) => {
-    setSession(user);
+  const session = useMemo((): TelegramAuthSession | null => {
+    if (!tokenSnapshot || isTelegramAccessTokenExpired(tokenSnapshot)) {
+      return null;
+    }
+    const label = getTelegramAccessDisplayLabelFromToken(tokenSnapshot);
+    if (!label) {
+      return null;
+    }
+    return { displayLabel: label };
+  }, [tokenSnapshot]);
+
+  const login = useCallback(async (user: TelegramWidgetUser) => {
+    return exchangeTelegramAccessTokenFromLoginWidget(user);
   }, []);
 
   const logout = useCallback(() => {
-    setSession(null);
+    clearStoredTelegramAccessToken();
   }, []);
 
   return { session, login, logout };

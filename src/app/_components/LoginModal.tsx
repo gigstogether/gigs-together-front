@@ -14,7 +14,7 @@ export interface LoginModalProps {
   readonly isOpen: boolean;
   readonly onOpenChange: (isOpen: boolean) => void;
   readonly telegramBotUsername: string | undefined;
-  readonly onAuthenticated: (user: TelegramWidgetUser) => void;
+  readonly onAuthenticated: (user: TelegramWidgetUser) => void | Promise<void>;
 }
 
 export default function LoginModal(props: LoginModalProps) {
@@ -42,8 +42,8 @@ export default function LoginModal(props: LoginModalProps) {
             <TelegramLoginWidget
               botUsername={botUsername}
               size="large"
-              onAuth={(user) => {
-                onAuthenticated(user);
+              onAuth={async (user) => {
+                await onAuthenticated(user);
                 onOpenChange(false);
               }}
             />

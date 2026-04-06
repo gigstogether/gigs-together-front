@@ -2,6 +2,10 @@
 
 import { useEffect, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
+import {
+  exchangeTelegramAccessTokenFromLoginWidget,
+  getTelegramAccessDisplayLabelFromToken,
+} from '@/lib/telegram-access-token';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 const TELEGRAM_WIDGET_SCRIPT_SRC = 'https://telegram.org/js/telegram-widget.js?22';
@@ -15,16 +19,27 @@ declare global {
 export interface TelegramLoginWidgetProps {
   readonly botUsername: string;
   readonly size?: 'small' | 'medium' | 'large';
-  readonly onAuth?: (user: TelegramWidgetUser) => void;
+  readonly onAuth?: (user: TelegramWidgetUser) => void | Promise<void>;
   readonly className?: string;
 }
 
-function defaultOnAuth(user: TelegramWidgetUser): void {
-  const label = user.username ? `@${user.username}` : user.first_name;
-  toast({
-    title: 'Signed in',
-    description: label,
-  });
+async function defaultOnAuth(user: TelegramWidgetUser): Promise<void> {
+  try {
+    const { accessToken } = await exchangeTelegramAccessTokenFromLoginWidget(user);
+    const label =
+      getTelegramAccessDisplayLabelFromToken(accessToken) ??
+      (user.username ? `@${user.username}` : user.first_name);
+    toast({
+      title: 'Signed in',
+      description: label,
+    });
+  } catch {
+    toast({
+      title: 'Sign in failed',
+      description: 'Could not complete login. Please try again.',
+      variant: 'destructive',
+    });
+  }
 }
 
 export default function TelegramLoginWidget(props: TelegramLoginWidgetProps) {

@@ -1,14 +1,14 @@
 'use client';
 
 import { LogIn, LogOut } from 'lucide-react';
-import type { TelegramWidgetUser } from '@/types/telegram-login';
+import type { TelegramAuthSession } from '@/types/telegram-auth';
 
 const menuRowClass =
   'flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted';
 
 export interface HeaderAuthActionsProps {
   readonly telegramBotUsername?: string;
-  readonly session: TelegramWidgetUser | null;
+  readonly session: TelegramAuthSession | null;
   readonly onLoginClick: () => void;
   readonly onLogout: () => void;
 }

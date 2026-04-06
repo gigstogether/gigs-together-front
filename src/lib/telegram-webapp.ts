@@ -23,12 +23,18 @@ export function getTelegramStartParam(): string {
   return (raw ?? '').toString();
 }
 
-export async function waitForTelegramInitData(options?: {
-  signal?: AbortSignal;
-  timeoutMs?: number;
-  intervalMs?: number;
-}): Promise<string> {
+export interface WaitForTelegramInitDataOptions {
+  readonly signal?: AbortSignal;
+  readonly timeoutMs?: number;
+  readonly intervalMs?: number;
+}
+
+export async function waitForTelegramInitData(
+  options?: WaitForTelegramInitDataOptions,
+): Promise<string> {
+  // 10_000 ms = 10 s poll budget for Mini App initData
   const timeoutMs = options?.timeoutMs ?? 10_000;
+  // 100 ms between polls
   const intervalMs = options?.intervalMs ?? 100;
 
   const start = Date.now();
