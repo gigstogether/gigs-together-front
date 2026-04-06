@@ -1,6 +1,5 @@
 import { fetchApiJson } from '@/lib/api-core';
 import { isRecord } from '@/lib/is-record';
-import { TELEGRAM_INIT_DATA_HEADER } from '@/lib/telegram-init-data-header';
 import { waitForTelegramInitData } from '@/lib/telegram-webapp';
 import type { EnsureTelegramAccessTokenOptions } from '@/types/ensure-telegram-access-token-options';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
@@ -152,14 +151,9 @@ export function getTelegramAccessDisplayLabelFromToken(token: string): string | 
 }
 
 export async function exchangeTelegramAccessTokenFromWebApp(initData: string): Promise<void> {
-  const raw = await fetchApiJson<unknown>(
-    'v1/auth/telegram/web-app',
-    'POST',
-    {},
-    {
-      headers: { [TELEGRAM_INIT_DATA_HEADER]: initData },
-    },
-  );
+  const raw = await fetchApiJson<unknown>('v1/auth/telegram/web-app', 'POST', {
+    initData,
+  });
   const { accessToken } = parseExchangeResponse(raw);
   setStoredTelegramAccessToken(accessToken);
 }
