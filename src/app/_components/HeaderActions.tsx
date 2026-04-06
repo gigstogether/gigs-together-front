@@ -72,9 +72,14 @@ export default function HeaderActions(props: HeaderActionsProps) {
   }, [closeMenus]);
 
   const handleLogout = useCallback(() => {
+    const label = authState?.displayLabel;
     logout();
     closeMenus();
-  }, [logout, closeMenus]);
+    toast({
+      title: 'Signed out',
+      ...(label ? { description: label } : {}),
+    });
+  }, [authState, logout, closeMenus]);
 
   const authMenuProps = {
     telegramBotUsername,

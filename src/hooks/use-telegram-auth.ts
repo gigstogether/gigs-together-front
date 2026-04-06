@@ -7,6 +7,7 @@ import {
   exchangeTelegramAccessTokenFromLoginWidget,
   getTelegramAccessDisplayLabelFromToken,
   getTelegramAccessTokenSnapshot,
+  getTelegramPhotoUrlFromAccessToken,
   isTelegramAccessTokenExpired,
   subscribeTelegramAccessToken,
 } from '@/lib/telegram-access-token';
@@ -34,7 +35,11 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     if (!label) {
       return null;
     }
-    return { displayLabel: label };
+    const photoUrl = getTelegramPhotoUrlFromAccessToken(tokenSnapshot);
+    return {
+      displayLabel: label,
+      ...(photoUrl ? { photoUrl } : {}),
+    };
   }, [tokenSnapshot]);
 
   const login = useCallback(async (user: TelegramWidgetUser) => {

@@ -150,6 +150,28 @@ export function getTelegramAccessDisplayLabelFromToken(token: string): string | 
   return tryTelegramDisplayLabelFromAccessJwtPayload(payload);
 }
 
+/**
+ * Profile photo URL from the access JWT (`identity.snapshot.extra.photo_url`), when the API
+ * stored it (e.g. Telegram Login Widget). Not verified; API is authoritative.
+ */
+export function getTelegramPhotoUrlFromAccessToken(token: string): string | null {
+  const payload = tryParseJwtPayloadUnknown(token);
+  if (payload === null) return null;
+  if (!isRecord(payload)) return null;
+  const identity = payload.identity;
+  if (!isRecord(identity)) return null;
+  if (identity.kind !== 'telegram') return null;
+  const snapshot = identity.snapshot;
+  if (!isRecord(snapshot)) return null;
+  const extra = snapshot.extra;
+  if (!isRecord(extra)) return null;
+  const raw = extra.photo_url;
+  if (typeof raw !== 'string' || !raw.trim()) return null;
+  const url = raw.trim();
+  if (!/^https:\/\//i.test(url)) return null;
+  return url;
+}
+
 export async function exchangeTelegramAccessTokenFromWebApp(initData: string): Promise<void> {
   const raw = await fetchApiJson<unknown>('v1/auth/telegram/web-app', 'POST', {
     initData,
