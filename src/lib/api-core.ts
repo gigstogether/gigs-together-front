@@ -7,6 +7,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_APP_API_BASE_URL;
 
 export interface FetchApiJsonOptions extends RequestInit {
   onUnauthorized?: () => void;
+  /**
+   * Internal: set after one `POST v1/auth/refresh` so a second 401 does not loop refresh.
+   */
+  hasAttemptedTokenRefresh?: boolean;
 }
 
 export function buildUrl(endpointOrUrl: string): string {
@@ -17,13 +21,17 @@ export function buildUrl(endpointOrUrl: string): string {
   return `${API_BASE_URL.replace(/\/$/, '')}/${endpointOrUrl.replace(/^\//, '')}`;
 }
 
+function isAuthRefreshEndpoint(endpointOrUrl: string): boolean {
+  return endpointOrUrl.includes('v1/auth/refresh');
+}
+
 export async function fetchApiJson<TResponse>(
   endpointOrUrl: string,
   method: HttpMethod,
   data?: unknown,
   init?: FetchApiJsonOptions,
 ): Promise<TResponse> {
-  const { onUnauthorized, ...fetchInit } = init ?? {};
+  const { onUnauthorized, hasAttemptedTokenRefresh, ...fetchInit } = init ?? {};
   const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
 
   const headers = new Headers(fetchInit.headers);
@@ -47,6 +55,21 @@ export async function fetchApiJson<TResponse>(
     body,
     credentials: fetchInit.credentials ?? 'include',
   });
+
+  if (
+    response.status === 401 &&
+    !hasAttemptedTokenRefresh &&
+    !isAuthRefreshEndpoint(endpointOrUrl)
+  ) {
+    const { postAuthRefresh } = await import('@/lib/auth-refresh');
+    const refreshed = await postAuthRefresh();
+    if (refreshed) {
+      return fetchApiJson<TResponse>(endpointOrUrl, method, data, {
+        ...init,
+        hasAttemptedTokenRefresh: true,
+      });
+    }
+  }
 
   const contentType = response.headers.get('Content-Type') || '';
   const isJson = contentType.includes('application/json');
