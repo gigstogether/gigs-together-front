@@ -57,11 +57,7 @@ function parseAuthExchangeResponse(raw: unknown): TelegramAuthExchangeResponse {
   if (!isRecord(raw)) {
     throw new Error('Invalid auth exchange response');
   }
-  const expiresIn = raw.expiresIn;
   const profileRaw = raw.profile;
-  if (typeof expiresIn !== 'number' || !Number.isFinite(expiresIn)) {
-    throw new Error('Invalid auth exchange response: expiresIn');
-  }
   if (!isRecord(profileRaw)) {
     throw new Error('Invalid auth exchange response: profile');
   }
@@ -81,7 +77,7 @@ function parseAuthExchangeResponse(raw: unknown): TelegramAuthExchangeResponse {
     displayLabel: displayLabel.trim(),
     ...(photoUrl ? { photoUrl } : {}),
   };
-  return { expiresIn, profile };
+  return { profile };
 }
 
 export function getStoredTelegramClientProfile(): TelegramStoredClientProfile | null {
