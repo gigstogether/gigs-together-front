@@ -49,6 +49,35 @@ export function subscribeTelegramClientProfile(listener: () => void): () => void
   };
 }
 
+/**
+ * Last `localStorage` payload for the profile key and its parsed value. `useSyncExternalStore`
+ * requires {@link getTelegramClientProfileSnapshot} to return the same object reference when the
+ * underlying storage string is unchanged (see React `getSnapshot` caching).
+ */
+let lastProfileStorageRaw: string | null | undefined;
+let lastProfileStorageParsed: TelegramStoredClientProfile | null | undefined;
+
+function parseStoredProfileJson(raw: string): TelegramStoredClientProfile | null {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return null;
+    const displayLabel = parsed.displayLabel;
+    if (typeof displayLabel !== 'string' || !displayLabel.trim()) return null;
+    const photoUrlRaw = parsed.photoUrl;
+    if (photoUrlRaw !== undefined && (typeof photoUrlRaw !== 'string' || !photoUrlRaw.trim())) {
+      return null;
+    }
+    return {
+      displayLabel: displayLabel.trim(),
+      ...(typeof photoUrlRaw === 'string' && photoUrlRaw.trim()
+        ? { photoUrl: photoUrlRaw.trim() }
+        : {}),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function getTelegramClientProfileSnapshot(): TelegramStoredClientProfile | null {
   return getStoredTelegramClientProfile();
 }
@@ -82,26 +111,24 @@ function parseAuthExchangeResponse(raw: unknown): TelegramAuthExchangeResponse {
 
 export function getStoredTelegramClientProfile(): TelegramStoredClientProfile | null {
   if (typeof localStorage === 'undefined') return null;
+  let raw: string | null;
   try {
-    const raw = localStorage.getItem(getTelegramClientProfileStorageKey());
-    if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed)) return null;
-    const displayLabel = parsed.displayLabel;
-    if (typeof displayLabel !== 'string' || !displayLabel.trim()) return null;
-    const photoUrlRaw = parsed.photoUrl;
-    if (photoUrlRaw !== undefined && (typeof photoUrlRaw !== 'string' || !photoUrlRaw.trim())) {
-      return null;
-    }
-    return {
-      displayLabel: displayLabel.trim(),
-      ...(typeof photoUrlRaw === 'string' && photoUrlRaw.trim()
-        ? { photoUrl: photoUrlRaw.trim() }
-        : {}),
-    };
+    raw = localStorage.getItem(getTelegramClientProfileStorageKey());
   } catch {
+    lastProfileStorageRaw = undefined;
     return null;
   }
+  if (raw === lastProfileStorageRaw) {
+    return lastProfileStorageParsed ?? null;
+  }
+  lastProfileStorageRaw = raw;
+  if (!raw) {
+    lastProfileStorageParsed = null;
+    return null;
+  }
+  const parsed = parseStoredProfileJson(raw);
+  lastProfileStorageParsed = parsed;
+  return parsed;
 }
 
 export function setStoredTelegramClientProfile(profile: TelegramStoredClientProfile): void {
