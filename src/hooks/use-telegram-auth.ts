@@ -1,53 +1,47 @@
 'use client';
 
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
-import type { TelegramExchangeResponse } from '@/lib/telegram-access-token';
 import {
-  clearStoredTelegramAccessToken,
-  exchangeTelegramAccessTokenFromLoginWidget,
-  getTelegramAccessDisplayLabelFromToken,
-  getTelegramAccessTokenSnapshot,
-  getTelegramPhotoUrlFromAccessToken,
-  isTelegramAccessTokenExpired,
-  subscribeTelegramAccessToken,
-} from '@/lib/telegram-access-token';
+  clearStoredTelegramClientProfile,
+  exchangeTelegramAuthFromLoginWidget,
+  getTelegramClientProfileSnapshot,
+  logoutTelegramAuthOnServer,
+  subscribeTelegramClientProfile,
+} from '@/lib/telegram-auth';
+import type { TelegramAuthExchangeResponse } from '@/types/telegram-auth-exchange-response';
 import type { TelegramAuthState } from '@/types/telegram-auth';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 export interface UseTelegramAuthResult {
   readonly authState: TelegramAuthState | null;
-  readonly login: (user: TelegramWidgetUser) => Promise<TelegramExchangeResponse>;
-  readonly logout: () => void;
+  readonly login: (user: TelegramWidgetUser) => Promise<TelegramAuthExchangeResponse>;
+  readonly logout: () => Promise<void>;
 }
 
 export function useTelegramAuth(): UseTelegramAuthResult {
-  const tokenSnapshot = useSyncExternalStore(
-    subscribeTelegramAccessToken,
-    getTelegramAccessTokenSnapshot,
+  const profileSnapshot = useSyncExternalStore(
+    subscribeTelegramClientProfile,
+    getTelegramClientProfileSnapshot,
     () => null,
   );
 
   const authState = useMemo((): TelegramAuthState | null => {
-    if (!tokenSnapshot || isTelegramAccessTokenExpired(tokenSnapshot)) {
+    if (!profileSnapshot) {
       return null;
     }
-    const label = getTelegramAccessDisplayLabelFromToken(tokenSnapshot);
-    if (!label) {
-      return null;
-    }
-    const photoUrl = getTelegramPhotoUrlFromAccessToken(tokenSnapshot);
     return {
-      displayLabel: label,
-      ...(photoUrl ? { photoUrl } : {}),
+      displayLabel: profileSnapshot.displayLabel,
+      ...(profileSnapshot.photoUrl ? { photoUrl: profileSnapshot.photoUrl } : {}),
     };
-  }, [tokenSnapshot]);
+  }, [profileSnapshot]);
 
   const login = useCallback(async (user: TelegramWidgetUser) => {
-    return exchangeTelegramAccessTokenFromLoginWidget(user);
+    return exchangeTelegramAuthFromLoginWidget(user);
   }, []);
 
-  const logout = useCallback(() => {
-    clearStoredTelegramAccessToken();
+  const logout = useCallback(async () => {
+    await logoutTelegramAuthOnServer();
+    clearStoredTelegramClientProfile();
   }, []);
 
   return { authState, login, logout };

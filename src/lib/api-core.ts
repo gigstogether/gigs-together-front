@@ -1,4 +1,5 @@
 import { ApiError } from '@/lib/api-errors';
+import { isRecord } from '@/lib/is-record';
 
 type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -33,9 +34,9 @@ export async function fetchApiJson<TResponse>(
   }
 
   const body =
-    method !== 'GET' && method !== 'HEAD' && data
+    method !== 'GET' && method !== 'HEAD' && data !== undefined
       ? isFormData
-        ? (data as FormData)
+        ? data
         : JSON.stringify(data)
       : undefined;
 
@@ -44,6 +45,7 @@ export async function fetchApiJson<TResponse>(
     method,
     headers,
     body,
+    credentials: fetchInit.credentials ?? 'include',
   });
 
   const contentType = response.headers.get('Content-Type') || '';
@@ -55,8 +57,8 @@ export async function fetchApiJson<TResponse>(
     if (response.status === 401 && onUnauthorized) {
       onUnauthorized();
     }
-    if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
-      const r = result as Record<string, unknown>;
+    if (isRecord(result)) {
+      const r = result;
       const msg =
         typeof r.message === 'string' && r.message.trim() ? r.message : 'Something went wrong';
       const code = typeof r.code === 'string' ? r.code : undefined;

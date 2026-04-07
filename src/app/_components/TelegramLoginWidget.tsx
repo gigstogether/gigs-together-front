@@ -2,10 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
-import {
-  exchangeTelegramAccessTokenFromLoginWidget,
-  getTelegramAccessDisplayLabelFromToken,
-} from '@/lib/telegram-access-token';
+import { exchangeTelegramAuthFromLoginWidget } from '@/lib/telegram-auth';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 const TELEGRAM_WIDGET_SCRIPT_SRC = 'https://telegram.org/js/telegram-widget.js?22';
@@ -25,10 +22,8 @@ export interface TelegramLoginWidgetProps {
 
 async function defaultOnAuth(user: TelegramWidgetUser): Promise<void> {
   try {
-    const { accessToken } = await exchangeTelegramAccessTokenFromLoginWidget(user);
-    const label =
-      getTelegramAccessDisplayLabelFromToken(accessToken) ??
-      (user.username ? `@${user.username}` : user.first_name);
+    const { profile } = await exchangeTelegramAuthFromLoginWidget(user);
+    const label = profile.displayLabel || (user.username ? `@${user.username}` : user.first_name);
     toast({
       title: 'Signed in',
       description: label,

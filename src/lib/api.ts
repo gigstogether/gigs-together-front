@@ -1,8 +1,5 @@
 import { fetchApiJson } from '@/lib/api-core';
-import {
-  clearStoredTelegramAccessToken,
-  getStoredTelegramAccessToken,
-} from '@/lib/telegram-access-token';
+import { clearStoredTelegramClientProfile } from '@/lib/telegram-auth';
 
 export {
   ApiError,
@@ -20,15 +17,11 @@ export async function apiRequest<TResponse = unknown, TBody = unknown>(
 ): Promise<TResponse> {
   try {
     const headers = new Headers(init?.headers);
-    const token = getStoredTelegramAccessToken();
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
     return await fetchApiJson<TResponse>(endpointOrUrl, method, data, {
       ...init,
       headers,
       onUnauthorized: () => {
-        clearStoredTelegramAccessToken();
+        clearStoredTelegramClientProfile();
       },
     });
   } catch (e) {

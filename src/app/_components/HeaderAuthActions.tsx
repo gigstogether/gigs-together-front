@@ -12,7 +12,7 @@ export interface HeaderAuthActionsProps {
   readonly telegramBotUsername?: string;
   readonly authState: TelegramAuthState | null;
   readonly onLoginClick: () => void;
-  readonly onLogout: () => void;
+  readonly onLogout: () => void | Promise<void>;
 }
 
 export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
@@ -60,7 +60,9 @@ export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
           <button
             type="button"
             className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground"
-            onClick={onLogout}
+            onClick={() => {
+              void onLogout();
+            }}
             aria-label="Log out"
             title="Log out"
           >

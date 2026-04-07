@@ -10,7 +10,6 @@ import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { ApiError } from '@/lib/api-errors';
 import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
-import { getTelegramAccessDisplayLabelFromToken } from '@/lib/telegram-access-token';
 import { normalizeLocationTitle } from '@/lib/utils';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
@@ -45,10 +44,9 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const handleAuthenticated = useCallback(
     async (user: TelegramWidgetUser) => {
       try {
-        const { accessToken } = await login(user);
+        const { profile } = await login(user);
         const label =
-          getTelegramAccessDisplayLabelFromToken(accessToken) ??
-          (user.username ? `@${user.username}` : user.first_name);
+          profile.displayLabel || (user.username ? `@${user.username}` : user.first_name);
         toast({
           title: 'Signed in',
           description: label,
@@ -71,9 +69,9 @@ export default function HeaderActions(props: HeaderActionsProps) {
     setLoginModalOpen(true);
   }, [closeMenus]);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     const label = authState?.displayLabel;
-    logout();
+    await logout();
     closeMenus();
     toast({
       title: 'Signed out',
