@@ -5,7 +5,7 @@ import {
   clearStoredTelegramClientProfile,
   exchangeTelegramAuthFromLoginWidget,
   getTelegramClientProfileSnapshot,
-  logoutTelegramAuthOnServer,
+  signOutTelegramAuthOnServer,
   subscribeTelegramClientProfile,
 } from '@/lib/telegram-auth';
 import type { TelegramAuthExchangeResponse } from '@/types/telegram-auth-exchange-response';
@@ -14,8 +14,8 @@ import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 export interface UseTelegramAuthResult {
   readonly authState: TelegramAuthState | null;
-  readonly login: (user: TelegramWidgetUser) => Promise<TelegramAuthExchangeResponse>;
-  readonly logout: () => Promise<void>;
+  readonly signIn: (user: TelegramWidgetUser) => Promise<TelegramAuthExchangeResponse>;
+  readonly signOut: () => Promise<void>;
 }
 
 export function useTelegramAuth(): UseTelegramAuthResult {
@@ -35,14 +35,14 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     };
   }, [profileSnapshot]);
 
-  const login = useCallback(async (user: TelegramWidgetUser) => {
+  const signIn = useCallback(async (user: TelegramWidgetUser) => {
     return exchangeTelegramAuthFromLoginWidget(user);
   }, []);
 
-  const logout = useCallback(async () => {
-    await logoutTelegramAuthOnServer();
+  const signOut = useCallback(async () => {
+    await signOutTelegramAuthOnServer();
     clearStoredTelegramClientProfile();
   }, []);
 
-  return { authState, login, logout };
+  return { authState, signIn, signOut };
 }

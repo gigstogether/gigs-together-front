@@ -31,7 +31,7 @@ async function defaultOnAuth(user: TelegramWidgetUser): Promise<void> {
   } catch {
     toast({
       title: 'Sign in failed',
-      description: 'Could not complete login. Please try again.',
+      description: 'Could not complete sign in. Please try again.',
       variant: 'destructive',
     });
   }

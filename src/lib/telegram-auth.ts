@@ -151,7 +151,8 @@ export function clearStoredTelegramClientProfile(): void {
   notifyTelegramClientProfileListeners();
 }
 
-export async function logoutTelegramAuthOnServer(): Promise<void> {
+/** Clears HttpOnly session cookies on the server (best-effort). */
+export async function signOutTelegramAuthOnServer(): Promise<void> {
   try {
     await fetchApiJson<unknown>('v1/auth/logout', 'POST', undefined, {
       credentials: 'include',

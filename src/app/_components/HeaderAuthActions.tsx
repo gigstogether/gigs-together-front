@@ -11,12 +11,12 @@ const menuRowClass =
 export interface HeaderAuthActionsProps {
   readonly telegramBotUsername?: string;
   readonly authState: TelegramAuthState | null;
-  readonly onLoginClick: () => void;
-  readonly onLogout: () => void | Promise<void>;
+  readonly onSignInClick: () => void;
+  readonly onSignOut: () => void | Promise<void>;
 }
 
 export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
-  const { telegramBotUsername, authState, onLoginClick, onLogout } = props;
+  const { telegramBotUsername, authState, onSignInClick, onSignOut } = props;
 
   const [miniAppEnv, setMiniAppEnv] = useState<'unknown' | 'mini' | 'browser'>('unknown');
   useLayoutEffect(() => {
@@ -33,7 +33,7 @@ export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
     return null;
   }
 
-  const showLoginButton = !authState && miniAppEnv === 'browser';
+  const showSignInButton = !authState && miniAppEnv === 'browser';
 
   return (
     <>
@@ -61,10 +61,10 @@ export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
             type="button"
             className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground"
             onClick={() => {
-              void onLogout();
+              void onSignOut();
             }}
-            aria-label="Log out"
-            title="Log out"
+            aria-label="Sign out"
+            title="Sign out"
           >
             <LogOut
               className="h-4 w-4"
@@ -72,21 +72,21 @@ export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
             />
           </button>
         </div>
-      ) : showLoginButton ? (
+      ) : showSignInButton ? (
         <button
           type="button"
           className={menuRowClass}
-          onClick={onLoginClick}
-          aria-label="Log in"
+          onClick={onSignInClick}
+          aria-label="Sign in"
         >
           <LogIn
             className="h-4 w-4 shrink-0"
             aria-hidden
           />
-          Login
+          Sign in
         </button>
       ) : null}
-      {(authState || showLoginButton) && (
+      {(authState || showSignInButton) && (
         <div
           className="my-0.5 h-px w-full bg-border/40"
           aria-hidden

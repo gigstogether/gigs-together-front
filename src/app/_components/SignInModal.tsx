@@ -10,14 +10,14 @@ import {
 } from '@/components/ui/dialog';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
-export interface LoginModalProps {
+export interface SignInModalProps {
   readonly isOpen: boolean;
   readonly onOpenChange: (isOpen: boolean) => void;
   readonly telegramBotUsername: string | undefined;
   readonly onAuthenticated: (user: TelegramWidgetUser) => void | Promise<void>;
 }
 
-export default function LoginModal(props: LoginModalProps) {
+export default function SignInModal(props: SignInModalProps) {
   const { isOpen, onOpenChange, telegramBotUsername, onAuthenticated } = props;
 
   const botUsername = telegramBotUsername?.trim();
@@ -32,7 +32,7 @@ export default function LoginModal(props: LoginModalProps) {
     >
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Login</DialogTitle>
+          <DialogTitle>Sign in</DialogTitle>
           <DialogDescription>
             Continue with the button below to sign in to your account.
           </DialogDescription>

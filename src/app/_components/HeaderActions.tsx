@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
 import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
-import LoginModal from '@/app/_components/LoginModal';
+import SignInModal from '@/app/_components/SignInModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationIcon } from '@/components/ui/location-icon';
 import { toast } from '@/hooks/use-toast';
@@ -27,12 +27,12 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const githubUrl = process.env.NEXT_PUBLIC_GITHUB_URL;
   const suggestGigUrl = showSuggestGig ? process.env.NEXT_PUBLIC_SUGGEST_GIG_LINK : undefined;
 
-  const { authState, login, logout } = useTelegramAuth();
+  const { authState, signIn, signOut } = useTelegramAuth();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const [locationTipOpen, setLocationTipOpen] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [signInModalOpen, setSignInModalOpen] = useState(false);
 
   const telegramBotUsername = getTelegramAuthBotUsername();
 
@@ -44,7 +44,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const handleAuthenticated = useCallback(
     async (user: TelegramWidgetUser) => {
       try {
-        const { profile } = await login(user);
+        const { profile } = await signIn(user);
         const label =
           profile.displayLabel || (user.username ? `@${user.username}` : user.first_name);
         toast({
@@ -53,7 +53,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
         });
       } catch (e) {
         const description =
-          e instanceof ApiError ? e.message : 'Could not complete login. Please try again.';
+          e instanceof ApiError ? e.message : 'Could not complete sign in. Please try again.';
         toast({
           title: 'Sign in failed',
           description,
@@ -61,29 +61,29 @@ export default function HeaderActions(props: HeaderActionsProps) {
         });
       }
     },
-    [login],
+    [signIn],
   );
 
-  const openLoginModal = useCallback(() => {
+  const openSignInModal = useCallback(() => {
     closeMenus();
-    setLoginModalOpen(true);
+    setSignInModalOpen(true);
   }, [closeMenus]);
 
-  const handleLogout = useCallback(async () => {
+  const handleSignOut = useCallback(async () => {
     const label = authState?.displayLabel;
-    await logout();
+    await signOut();
     closeMenus();
     toast({
       title: 'Signed out',
       ...(label ? { description: label } : {}),
     });
-  }, [authState, logout, closeMenus]);
+  }, [authState, signOut, closeMenus]);
 
   const authMenuProps = {
     telegramBotUsername,
     authState,
-    onLoginClick: openLoginModal,
-    onLogout: handleLogout,
+    onSignInClick: openSignInModal,
+    onSignOut: handleSignOut,
   };
 
   return (
@@ -280,9 +280,9 @@ export default function HeaderActions(props: HeaderActionsProps) {
         </Popover>
       </div>
 
-      <LoginModal
-        isOpen={loginModalOpen}
-        onOpenChange={setLoginModalOpen}
+      <SignInModal
+        isOpen={signInModalOpen}
+        onOpenChange={setSignInModalOpen}
         telegramBotUsername={telegramBotUsername}
         onAuthenticated={handleAuthenticated}
       />
