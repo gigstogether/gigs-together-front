@@ -56,6 +56,8 @@ export async function fetchApiJson<TResponse>(
     credentials: fetchInit.credentials ?? 'include',
   });
 
+  // TODO: single-flight refresh — concurrent 401s each call `postAuthRefresh()` today; share one in-flight
+  // `POST v1/auth/refresh` (or a shared Promise) so parallel requests await the same rotation.
   if (
     response.status === 401 &&
     !hasAttemptedTokenRefresh &&

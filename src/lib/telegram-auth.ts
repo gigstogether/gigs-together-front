@@ -1,7 +1,5 @@
 import { fetchApiJson } from '@/lib/api-core';
 import { isRecord } from '@/lib/is-record';
-import { waitForTelegramInitData } from '@/lib/telegram-webapp';
-import type { EnsureTelegramAuthOptions } from '@/types/ensure-telegram-auth-options';
 import type { TelegramAuthExchangeResponse } from '@/types/telegram-auth-exchange-response';
 import type { TelegramStoredClientProfile } from '@/types/telegram-client-profile';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
@@ -188,17 +186,4 @@ export async function exchangeTelegramAuthFromLoginWidget(
   const response = parseAuthExchangeResponse(raw);
   setStoredTelegramClientProfile(response.profile);
   return response;
-}
-
-/**
- * Ensures Web App `initData` is exchanged when there is no local profile. Cookie validity is
- * enforced by the API; 401 responses clear the profile via `apiRequest`.
- */
-// TODO: this either should not happen or should happen with web version as well - not only in mini app
-export async function ensureTelegramAuth(options?: EnsureTelegramAuthOptions): Promise<void> {
-  if (getStoredTelegramClientProfile()) {
-    return;
-  }
-  const initData = await waitForTelegramInitData(options);
-  await exchangeTelegramAuthFromWebApp(initData);
 }

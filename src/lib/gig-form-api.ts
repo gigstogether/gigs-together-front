@@ -1,5 +1,4 @@
 import { apiRequest } from '@/lib/api';
-import { ensureTelegramAuth } from '@/lib/telegram-auth';
 import { isRecord } from '@/lib/is-record';
 
 export type PosterMode = 'upload' | 'url';
@@ -161,8 +160,6 @@ interface SubmitGigParams extends GigUpsertApiParams {
 }
 
 async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TResponse> {
-  await ensureTelegramAuth();
-
   const gig: GigUpsertPayload = {
     title: params.gig.title,
     date: params.gig.date,
@@ -211,7 +208,6 @@ export async function lookupGig(params: LookupGigParams): Promise<GigLookupData>
   if (!location) {
     throw new Error('Invalid lookup request: "location" is required');
   }
-  await ensureTelegramAuth({ signal: params.signal });
   const raw = await apiRequest<GigLookupApiResponseBody>(
     'v1/gig/lookup',
     'POST',
