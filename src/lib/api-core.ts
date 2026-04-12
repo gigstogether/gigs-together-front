@@ -33,7 +33,23 @@ function isTelegramWebAppAuthEndpoint(endpointOrUrl: string): boolean {
   return endpointOrUrl.includes('v1/auth/telegram/web-app');
 }
 
+let authRefreshPromise: Promise<boolean> | null = null;
 let telegramMiniAppReauthPromise: Promise<boolean> | null = null;
+
+async function postAuthRefreshSingleFlight(): Promise<boolean> {
+  if (!authRefreshPromise) {
+    authRefreshPromise = (async () => {
+      try {
+        const { postAuthRefresh } = await import('@/lib/auth-refresh');
+        return await postAuthRefresh();
+      } finally {
+        authRefreshPromise = null;
+      }
+    })();
+  }
+
+  return authRefreshPromise;
+}
 
 async function postTelegramMiniAppReauth(): Promise<boolean> {
   if (typeof window === 'undefined') {
@@ -107,15 +123,12 @@ export async function fetchApiJson<TResponse>(
     credentials: fetchInit.credentials ?? 'include',
   });
 
-  // TODO: single-flight refresh — concurrent 401s each call `postAuthRefresh()` today; share one in-flight
-  // `POST v1/auth/refresh` (or a shared Promise) so parallel requests await the same rotation.
   if (
     response.status === 401 &&
     !hasAttemptedTokenRefresh &&
     !isAuthRefreshEndpoint(endpointOrUrl)
   ) {
-    const { postAuthRefresh } = await import('@/lib/auth-refresh');
-    const refreshed = await postAuthRefresh();
+    const refreshed = await postAuthRefreshSingleFlight();
     if (refreshed) {
       return fetchApiJson<TResponse>(endpointOrUrl, method, data, {
         ...init,
