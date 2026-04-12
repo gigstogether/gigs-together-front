@@ -39,6 +39,7 @@ async function defaultOnAuth(user: TelegramWidgetUser): Promise<void> {
 
 export default function TelegramLoginWidget(props: TelegramLoginWidgetProps) {
   const { botUsername, size = 'small', onAuth, className } = props;
+  const telegramAuthSessionHelpUrl = process.env.NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL?.trim();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const onAuthRef = useRef(onAuth ?? defaultOnAuth);
@@ -81,10 +82,29 @@ export default function TelegramLoginWidget(props: TelegramLoginWidgetProps) {
   }
 
   return (
-    <div
-      ref={containerRef}
-      className={className}
-      data-telegram-login-widget
-    />
+    <div className={className}>
+      <div className="flex justify-center">
+        <div
+          ref={containerRef}
+          data-telegram-login-widget
+        />
+      </div>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        To terminate previous Telegram session you can use{' '}
+        {telegramAuthSessionHelpUrl ? (
+          <a
+            href={telegramAuthSessionHelpUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium underline underline-offset-2"
+          >
+            Telegram service account
+          </a>
+        ) : (
+          <span className="font-medium">service account</span>
+        )}
+        .
+      </p>
+    </div>
   );
 }
