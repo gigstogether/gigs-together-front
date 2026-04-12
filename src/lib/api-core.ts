@@ -11,6 +11,10 @@ export interface FetchApiJsonOptions extends RequestInit {
    * Internal: set after one `POST v1/auth/refresh` so a second 401 does not loop refresh.
    */
   hasAttemptedTokenRefresh?: boolean;
+  /**
+   * Internal: set after one Telegram Mini App re-auth so a second 401 does not loop re-auth.
+   */
+  hasAttemptedTelegramMiniAppReauth?: boolean;
 }
 
 export function buildUrl(endpointOrUrl: string): string {
@@ -25,13 +29,60 @@ function isAuthRefreshEndpoint(endpointOrUrl: string): boolean {
   return endpointOrUrl.includes('v1/auth/refresh');
 }
 
+function isTelegramWebAppAuthEndpoint(endpointOrUrl: string): boolean {
+  return endpointOrUrl.includes('v1/auth/telegram/web-app');
+}
+
+let telegramMiniAppReauthPromise: Promise<boolean> | null = null;
+
+async function postTelegramMiniAppReauth(): Promise<boolean> {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  if (!telegramMiniAppReauthPromise) {
+    telegramMiniAppReauthPromise = (async () => {
+      try {
+        const { isTelegramMiniApp, waitForTelegramInitData } = await import(
+          '@/lib/telegram-webapp'
+        );
+        if (!isTelegramMiniApp()) {
+          return false;
+        }
+
+        const initData = await waitForTelegramInitData();
+        const response = await fetch(buildUrl('v1/auth/telegram/web-app'), {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ initData }),
+        });
+        return response.ok;
+      } catch {
+        return false;
+      } finally {
+        telegramMiniAppReauthPromise = null;
+      }
+    })();
+  }
+
+  return telegramMiniAppReauthPromise;
+}
+
 export async function fetchApiJson<TResponse>(
   endpointOrUrl: string,
   method: HttpMethod,
   data?: unknown,
   init?: FetchApiJsonOptions,
 ): Promise<TResponse> {
-  const { onUnauthorized, hasAttemptedTokenRefresh, ...fetchInit } = init ?? {};
+  const {
+    onUnauthorized,
+    hasAttemptedTokenRefresh,
+    hasAttemptedTelegramMiniAppReauth,
+    ...fetchInit
+  } = init ?? {};
   const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
 
   const headers = new Headers(fetchInit.headers);
@@ -69,6 +120,21 @@ export async function fetchApiJson<TResponse>(
       return fetchApiJson<TResponse>(endpointOrUrl, method, data, {
         ...init,
         hasAttemptedTokenRefresh: true,
+      });
+    }
+  }
+
+  if (
+    response.status === 401 &&
+    !hasAttemptedTelegramMiniAppReauth &&
+    !isAuthRefreshEndpoint(endpointOrUrl) &&
+    !isTelegramWebAppAuthEndpoint(endpointOrUrl)
+  ) {
+    const isReauthenticated = await postTelegramMiniAppReauth();
+    if (isReauthenticated) {
+      return fetchApiJson<TResponse>(endpointOrUrl, method, data, {
+        ...init,
+        hasAttemptedTelegramMiniAppReauth: true,
       });
     }
   }
