@@ -1,5 +1,5 @@
 import { fetchApiJson } from '@/lib/api-core';
-import { clearStoredTelegramClientProfile } from '@/lib/telegram-auth';
+import { clearStoredTelegramClientProfile, requestTelegramSignIn } from '@/lib/telegram-auth';
 
 export {
   ApiError,
@@ -22,6 +22,7 @@ export async function apiRequest<TResponse = unknown, TBody = unknown>(
       headers,
       onUnauthorized: () => {
         clearStoredTelegramClientProfile();
+        requestTelegramSignIn();
       },
     });
   } catch (e) {

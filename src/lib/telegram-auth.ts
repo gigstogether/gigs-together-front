@@ -8,6 +8,7 @@ export type { TelegramAuthExchangeResponse };
 
 /** Default localStorage key for the non-sensitive Telegram profile cache. */
 const DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY = 'gt_tg_client_profile';
+const TELEGRAM_SIGN_IN_REQUIRED_EVENT = 'gt:telegram-sign-in-required';
 
 /**
  * localStorage key for the cached Telegram profile (`NEXT_PUBLIC_*` is inlined at build time).
@@ -147,6 +148,28 @@ export function clearStoredTelegramClientProfile(): void {
     /* ignore */
   }
   notifyTelegramClientProfileListeners();
+}
+
+export function requestTelegramSignIn(): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  window.dispatchEvent(new Event(TELEGRAM_SIGN_IN_REQUIRED_EVENT));
+}
+
+export function subscribeTelegramSignInRequest(listener: () => void): () => void {
+  if (typeof window === 'undefined') {
+    return () => undefined;
+  }
+
+  const handleRequest = (): void => {
+    listener();
+  };
+
+  window.addEventListener(TELEGRAM_SIGN_IN_REQUIRED_EVENT, handleRequest);
+  return () => {
+    window.removeEventListener(TELEGRAM_SIGN_IN_REQUIRED_EVENT, handleRequest);
+  };
 }
 
 /** Clears HttpOnly session cookies on the server (best-effort). */

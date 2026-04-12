@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
 import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
 import SignInModal from '@/app/_components/SignInModal';
@@ -9,6 +9,7 @@ import { LocationIcon } from '@/components/ui/location-icon';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { ApiError } from '@/lib/api-errors';
+import { subscribeTelegramSignInRequest } from '@/lib/telegram-auth';
 import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
 import { normalizeLocationTitle } from '@/lib/utils';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
@@ -68,6 +69,12 @@ export default function HeaderActions(props: HeaderActionsProps) {
     closeMenus();
     setSignInModalOpen(true);
   }, [closeMenus]);
+
+  useEffect(() => {
+    return subscribeTelegramSignInRequest(() => {
+      openSignInModal();
+    });
+  }, [openSignInModal]);
 
   const handleSignOut = useCallback(async () => {
     const label = authState?.displayLabel;
