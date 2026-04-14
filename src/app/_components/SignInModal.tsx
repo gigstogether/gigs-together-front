@@ -1,13 +1,7 @@
 'use client';
 
-import TelegramLoginWidget from '@/app/_components/TelegramLoginWidget';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import SignInContent from '@/app/_components/SignInContent';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 export interface SignInModalProps {
@@ -31,23 +25,14 @@ export default function SignInModal(props: SignInModalProps) {
       onOpenChange={onOpenChange}
     >
       <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Sign in</DialogTitle>
-          <DialogDescription>
-            Continue with the button below to sign in to your account.
-          </DialogDescription>
-        </DialogHeader>
         {isOpen ? (
-          <div className="flex justify-center pt-1">
-            <TelegramLoginWidget
-              botUsername={botUsername}
-              size="large"
-              onAuth={async (user) => {
-                await onAuthenticated(user);
-                onOpenChange(false);
-              }}
-            />
-          </div>
+          <SignInContent
+            telegramBotUsername={botUsername}
+            onAuthenticated={async (user) => {
+              await onAuthenticated(user);
+              onOpenChange(false);
+            }}
+          />
         ) : null}
       </DialogContent>
     </Dialog>

@@ -1,9 +1,9 @@
 'use client';
 
 import { useCallback } from 'react';
+import SignInContent from '@/app/_components/SignInContent';
 import CreateGigFormClient from '@/app/gig-form/CreateGigFormClient';
 import EditGigFormClient from '@/app/gig-form/EditGigFormClient';
-import SignInModal from '@/app/_components/SignInModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
@@ -71,12 +71,23 @@ export default function GigFormClient({
 
   if (!authState) {
     return (
-      <SignInModal
-        isOpen={isTelegramSignInAvailable}
-        onOpenChange={() => undefined}
-        telegramBotUsername={telegramBotUsername}
-        onAuthenticated={handleAuthenticated}
-      />
+      <Card className="w-full max-w-md m-auto border-0">
+        <CardContent className="space-y-6 pt-6">
+          {isTelegramSignInAvailable ? (
+            <SignInContent
+              telegramBotUsername={telegramBotUsername}
+              onAuthenticated={handleAuthenticated}
+            />
+          ) : (
+            <>
+              <div className="flex flex-col space-y-1.5 text-center sm:text-left">
+                <h2 className="text-lg font-semibold leading-none tracking-tight">Sign in</h2>
+                <p className="text-sm text-muted-foreground">Sign in is not configured.</p>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
     );
   }
 
