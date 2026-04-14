@@ -24,7 +24,7 @@ export default function GigFormClient({
   mode = 'create',
   gigPublicId,
 }: GigFormClientProps) {
-  const { authState, signIn, signOut } = useTelegramAuth();
+  const { authState, isLoadingAuthState, signIn, signOut } = useTelegramAuth();
   const telegramBotUsername = getTelegramAuthBotUsername();
   const isTelegramSignInAvailable = Boolean(telegramBotUsername?.trim());
 
@@ -69,48 +69,60 @@ export default function GigFormClient({
     });
   }, [authState, signOut]);
 
+  if (isLoadingAuthState) {
+    return (
+      <div className="flex items-center justify-center py-6">
+        <span className="text-base text-muted-foreground">Loading…</span>
+      </div>
+    );
+  }
+
   if (!authState) {
     return (
-      <Card className="w-full max-w-md m-auto border-0">
-        <CardContent className="space-y-6 pt-6">
-          {isTelegramSignInAvailable ? (
-            <SignInContent
-              telegramBotUsername={telegramBotUsername}
-              onAuthenticated={handleAuthenticated}
-            />
-          ) : (
-            <>
-              <div className="flex flex-col space-y-1.5 text-center sm:text-left">
-                <h2 className="text-lg font-semibold leading-none tracking-tight">Sign in</h2>
-                <p className="text-sm text-muted-foreground">Sign in is not configured.</p>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-6">
+        <Card className="w-full max-w-md m-auto border-0">
+          <CardContent className="space-y-2 pt-6">
+            {isTelegramSignInAvailable ? (
+              <SignInContent
+                telegramBotUsername={telegramBotUsername}
+                onAuthenticated={handleAuthenticated}
+              />
+            ) : (
+              <>
+                <div className="flex flex-col space-y-1.5 text-center sm:text-left">
+                  <h2 className="text-lg font-semibold leading-none tracking-tight">Sign in</h2>
+                  <p className="text-sm text-muted-foreground">Sign in is not configured.</p>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   if (!authState.isAdmin) {
     return (
-      <Card className="w-full max-w-md m-auto border-0">
-        <CardHeader>
-          <CardTitle>Access denied</CardTitle>
-          <CardDescription>This page is available only for admin accounts.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              void handleSignOut();
-            }}
-            className="w-full"
-          >
-            Sign out
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-6">
+        <Card className="w-full max-w-md m-auto border-0">
+          <CardHeader>
+            <CardTitle>Access denied</CardTitle>
+            <CardDescription>This page is available only for admin accounts.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                void handleSignOut();
+              }}
+              className="w-full"
+            >
+              Sign out
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
