@@ -1,17 +1,17 @@
 'use client';
 
-import { useCallback, useLayoutEffect, useState } from 'react';
+import { useCallback } from 'react';
 import SignInContent from '@/app/_components/SignInContent';
 import CreateGigFormClient from '@/app/gig-form/CreateGigFormClient';
 import EditGigFormClient from '@/app/gig-form/EditGigFormClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { ApiError } from '@/lib/api-errors';
 import type { Country } from '@/lib/countries.server';
 import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
-import { isTelegramMiniApp } from '@/lib/telegram-webapp';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 interface GigFormClientProps {
@@ -28,16 +28,7 @@ export default function GigFormClient({
   const { authState, isLoadingAuthState, signIn, signOut } = useTelegramAuth();
   const telegramBotUsername = getTelegramAuthBotUsername();
   const isTelegramSignInAvailable = Boolean(telegramBotUsername?.trim());
-  const [miniAppEnv, setMiniAppEnv] = useState<'unknown' | 'mini' | 'browser'>('unknown');
-
-  useLayoutEffect(() => {
-    const resolve = (): void => {
-      setMiniAppEnv(isTelegramMiniApp() ? 'mini' : 'browser');
-    };
-    resolve();
-    const timeouts = [50, 200, 600].map((ms) => window.setTimeout(resolve, ms));
-    return () => timeouts.forEach((id) => window.clearTimeout(id));
-  }, []);
+  const miniAppEnv = useTelegramMiniAppEnv();
 
   const handleAuthenticated = useCallback(
     async (user: TelegramWidgetUser) => {

@@ -1,8 +1,7 @@
 'use client';
 
-import { useLayoutEffect, useState } from 'react';
 import { LogIn, LogOut } from 'lucide-react';
-import { isTelegramMiniApp } from '@/lib/telegram-webapp';
+import type { TelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import type { TelegramAuthState } from '@/types/telegram-auth';
 
 const menuRowClass =
@@ -11,23 +10,13 @@ const menuRowClass =
 export interface HeaderAuthActionsProps {
   readonly telegramBotUsername?: string;
   readonly authState: TelegramAuthState | null;
+  readonly miniAppEnv: TelegramMiniAppEnv;
   readonly onSignInClick: () => void;
   readonly onSignOut: () => void | Promise<void>;
 }
 
 export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
-  const { telegramBotUsername, authState, onSignInClick, onSignOut } = props;
-
-  const [miniAppEnv, setMiniAppEnv] = useState<'unknown' | 'mini' | 'browser'>('unknown');
-  useLayoutEffect(() => {
-    const resolve = (): void => {
-      setMiniAppEnv(isTelegramMiniApp() ? 'mini' : 'browser');
-    };
-    resolve();
-    // Script from root layout may attach `Telegram.WebApp` shortly after first paint.
-    const timeouts = [50, 200, 600].map((ms) => window.setTimeout(resolve, ms));
-    return () => timeouts.forEach((id) => window.clearTimeout(id));
-  }, []);
+  const { telegramBotUsername, authState, miniAppEnv, onSignInClick, onSignOut } = props;
 
   if (!telegramBotUsername?.trim()) {
     return null;

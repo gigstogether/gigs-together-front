@@ -6,6 +6,7 @@ import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
 import SignInModal from '@/app/_components/SignInModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationIcon } from '@/components/ui/location-icon';
+import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { ApiError } from '@/lib/api-errors';
@@ -36,6 +37,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const [signInModalOpen, setSignInModalOpen] = useState(false);
 
   const telegramBotUsername = getTelegramAuthBotUsername();
+  const miniAppEnv = useTelegramMiniAppEnv();
 
   const closeMenus = useCallback(() => {
     setDesktopMenuOpen(false);
@@ -89,6 +91,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const authMenuProps = {
     telegramBotUsername,
     authState,
+    miniAppEnv,
     onSignInClick: openSignInModal,
     onSignOut: handleSignOut,
   };
