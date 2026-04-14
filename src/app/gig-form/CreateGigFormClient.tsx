@@ -74,47 +74,45 @@ export default function CreateGigFormClient({ countries }: CreateGigFormClientPr
   }
 
   return (
-    <div className="flex items-center justify-center py-6">
-      <Card className="w-full max-w-md m-auto border-0">
-        <CardHeader>
-          <CardTitle>Suggest a gig</CardTitle>
-          <CardDescription>
-            Looking for a gig company? Let us know which gig should we announce!
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6"
+    <Card className="w-full max-w-md m-auto border-0">
+      <CardHeader>
+        <CardTitle>Suggest a gig</CardTitle>
+        <CardDescription>
+          Looking for a gig company? Let us know which gig should we announce!
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
+          <GigFormFields
+            form={form}
+            countries={countries}
+            isLookingUp={isLookingUp}
+            isSubmitting={isSubmitting}
+            onLookup={onLookup}
+          />
+
+          <PosterField
+            variant="create"
+            posterFile={posterFile}
+            onPosterFileChange={setPosterFile}
+            posterUrl={posterUrl}
+            onPosterUrlChange={setPosterUrl}
+            onClearPoster={clearPoster}
+            posterFileInputRef={posterFileInputRef}
+          />
+
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            style={{ width: '100%' }}
           >
-            <GigFormFields
-              form={form}
-              countries={countries}
-              isLookingUp={isLookingUp}
-              isSubmitting={isSubmitting}
-              onLookup={onLookup}
-            />
-
-            <PosterField
-              variant="create"
-              posterFile={posterFile}
-              onPosterFileChange={setPosterFile}
-              posterUrl={posterUrl}
-              onPosterUrlChange={setPosterUrl}
-              onClearPoster={clearPoster}
-              posterFileInputRef={posterFileInputRef}
-            />
-
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              style={{ width: '100%' }}
-            >
-              {isSubmitting ? 'Submitting...' : 'Suggest'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+            {isSubmitting ? 'Submitting...' : 'Suggest'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

@@ -34,6 +34,7 @@ export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
   }
 
   const showSignInButton = !authState && miniAppEnv === 'browser';
+  const showSignOutButton = authState && miniAppEnv !== 'mini';
 
   return (
     <>
@@ -57,20 +58,22 @@ export default function HeaderAuthActions(props: HeaderAuthActionsProps) {
               {authState.displayLabel}
             </span>
           </div>
-          <button
-            type="button"
-            className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground"
-            onClick={() => {
-              void onSignOut();
-            }}
-            aria-label="Sign out"
-            title="Sign out"
-          >
-            <LogOut
-              className="h-4 w-4"
-              aria-hidden
-            />
-          </button>
+          {showSignOutButton ? (
+            <button
+              type="button"
+              className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground"
+              onClick={() => {
+                void onSignOut();
+              }}
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut
+                className="h-4 w-4"
+                aria-hidden
+              />
+            </button>
+          ) : null}
         </div>
       ) : showSignInButton ? (
         <button

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import SignInContent from '@/app/_components/SignInContent';
 import CreateGigFormClient from '@/app/gig-form/CreateGigFormClient';
 import EditGigFormClient from '@/app/gig-form/EditGigFormClient';
@@ -11,6 +11,7 @@ import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { ApiError } from '@/lib/api-errors';
 import type { Country } from '@/lib/countries.server';
 import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
+import { isTelegramMiniApp } from '@/lib/telegram-webapp';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 interface GigFormClientProps {
@@ -27,6 +28,16 @@ export default function GigFormClient({
   const { authState, isLoadingAuthState, signIn, signOut } = useTelegramAuth();
   const telegramBotUsername = getTelegramAuthBotUsername();
   const isTelegramSignInAvailable = Boolean(telegramBotUsername?.trim());
+  const [miniAppEnv, setMiniAppEnv] = useState<'unknown' | 'mini' | 'browser'>('unknown');
+
+  useLayoutEffect(() => {
+    const resolve = (): void => {
+      setMiniAppEnv(isTelegramMiniApp() ? 'mini' : 'browser');
+    };
+    resolve();
+    const timeouts = [50, 200, 600].map((ms) => window.setTimeout(resolve, ms));
+    return () => timeouts.forEach((id) => window.clearTimeout(id));
+  }, []);
 
   const handleAuthenticated = useCallback(
     async (user: TelegramWidgetUser) => {
@@ -109,18 +120,20 @@ export default function GigFormClient({
             <CardTitle>Access denied</CardTitle>
             <CardDescription>This page is available only for admin accounts.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                void handleSignOut();
-              }}
-              className="w-full"
-            >
-              Sign out
-            </Button>
-          </CardContent>
+          {miniAppEnv !== 'mini' ? (
+            <CardContent>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  void handleSignOut();
+                }}
+                className="w-full"
+              >
+                Sign out
+              </Button>
+            </CardContent>
+          ) : null}
         </Card>
       </div>
     );
