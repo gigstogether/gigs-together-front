@@ -1,11 +1,14 @@
 'use client';
 
-import { useCallback, useMemo, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import {
+  bootstrapTelegramAuthFromWebApp,
   clearStoredTelegramClientProfile,
   exchangeTelegramAuthFromLoginWidget,
+  getTelegramMiniAppBootstrapSnapshot,
   getTelegramClientProfileSnapshot,
   signOutTelegramAuthOnServer,
+  subscribeTelegramMiniAppBootstrap,
   subscribeTelegramClientProfile,
 } from '@/lib/telegram-auth';
 import type { TelegramAuthExchangeResponse } from '@/types/telegram-auth-exchange-response';
@@ -38,6 +41,12 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     getTelegramClientProfileSnapshot,
     () => null,
   );
+  const isTelegramMiniAppBootstrapPending = useSyncExternalStore(
+    subscribeTelegramMiniAppBootstrap,
+    getTelegramMiniAppBootstrapSnapshot,
+    () => false,
+  );
+  const hasAttemptedMiniAppBootstrapRef = useRef(false);
 
   const authState = useMemo((): TelegramAuthState | null => {
     if (!profileSnapshot) {
@@ -59,9 +68,18 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     clearStoredTelegramClientProfile();
   }, []);
 
+  useEffect(() => {
+    if (!isHydrated || authState || hasAttemptedMiniAppBootstrapRef.current) {
+      return;
+    }
+
+    hasAttemptedMiniAppBootstrapRef.current = true;
+    void bootstrapTelegramAuthFromWebApp();
+  }, [authState, isHydrated]);
+
   return {
     authState,
-    isLoadingAuthState: !isHydrated,
+    isLoadingAuthState: !isHydrated || isTelegramMiniAppBootstrapPending,
     signIn,
     signOut,
   };
