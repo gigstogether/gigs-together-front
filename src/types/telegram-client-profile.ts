@@ -4,4 +4,5 @@
 export interface TelegramStoredClientProfile {
   readonly displayLabel: string;
   readonly photoUrl?: string;
+  readonly isAdmin: boolean;
 }

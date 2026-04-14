@@ -32,6 +32,7 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     return {
       displayLabel: profileSnapshot.displayLabel,
       ...(profileSnapshot.photoUrl ? { photoUrl: profileSnapshot.photoUrl } : {}),
+      isAdmin: profileSnapshot.isAdmin,
     };
   }, [profileSnapshot]);
 

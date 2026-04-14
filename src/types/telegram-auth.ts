@@ -6,4 +6,5 @@ export interface TelegramAuthState {
   readonly displayLabel: string;
   /** When present (e.g. Telegram Login Widget `photo_url`), shown as a small avatar in the UI. */
   readonly photoUrl?: string;
+  readonly isAdmin: boolean;
 }

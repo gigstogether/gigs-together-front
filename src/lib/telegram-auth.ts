@@ -66,11 +66,16 @@ function parseStoredProfileJson(raw: string): TelegramStoredClientProfile | null
     if (photoUrlRaw !== undefined && (typeof photoUrlRaw !== 'string' || !photoUrlRaw.trim())) {
       return null;
     }
+    const isAdmin = parsed.isAdmin;
+    if (typeof isAdmin !== 'boolean') {
+      return null;
+    }
     return {
       displayLabel: displayLabel.trim(),
       ...(typeof photoUrlRaw === 'string' && photoUrlRaw.trim()
         ? { photoUrl: photoUrlRaw.trim() }
         : {}),
+      isAdmin,
     };
   } catch {
     return null;
@@ -101,9 +106,14 @@ function parseAuthExchangeResponse(raw: unknown): TelegramAuthExchangeResponse {
     }
     photoUrl = photoUrlRaw.trim();
   }
+  const isAdmin = profileRaw.isAdmin;
+  if (typeof isAdmin !== 'boolean') {
+    throw new Error('Invalid auth exchange response: profile.isAdmin');
+  }
   const profile: TelegramStoredClientProfile = {
     displayLabel: displayLabel.trim(),
     ...(photoUrl ? { photoUrl } : {}),
+    isAdmin,
   };
   return { profile };
 }
