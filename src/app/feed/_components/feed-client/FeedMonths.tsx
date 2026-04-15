@@ -32,6 +32,7 @@ export function FeedMonths(props: FeedMonthsProps) {
             <div
               id={event.id}
               data-date={isFirstOfDate ? event.date : undefined}
+              data-event-date={event.date}
               data-event-id={event.id}
               ref={(el) => registerEventRef(event.id, el)}
               className="gig-anchor"
