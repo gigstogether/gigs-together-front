@@ -6,14 +6,14 @@ import { toLocalYMD } from '@/lib/utils';
 import '@/app/style.css';
 import type { Event } from '@/lib/types';
 import type { V1GigGetResponseBody } from '@/lib/types';
-import { useT } from '@/lib/i18n/I18nProvider';
+import { useT } from '@/lib/i18n';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
 import { FeedMonths } from './feed-client/FeedMonths';
 import { useCalendarAvailableDates } from './feed-client/useCalendarAvailableDates';
 import { useFeedHeaderConfigSync } from './feed-client/useFeedHeaderConfigSync';
 import { useHeaderHeight } from './feed-client/useHeaderHeight';
 import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
-import { gigToEvent } from '@/lib/feed.mapper';
+import { gigDateToYMD, gigToEvent } from '@/lib/feed.mapper';
 import { apiRequest } from '@/lib/api';
 import { useHashAutoScroll } from './feed-client/useHashAutoScroll';
 import { useInfiniteScroll } from './feed-client/useInfiniteScroll';
@@ -52,7 +52,7 @@ export default function FeedClient(props: FeedClientProps) {
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | undefined>(() => initialNextCursor);
   const [prevCursor, setPrevCursor] = useState<string | undefined>(() => initialPrevCursor);
-  const [userScrollSessionKey, setUserScrollSessionKey] = useState(0);
+  const [infiniteScrollResetKey, setInfiniteScrollResetKey] = useState(0);
 
   const eventRefs = useRef<Map<string, HTMLElement>>(new Map());
   const inFlightNextRef = useRef(false);
@@ -63,8 +63,8 @@ export default function FeedClient(props: FeedClientProps) {
     headerOffsetPx: headerH ?? 0,
   });
 
-  const bumpUserScrollSessionKey = useCallback(() => {
-    setUserScrollSessionKey((x) => x + 1);
+  const bumpInfiniteScrollResetKey = useCallback(() => {
+    setInfiniteScrollResetKey((x) => x + 1);
   }, []);
 
   const fetchAroundAndReplace = useCallback(
@@ -98,25 +98,14 @@ export default function FeedClient(props: FeedClientProps) {
     [city, country, t],
   );
 
-  const fetchHashTargetAnchorYmd = useCallback(
-    async (publicId: string): Promise<string> => {
-      const qs = new URLSearchParams();
-      if (country) qs.set('country', country);
-      if (city) qs.set('city', city);
+  const fetchHashTargetAnchorYmd = useCallback(async (publicId: string): Promise<string> => {
+    const res = await apiRequest<unknown>(`v1/gig/date/${encodeURIComponent(publicId)}`, 'GET');
+    if (!isV1GigByPublicIdGetResponseBody(res)) {
+      throw new Error('Invalid API response: expected { date }');
+    }
 
-      const query = qs.toString();
-      const res = await apiRequest<unknown>(
-        `v1/gig/${encodeURIComponent(publicId)}${query ? `?${query}` : ''}`,
-        'GET',
-      );
-      if (!isV1GigByPublicIdGetResponseBody(res)) {
-        throw new Error('Invalid API response: expected { gig: { id, date } }');
-      }
-
-      return gigToEvent(res.gig, { resolveCountryName: (iso) => t('country', iso) }).date;
-    },
-    [city, country, t],
-  );
+    return gigDateToYMD(res.date);
+  }, []);
 
   const fetchNextPage = useCallback(async () => {
     if (!nextCursor) return;
@@ -144,7 +133,7 @@ export default function FeedClient(props: FeedClientProps) {
       dispatchLoading({ type: 'next:end' });
       inFlightNextRef.current = false;
     }
-  }, [city, country, mergeUniqueSorted, nextCursor, t]);
+  }, [city, country, nextCursor, t]);
 
   const fetchPrevPage = useCallback(async () => {
     if (!prevCursor) return;
@@ -236,7 +225,7 @@ export default function FeedClient(props: FeedClientProps) {
     }
 
     void fetchInitial();
-  }, [country, city, fetchInitial, initialEvents, initialNextCursor]);
+  }, [country, city, fetchInitial, initialEvents, initialNextCursor, initialPrevCursor]);
 
   const hasMore = Boolean(nextCursor);
   const hasPrev = Boolean(prevCursor);
@@ -265,7 +254,7 @@ export default function FeedClient(props: FeedClientProps) {
     },
     dispatchLoading,
     setError,
-    bumpUserScrollSessionKey,
+    bumpInfiniteScrollResetKey,
     resolveAnchorYmdByEventId: fetchHashTargetAnchorYmd,
     loadAroundAndReplace: async (anchorYmd) => {
       await fetchAroundAndReplace(anchorYmd);
@@ -277,7 +266,7 @@ export default function FeedClient(props: FeedClientProps) {
     canLoadMore: hasMore && !loading.initial && !loading.next && !loading.jump,
     isLoading: loading.initial || loading.next || loading.jump,
     onLoadMore: fetchNextPage,
-    resetUserScrollKey: userScrollSessionKey,
+    infiniteScrollResetKey,
   });
 
   const { sentinelRef: topSentinelRef } = useInfiniteScroll({
@@ -286,7 +275,7 @@ export default function FeedClient(props: FeedClientProps) {
     isLoading: loading.initial || loading.prev || loading.jump,
     onLoadMore: fetchPrevPage,
     rootMargin: '400px 0px',
-    resetUserScrollKey: userScrollSessionKey,
+    infiniteScrollResetKey,
   });
 
   const registerEventRef = useCallback((eventId: string, element: HTMLElement | null) => {
@@ -326,7 +315,7 @@ export default function FeedClient(props: FeedClientProps) {
       inFlightJumpRef.current = true;
       dispatchLoading({ type: 'jump:start' });
       setError(null);
-      bumpUserScrollSessionKey();
+      bumpInfiniteScrollResetKey();
 
       try {
         const windowEvents = await fetchAroundAndReplace(key);
@@ -351,7 +340,7 @@ export default function FeedClient(props: FeedClientProps) {
         inFlightJumpRef.current = false;
       }
     },
-    [events, fetchAroundAndReplace, headerH],
+    [events, fetchAroundAndReplace, headerH, bumpInfiniteScrollResetKey],
   );
 
   useFeedHeaderConfigSync({
@@ -402,13 +391,24 @@ export default function FeedClient(props: FeedClientProps) {
               </div>
             </div>
           ) : null}
-          <div ref={topSentinelRef} className="h-px" aria-hidden />
+          <div
+            ref={topSentinelRef}
+            className="h-px"
+            aria-hidden
+          />
           {loading.prev ? (
             <div className="py-4 text-center text-gray-500">Loading previous…</div>
           ) : null}
-          <FeedMonths events={events} registerEventRef={registerEventRef} />
+          <FeedMonths
+            events={events}
+            registerEventRef={registerEventRef}
+          />
 
-          <div ref={bottomSentinelRef} className="h-12" aria-hidden />
+          <div
+            ref={bottomSentinelRef}
+            className="h-12"
+            aria-hidden
+          />
           {loading.next ? (
             <div className="py-4 text-center text-gray-500">Loading more…</div>
           ) : null}

@@ -23,7 +23,12 @@ import {
 } from 'react-admin';
 
 const userFilters = [
-  <SearchInput key="q" source="q" placeholder="Search users..." alwaysOn />,
+  <SearchInput
+    key="q"
+    source="q"
+    placeholder="Search users..."
+    alwaysOn
+  />,
   <SelectInput
     key="role"
     source="role"
@@ -55,7 +60,10 @@ export const UserList = () => (
       <TextField source="firstName" />
       <TextField source="lastName" />
       <TextField source="role" />
-      <DateField source="createdAt" showTime />
+      <DateField
+        source="createdAt"
+        showTime
+      />
       <EditButton />
       <ShowButton />
       <DeleteButton />
@@ -66,10 +74,23 @@ export const UserList = () => (
 export const UserCreate = () => (
   <Create>
     <SimpleForm>
-      <TextInput source="email" validate={[required()]} />
-      <TextInput source="firstName" validate={[required()]} />
-      <TextInput source="lastName" validate={[required()]} />
-      <TextInput source="password" type="password" validate={[required()]} />
+      <TextInput
+        source="email"
+        validate={[required()]}
+      />
+      <TextInput
+        source="firstName"
+        validate={[required()]}
+      />
+      <TextInput
+        source="lastName"
+        validate={[required()]}
+      />
+      <TextInput
+        source="password"
+        type="password"
+        validate={[required()]}
+      />
       <SelectInput
         source="role"
         choices={[
@@ -86,9 +107,18 @@ export const UserCreate = () => (
 export const UserEdit = () => (
   <Edit>
     <SimpleForm>
-      <TextInput source="email" validate={[required()]} />
-      <TextInput source="firstName" validate={[required()]} />
-      <TextInput source="lastName" validate={[required()]} />
+      <TextInput
+        source="email"
+        validate={[required()]}
+      />
+      <TextInput
+        source="firstName"
+        validate={[required()]}
+      />
+      <TextInput
+        source="lastName"
+        validate={[required()]}
+      />
       <TextInput
         source="password"
         type="password"
@@ -114,7 +144,10 @@ export const UserShow = () => (
       <TextField source="firstName" />
       <TextField source="lastName" />
       <TextField source="role" />
-      <DateField source="createdAt" showTime />
+      <DateField
+        source="createdAt"
+        showTime
+      />
     </SimpleShowLayout>
   </Show>
 );

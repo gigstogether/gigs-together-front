@@ -11,7 +11,7 @@ export interface UseEventHashLoaderParams {
   readonly setIsBusy: (next: boolean) => void;
   readonly dispatchLoading: (action: FeedLoadingAction) => void;
   readonly setError: (message: string | null) => void;
-  readonly bumpUserScrollSessionKey: () => void;
+  readonly bumpInfiniteScrollResetKey: () => void;
   readonly resolveAnchorYmdByEventId: (eventId: string) => Promise<string>;
   readonly loadAroundAndReplace: (anchorYmd: string) => Promise<void>;
 }
@@ -26,7 +26,7 @@ export function useEventHashLoader(params: UseEventHashLoaderParams): void {
     setIsBusy,
     dispatchLoading,
     setError,
-    bumpUserScrollSessionKey,
+    bumpInfiniteScrollResetKey,
     resolveAnchorYmdByEventId,
     loadAroundAndReplace,
   } = params;
@@ -58,7 +58,7 @@ export function useEventHashLoader(params: UseEventHashLoaderParams): void {
     setIsBusy(true);
     dispatchLoading({ type: 'jump:start' });
     setError(null);
-    bumpUserScrollSessionKey();
+    bumpInfiniteScrollResetKey();
 
     try {
       const anchorYmd = await resolveAnchorYmdByEventId(id);
@@ -91,7 +91,7 @@ export function useEventHashLoader(params: UseEventHashLoaderParams): void {
       setIsBusy(false);
     }
   }, [
-    bumpUserScrollSessionKey,
+    bumpInfiniteScrollResetKey,
     dispatchLoading,
     isBusyRef,
     isEnabled,

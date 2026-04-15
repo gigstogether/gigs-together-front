@@ -2,6 +2,17 @@ export function getTelegramInitData(): string {
   return window.Telegram?.WebApp?.initData ?? getTelegramInitDataFromLocation() ?? '';
 }
 
+/**
+ * Whether the app runs inside Telegram (Mini App). Uses initData / URL fallbacks and
+ * `initDataUnsafe.user` when the Web App script has run. Call only on the client.
+ */
+export function isTelegramMiniApp(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (getTelegramInitData()) return true;
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  return typeof user?.id === 'number';
+}
+
 function getTelegramInitDataFromLocation(): string | undefined {
   // Telegram Mini Apps commonly pass init data as `tgWebAppData` in the URL hash.
   // In some cases it can also be present in the query string.
@@ -23,12 +34,18 @@ export function getTelegramStartParam(): string {
   return (raw ?? '').toString();
 }
 
-export async function waitForTelegramInitData(options?: {
-  signal?: AbortSignal;
-  timeoutMs?: number;
-  intervalMs?: number;
-}): Promise<string> {
+export interface WaitForTelegramInitDataOptions {
+  readonly signal?: AbortSignal;
+  readonly timeoutMs?: number;
+  readonly intervalMs?: number;
+}
+
+export async function waitForTelegramInitData(
+  options?: WaitForTelegramInitDataOptions,
+): Promise<string> {
+  // 10_000 ms = 10 s poll budget for Mini App initData
   const timeoutMs = options?.timeoutMs ?? 10_000;
+  // 100 ms between polls
   const intervalMs = options?.intervalMs ?? 100;
 
   const start = Date.now();

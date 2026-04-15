@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation';
-import { Suspense } from 'react';
 import FeedClient from '../../_components/FeedClient';
 import { getTranslations } from '@/lib/translations.server';
-import { I18nProvider } from '@/lib/i18n/I18nProvider';
+import { I18nProvider } from '@/lib/i18n';
 import { getFeed } from '@/lib/feed.server';
 import type { V1TranslationsByNamespace } from '@/lib/translations.server';
 import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
@@ -34,27 +33,27 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
     redirect(DEFAULT_FEED_ROUTE);
   }
 
-  const i18n = await getTranslations('en', 'country');
+  const [i18n, feed] = await Promise.all([
+    getTranslations('en', 'country'),
+    getFeed({ limit: PAGE_SIZE, country, city }),
+  ]);
   const tCountry = tFromTranslations(i18n.translations, 'country');
-
-  const feed = await getFeed({ limit: PAGE_SIZE, country, city });
   const initialEvents: Event[] = feed.gigs.map((gig) =>
     gigToEvent(gig, { resolveCountryName: (iso) => tCountry(iso) }),
   );
 
   return (
-    <I18nProvider locale={i18n.locale} translations={i18n.translations}>
-      <Suspense
-        fallback={<div className="min-h-[100svh] flex justify-center items-center">Loading…</div>}
-      >
-        <FeedClient
-          country={country}
-          city={city}
-          initialEvents={initialEvents}
-          initialPrevCursor={feed.prevCursor}
-          initialNextCursor={feed.nextCursor}
-        />
-      </Suspense>
+    <I18nProvider
+      locale={i18n.locale}
+      translations={i18n.translations}
+    >
+      <FeedClient
+        country={country}
+        city={city}
+        initialEvents={initialEvents}
+        initialPrevCursor={feed.prevCursor}
+        initialNextCursor={feed.nextCursor}
+      />
     </I18nProvider>
   );
 }

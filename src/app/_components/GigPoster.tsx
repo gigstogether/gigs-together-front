@@ -1,10 +1,10 @@
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ImageLightbox } from '@/app/_components/ImageLightbox';
 
-export type GigPosterProps = {
+export interface GigPosterProps {
   poster: string;
   title: string;
-};
+}
 
 export function GigPoster({ poster, title }: GigPosterProps) {
   const [loadedPoster, setLoadedPoster] = useState<string | null>(null);
@@ -43,6 +43,7 @@ export function GigPoster({ poster, title }: GigPosterProps) {
         ) : null}
 
         {/* TODO: Consider using `<Image />` from `next/image`  */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className={`h-full w-full object-cover transition-opacity duration-200 ${
             isLoaded ? 'opacity-100' : 'opacity-0'

@@ -8,6 +8,17 @@ body {
   overflow-x: hidden;
 }
 
+@media (max-width: 639px) {
+  html,
+  body {
+    width: 100vw;
+  }
+
+  .app-header-mobile-width {
+    width: 100vw;
+  }
+}
+
 html {
   /* Make hash navigation account for the fixed header */
   scroll-padding-top: calc(var(--header-h) + 32px);

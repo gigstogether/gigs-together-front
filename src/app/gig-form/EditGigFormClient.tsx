@@ -4,18 +4,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
-import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
-import { fetchGigForEdit, lookupGig, updateGig } from '@/lib/gig-form-api';
-import { waitForTelegramInitData } from '@/lib/telegram-webapp';
+import { fetchGigByPublicId, updateGig } from '@/lib/gig-form-api';
+import { getTelegramInitDataExpiredToastContent } from '@/lib/telegram-init-data-expired';
 import { dateToYMD, defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
+import { useGigLookup } from '@/app/gig-form/useGigLookup';
+import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
 
 interface EditGigFormClientProps {
   countries: Country[];
@@ -24,8 +24,6 @@ interface EditGigFormClientProps {
 
 export default function EditGigFormClient({ countries, gigPublicId }: EditGigFormClientProps) {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isLookingUp, setIsLookingUp] = useState<boolean>(false);
   const [isLoadingGig, setIsLoadingGig] = useState<boolean>(false);
   const [loadGigError, setLoadGigError] = useState<string | null>(null);
   const [isPrefilled, setIsPrefilled] = useState<boolean>(false);
@@ -43,11 +41,28 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
     defaultValues: defaultGigFormValues,
   });
 
+  const { isLookingUp, onLookup } = useGigLookup(form, setPosterFile, setPosterUrl);
+
+  const { isSubmitting, onSubmit } = useGigSubmit({
+    posterFile,
+    posterUrl,
+    apiCall: ({ gig, poster }) => updateGig({ publicId: gigPublicId, gig, poster }),
+    onSuccess: () => {
+      toast({
+        title: 'Updated!',
+        description: 'Gig was updated.',
+      });
+      router.back();
+    },
+  });
+
   useEffect(() => {
     if (!gigPublicId) return;
     if (loadedGigRef.current === gigPublicId) return;
 
     setIsPrefilled(false);
+    setPosterFile(null);
+    setPosterUrl('');
     const ac = new AbortController();
     abortRef.current?.abort();
     abortRef.current = ac;
@@ -62,11 +77,8 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
         setLoadGigError(null);
       }
       try {
-        const telegramInitDataString = await waitForTelegramInitData({ signal: ac.signal });
-
-        const data = await fetchGigForEdit({
+        const data = await fetchGigByPublicId({
           publicId: gigPublicId,
-          telegramInitDataString,
           signal: ac.signal,
         });
 
@@ -100,17 +112,25 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
         if (ac.signal.aborted) {
           return;
         }
-        const message =
-          e instanceof Error ? e.message : 'There was an error loading gig data for editing.';
+        const expiredContent = getTelegramInitDataExpiredToastContent(e);
+        const message = expiredContent
+          ? expiredContent.description
+          : e instanceof Error
+            ? e.message
+            : 'There was an error loading gig data for editing.';
         if (seq === requestSeqRef.current) {
           setLoadGigError(message);
           setIsPrefilled(false);
         }
-        toast({
-          title: 'Couldn’t load gig',
-          description: message,
-          variant: 'destructive',
-        });
+        toast(
+          expiredContent
+            ? { ...expiredContent, variant: 'destructive' }
+            : {
+                title: 'Couldn’t load gig',
+                description: message,
+                variant: 'destructive',
+              },
+        );
         console.error(e);
       } finally {
         window.clearTimeout(timeoutId);
@@ -136,138 +156,8 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
     }
   }
 
-  async function onSubmit(values: GigFormValues) {
-    setIsSubmitting(true);
-    try {
-      const telegramInitDataString = await waitForTelegramInitData();
-
-      const gig = {
-        title: values.title,
-        date: values.date,
-        endDate: values.endDate || undefined,
-        city: values.city,
-        country: values.country,
-        venue: values.venue,
-        ticketsUrl: values.ticketsUrl,
-      };
-
-      const posterMode = posterFile ? 'upload' : 'url';
-      if (posterMode === 'url' && posterUrl.trim()) {
-        try {
-          new URL(posterUrl.trim());
-        } catch {
-          toast({
-            title: 'Invalid poster URL',
-            description: 'Please paste a valid image URL.',
-            variant: 'destructive',
-          });
-          return;
-        }
-      }
-
-      await updateGig({
-        publicId: gigPublicId,
-        telegramInitDataString,
-        gig,
-        poster: { mode: posterMode, file: posterFile, url: posterUrl },
-      });
-
-      toast({
-        title: 'Updated!',
-        description: 'Gig was updated.',
-      });
-
-      router.back();
-    } catch (e) {
-      const message =
-        e instanceof Error
-          ? e.message
-          : typeof e === 'string'
-            ? e
-            : 'There was an error submitting the form.';
-      toast({
-        title: 'Couldn’t submit',
-        description: message,
-        variant: 'destructive',
-      });
-      console.error(e);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  async function onLookup() {
-    if (isLookingUp) return;
-    setIsLookingUp(true);
-    try {
-      const name = form.getValues('title')?.trim();
-      const city = form.getValues('city')?.trim();
-      const country = form.getValues('country')?.trim();
-      const location = [city, country].filter(Boolean).join(', ');
-      if (!name) {
-        throw new Error('Lookup requires "title"');
-      }
-      if (!location) {
-        throw new Error('Lookup requires "city" and "country"');
-      }
-      const data = await lookupGig({ name, location });
-
-      if (!data.date) {
-        throw new Error('AI lookup did not return a date');
-      }
-      const ymd = dateToYMD(data.date);
-      if (!ymd) {
-        throw new Error('Invalid API response: "gig.date" must be YYYY-MM-DD (or ISO)');
-      }
-      const ymd2 = data.endDate ? dateToYMD(data.endDate) : undefined;
-      if (data.endDate && !ymd2) {
-        throw new Error('Invalid API response: "gig.endDate" must be YYYY-MM-DD (or ISO)');
-      }
-
-      if (data.title) form.setValue('title', data.title, { shouldDirty: true });
-      form.setValue('date', ymd, { shouldDirty: true });
-      if (data.endDate) form.setValue('endDate', ymd2 ?? '', { shouldDirty: true });
-      if (data.city) form.setValue('city', data.city, { shouldDirty: true });
-      if (data.country) {
-        form.setValue('country', data.country.toUpperCase(), { shouldDirty: true });
-      }
-      if (data.venue) form.setValue('venue', data.venue, { shouldDirty: true });
-      if (data.ticketsUrl) {
-        form.setValue('ticketsUrl', data.ticketsUrl, { shouldDirty: true });
-      }
-      if (data.posterUrl) {
-        const nextPosterUrl = data.posterUrl.trim();
-        try {
-          new URL(nextPosterUrl);
-          setPosterFile(null);
-          setPosterUrl(nextPosterUrl);
-        } catch {
-          setPosterFile(null);
-          setPosterUrl(nextPosterUrl);
-          toast({
-            title: 'Invalid poster URL',
-            description: 'Please review/fix the poster link.',
-            variant: 'destructive',
-          });
-        }
-      }
-
-      toast({ title: 'Filled from AI', description: 'Fields were updated from lookup results.' });
-    } catch (e) {
-      toast({
-        title: 'Error',
-        description: 'Failed to start AI lookup.',
-        variant: 'destructive',
-      });
-      console.error(e);
-    } finally {
-      setIsLookingUp(false);
-    }
-  }
-
   return (
     <>
-      <TelegramWebAppScript />
       {!isPrefilled ? (
         <Card className="w-full max-w-md m-auto border-0">
           <CardHeader>
@@ -278,7 +168,11 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
           </CardHeader>
           <CardContent>
             {loadGigError ? (
-              <Button type="button" variant="secondary" onClick={() => setReloadKey((x) => x + 1)}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setReloadKey((x) => x + 1)}
+              >
                 Retry
               </Button>
             ) : null}
@@ -291,37 +185,38 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
             <CardDescription>Update gig details.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <GigFormFields
-                  form={form}
-                  countries={countries}
-                  isLookingUp={isLookingUp}
-                  isSubmitting={isSubmitting}
-                  isLoading={isLoadingGig}
-                  onLookup={onLookup}
-                />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6"
+            >
+              <GigFormFields
+                form={form}
+                countries={countries}
+                isLookingUp={isLookingUp}
+                isSubmitting={isSubmitting}
+                isLoading={isLoadingGig}
+                onLookup={onLookup}
+              />
 
-                <PosterField
-                  variant="edit"
-                  posterFile={posterFile}
-                  onPosterFileChange={setPosterFile}
-                  posterUrl={posterUrl}
-                  onPosterUrlChange={setPosterUrl}
-                  onClearPoster={clearPoster}
-                  posterFileInputRef={posterFileInputRef}
-                  existingPosterUrl={existingPosterUrl}
-                />
+              <PosterField
+                variant="edit"
+                posterFile={posterFile}
+                onPosterFileChange={setPosterFile}
+                posterUrl={posterUrl}
+                onPosterUrlChange={setPosterUrl}
+                onClearPoster={clearPoster}
+                posterFileInputRef={posterFileInputRef}
+                existingPosterUrl={existingPosterUrl}
+              />
 
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || isLoadingGig || !gigPublicId}
-                  style={{ width: '100%' }}
-                >
-                  {isSubmitting ? 'Submitting...' : 'Save changes'}
-                </Button>
-              </form>
-            </Form>
+              <Button
+                type="submit"
+                disabled={isSubmitting || isLoadingGig || !gigPublicId}
+                style={{ width: '100%' }}
+              >
+                {isSubmitting ? 'Submitting...' : 'Save changes'}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       )}

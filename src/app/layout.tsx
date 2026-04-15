@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
 import { HeaderConfigProvider } from '@/app/_components/HeaderConfigProvider';
 import AppHeader from '@/app/_components/AppHeader';
+import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
 
 const geistSans = localFont({
   src: '../../public/fonts/GeistVF.woff',
@@ -81,6 +82,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <TelegramWebAppScript />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

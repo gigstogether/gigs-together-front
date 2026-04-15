@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic';
 import type { Route } from 'next';
-import { normalizeLocationTitle } from '@/lib/utils';
 import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
 
 const TopForm = dynamic(() => import('@/app/_components/TopForm'), { ssr: false });
@@ -32,16 +31,12 @@ export default function Header(props: HeaderProps) {
     country,
     city,
   } = props;
-  const telegramUrl = process.env.NEXT_PUBLIC_TELEGRAM_URL;
-  const githubUrl = process.env.NEXT_PUBLIC_GITHUB_URL;
-  const suggestGigUrl = showSuggestGig ? process.env.NEXT_PUBLIC_SUGGEST_GIG_LINK : undefined;
-  const locationLabel = city ? normalizeLocationTitle(city) : country.toUpperCase();
   const homeHref = (city ? `/feed/${country}/${city}` : `/feed/${country}`) as Route;
 
   return (
     <header
       data-app-header
-      className="bg-background border-b fixed top-0 left-0 w-full z-50 h-[45px]"
+      className="app-header-mobile-width bg-background fixed top-0 left-0 z-50 h-[45px] w-full border-b"
     >
       <div className="w-full px-4 h-full">
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center w-full h-full">
@@ -69,10 +64,9 @@ export default function Header(props: HeaderProps) {
             ) : null}
           </div>
           <HeaderActions
-            locationLabel={locationLabel}
-            telegramUrl={telegramUrl}
-            githubUrl={githubUrl}
-            suggestGigUrl={suggestGigUrl}
+            country={country}
+            city={city}
+            showSuggestGig={showSuggestGig}
           />
         </div>
       </div>

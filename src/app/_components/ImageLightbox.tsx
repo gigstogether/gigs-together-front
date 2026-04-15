@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 export interface ImageLightboxProps {
@@ -44,7 +44,7 @@ export function ImageLightbox(props: ImageLightboxProps) {
     return () => window.clearTimeout(id);
   }, [open]);
 
-  const label = useMemo(() => (alt?.trim() ? alt : 'Image preview'), [alt]);
+  const label = alt?.trim() ? alt : 'Image preview';
 
   if (!open) return null;
   if (typeof document === 'undefined') return null;
@@ -73,7 +73,10 @@ export function ImageLightbox(props: ImageLightboxProps) {
           className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-white/10 text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60"
           aria-label="Close image"
         >
-          <X className="h-5 w-5" aria-hidden />
+          <X
+            className="h-5 w-5"
+            aria-hidden
+          />
         </button>
 
         {/* eslint-disable-next-line @next/next/no-img-element */}

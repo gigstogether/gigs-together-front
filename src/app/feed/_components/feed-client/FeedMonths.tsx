@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useMemo } from 'react';
+import { Fragment } from 'react';
 import { MonthSection } from '@/app/_components/MonthSection';
 import { GigCard } from '@/app/_components/GigCard';
 import type { Event } from '@/lib/types';
@@ -14,7 +14,7 @@ export interface FeedMonthsProps {
 export function FeedMonths(props: FeedMonthsProps) {
   const { events, registerEventRef } = props;
 
-  const months = useMemo(() => {
+  const getMonths = () => {
     const grouped: Record<string, Event[]> = {};
     events.forEach((event) => {
       const monthYear = event.date.split('-').slice(0, 2).join('-');
@@ -28,7 +28,9 @@ export function FeedMonths(props: FeedMonthsProps) {
         date: date + '-01',
         events: grouped[date],
       }));
-  }, [events]);
+  };
+
+  const months = getMonths();
 
   if (events.length === 0) {
     return (

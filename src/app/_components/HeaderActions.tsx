@@ -1,27 +1,109 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
+import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
+import SignInModal from '@/app/_components/SignInModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationIcon } from '@/components/ui/location-icon';
+import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
+import { toast } from '@/hooks/use-toast';
+import { useTelegramAuth } from '@/hooks/use-telegram-auth';
+import { ApiError } from '@/lib/api-errors';
+import { subscribeTelegramSignInRequest } from '@/lib/telegram-auth';
+import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
+import { normalizeLocationTitle } from '@/lib/utils';
+import type { TelegramWidgetUser } from '@/types/telegram-login';
 
-export default function HeaderActions(props: {
-  locationLabel: string;
-  telegramUrl?: string;
-  githubUrl?: string;
-  suggestGigUrl?: string;
-}) {
-  const { locationLabel, telegramUrl, githubUrl, suggestGigUrl } = props;
+export interface HeaderActionsProps {
+  readonly country: string;
+  readonly city: string;
+  readonly showSuggestGig?: boolean;
+}
+
+export default function HeaderActions(props: HeaderActionsProps) {
+  const { country, city, showSuggestGig = true } = props;
+
+  const locationLabel = city ? normalizeLocationTitle(city) : country.toUpperCase();
+  const telegramUrl = process.env.NEXT_PUBLIC_TELEGRAM_URL;
+  const githubUrl = process.env.NEXT_PUBLIC_GITHUB_URL;
+  const suggestGigUrl = showSuggestGig ? process.env.NEXT_PUBLIC_SUGGEST_GIG_LINK : undefined;
+
+  const { authState, signIn, signOut } = useTelegramAuth();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const [locationTipOpen, setLocationTipOpen] = useState(false);
+  const [signInModalOpen, setSignInModalOpen] = useState(false);
+
+  const telegramBotUsername = getTelegramAuthBotUsername();
+  const miniAppEnv = useTelegramMiniAppEnv();
+
+  const closeMenus = useCallback(() => {
+    setDesktopMenuOpen(false);
+    setMobileMenuOpen(false);
+  }, []);
+
+  const handleAuthenticated = useCallback(
+    async (user: TelegramWidgetUser) => {
+      try {
+        const { profile } = await signIn(user);
+        const label =
+          profile.displayLabel || (user.username ? `@${user.username}` : user.first_name);
+        toast({
+          title: 'Signed in',
+          description: label,
+        });
+      } catch (e) {
+        const description =
+          e instanceof ApiError ? e.message : 'Could not complete sign in. Please try again.';
+        toast({
+          title: 'Sign in failed',
+          description,
+          variant: 'destructive',
+        });
+      }
+    },
+    [signIn],
+  );
+
+  const openSignInModal = useCallback(() => {
+    closeMenus();
+    setSignInModalOpen(true);
+  }, [closeMenus]);
+
+  useEffect(() => {
+    return subscribeTelegramSignInRequest(() => {
+      openSignInModal();
+    });
+  }, [openSignInModal]);
+
+  const handleSignOut = useCallback(async () => {
+    const label = authState?.displayLabel;
+    await signOut();
+    closeMenus();
+    toast({
+      title: 'Signed out',
+      ...(label ? { description: label } : {}),
+    });
+  }, [authState, signOut, closeMenus]);
+
+  const authMenuProps = {
+    telegramBotUsername,
+    authState,
+    miniAppEnv,
+    onSignInClick: openSignInModal,
+    onSignOut: handleSignOut,
+  };
 
   return (
     <div className="min-w-0 justify-self-end flex items-center space-x-4">
       {/* Desktop actions */}
       <div className="hidden sm:flex items-center space-x-4">
-        <Popover open={locationTipOpen} onOpenChange={setLocationTipOpen}>
+        <Popover
+          open={locationTipOpen}
+          onOpenChange={setLocationTipOpen}
+        >
           <PopoverTrigger
             type="button"
             className="flex items-center gap-2 text-base font-normal text-gray-800"
@@ -31,7 +113,11 @@ export default function HeaderActions(props: {
             <LocationIcon className="h-4 w-4" />
             {locationLabel}
           </PopoverTrigger>
-          <PopoverContent className="w-auto px-3 py-2 text-sm" align="end" side="bottom">
+          <PopoverContent
+            className="w-auto px-3 py-2 text-sm"
+            align="end"
+            side="bottom"
+          >
             Currently, we only support one location: Barcelona.
           </PopoverContent>
         </Popover>
@@ -46,12 +132,20 @@ export default function HeaderActions(props: {
             title="Suggest a gig"
           >
             <span className="hidden lg:inline">Suggest a gig</span>
-            <FaRegLightbulb className="text-[1.05em] lg:hidden" aria-hidden />
+            <FaRegLightbulb
+              className="text-[1.05em] lg:hidden"
+              aria-hidden
+            />
           </a>
         )}
 
         {!!telegramUrl && (
-          <a href={telegramUrl} target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+          <a
+            href={telegramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Telegram"
+          >
             <FaTelegramPlane className="text-xl text-black-500 hover:text-black-700" />
           </a>
         )}
@@ -68,11 +162,22 @@ export default function HeaderActions(props: {
           </a>
         )}
 
-        <Popover open={desktopMenuOpen} onOpenChange={setDesktopMenuOpen}>
-          <PopoverTrigger type="button" aria-label="Menu" className="py-1.5 px-0">
+        <Popover
+          open={desktopMenuOpen}
+          onOpenChange={setDesktopMenuOpen}
+        >
+          <PopoverTrigger
+            type="button"
+            aria-label="Menu"
+            className="py-1.5 px-0"
+          >
             <FaBars className="text-base text-black-500 hover:text-black-700" />
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-48 p-2">
+          <PopoverContent
+            align="end"
+            className="w-auto min-w-[13rem] max-w-[min(100vw-2rem,20rem)] p-2"
+          >
+            <HeaderAuthActions {...authMenuProps} />
             <a
               href="/about"
               className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
@@ -86,12 +191,24 @@ export default function HeaderActions(props: {
 
       {/* Mobile menu */}
       <div className="sm:hidden">
-        <Popover open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <PopoverTrigger type="button" aria-label="Menu" className="py-1.5 px-0">
+        <Popover
+          open={mobileMenuOpen}
+          onOpenChange={setMobileMenuOpen}
+        >
+          <PopoverTrigger
+            type="button"
+            aria-label="Menu"
+            className="py-1.5 px-0"
+          >
             <FaBars className="text-base text-black-500 hover:text-black-700" />
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-56 p-2">
+          <PopoverContent
+            align="end"
+            className="w-auto min-w-[14rem] max-w-[min(100vw-2rem,20rem)] p-2"
+          >
             <div className="flex flex-col gap-1">
+              <HeaderAuthActions {...authMenuProps} />
+
               {!!suggestGigUrl && (
                 <>
                   <a
@@ -105,7 +222,10 @@ export default function HeaderActions(props: {
                     <FaRegLightbulb className="h-4 w-4" />
                     Suggest a gig
                   </a>
-                  <div className="my-0.5 h-px w-full bg-border/40" aria-hidden />
+                  <div
+                    className="my-0.5 h-px w-full bg-border/40"
+                    aria-hidden
+                  />
                 </>
               )}
 
@@ -118,7 +238,11 @@ export default function HeaderActions(props: {
                   <LocationIcon className="h-4 w-4" />
                   {locationLabel}
                 </PopoverTrigger>
-                <PopoverContent className="w-64 px-3 py-2 text-sm" align="start" side="bottom">
+                <PopoverContent
+                  className="w-64 px-3 py-2 text-sm"
+                  align="start"
+                  side="bottom"
+                >
                   Currently, we only support one location: Barcelona.
                 </PopoverContent>
               </Popover>
@@ -149,7 +273,10 @@ export default function HeaderActions(props: {
                 </a>
               )}
 
-              <div className="my-0.5 h-px w-full bg-border/40" aria-hidden />
+              <div
+                className="my-0.5 h-px w-full bg-border/40"
+                aria-hidden
+              />
               <a
                 href="/about"
                 className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
@@ -162,6 +289,13 @@ export default function HeaderActions(props: {
           </PopoverContent>
         </Popover>
       </div>
+
+      <SignInModal
+        isOpen={signInModalOpen}
+        onOpenChange={setSignInModalOpen}
+        telegramBotUsername={telegramBotUsername}
+        onAuthenticated={handleAuthenticated}
+      />
     </div>
   );
 }

@@ -11,18 +11,18 @@ import nextPlugin from '@next/eslint-plugin-next';
 
 export default tseslint.config(
   {
-    ignores: [
-      'dist',
-      '.next',
-      'node_modules',
-      '**/*debug*',
-      'src/components/ui/**/*',
-      'tailwind.config.js',
-    ],
+    ignores: ['dist', '.next', 'next-env.d.ts', 'node_modules', '**/*debug*', 'tailwind.config.js'],
   },
 
   js.configs.recommended,
   ...tseslint.configs.recommended,
+
+  {
+    files: ['*.mjs'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 
   {
     files: ['*.{js,jsx,ts,tsx}', 'src/**/*.{js,jsx,ts,tsx}'],
@@ -48,9 +48,22 @@ export default tseslint.config(
     rules: {
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs['core-web-vitals'].rules,
-      ...reactHooks.configs.recommended.rules,
-      ...react.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      ...reactHooks.configs.flat.recommended.rules,
+      ...react.configs.flat.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
+          allowExportNames: [
+            'metadata',
+            'generateMetadata',
+            'generateStaticParams',
+            'dynamic',
+            'revalidate',
+            'dynamicParams',
+          ],
+        },
+      ],
       'react/react-in-jsx-scope': 'off',
       'react/jsx-tag-spacing': [
         'error',
@@ -71,6 +84,14 @@ export default tseslint.config(
         },
       ],
       '@stylistic/quote-props': ['error', 'as-needed'],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/consistent-type-imports': [
         'warn',
         {
@@ -78,6 +99,8 @@ export default tseslint.config(
           fixStyle: 'separate-type-imports',
         },
       ],
+      // consistent-type-imports does not flag inline `import { value, type T }` (TS 4.5+); this rule does.
+      'import/consistent-type-specifier-style': ['warn', 'prefer-top-level'],
       'import/extensions': [
         'warn',
         'never',

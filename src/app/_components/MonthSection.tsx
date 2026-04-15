@@ -13,7 +13,11 @@ export function MonthSection({ children, title, date, showDivider = true }: Mont
   const monthRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div id={'month-' + date} ref={monthRef} className="flex flex-col w-full">
+    <div
+      id={'month-' + date}
+      ref={monthRef}
+      className="flex flex-col w-full"
+    >
       {showDivider ? (
         <div className="w-full border-b border-gray-200 dark:border-gray-700 mt-6 mb-10 relative">
           <span className="inline-flex items-center justify-center gap-2 text-base leading-none font-normal text-gray-800 dark:text-gray-100 px-2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-900 w-[20ch]">

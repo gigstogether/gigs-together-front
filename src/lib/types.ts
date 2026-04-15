@@ -5,6 +5,9 @@ declare global {
         initData: string;
         initDataUnsafe?: {
           start_param?: string;
+          user?: {
+            id: number;
+          };
         };
       };
     };
@@ -45,8 +48,9 @@ export interface V1GigAroundGetResponseBody {
   nextCursor?: string;
 }
 
+/** GET v1/gig/date/:publicId — anchor date for hash / deep links */
 export interface V1GigByPublicIdGetResponseBody {
-  gig: V1GigGetResponseBodyGig;
+  date: string;
 }
 
 export interface V1GigGetResponseBodyGig {

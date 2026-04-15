@@ -1,7 +1,7 @@
 'use client';
 
 import type { MouseEvent } from 'react';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { cn, toLocalYMD } from '@/lib/utils';
 import { FaRegCalendar } from 'react-icons/fa';
 import { Calendar } from '@/components/ui/calendar';
@@ -26,14 +26,11 @@ const formatDisplayMonth = (dateString?: string) => {
   return `${d.toLocaleString('en-US', { month: 'long' })} ${y}`;
 };
 
-const TopForm = ({
-  visibleEventDate,
-  onDayClick,
-  availableDates,
-  calendarDatesStatus,
-  calendarDatesError,
-}: TopFormProps) => {
-  const availableSet = useMemo(() => new Set(availableDates ?? []), [availableDates]);
+const TopForm = (props: TopFormProps) => {
+  const { visibleEventDate, onDayClick, availableDates, calendarDatesStatus, calendarDatesError } =
+    props;
+
+  const availableSet = new Set(availableDates ?? []);
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState<Date | undefined>(undefined);
 
@@ -79,13 +76,19 @@ const TopForm = ({
           if (nextOpen) setMonth(monthFromVisibleDate ?? new Date());
         }}
       >
-        <PopoverTrigger type="button" className="flex items-center gap-2 focus:outline-none">
+        <PopoverTrigger
+          type="button"
+          className="flex items-center gap-2 focus:outline-none"
+        >
           <span className="inline-flex items-center justify-center gap-2 text-base font-normal text-gray-800 px-2">
             <FaRegCalendar className="text-gray-600" />
             {formatDisplayMonth(visibleEventDate)}
           </span>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="center">
+        <PopoverContent
+          className="w-auto p-0"
+          align="center"
+        >
           {calendarDatesStatus === 'loading' ? (
             <div className="px-3 py-2 text-sm text-gray-600">Loading calendar…</div>
           ) : null}
