@@ -36,7 +36,7 @@ export default function Header(props: HeaderProps) {
   return (
     <header
       data-app-header
-      className="bg-background border-b fixed top-0 left-0 w-full z-50 h-[45px]"
+      className="app-header-mobile-width bg-background fixed top-0 left-0 z-50 h-[45px] w-full border-b"
     >
       <div className="w-full px-4 h-full">
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center w-full h-full">
