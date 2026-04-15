@@ -1,10 +1,8 @@
 'use client';
 
 import { Fragment } from 'react';
-import { MonthSection } from '@/app/_components/MonthSection';
 import { GigCard } from '@/app/_components/GigCard';
 import type { Event } from '@/lib/types';
-import { formatMonthTitle } from './utils';
 
 export interface FeedMonthsProps {
   events: Event[];
@@ -13,24 +11,6 @@ export interface FeedMonthsProps {
 
 export function FeedMonths(props: FeedMonthsProps) {
   const { events, registerEventRef } = props;
-
-  const getMonths = () => {
-    const grouped: Record<string, Event[]> = {};
-    events.forEach((event) => {
-      const monthYear = event.date.split('-').slice(0, 2).join('-');
-      grouped[monthYear] = grouped[monthYear] || [];
-      grouped[monthYear].push(event);
-    });
-
-    return Object.keys(grouped)
-      .sort()
-      .map((date) => ({
-        date: date + '-01',
-        events: grouped[date],
-      }));
-  };
-
-  const months = getMonths();
 
   if (events.length === 0) {
     return (
@@ -42,39 +22,25 @@ export function FeedMonths(props: FeedMonthsProps) {
   }
 
   return (
-    <>
-      {months.map((month, monthIdx) => {
-        const orderedMonthEvents = [...month.events].sort(
-          (a, b) => a.date.localeCompare(b.date) || String(a.id).localeCompare(String(b.id)),
-        );
-        return (
-          <MonthSection
-            key={month.date}
-            title={formatMonthTitle(month.date)}
-            date={month.date}
-            showDivider={monthIdx !== 0}
-          >
-            {orderedMonthEvents.map((event, idx) => {
-              const prev = orderedMonthEvents[idx - 1];
-              const isFirstOfDate = idx === 0 || prev?.date !== event.date;
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+      {events.map((event, idx) => {
+        const prev = events[idx - 1];
+        const isFirstOfDate = idx === 0 || prev?.date !== event.date;
 
-              return (
-                <Fragment key={event.id}>
-                  <div
-                    id={event.id}
-                    data-date={isFirstOfDate ? event.date : undefined}
-                    data-event-id={event.id}
-                    ref={(el) => registerEventRef(event.id, el)}
-                    className="gig-anchor"
-                  >
-                    <GigCard gig={event} />
-                  </div>
-                </Fragment>
-              );
-            })}
-          </MonthSection>
+        return (
+          <Fragment key={event.id}>
+            <div
+              id={event.id}
+              data-date={isFirstOfDate ? event.date : undefined}
+              data-event-id={event.id}
+              ref={(el) => registerEventRef(event.id, el)}
+              className="gig-anchor"
+            >
+              <GigCard gig={event} />
+            </div>
+          </Fragment>
         );
       })}
-    </>
+    </div>
   );
 }
