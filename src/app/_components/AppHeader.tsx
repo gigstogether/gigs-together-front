@@ -39,6 +39,7 @@ export default function AppHeader() {
       showCalendar={isFeed}
       showSuggestGig={!isGigForm}
       earliestEventDate={config.earliestEventDate}
+      visibleEventDateRange={config.visibleEventDateRange}
       availableDates={config.availableDates}
       calendarDatesStatus={config.calendarDatesStatus}
       calendarDatesError={config.calendarDatesError}

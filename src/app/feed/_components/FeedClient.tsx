@@ -240,7 +240,7 @@ export default function FeedClient(props: FeedClientProps) {
     enabled: !loading.initial && !error,
   });
 
-  const { visibleEventDate } = useVisibleEventDateOnScroll({
+  const { visibleEventDate, visibleEventDateRange } = useVisibleEventDateOnScroll({
     events,
     headerOffsetPx: headerH ?? 0,
   });
@@ -346,6 +346,7 @@ export default function FeedClient(props: FeedClientProps) {
   useFeedHeaderConfigSync({
     setHeaderConfig,
     visibleEventDate,
+    visibleEventDateRange,
     availableDates: calendarDatesStatus === 'ready' ? calendarAvailableDates : undefined,
     calendarDatesStatus,
     calendarDatesError,
