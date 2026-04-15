@@ -28,6 +28,8 @@ const DESCRIPTION =
 const IMAGE_WIDTH = 1200;
 const IMAGE_HEIGHT = 630;
 const PREVIEW_IMAGE = `/logo-${IMAGE_WIDTH}x${IMAGE_HEIGHT}.png`;
+const FAVICON_URL =
+  process.env.NODE_ENV === 'development' ? '/logo-dev-circle-96x96.png' : '/logo-circle-96x96.png';
 
 const metadataBase = SITE_BASE_URL ? new URL(SITE_BASE_URL) : undefined;
 const previewImage = new URL(PREVIEW_IMAGE, metadataBase).toString();
@@ -44,7 +46,7 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   icons: {
-    icon: [{ url: '/logo-circle-96x96.png', type: 'image/png', sizes: '96x96' }],
+    icon: [{ url: FAVICON_URL, type: 'image/png', sizes: '96x96' }],
     apple: [{ url: '/logo-circle-180x180.png', sizes: '180x180' }],
   },
   openGraph: {
