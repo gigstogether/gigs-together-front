@@ -9,10 +9,17 @@ export interface UseVisibleEventDateOnScrollParams {
   readonly anchorSelector?: string;
   readonly debounceMs?: number;
   readonly earlySwitchPx?: number;
+  readonly rowTolerancePx?: number;
+}
+
+export interface VisibleEventDateRange {
+  readonly startDate: string;
+  readonly endDate: string;
 }
 
 export interface UseVisibleEventDateOnScrollResult {
   readonly visibleEventDate: string | undefined;
+  readonly visibleEventDateRange: VisibleEventDateRange | undefined;
 }
 
 export function useVisibleEventDateOnScroll(
@@ -21,22 +28,26 @@ export function useVisibleEventDateOnScroll(
   const {
     events,
     headerOffsetPx,
-    anchorSelector = '[data-date]',
+    anchorSelector = '[data-event-date]',
     debounceMs = 150,
     earlySwitchPx = 40,
+    rowTolerancePx = 12,
   } = params;
 
   const anchorsRef = useRef<HTMLElement[]>([]);
   const pendingVisibleDateRef = useRef<string | undefined>(undefined);
+  const pendingVisibleDateRangeKeyRef = useRef<string | undefined>(undefined);
   const debounceTimeoutRef = useRef<number | undefined>(undefined);
 
   const [visibleEventDate, setVisibleEventDate] = useState<string | undefined>();
+  const [visibleEventDateRange, setVisibleEventDateRange] = useState<VisibleEventDateRange>();
 
   const scheduleVisibleDateCommit = useCallback(
-    (next: string | undefined) => {
+    (next: string | undefined, nextRange: VisibleEventDateRange | undefined) => {
       if (debounceTimeoutRef.current) window.clearTimeout(debounceTimeoutRef.current);
       debounceTimeoutRef.current = window.setTimeout(() => {
         setVisibleEventDate(next);
+        setVisibleEventDateRange(nextRange);
       }, debounceMs);
     },
     [debounceMs],
@@ -56,11 +67,34 @@ export function useVisibleEventDateOnScroll(
       firstBelow && firstBelow.top < earlySwitchPx ? firstBelow : (closestAbove ?? firstBelow)
     )?.el;
 
-    const next = targetEl?.dataset.date;
-    if (pendingVisibleDateRef.current === next) return;
+    const next = targetEl?.dataset.eventDate;
+    const targetTop = withTop.find((item) => item.el === targetEl)?.top;
+    const rowDates =
+      targetTop === undefined
+        ? []
+        : withTop
+            .filter((item) => Math.abs(item.top - targetTop) <= rowTolerancePx)
+            .map((item) => item.el.dataset.eventDate)
+            .filter((date): date is string => typeof date === 'string')
+            .sort();
+    const nextRange =
+      rowDates.length === 0
+        ? undefined
+        : {
+            startDate: rowDates[0],
+            endDate: rowDates[rowDates.length - 1],
+          };
+    const nextRangeKey = nextRange ? `${nextRange.startDate}|${nextRange.endDate}` : undefined;
+    if (
+      pendingVisibleDateRef.current === next &&
+      pendingVisibleDateRangeKeyRef.current === nextRangeKey
+    ) {
+      return;
+    }
     pendingVisibleDateRef.current = next;
-    scheduleVisibleDateCommit(next);
-  }, [earlySwitchPx, headerOffsetPx, scheduleVisibleDateCommit]);
+    pendingVisibleDateRangeKeyRef.current = nextRangeKey;
+    scheduleVisibleDateCommit(next, nextRange);
+  }, [earlySwitchPx, headerOffsetPx, rowTolerancePx, scheduleVisibleDateCommit]);
 
   useEffect(() => {
     anchorsRef.current = Array.from(document.querySelectorAll<HTMLElement>(anchorSelector));
@@ -103,5 +137,5 @@ export function useVisibleEventDateOnScroll(
     };
   }, []);
 
-  return { visibleEventDate };
+  return { visibleEventDate, visibleEventDateRange };
 }

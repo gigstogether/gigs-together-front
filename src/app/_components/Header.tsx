@@ -3,12 +3,14 @@
 import dynamic from 'next/dynamic';
 import type { Route } from 'next';
 import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
+import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
 
 const TopForm = dynamic(() => import('@/app/_components/TopForm'), { ssr: false });
 const HeaderActions = dynamic(() => import('@/app/_components/HeaderActions'), { ssr: false });
 
 interface HeaderProps {
   earliestEventDate?: string;
+  visibleEventDateRange?: VisibleEventDateRange;
   onDayClick?: (day: Date) => void;
   availableDates?: string[]; // formatted as YYYY-MM-DD
   calendarDatesStatus?: CalendarDatesStatus;
@@ -22,6 +24,7 @@ interface HeaderProps {
 export default function Header(props: HeaderProps) {
   const {
     earliestEventDate,
+    visibleEventDateRange,
     onDayClick,
     availableDates,
     calendarDatesStatus,
@@ -56,6 +59,7 @@ export default function Header(props: HeaderProps) {
             {showCalendar ? (
               <TopForm
                 visibleEventDate={earliestEventDate}
+                visibleEventDateRange={visibleEventDateRange}
                 onDayClick={onDayClick}
                 availableDates={availableDates}
                 calendarDatesStatus={calendarDatesStatus}
