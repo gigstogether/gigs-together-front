@@ -144,6 +144,18 @@ function parseGigLookupData(raw: unknown): GigLookupData {
   };
 }
 
+/** `null` means the API found no matching future gig. */
+function parseGigLookupApiResponse(raw: unknown): GigLookupData | null {
+  const obj = asRecordOrThrow(raw);
+  if (obj.gig === null) {
+    return null;
+  }
+  if (obj.gig === undefined) {
+    throw new Error('Invalid API response: "gig" is required (use null when there is no match)');
+  }
+  return parseGigLookupData(obj.gig);
+}
+
 function getPosterUrlOrUndefined(poster: PosterSelection): string | undefined {
   if (poster.mode !== 'url') return undefined;
   const trimmed = (poster.url ?? '').trim();
@@ -199,7 +211,7 @@ export async function fetchGigByPublicId(params: FetchGigByPublicIdParams): Prom
   return parseGigFormData(raw);
 }
 
-export async function lookupGig(params: LookupGigParams): Promise<GigLookupData> {
+export async function lookupGig(params: LookupGigParams): Promise<GigLookupData | null> {
   const name = params.name.trim();
   const location = params.location.trim();
   if (!name) {
@@ -217,7 +229,7 @@ export async function lookupGig(params: LookupGigParams): Promise<GigLookupData>
     },
     { signal: params.signal },
   );
-  return parseGigLookupData(raw?.gig);
+  return parseGigLookupApiResponse(raw);
 }
 
 export async function createGig(params: GigUpsertApiParams): Promise<void> {

@@ -33,7 +33,8 @@ export function useGigLookup(
     }
   }
 
-  async function lookup() {
+  /** @returns true if gig data was applied, false if API reported no match */
+  async function lookup(): Promise<boolean> {
     const name = form.getValues('title')?.trim();
     const city = form.getValues('city')?.trim();
     const country = form.getValues('country')?.trim();
@@ -45,6 +46,14 @@ export function useGigLookup(
       throw new Error('Lookup requires "city" and "country"');
     }
     const data = await lookupGig({ name, location });
+
+    if (!data) {
+      toast({
+        title: 'Not found',
+        description: 'AI could not find a matching future gig for this title and place.',
+      });
+      return false;
+    }
 
     if (!data.date) {
       throw new Error('AI lookup did not return a date');
@@ -71,14 +80,20 @@ export function useGigLookup(
     }
 
     setPoster(data.posterUrl);
+    return true;
   }
 
   function onLookup() {
     if (isLookingUp) return;
     startLookupTransition(async () => {
       try {
-        await lookup();
-        toast({ title: 'Filled from AI', description: 'Fields were updated from lookup results.' });
+        const applied = await lookup();
+        if (applied) {
+          toast({
+            title: 'Filled from AI',
+            description: 'Fields were updated from lookup results.',
+          });
+        }
       } catch (e) {
         if (!toastTelegramInitDataExpired(e)) {
           toast({
