@@ -10,7 +10,7 @@ import { cn, toLocalYMD } from '@/lib/utils';
 import { FaRegCalendar } from 'react-icons/fa';
 import type { Modifiers } from 'react-day-picker';
 
-interface TopFormProps {
+interface HeaderCalendarProps {
   visibleEventDate?: string;
   visibleEventDateRange?: VisibleEventDateRange;
   onDayClick?: (day: Date, modifiers?: Modifiers, e?: MouseEvent) => void;
@@ -65,7 +65,7 @@ const formatDisplayMonth = (
   return `${formatMonthYear(start)} ${DASH} ${formatMonthYear(end)}`;
 };
 
-const TopForm = (props: TopFormProps) => {
+export default function HeaderCalendar(props: HeaderCalendarProps) {
   const {
     visibleEventDate,
     visibleEventDateRange,
@@ -166,6 +166,4 @@ const TopForm = (props: TopFormProps) => {
       </Popover>
     </form>
   );
-};
-
-export default TopForm;
+}

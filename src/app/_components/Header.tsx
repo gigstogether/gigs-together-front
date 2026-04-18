@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
 import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
 
-const TopForm = dynamic(() => import('@/app/_components/TopForm'), { ssr: false });
+const HeaderCalendar = dynamic(() => import('@/app/_components/HeaderCalendar'), { ssr: false });
 const HeaderActions = dynamic(() => import('@/app/_components/HeaderActions'), { ssr: false });
 
 interface HeaderProps {
@@ -57,7 +57,7 @@ export default function Header(props: HeaderProps) {
           </div>
           <div className="min-w-0 justify-self-center">
             {showCalendar ? (
-              <TopForm
+              <HeaderCalendar
                 visibleEventDate={earliestEventDate}
                 visibleEventDateRange={visibleEventDateRange}
                 onDayClick={onDayClick}
