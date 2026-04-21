@@ -12,13 +12,7 @@ import { useCalendarAvailableDates } from './feed-client/useCalendarAvailableDat
 import { useFeedHeaderConfigSync } from './feed-client/useFeedHeaderConfigSync';
 import { useHeaderHeight } from './feed-client/useHeaderHeight';
 import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
-import { gigDateToYMD, gigToEvent } from '@/lib/feed.mapper';
-import { apiRequest } from '@/lib/api';
-import {
-  parseV1GigAroundGetResponseBody,
-  parseV1GigByPublicIdGetResponseBody,
-  parseV1GigGetResponseBody,
-} from '@/lib/api-boundary-schemas';
+import { gigToEvent } from '@/lib/feed.mapper';
 import { useHashAutoScroll } from './feed-client/useHashAutoScroll';
 import { useInfiniteScroll } from './feed-client/useInfiniteScroll';
 import { useVisibleEventDateOnScroll } from './feed-client/useVisibleEventDateOnScroll';
@@ -27,6 +21,11 @@ import type { FeedLoadingState } from './feed-client/feedLoading';
 import { mergeUniqueSorted, sortEventsAsc } from './feed-client/feedEvents';
 import { usePrependScrollRestore } from './feed-client/usePrependScrollRestore';
 import { useEventHashLoader } from './feed-client/useEventHashLoader';
+import {
+  fetchFeedAnchorYmdByPublicId,
+  fetchFeedAroundWindow,
+  fetchFeedPage,
+} from './feed-client/feedApi';
 
 interface FeedClientProps {
   country: string; // ISO like "es"
@@ -69,15 +68,13 @@ export default function FeedClient(props: FeedClientProps) {
 
   const fetchAroundAndReplace = useCallback(
     async (anchorYmd: string): Promise<Event[]> => {
-      const qs = new URLSearchParams();
-      qs.set('anchor', anchorYmd);
-      qs.set('beforeLimit', String(FEED_PAGE_SIZE));
-      qs.set('afterLimit', String(FEED_PAGE_SIZE));
-      if (country) qs.set('country', country);
-      if (city) qs.set('city', city);
-
-      const raw = await apiRequest<unknown>(`v1/gig/around?${qs.toString()}`, 'GET');
-      const res = parseV1GigAroundGetResponseBody(raw);
+      const res = await fetchFeedAroundWindow({
+        anchorYmd,
+        beforeLimit: FEED_PAGE_SIZE,
+        afterLimit: FEED_PAGE_SIZE,
+        country,
+        city,
+      });
 
       const mappedBefore: Event[] = res.before.map((gig) =>
         gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
@@ -97,10 +94,7 @@ export default function FeedClient(props: FeedClientProps) {
   );
 
   const fetchHashTargetAnchorYmd = useCallback(async (publicId: string): Promise<string> => {
-    const raw = await apiRequest<unknown>(`v1/gig/date/${encodeURIComponent(publicId)}`, 'GET');
-    const res = parseV1GigByPublicIdGetResponseBody(raw);
-
-    return gigDateToYMD(res.date);
+    return fetchFeedAnchorYmdByPublicId({ publicId });
   }, []);
 
   const fetchNextPage = useCallback(async () => {
@@ -108,16 +102,14 @@ export default function FeedClient(props: FeedClientProps) {
     if (inFlightNextRef.current) return;
     inFlightNextRef.current = true;
 
-    const qs = new URLSearchParams();
-    qs.set('limit', String(FEED_PAGE_SIZE));
-    qs.set('cursor', nextCursor);
-    if (country) qs.set('country', country);
-    if (city) qs.set('city', city);
-
     try {
       dispatchLoading({ type: 'next:start' });
-      const raw = await apiRequest<unknown>(`v1/gig?${qs.toString()}`, 'GET');
-      const res = parseV1GigGetResponseBody(raw);
+      const res = await fetchFeedPage({
+        limit: FEED_PAGE_SIZE,
+        cursor: nextCursor,
+        country,
+        city,
+      });
       const mapped: Event[] = res.gigs.map((gig) =>
         gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
       );
@@ -139,17 +131,15 @@ export default function FeedClient(props: FeedClientProps) {
 
     capturePrependAnchor();
 
-    const qs = new URLSearchParams();
-    qs.set('limit', String(FEED_PAGE_SIZE));
-    qs.set('cursor', prevCursor);
-    qs.set('direction', 'prev');
-    if (country) qs.set('country', country);
-    if (city) qs.set('city', city);
-
     try {
       dispatchLoading({ type: 'prev:start' });
-      const raw = await apiRequest<unknown>(`v1/gig?${qs.toString()}`, 'GET');
-      const res = parseV1GigGetResponseBody(raw);
+      const res = await fetchFeedPage({
+        limit: FEED_PAGE_SIZE,
+        cursor: prevCursor,
+        direction: 'prev',
+        country,
+        city,
+      });
       const mapped: Event[] = res.gigs.map((gig) =>
         gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
       );
@@ -176,17 +166,15 @@ export default function FeedClient(props: FeedClientProps) {
 
   const fetchInitial = useCallback(
     async (cursor?: string) => {
-      const qs = new URLSearchParams();
-      qs.set('limit', String(FEED_PAGE_SIZE));
-      if (cursor) qs.set('cursor', cursor);
-      if (country) qs.set('country', country);
-      if (city) qs.set('city', city);
-
       try {
         dispatchLoading({ type: 'initial:start' });
         setError(null);
-        const raw = await apiRequest<unknown>(`v1/gig?${qs.toString()}`, 'GET');
-        const res = parseV1GigGetResponseBody(raw);
+        const res = await fetchFeedPage({
+          limit: FEED_PAGE_SIZE,
+          cursor,
+          country,
+          city,
+        });
         setPrevCursor(res.prevCursor);
 
         const mapped: Event[] = res.gigs.map((gig) =>

@@ -1,10 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { apiRequest } from '@/lib/api';
-import { parseV1GigDatesGetResponseBody } from '@/lib/api-boundary-schemas';
-import { gigDateToYMD } from '@/lib/feed.mapper';
 import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
+import { fetchFeedAvailableDates } from './feedApi';
 
 export interface UseCalendarAvailableDatesParams {
   country: string;
@@ -60,17 +58,7 @@ export function useCalendarAvailableDates(
 
     const run = async () => {
       try {
-        const qs = new URLSearchParams();
-        if (country) qs.set('country', country);
-        if (city) qs.set('city', city);
-
-        const raw = await apiRequest<unknown>(`v1/gig/dates?${qs.toString()}`, 'GET', undefined, {
-          signal: ac.signal,
-        });
-        const res = parseV1GigDatesGetResponseBody(raw);
-
-        const ymd = res.dates.map((x) => gigDateToYMD(x));
-        const unique = Array.from(new Set(ymd)).sort();
+        const unique = await fetchFeedAvailableDates({ country, city, signal: ac.signal });
 
         if (ac.signal.aborted) return;
         if (seq !== calendarRequestSeqRef.current) return;
