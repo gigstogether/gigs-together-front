@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import {
   isV1GigAroundGetResponseBody,
   isV1GigByPublicIdGetResponseBody,
