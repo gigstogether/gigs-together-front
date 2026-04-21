@@ -1,4 +1,5 @@
 import { fetchApiJson } from '@/lib/api-core';
+import { logger } from '@/lib/logger';
 import { clearStoredTelegramClientProfile, requestTelegramSignIn } from '@/lib/telegram-auth';
 import { isTelegramMiniApp } from '@/lib/telegram-webapp';
 
@@ -29,7 +30,7 @@ export async function apiRequest<TResponse = unknown, TBody = unknown>(
       },
     });
   } catch (e) {
-    console.error('API Error:', e);
+    logger.errorFromUnknown('api_request_failed', e, { endpointOrUrl, method });
     throw e;
   }
 }

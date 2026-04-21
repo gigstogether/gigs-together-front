@@ -19,7 +19,29 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 - Do not run `build`, `test`, `typecheck`, `dev`, or start watchers or servers unless the user explicitly asks.
 - If command execution is needed to validate a change, ask first instead of running it proactively.
-- After code changes, run `npm run lint:fix` before finishing the task.
+- After source code changes (`*.ts`, `*.tsx`, `*.js`, `*.jsx`, `*.json`), run `npm run lint:fix` before finishing the task.
+- Do not run lint after documentation-only changes (for example `*.md`).
+
+## Testing Rules
+
+- Use Vitest for unit and integration tests in this repository.
+- Name test files as `*.test.ts` and colocate them near the module under test when practical.
+- Name `describe` blocks after the unit under test (module/function/behavior group), for example `describe('fetchApiJson')`.
+- Keep `describe` names short and stable; do not duplicate scenario phrasing that belongs in `it`.
+- `describe` naming format: prefer exact symbol/module names (`fetchApiJson`, `useCalendarAvailableDates`, `parseCountries`), not full sentence descriptions.
+- Write test titles in clear behavior form: `should <expected behavior> when <condition>`.
+- Use Arrange-Act-Assert structure in each test; keep one primary behavior assertion per test.
+- Do not add explicit AAA comments like `// Arrange`, `// Act`, `// Assert`; keep AAA structure through code layout only.
+- Prefer deterministic tests: no real network, no timers without control, no hidden global state dependencies.
+- Mock only at I/O boundaries (HTTP, storage, time, env). Do not mock pure business logic modules.
+- For bug fixes, add at least one regression test that fails before the fix and passes after it.
+- Cover both success and failure paths for boundary parsers, guards, and request flows.
+- Keep fixtures minimal and explicit; avoid oversized shared fixtures that hide intent.
+- Use `beforeEach`/`afterEach` to fully reset mocks, stubs, and globals.
+- Do not assert on implementation details if externally observable behavior can be asserted instead.
+- When asserting errors, verify error type and key message/code fields, not only "throws".
+- Keep tests fast and isolated so they can run in parallel reliably.
+- Avoid snapshot tests for dynamic or business-critical payloads; prefer explicit field assertions.
 
 ## TypeScript Rules
 
