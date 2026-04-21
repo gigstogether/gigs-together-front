@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import { gigDateToYMD } from '@/lib/feed.mapper';
 
 export const gigFormSchema = z.object({
   title: z.string().min(2, {
@@ -36,15 +37,15 @@ export const defaultGigFormValues: GigFormValues = {
   ticketsUrl: '',
 };
 
-export function dateToYMD(date?: string): string | undefined {
-  if (!date) return undefined;
-  const s = String(date).trim();
-  if (!s) return undefined;
-  // ISO "2026-02-15T20:00:00+01:00"
-  if (s.includes('T')) return s.slice(0, 10);
-  // "YYYY-MM-DD"
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return undefined;
-  return d.toISOString().slice(0, 10);
+export function dateToYMD(date?: string | number): string | undefined {
+  if (date === undefined || date === null) return undefined;
+
+  const normalized = typeof date === 'number' ? date : date.trim();
+  if (normalized === '') return undefined;
+
+  try {
+    return gigDateToYMD(normalized);
+  } catch {
+    return undefined;
+  }
 }
