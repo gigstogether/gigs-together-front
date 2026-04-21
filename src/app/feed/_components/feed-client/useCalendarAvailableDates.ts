@@ -72,7 +72,7 @@ export function useCalendarAvailableDates(
           throw new Error('Invalid API response: expected { dates: (string | number)[] }');
         }
 
-        const ymd = res.dates.map((x) => gigDateToYMD(String(x)));
+        const ymd = res.dates.map((x) => gigDateToYMD(x));
         const unique = Array.from(new Set(ymd)).sort();
 
         if (ac.signal.aborted) return;

@@ -25,6 +25,7 @@ Apply these rules to the whole repository unless a more specific instruction exi
 ## Testing Rules
 
 - Use Vitest for unit and integration tests in this repository.
+- Write tests for all new code.
 - Name test files as `*.test.ts` and colocate them near the module under test when practical.
 - Name `describe` blocks after the unit under test (module/function/behavior group), for example `describe('fetchApiJson')`.
 - Keep `describe` names short and stable; do not duplicate scenario phrasing that belongs in `it`.
