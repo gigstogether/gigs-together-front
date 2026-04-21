@@ -19,6 +19,7 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 - Do not run `build`, `test`, `typecheck`, `dev`, or start watchers or servers unless the user explicitly asks.
 - If command execution is needed to validate a change, ask first instead of running it proactively.
+- After code changes, run `npm run lint:fix` before finishing the task.
 
 ## TypeScript Rules
 

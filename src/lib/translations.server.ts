@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { apiRequest } from '@/lib/api';
+import { parseLanguageGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
 import type { Language } from '@/lib/types';
 
 export type TranslationFormat = 'plain' | 'icu';
@@ -59,7 +60,7 @@ export async function getTranslations(
 
   const url = `/v1/language/translations${qs.size ? `?${qs.toString()}` : ''}`;
 
-  const data = await apiRequest<V1LanguageGetTranslationsResponseBody>(url, 'GET', undefined, {
+  const raw = await apiRequest<unknown>(url, 'GET', undefined, {
     // Explicitly set accept-language; otherwise some runtimes send "*" by default.
     headers: { 'accept-language': acceptLanguage },
     next: {
@@ -72,13 +73,5 @@ export async function getTranslations(
     },
   });
 
-  // Safety net: keep return shape stable even if backend misbehaves.
-  if (!data || typeof data !== 'object') {
-    return { locale: acceptLanguage ?? 'en', translations: {} };
-  }
-  if (!data.translations || typeof data.translations !== 'object') {
-    return { locale: data.locale ?? acceptLanguage ?? 'en', translations: {} };
-  }
-
-  return data;
+  return parseLanguageGetTranslationsResponseBody(raw);
 }
