@@ -57,6 +57,7 @@ export default function FeedClient(props: FeedClientProps) {
   const inFlightNextRef = useRef(false);
   const inFlightPrevRef = useRef(false);
   const inFlightJumpRef = useRef(false);
+  const appliedInitialSnapshotRef = useRef<string | null>(null);
   const { capture: capturePrependAnchor, clear: clearPrependAnchor } = usePrependScrollRestore({
     events,
     headerOffsetPx: headerH ?? 0,
@@ -199,20 +200,44 @@ export default function FeedClient(props: FeedClientProps) {
   );
 
   useEffect(() => {
-    if (initialEvents !== undefined) {
-      setEvents(initialEvents);
-      setNextCursor(initialNextCursor);
-      setError(null);
-      setPrevCursor(initialPrevCursor);
-      dispatchLoading({ type: 'reset' });
-      inFlightNextRef.current = false;
-      inFlightPrevRef.current = false;
-      inFlightJumpRef.current = false;
+    if (initialEvents === undefined) {
+      appliedInitialSnapshotRef.current = null;
       return;
     }
 
+    const firstId = initialEvents[0]?.id ?? '';
+    const lastId = initialEvents[initialEvents.length - 1]?.id ?? '';
+    const snapshot = [
+      country,
+      city,
+      initialPrevCursor ?? '',
+      initialNextCursor ?? '',
+      String(initialEvents.length),
+      firstId,
+      lastId,
+    ].join('|');
+
+    if (appliedInitialSnapshotRef.current === snapshot) {
+      return;
+    }
+    appliedInitialSnapshotRef.current = snapshot;
+
+    setEvents(initialEvents);
+    setNextCursor(initialNextCursor);
+    setError(null);
+    setPrevCursor(initialPrevCursor);
+    dispatchLoading({ type: 'reset' });
+    inFlightNextRef.current = false;
+    inFlightPrevRef.current = false;
+    inFlightJumpRef.current = false;
+  }, [city, country, initialEvents, initialNextCursor, initialPrevCursor]);
+
+  useEffect(() => {
+    if (initialEvents !== undefined) {
+      return;
+    }
     void fetchInitial();
-  }, [country, city, fetchInitial, initialEvents, initialNextCursor, initialPrevCursor]);
+  }, [fetchInitial, initialEvents]);
 
   const hasMore = Boolean(nextCursor);
   const hasPrev = Boolean(prevCursor);
