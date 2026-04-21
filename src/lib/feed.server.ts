@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { apiRequest } from '@/lib/api';
+import { parseV1GigGetResponseBody } from '@/lib/api-boundary-schemas';
 import type { V1GigGetResponseBody } from '@/lib/types';
 
 export type GetFeedParams = Readonly<{
@@ -23,5 +24,6 @@ export async function getFeed(params: GetFeedParams): Promise<V1GigGetResponseBo
   if (country) qs.set('country', country);
   if (city) qs.set('city', city);
 
-  return await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
+  const raw = await apiRequest<unknown>(`v1/gig?${qs.toString()}`, 'GET');
+  return parseV1GigGetResponseBody(raw);
 }

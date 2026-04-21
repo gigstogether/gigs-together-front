@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { apiRequest } from '@/lib/api';
+import { parseV1GigDatesGetResponseBody } from '@/lib/api-boundary-schemas';
 import { gigDateToYMD } from '@/lib/feed.mapper';
 import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
-import { isV1GigDatesGetResponseBody } from './utils';
 
 export interface UseCalendarAvailableDatesParams {
   country: string;
@@ -64,13 +64,10 @@ export function useCalendarAvailableDates(
         if (country) qs.set('country', country);
         if (city) qs.set('city', city);
 
-        const res = await apiRequest<unknown>(`v1/gig/dates?${qs.toString()}`, 'GET', undefined, {
+        const raw = await apiRequest<unknown>(`v1/gig/dates?${qs.toString()}`, 'GET', undefined, {
           signal: ac.signal,
         });
-
-        if (!isV1GigDatesGetResponseBody(res)) {
-          throw new Error('Invalid API response: expected { dates: (string | number)[] }');
-        }
+        const res = parseV1GigDatesGetResponseBody(raw);
 
         const ymd = res.dates.map((x) => gigDateToYMD(x));
         const unique = Array.from(new Set(ymd)).sort();

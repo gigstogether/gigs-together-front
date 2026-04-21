@@ -5,7 +5,6 @@ import styles from '@/app/page.module.css';
 import { toLocalYMD } from '@/lib/utils';
 import '@/app/style.css';
 import type { Event } from '@/lib/types';
-import type { V1GigGetResponseBody } from '@/lib/types';
 import { useT } from '@/lib/i18n';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
 import { FeedMonths } from './feed-client/FeedMonths';
@@ -15,15 +14,16 @@ import { useHeaderHeight } from './feed-client/useHeaderHeight';
 import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
 import { gigDateToYMD, gigToEvent } from '@/lib/feed.mapper';
 import { apiRequest } from '@/lib/api';
+import {
+  parseV1GigAroundGetResponseBody,
+  parseV1GigByPublicIdGetResponseBody,
+  parseV1GigGetResponseBody,
+} from '@/lib/api-boundary-schemas';
 import { useHashAutoScroll } from './feed-client/useHashAutoScroll';
 import { useInfiniteScroll } from './feed-client/useInfiniteScroll';
 import { useVisibleEventDateOnScroll } from './feed-client/useVisibleEventDateOnScroll';
 import { createInitialFeedLoadingState, feedLoadingReducer } from './feed-client/feedLoading';
 import type { FeedLoadingState } from './feed-client/feedLoading';
-import {
-  isV1GigAroundGetResponseBody,
-  isV1GigByPublicIdGetResponseBody,
-} from './feed-client/utils';
 import { mergeUniqueSorted, sortEventsAsc } from './feed-client/feedEvents';
 import { usePrependScrollRestore } from './feed-client/usePrependScrollRestore';
 import { useEventHashLoader } from './feed-client/useEventHashLoader';
@@ -76,10 +76,8 @@ export default function FeedClient(props: FeedClientProps) {
       if (country) qs.set('country', country);
       if (city) qs.set('city', city);
 
-      const res = await apiRequest<unknown>(`v1/gig/around?${qs.toString()}`, 'GET');
-      if (!isV1GigAroundGetResponseBody(res)) {
-        throw new Error('Invalid API response: expected { before: [], after: [] }');
-      }
+      const raw = await apiRequest<unknown>(`v1/gig/around?${qs.toString()}`, 'GET');
+      const res = parseV1GigAroundGetResponseBody(raw);
 
       const mappedBefore: Event[] = res.before.map((gig) =>
         gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
@@ -99,10 +97,8 @@ export default function FeedClient(props: FeedClientProps) {
   );
 
   const fetchHashTargetAnchorYmd = useCallback(async (publicId: string): Promise<string> => {
-    const res = await apiRequest<unknown>(`v1/gig/date/${encodeURIComponent(publicId)}`, 'GET');
-    if (!isV1GigByPublicIdGetResponseBody(res)) {
-      throw new Error('Invalid API response: expected { date }');
-    }
+    const raw = await apiRequest<unknown>(`v1/gig/date/${encodeURIComponent(publicId)}`, 'GET');
+    const res = parseV1GigByPublicIdGetResponseBody(raw);
 
     return gigDateToYMD(res.date);
   }, []);
@@ -120,7 +116,8 @@ export default function FeedClient(props: FeedClientProps) {
 
     try {
       dispatchLoading({ type: 'next:start' });
-      const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
+      const raw = await apiRequest<unknown>(`v1/gig?${qs.toString()}`, 'GET');
+      const res = parseV1GigGetResponseBody(raw);
       const mapped: Event[] = res.gigs.map((gig) =>
         gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
       );
@@ -151,7 +148,8 @@ export default function FeedClient(props: FeedClientProps) {
 
     try {
       dispatchLoading({ type: 'prev:start' });
-      const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
+      const raw = await apiRequest<unknown>(`v1/gig?${qs.toString()}`, 'GET');
+      const res = parseV1GigGetResponseBody(raw);
       const mapped: Event[] = res.gigs.map((gig) =>
         gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
       );
@@ -187,7 +185,8 @@ export default function FeedClient(props: FeedClientProps) {
       try {
         dispatchLoading({ type: 'initial:start' });
         setError(null);
-        const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
+        const raw = await apiRequest<unknown>(`v1/gig?${qs.toString()}`, 'GET');
+        const res = parseV1GigGetResponseBody(raw);
         setPrevCursor(res.prevCursor);
 
         const mapped: Event[] = res.gigs.map((gig) =>

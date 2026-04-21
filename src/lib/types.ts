@@ -38,7 +38,7 @@ export interface V1GigGetResponseBody {
 }
 
 export interface V1GigDatesGetResponseBody {
-  dates: string[];
+  dates: Array<string | number>;
 }
 
 export interface V1GigAroundGetResponseBody {
@@ -50,14 +50,14 @@ export interface V1GigAroundGetResponseBody {
 
 /** GET v1/gig/date/:publicId — anchor date for hash / deep links */
 export interface V1GigByPublicIdGetResponseBody {
-  date: string;
+  date: string | number;
 }
 
 export interface V1GigGetResponseBodyGig {
   id: string;
   title: string;
-  date: string;
-  endDate?: string;
+  date: string | number;
+  endDate?: string | number;
   city: string;
   country: string;
   venue: string;
