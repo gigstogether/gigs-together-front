@@ -20,11 +20,22 @@ export interface V1LanguageGetTranslationsResponseBody {
   readonly translations: V1TranslationsByNamespace;
 }
 
-const getTranslationsRevalidateSeconds = (): number | false => {
-  const value = Number(process.env.NEXT_PUBLIC_TRANSLATIONS_REVALIDATE_SECONDS);
-  return isNaN(value) ? false : value;
+const DEFAULT_TRANSLATIONS_REVALIDATE_SECONDS = 3_600; // 1 hour (60 minutes)
+
+const getTranslationsRevalidateSeconds = (): number => {
+  const raw = process.env.TRANSLATIONS_REVALIDATE_SECONDS;
+  if (raw === undefined || raw.trim() === '') {
+    return DEFAULT_TRANSLATIONS_REVALIDATE_SECONDS;
+  }
+
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error('TRANSLATIONS_REVALIDATE_SECONDS must be a positive integer');
+  }
+
+  return value;
 };
-const TRANSLATIONS_REVALIDATE_SECONDS = getTranslationsRevalidateSeconds(); // 1h
+const TRANSLATIONS_REVALIDATE_SECONDS = getTranslationsRevalidateSeconds();
 
 const DEFAULT_LANGUAGE: Language = 'en';
 

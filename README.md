@@ -46,21 +46,21 @@ You can also use `.env`, but `.env.local` is the safer default for machine-speci
 
 What they are used for:
 
-| Variable                                          | Required                         | Purpose                                                                                    |
-| ------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_APP_API_BASE_URL`                    | Yes                              | Base URL for backend API requests. Without it, direct API calls throw at runtime.          |
-| `NEXT_PUBLIC_APP_BASE_URL`                        | Recommended                      | Public site base URL used for metadata, sitemap, and robots.                               |
-| `NEXT_PUBLIC_GITHUB_URL`                          | Optional                         | GitHub link rendered in the header.                                                        |
-| `NEXT_PUBLIC_TELEGRAM_URL`                        | Optional                         | Telegram link used in the header and as a fallback on gig cards.                           |
-| `NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL`      | Optional                         | Deep link to the Telegram service chat where users can terminate an active login session.  |
-| `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` | Optional                         | localStorage key for the cached Telegram display profile. Default: `gt_tg_client_profile`. |
-| `NEXT_PUBLIC_TRANSLATIONS_REVALIDATE_SECONDS`     | Optional                         | Cache revalidation period for server-side translation fetching.                            |
-| `NEXT_PUBLIC_FEED_PAGE_SIZE`                      | Optional                         | Feed page size. Must be a positive integer. Default is `10`.                               |
-| `NEXT_PUBLIC_SUGGEST_GIG_LINK`                    | Optional                         | Link for the "suggest gig" action in the header.                                           |
-| `NEXT_PUBLIC_SITE_PREVIEW_TITLE`                  | Optional                         | SEO/social preview title.                                                                  |
-| `NEXT_PUBLIC_SITE_PREVIEW_DESCRIPTION`            | Optional                         | SEO/social preview description.                                                            |
-| `NEXT_PUBLIC_BRAND_NAME`                          | Optional                         | Brand name used in metadata. Defaults to `Gigs Together`.                                  |
-| `FEED_REVALIDATE_SECRET`                          | Required for revalidation routes | Secret checked by `/api/revalidate/feed`.                                                  |
+| Variable                                          | Required                         | Purpose                                                                                                      |
+| ------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_APP_API_BASE_URL`                    | Yes                              | Base URL for backend API requests. Without it, direct API calls throw at runtime.                            |
+| `NEXT_PUBLIC_APP_BASE_URL`                        | Recommended                      | Public site base URL used for metadata, sitemap, and robots.                                                 |
+| `NEXT_PUBLIC_GITHUB_URL`                          | Optional                         | GitHub link rendered in the header.                                                                          |
+| `NEXT_PUBLIC_TELEGRAM_URL`                        | Optional                         | Telegram link used in the header and as a fallback on gig cards.                                             |
+| `NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL`      | Optional                         | Deep link to the Telegram service chat where users can terminate an active login session.                    |
+| `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` | Optional                         | localStorage key for the cached Telegram display profile. Default: `gt_tg_client_profile`.                   |
+| `NEXT_PUBLIC_FEED_PAGE_SIZE`                      | Optional                         | Feed page size. Must be a positive integer. Default is `10`.                                                 |
+| `NEXT_PUBLIC_SUGGEST_GIG_LINK`                    | Optional                         | Link for the "suggest gig" action in the header.                                                             |
+| `NEXT_PUBLIC_SITE_PREVIEW_TITLE`                  | Optional                         | SEO/social preview title.                                                                                    |
+| `NEXT_PUBLIC_SITE_PREVIEW_DESCRIPTION`            | Optional                         | SEO/social preview description.                                                                              |
+| `NEXT_PUBLIC_BRAND_NAME`                          | Optional                         | Brand name used in metadata. Defaults to `Gigs Together`.                                                    |
+| `FEED_REVALIDATE_SECRET`                          | Required for revalidation routes | Secret checked by `/api/revalidate/feed`.                                                                    |
+| `TRANSLATIONS_REVALIDATE_SECONDS`                 | Optional                         | Server-side cache revalidation period for translation fetching. Positive integer in seconds, default `3600`. |
 
 ## Running the app locally
 
