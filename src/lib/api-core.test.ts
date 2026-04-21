@@ -11,6 +11,9 @@ describe('fetchApiJson', () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_APP_API_BASE_URL = 'https://api.example.com';
     vi.resetModules();
+    vi.doMock('@/lib/auth-refresh', () => ({
+      postAuthRefresh: vi.fn(async (): Promise<boolean> => false),
+    }));
   });
 
   afterEach(() => {
@@ -112,13 +115,13 @@ describe('fetchApiJson', () => {
     );
 
     vi.stubGlobal('fetch', fetchMock);
-    const { ApiError } = await import('@/lib/api-errors');
     const { fetchApiJson } = await import('@/lib/api-core');
 
     const action = fetchApiJson('v1/auth/telegram/web-app', 'POST', { initData: 'abc' });
 
-    await expect(action).rejects.toBeInstanceOf(ApiError);
     await expect(action).rejects.toMatchObject({
+      name: 'ApiError',
+      message: 'expired',
       code: 'TELEGRAM_INIT_DATA_EXPIRED',
       statusCode: 401,
     });
