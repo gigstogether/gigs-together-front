@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic';
 import type { Route } from 'next';
-import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
 import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
 
 const HeaderCalendar = dynamic(() => import('@/app/_components/HeaderCalendar'), { ssr: false });
@@ -13,7 +12,8 @@ interface HeaderProps {
   visibleEventDateRange?: VisibleEventDateRange;
   onDayClick?: (day: Date) => void;
   availableDates?: string[]; // formatted as YYYY-MM-DD
-  calendarDatesStatus?: CalendarDatesStatus;
+  calendarDatesIsLoading?: boolean;
+  calendarDatesIsError?: boolean;
   calendarDatesError?: string;
   showCalendar?: boolean;
   showSuggestGig?: boolean;
@@ -27,7 +27,8 @@ export default function Header(props: HeaderProps) {
     visibleEventDateRange,
     onDayClick,
     availableDates,
-    calendarDatesStatus,
+    calendarDatesIsLoading = true,
+    calendarDatesIsError = false,
     calendarDatesError,
     showCalendar = true,
     showSuggestGig = true,
@@ -62,7 +63,8 @@ export default function Header(props: HeaderProps) {
                 visibleEventDateRange={visibleEventDateRange}
                 onDayClick={onDayClick}
                 availableDates={availableDates}
-                calendarDatesStatus={calendarDatesStatus}
+                calendarDatesIsLoading={calendarDatesIsLoading}
+                calendarDatesIsError={calendarDatesIsError}
                 calendarDatesError={calendarDatesError}
               />
             ) : null}

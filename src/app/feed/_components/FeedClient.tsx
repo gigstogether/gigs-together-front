@@ -244,13 +244,19 @@ export default function FeedClient(props: FeedClientProps) {
 
   const {
     availableDates: calendarAvailableDates,
-    status: calendarDatesStatus,
-    error: calendarDatesError,
+    isLoading: calendarDatesIsLoading,
+    isError: calendarDatesIsError,
+    isSuccess: isCalendarDatesSuccess,
+    error: calendarDatesQueryError,
   } = useCalendarAvailableDates({
     country,
     city,
     enabled: !loading.initial && !error,
   });
+
+  const calendarDatesError = calendarDatesIsError
+    ? (calendarDatesQueryError ?? 'Failed to load calendar dates.')
+    : undefined;
 
   const { visibleEventDate, visibleEventDateRange } = useVisibleEventDateOnScroll({
     events,
@@ -359,8 +365,9 @@ export default function FeedClient(props: FeedClientProps) {
     setHeaderConfig,
     visibleEventDate,
     visibleEventDateRange,
-    availableDates: calendarDatesStatus === 'ready' ? calendarAvailableDates : undefined,
-    calendarDatesStatus,
+    availableDates: isCalendarDatesSuccess ? calendarAvailableDates : undefined,
+    calendarDatesIsLoading,
+    calendarDatesIsError,
     calendarDatesError,
     onDayClick: handleDayClick,
   });

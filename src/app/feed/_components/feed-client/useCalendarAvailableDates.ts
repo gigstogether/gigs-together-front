@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
 import { fetchFeedAvailableDates } from './feedApi';
 
 export interface UseCalendarAvailableDatesParams {
@@ -12,7 +11,9 @@ export interface UseCalendarAvailableDatesParams {
 
 export interface UseCalendarAvailableDatesResult {
   availableDates: string[] | undefined;
-  status: CalendarDatesStatus;
+  readonly isError: boolean;
+  readonly isSuccess: boolean;
+  readonly isLoading: boolean;
   error: string | undefined;
 }
 
@@ -22,7 +23,7 @@ export function useCalendarAvailableDates(
   const { country, city, enabled } = params;
 
   const [availableDates, setAvailableDates] = useState<string[] | undefined>();
-  const [status, setStatus] = useState<CalendarDatesStatus>('loading');
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState<string | undefined>(undefined);
 
   const calendarAbortRef = useRef<AbortController | null>(null);
@@ -87,5 +88,11 @@ export function useCalendarAvailableDates(
     };
   }, [city, country, enabled]);
 
-  return { availableDates, status, error };
+  return {
+    availableDates,
+    error,
+    isLoading: status === 'loading',
+    isError: status === 'error',
+    isSuccess: status === 'ready',
+  };
 }
