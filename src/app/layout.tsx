@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { HeaderConfigProvider } from '@/app/_components/HeaderConfigProvider';
 import AppHeader from '@/app/_components/AppHeader';
 import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
+import { QueryProvider } from '@/app/_providers/QueryProvider';
 
 const geistSans = localFont({
   src: '../../public/fonts/GeistVF.woff',
@@ -84,18 +85,20 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <TelegramWebAppScript />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
-          }}
-        />
-        <HeaderConfigProvider>
-          <AppHeader />
-          <div className="pt-[45px]">{children}</div>
-          <Toaster />
-        </HeaderConfigProvider>
+        <QueryProvider>
+          <TelegramWebAppScript />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+            }}
+          />
+          <HeaderConfigProvider>
+            <AppHeader />
+            <div className="pt-[45px]">{children}</div>
+            <Toaster />
+          </HeaderConfigProvider>
+        </QueryProvider>
       </body>
     </html>
   );
