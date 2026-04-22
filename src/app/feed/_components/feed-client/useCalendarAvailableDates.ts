@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchFeedAvailableDates } from './feedApi';
+import { FEED_CALENDAR_DATES_STALE_TIME_MS } from '@/lib/feed.constants';
 
 export interface UseCalendarAvailableDatesParams {
   country: string;
@@ -18,7 +19,6 @@ export interface UseCalendarAvailableDatesResult {
 }
 
 const CALENDAR_DATES_TIMEOUT_MS = 15_000; // 15 seconds
-const FEED_CALENDAR_DATES_STALE_TIME_MS = 10_000; // 10 seconds
 
 export function useCalendarAvailableDates(
   params: UseCalendarAvailableDatesParams,

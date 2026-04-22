@@ -55,6 +55,7 @@ What they are used for:
 | `NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL`      | Optional                         | Deep link to the Telegram service chat where users can terminate an active login session.                    |
 | `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` | Optional                         | localStorage key for the cached Telegram display profile. Default: `gt_tg_client_profile`.                   |
 | `NEXT_PUBLIC_FEED_PAGE_SIZE`                      | Optional                         | Feed page size. Must be a positive integer. Default is `10`.                                                 |
+| `NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS`  | Optional                         | Calendar dates query stale time in milliseconds. Must be a positive integer. Default is `600000` (10 minutes). |
 | `NEXT_PUBLIC_SUGGEST_GIG_LINK`                    | Optional                         | Link for the "suggest gig" action in the header.                                                             |
 | `NEXT_PUBLIC_SITE_PREVIEW_TITLE`                  | Optional                         | SEO/social preview title.                                                                                    |
 | `NEXT_PUBLIC_SITE_PREVIEW_DESCRIPTION`            | Optional                         | SEO/social preview description.                                                                              |
