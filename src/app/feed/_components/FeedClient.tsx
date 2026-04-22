@@ -251,11 +251,11 @@ export default function FeedClient(props: FeedClientProps) {
   } = useCalendarAvailableDates({
     country,
     city,
-    enabled: !loading.initial && !error,
+    isEnabled: !loading.initial && !error,
   });
 
   const calendarDatesError = calendarDatesIsError
-    ? (calendarDatesQueryError ?? 'Failed to load calendar dates.')
+    ? (calendarDatesQueryError?.message ?? 'Failed to load calendar dates.')
     : undefined;
 
   const { visibleEventDate, visibleEventDateRange } = useVisibleEventDateOnScroll({
