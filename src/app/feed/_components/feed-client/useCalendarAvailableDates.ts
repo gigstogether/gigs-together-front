@@ -42,7 +42,7 @@ export function useCalendarAvailableDates(
 
       signal.addEventListener('abort', abortFromQuerySignal);
       try {
-        return fetchFeedAvailableDates({ country, city, signal: timeoutController.signal });
+        return await fetchFeedAvailableDates({ country, city, signal: timeoutController.signal });
       } finally {
         window.clearTimeout(timeoutId);
         signal.removeEventListener('abort', abortFromQuerySignal);
