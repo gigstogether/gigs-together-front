@@ -1,3 +1,9 @@
+import {
+  captureRejectedError,
+  captureThrownErrorInstance,
+  expectZodIssue,
+} from '@/env/env-test-helpers';
+
 vi.mock('server-only', () => ({}));
 
 async function importServerEnv() {
@@ -14,39 +20,59 @@ describe('env/server', () => {
     vi.unstubAllEnvs();
   });
 
-  it('should use translations revalidate seconds when env var is a positive integer', async () => {
-    vi.stubEnv('NODE_ENV', 'test');
-    vi.stubEnv('TRANSLATIONS_REVALIDATE_SECONDS', '120');
+  describe('TRANSLATIONS_REVALIDATE_SECONDS', () => {
+    it('should parse translations revalidate seconds when env var is a positive integer', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('TRANSLATIONS_REVALIDATE_SECONDS', '120');
 
-    const serverEnvModule = await importServerEnv();
+      const serverEnvModule = await importServerEnv();
 
-    expect(serverEnvModule.serverEnv.translationsRevalidateSeconds).toBe(120);
+      expect(serverEnvModule.serverEnv.translationsRevalidateSeconds).toBe(120);
+    });
+
+    it('should use default translations revalidate seconds when env var is missing', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('TRANSLATIONS_REVALIDATE_SECONDS', undefined);
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.translationsRevalidateSeconds).toBe(3_600);
+    });
+
+    it('should throw when translations revalidate seconds env var is not a positive integer', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('TRANSLATIONS_REVALIDATE_SECONDS', '0');
+
+      const error = await captureRejectedError(() => importServerEnv());
+
+      expectZodIssue(error, {
+        code: 'custom',
+        message: 'TRANSLATIONS_REVALIDATE_SECONDS must be a positive integer (got "0")',
+        path: ['TRANSLATIONS_REVALIDATE_SECONDS'],
+      });
+    });
   });
 
-  it('should default translations revalidate seconds when env var is missing', async () => {
-    vi.stubEnv('NODE_ENV', 'test');
-    vi.stubEnv('TRANSLATIONS_REVALIDATE_SECONDS', undefined);
+  describe('getFeedRevalidateSecretOrThrow', () => {
+    it('should return trimmed feed revalidate secret when env var is set', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('FEED_REVALIDATE_SECRET', ' top-secret ');
 
-    const serverEnvModule = await importServerEnv();
+      const serverEnvModule = await importServerEnv();
 
-    expect(serverEnvModule.serverEnv.translationsRevalidateSeconds).toBe(3_600);
-  });
+      expect(serverEnvModule.getFeedRevalidateSecretOrThrow()).toBe('top-secret');
+    });
 
-  it('should default translations revalidate seconds when env var is blank', async () => {
-    vi.stubEnv('NODE_ENV', 'test');
-    vi.stubEnv('TRANSLATIONS_REVALIDATE_SECONDS', '   ');
+    it('should throw when FEED_REVALIDATE_SECRET is missing', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('FEED_REVALIDATE_SECRET', undefined);
 
-    const serverEnvModule = await importServerEnv();
+      const serverEnvModule = await importServerEnv();
+      const error = captureThrownErrorInstance(() =>
+        serverEnvModule.getFeedRevalidateSecretOrThrow(),
+      );
 
-    expect(serverEnvModule.serverEnv.translationsRevalidateSeconds).toBe(3_600);
-  });
-
-  it('should return trimmed feed revalidate secret when env var is set', async () => {
-    vi.stubEnv('NODE_ENV', 'test');
-    vi.stubEnv('FEED_REVALIDATE_SECRET', ' top-secret ');
-
-    const serverEnvModule = await importServerEnv();
-
-    expect(serverEnvModule.getFeedRevalidateSecretOrThrow()).toBe('top-secret');
+      expect(error.message).toBe('Missing FEED_REVALIDATE_SECRET');
+    });
   });
 });
