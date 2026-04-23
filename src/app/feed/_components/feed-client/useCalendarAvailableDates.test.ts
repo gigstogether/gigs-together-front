@@ -1,4 +1,4 @@
-import { FEED_CALENDAR_DATES_STALE_TIME_MS } from '@/lib/feed.constants';
+import { clientEnv } from '@/env/client-env';
 import { fetchFeedAvailableDates } from './feedApi';
 import { useCalendarAvailableDates } from './useCalendarAvailableDates';
 
@@ -176,7 +176,7 @@ describe('useCalendarAvailableDates', () => {
     });
     const options = getQueryOptionsFromFirstUseQueryCall();
 
-    expect(options.staleTime).toBe(FEED_CALENDAR_DATES_STALE_TIME_MS);
+    expect(options.staleTime).toBe(clientEnv.feedCalendarDatesStaleTimeMs);
   });
 
   it('should call fetchFeedAvailableDates when queryFn is executed', async () => {

@@ -2,6 +2,7 @@ import 'server-only';
 
 import { apiRequest } from '@/lib/api';
 import { parseLanguageGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
+import { serverEnv } from '@/env/server-env';
 import type { Language } from '@/lib/types';
 
 export type TranslationFormat = 'plain' | 'icu';
@@ -19,23 +20,6 @@ export interface V1LanguageGetTranslationsResponseBody {
   readonly locale: string;
   readonly translations: V1TranslationsByNamespace;
 }
-
-const DEFAULT_TRANSLATIONS_REVALIDATE_SECONDS = 3_600; // 1 hour (60 minutes)
-
-const getTranslationsRevalidateSeconds = (): number => {
-  const raw = process.env.TRANSLATIONS_REVALIDATE_SECONDS;
-  if (raw === undefined || raw.trim() === '') {
-    return DEFAULT_TRANSLATIONS_REVALIDATE_SECONDS;
-  }
-
-  const value = Number(raw);
-  if (!Number.isInteger(value) || value <= 0) {
-    throw new Error('TRANSLATIONS_REVALIDATE_SECONDS must be a positive integer');
-  }
-
-  return value;
-};
-const TRANSLATIONS_REVALIDATE_SECONDS = getTranslationsRevalidateSeconds();
 
 const DEFAULT_LANGUAGE: Language = 'en';
 
@@ -75,7 +59,7 @@ export async function getTranslations(
     // Explicitly set accept-language; otherwise some runtimes send "*" by default.
     headers: { 'accept-language': acceptLanguage },
     next: {
-      revalidate: TRANSLATIONS_REVALIDATE_SECONDS,
+      revalidate: serverEnv.translationsRevalidateSeconds,
       // tags: [
       //   TRANSLATIONS_TAG_ALL,
       //   ...(acceptLanguage ? [tagLocale(acceptLanguage)] : []),

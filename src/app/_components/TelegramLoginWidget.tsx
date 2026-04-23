@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { clientEnv } from '@/env/client-env';
 import { exchangeTelegramAuthFromLoginWidget } from '@/lib/telegram-auth';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
@@ -39,7 +40,7 @@ async function defaultOnAuth(user: TelegramWidgetUser): Promise<void> {
 
 export default function TelegramLoginWidget(props: TelegramLoginWidgetProps) {
   const { botUsername, size = 'small', onAuth, className } = props;
-  const telegramAuthSessionHelpUrl = process.env.NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL?.trim();
+  const telegramAuthSessionHelpUrl = clientEnv.telegramAuthSessionHelpUrl;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const onAuthRef = useRef(onAuth ?? defaultOnAuth);

@@ -4,12 +4,12 @@ import { getTranslations } from '@/lib/translations.server';
 import { I18nProvider } from '@/lib/i18n';
 import { getFeed } from '@/lib/feed.server';
 import type { V1TranslationsByNamespace } from '@/lib/translations.server';
-import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
+import { clientEnv } from '@/env/client-env';
 import type { Event } from '@/lib/types';
 import { gigToEvent } from '@/lib/feed.mapper';
 import { DEFAULT_FEED_ROUTE, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed.routes';
 
-const PAGE_SIZE = FEED_PAGE_SIZE;
+const PAGE_SIZE = clientEnv.feedPageSize;
 
 export const dynamicParams = false;
 export const revalidate = 60;

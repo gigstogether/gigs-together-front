@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
+import { getPublicAppBaseUrlOrThrow } from '@/env/client-env';
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL!.replace(/\/$/, '');
+const baseUrl = getPublicAppBaseUrlOrThrow();
 
 export default function robots(): MetadataRoute.Robots {
   return {

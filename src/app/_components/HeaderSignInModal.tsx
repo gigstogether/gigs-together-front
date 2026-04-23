@@ -6,13 +6,13 @@ import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { ApiError } from '@/lib/api-errors';
 import { subscribeTelegramSignInRequest } from '@/lib/telegram-auth';
-import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
+import { clientEnv } from '@/env/client-env';
 
 export default function HeaderSignInModal() {
   const { signIn } = useTelegramAuth();
   const [signInModalOpen, setSignInModalOpen] = useState(false);
-  const telegramBotUsername = getTelegramAuthBotUsername();
+  const telegramBotUsername = clientEnv.isAuthEnabled ? clientEnv.telegramBotUsername : undefined;
 
   const handleAuthenticated = useCallback(
     async (user: TelegramWidgetUser) => {

@@ -1,9 +1,10 @@
 import { ApiError } from '@/lib/api-errors';
+import { clientEnv } from '@/env/client-env';
 import { isRecord } from '@/lib/is-record';
 
 type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_APP_API_BASE_URL;
+const API_BASE_URL = clientEnv.appApiBaseUrl;
 
 export interface FetchApiJsonOptions extends RequestInit {
   onUnauthorized?: () => void;

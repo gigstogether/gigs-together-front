@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchFeedAvailableDates } from './feedApi';
-import { FEED_CALENDAR_DATES_STALE_TIME_MS } from '@/lib/feed.constants';
+import { clientEnv } from '@/env/client-env';
 
 export interface UseCalendarAvailableDatesParams {
   country: string;
@@ -29,7 +29,7 @@ export function useCalendarAvailableDates(
   const query = useQuery<string[], Error>({
     queryKey: ['feed', 'calendar-available-dates', locationKey],
     enabled: isEnabled,
-    staleTime: FEED_CALENDAR_DATES_STALE_TIME_MS,
+    staleTime: clientEnv.feedCalendarDatesStaleTimeMs,
     queryFn: async ({ signal }) => {
       const timeoutController = new AbortController();
       const timeoutId = window.setTimeout(() => {

@@ -5,6 +5,7 @@ import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/f
 import HeaderSignInModal from '@/app/_components/HeaderSignInModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationIcon } from '@/components/ui/location-icon';
+import { clientEnv } from '@/env/client-env';
 import { normalizeLocationTitle } from '@/lib/utils';
 import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
 
@@ -18,9 +19,9 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const { country, city, showSuggestGig = true } = props;
 
   const locationLabel = city ? normalizeLocationTitle(city) : country.toUpperCase();
-  const telegramUrl = process.env.NEXT_PUBLIC_TELEGRAM_URL;
-  const githubUrl = process.env.NEXT_PUBLIC_GITHUB_URL;
-  const suggestGigUrl = showSuggestGig ? process.env.NEXT_PUBLIC_SUGGEST_GIG_LINK : undefined;
+  const telegramUrl = clientEnv.telegramUrl;
+  const githubUrl = clientEnv.githubUrl;
+  const suggestGigUrl = showSuggestGig ? clientEnv.suggestGigLink : undefined;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);

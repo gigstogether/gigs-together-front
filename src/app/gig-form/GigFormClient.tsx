@@ -11,8 +11,8 @@ import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { ApiError } from '@/lib/api-errors';
 import type { Country } from '@/lib/countries.server';
-import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
+import { clientEnv } from '@/env/client-env';
 
 interface GigFormClientProps {
   countries: Country[];
@@ -26,7 +26,7 @@ export default function GigFormClient({
   gigPublicId,
 }: GigFormClientProps) {
   const { authState, isLoadingAuthState, signIn, signOut } = useTelegramAuth();
-  const telegramBotUsername = getTelegramAuthBotUsername();
+  const telegramBotUsername = clientEnv.isAuthEnabled ? clientEnv.telegramBotUsername : undefined;
   const isTelegramSignInAvailable = Boolean(telegramBotUsername?.trim());
   const miniAppEnv = useTelegramMiniAppEnv();
 

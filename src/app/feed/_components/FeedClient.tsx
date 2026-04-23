@@ -11,7 +11,7 @@ import { FeedMonths } from './feed-client/FeedMonths';
 import { useCalendarAvailableDates } from './feed-client/useCalendarAvailableDates';
 import { useFeedHeaderConfigSync } from './feed-client/useFeedHeaderConfigSync';
 import { useHeaderHeight } from './feed-client/useHeaderHeight';
-import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
+import { clientEnv } from '@/env/client-env';
 import { gigToEvent } from '@/lib/feed.mapper';
 import { useHashAutoScroll } from './feed-client/useHashAutoScroll';
 import { useInfiniteScroll } from './feed-client/useInfiniteScroll';
@@ -71,8 +71,8 @@ export default function FeedClient(props: FeedClientProps) {
     async (anchorYmd: string): Promise<Event[]> => {
       const res = await fetchFeedAroundWindow({
         anchorYmd,
-        beforeLimit: FEED_PAGE_SIZE,
-        afterLimit: FEED_PAGE_SIZE,
+        beforeLimit: clientEnv.feedPageSize,
+        afterLimit: clientEnv.feedPageSize,
         country,
         city,
       });
@@ -106,7 +106,7 @@ export default function FeedClient(props: FeedClientProps) {
     try {
       dispatchLoading({ type: 'next:start' });
       const res = await fetchFeedPage({
-        limit: FEED_PAGE_SIZE,
+        limit: clientEnv.feedPageSize,
         cursor: nextCursor,
         country,
         city,
@@ -135,7 +135,7 @@ export default function FeedClient(props: FeedClientProps) {
     try {
       dispatchLoading({ type: 'prev:start' });
       const res = await fetchFeedPage({
-        limit: FEED_PAGE_SIZE,
+        limit: clientEnv.feedPageSize,
         cursor: prevCursor,
         direction: 'prev',
         country,
@@ -171,7 +171,7 @@ export default function FeedClient(props: FeedClientProps) {
         dispatchLoading({ type: 'initial:start' });
         setError(null);
         const res = await fetchFeedPage({
-          limit: FEED_PAGE_SIZE,
+          limit: clientEnv.feedPageSize,
           cursor,
           country,
           city,

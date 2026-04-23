@@ -3,17 +3,17 @@
 import { LogIn, LogOut } from 'lucide-react';
 import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { getTelegramAuthBotUsername } from '@/lib/telegram-auth-env';
 import { useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { requestTelegramSignIn } from '@/lib/telegram-auth';
+import { clientEnv } from '@/env/client-env';
 
 const menuRowClass =
   'flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted';
 
 export default function HeaderAuthActions() {
   const { authState, signOut } = useTelegramAuth();
-  const telegramBotUsername = getTelegramAuthBotUsername();
+  const telegramBotUsername = clientEnv.isAuthEnabled ? clientEnv.telegramBotUsername : undefined;
   const miniAppEnv = useTelegramMiniAppEnv();
 
   const handleSignOut = useCallback(async () => {
