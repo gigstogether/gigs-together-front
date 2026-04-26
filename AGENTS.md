@@ -17,7 +17,7 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 ## Execution Rules
 
-- Do not run `build`, `test`, `typecheck`, `dev`, or start watchers or servers unless the user explicitly asks.
+- Do not run `build`, `dev`, or start watchers or servers unless the user explicitly asks.
 - If command execution is needed to validate a change, ask first instead of running it proactively.
 - After source code changes (`*.ts`, `*.tsx`, `*.js`, `*.jsx`, `*.json`), run `npm run lint:fix` before finishing the task.
 - Do not run lint after documentation-only changes (for example `*.md`).
