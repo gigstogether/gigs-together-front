@@ -55,7 +55,7 @@ export function useCalendarAvailableDates(
   return {
     availableDates,
     error,
-    isLoading: isPending || isFetching,
+    isLoading: isEnabled && (isPending || isFetching),
     isError,
     isSuccess,
   };
