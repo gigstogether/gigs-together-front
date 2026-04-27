@@ -84,5 +84,7 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 ## Notes
 
+- `'use client'` is not needed for every hook or component by default. Use it only in files that declare a client boundary.
+- A client boundary is a module that may be imported directly by a Server Component and therefore must explicitly opt into client-side execution. Files that are only imported from other client modules usually do not need their own `'use client'` directive.
 - This file is the repository-wide, tool-agnostic source of agent instructions.
 - If a tool supports its own instruction format, prefer pointing it to this file instead of duplicating rules.
