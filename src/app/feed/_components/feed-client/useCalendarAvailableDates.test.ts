@@ -106,7 +106,9 @@ describe('useCalendarAvailableDates', () => {
   });
 
   it('should expose loading state when query is pending', async () => {
-    vi.mocked(fetchFeedAvailableDates).mockImplementationOnce(() => new Promise(() => {}));
+    vi.mocked(fetchFeedAvailableDates).mockImplementationOnce(
+      () => new Promise<string[]>(() => {}),
+    );
 
     const queryClient = createTestQueryClient();
 
@@ -207,7 +209,7 @@ describe('useCalendarAvailableDates', () => {
     vi.mocked(fetchFeedAvailableDates).mockImplementationOnce(({ signal }) => {
       receivedSignal = signal;
 
-      return new Promise(() => {});
+      return new Promise<string[]>(() => {});
     });
 
     const queryClient = createTestQueryClient();
@@ -243,7 +245,7 @@ describe('useCalendarAvailableDates', () => {
     vi.mocked(fetchFeedAvailableDates).mockImplementationOnce(({ signal }) => {
       receivedSignal = signal;
 
-      return new Promise(() => {});
+      return new Promise<string[]>(() => {});
     });
 
     const queryClient = createTestQueryClient();

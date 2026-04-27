@@ -75,8 +75,8 @@ const DEFAULT_LOOKUP_FORM_VALUES: GigFormValues = {
 function createLookupData(overrides: Partial<GigLookupData> = {}): GigLookupData {
   return {
     title: 'Arctic Monkeys',
-    date: '2026-07-01T20:00:00.000Z',
-    endDate: '2026-07-02T20:00:00.000Z',
+    date: '2026-07-01',
+    endDate: '2026-07-02',
     city: 'Barcelona',
     country: 'es',
     venue: 'Razzmatazz',
@@ -213,8 +213,9 @@ describe('useGigLookup', () => {
     });
   });
 
-  it('should show error toast when lookup response does not include a date', async () => {
-    vi.mocked(lookupGig).mockResolvedValueOnce(createLookupData({ date: undefined }));
+  it('should show error toast when lookup request fails', async () => {
+    const error = new Error('Lookup failed');
+    vi.mocked(lookupGig).mockRejectedValueOnce(error);
 
     const { result } = renderUseGigLookup();
 
@@ -225,18 +226,9 @@ describe('useGigLookup', () => {
       description: 'Failed to start AI lookup.',
       variant: 'destructive',
     });
-  });
-
-  it('should report lookup validation error to console when API response does not include a date', async () => {
-    vi.mocked(lookupGig).mockResolvedValueOnce(createLookupData({ date: undefined }));
-
-    const { result } = renderUseGigLookup();
-
-    await triggerLookup(result.current.lookup.onLookup);
-
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        message: 'AI lookup did not return a date',
+        message: 'Lookup failed',
       }),
     );
     expect(consoleErrorSpy.mock.calls[0]?.[0]).toBeInstanceOf(Error);

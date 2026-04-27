@@ -4,24 +4,12 @@ import { toast } from '@/hooks/use-toast';
 import { lookupGig } from '@/lib/gig-form-api';
 import type { GigLookupData } from '@/lib/gig-form-api';
 import { toastTelegramInitDataExpired } from '@/lib/telegram-init-data-expired';
-import { dateToYMD } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 
 export interface GigLookupInput {
   readonly title: string;
   readonly city: string;
   readonly country: string;
-}
-
-export interface GigLookupResult {
-  readonly title?: string;
-  readonly date: string;
-  readonly endDate?: string;
-  readonly city?: string;
-  readonly country?: string;
-  readonly venue?: string;
-  readonly ticketsUrl?: string;
-  readonly posterUrl?: string;
 }
 
 export interface UseGigLookupResult {
@@ -50,48 +38,15 @@ function buildLookupRequest(input: GigLookupInput): GigLookupRequest {
   return { name, location };
 }
 
-function normalizeLookupResult(data: GigLookupData | null): GigLookupResult | null {
-  if (!data) {
-    return null;
-  }
-
-  if (!data.date) {
-    throw new Error('AI lookup did not return a date');
-  }
-
-  const date = dateToYMD(data.date);
-  if (!date) {
-    throw new Error('Invalid API response: "gig.date" must be YYYY-MM-DD (or ISO)');
-  }
-
-  const endDate = data.endDate ? dateToYMD(data.endDate) : undefined;
-  if (data.endDate && !endDate) {
-    throw new Error('Invalid API response: "gig.endDate" must be YYYY-MM-DD (or ISO)');
-  }
-
-  return {
-    title: data.title,
-    date,
-    endDate,
-    city: data.city,
-    country: data.country,
-    venue: data.venue,
-    ticketsUrl: data.ticketsUrl,
-    posterUrl: data.posterUrl,
-  };
-}
-
 export function useGigLookup(
   form: UseFormReturn<GigFormValues>,
   setPosterFile: (file: File | null) => void,
   setPosterUrl: (url: string) => void,
 ): UseGigLookupResult {
-  const mutation = useMutation<GigLookupResult | null, Error, GigLookupInput>({
-    mutationFn: async (input) => {
+  const mutation = useMutation<GigLookupData | null, Error, GigLookupInput>({
+    mutationFn: (input: GigLookupInput): Promise<GigLookupData | null> => {
       const request = buildLookupRequest(input);
-      const result = await lookupGig(request);
-
-      return normalizeLookupResult(result);
+      return lookupGig(request);
     },
   });
 
@@ -113,11 +68,9 @@ export function useGigLookup(
     }
   }
 
-  function applyLookupResult(result: GigLookupResult) {
+  function applyLookupResult(result: GigLookupData) {
     form.setValue('date', result.date, { shouldDirty: true });
 
-    // : (keyof Omit<GigLookupResult, 'posterUrl'>)[]
-    // : (keyof GigFormValues)[]
     const GIG_LOOKUP_OPTIONAL_FORM_FIELD_NAMES = [
       'title',
       'endDate',
@@ -141,7 +94,7 @@ export function useGigLookup(
     setPoster(result.posterUrl);
   }
 
-  function handleLookupSuccess(result: GigLookupResult | null) {
+  function handleLookupSuccess(result: GigLookupData | null) {
     if (!result) {
       toast({
         title: 'Not found',
