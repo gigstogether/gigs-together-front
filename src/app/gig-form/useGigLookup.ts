@@ -114,16 +114,28 @@ export function useGigLookup(
   }
 
   function applyLookupResult(result: GigLookupResult) {
-    if (result.title) form.setValue('title', result.title, { shouldDirty: true });
     form.setValue('date', result.date, { shouldDirty: true });
-    if (result.endDate) form.setValue('endDate', result.endDate, { shouldDirty: true });
-    if (result.city) form.setValue('city', result.city, { shouldDirty: true });
+
+    // : (keyof Omit<GigLookupResult, 'posterUrl'>)[]
+    // : (keyof GigFormValues)[]
+    const GIG_LOOKUP_OPTIONAL_FORM_FIELD_NAMES = [
+      'title',
+      'endDate',
+      'city',
+      'venue',
+      'ticketsUrl',
+    ] as const;
+
+    for (const fieldName of GIG_LOOKUP_OPTIONAL_FORM_FIELD_NAMES) {
+      const fieldValue = result[fieldName];
+      if (!fieldValue) {
+        continue;
+      }
+      form.setValue(fieldName, fieldValue, { shouldDirty: true });
+    }
+
     if (result.country) {
       form.setValue('country', result.country.toUpperCase(), { shouldDirty: true });
-    }
-    if (result.venue) form.setValue('venue', result.venue, { shouldDirty: true });
-    if (result.ticketsUrl) {
-      form.setValue('ticketsUrl', result.ticketsUrl, { shouldDirty: true });
     }
 
     setPoster(result.posterUrl);
