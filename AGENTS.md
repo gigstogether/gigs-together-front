@@ -53,6 +53,9 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Use `any` only when there is no realistic alternative, for example a truly untyped third-party API surface.
 - When using `any`, localize it at the boundary and add a short comment explaining why it is unavoidable.
 
+- Mark a function as `async` only when it contains `await`.
+- If a function returns a `Promise` without using `await`, declare the `Promise` return type explicitly in the signature instead of marking the function as `async`.
+
 - Avoid type assertions with `as` as much as possible.
 - Prefer type guards, narrowing, and better source types instead of `as`.
 - Prefer `satisfies` for validating object shapes without changing inferred types.
