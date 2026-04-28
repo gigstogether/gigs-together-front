@@ -19,7 +19,8 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 - Do not run `build`, `dev`, or start watchers or servers unless the user explicitly asks.
 - If command execution is needed to validate a change, ask first instead of running it proactively.
-- After source code changes (`*.ts`, `*.tsx`, `*.js`, `*.jsx`, `*.json`), run `npm run lint:fix` before finishing the task.
+- After source code changes (`*.ts`, `*.tsx`, `*.js`, `*.jsx`, `*.json`), run `npm run lint:fix` before finishing the task without asking the user.
+- If necessary for the task, it's allowed to run relevant tests without asking the user.
 - Do not run lint after documentation-only changes (for example `*.md`).
 
 ## Testing Rules
@@ -55,6 +56,7 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 - Mark a function as `async` only when it contains `await`.
 - If a function returns a `Promise` without using `await`, declare the `Promise` return type explicitly in the signature instead of marking the function as `async`.
+- Do not use `.then(...)` when the same logic can be written with `await`.
 
 - Avoid type assertions with `as` as much as possible.
 - Prefer type guards, narrowing, and better source types instead of `as`.
@@ -67,6 +69,8 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Prefer named types for public APIs such as service methods, controller responses, and module exports.
 - Do not use inline object types in public signatures such as `Promise<{ ... }>` or `foo(arg: { ... })`.
 - Extract object shapes into a named `interface` or `type`, ideally colocated in `types/requests/*` for DTOs.
+- Prefer a named params object for long function signatures.
+- When an object-parameter function signature becomes long, do not destructure in the parameter list; accept `params: SomeParams` and destructure inside the function body.
 
 - Prefer `interface` over `type` for object shapes unless `type` is clearly the better fit.
 - Use `type` for unions, intersections, mapped types, conditional types, tuples, and other patterns that interfaces cannot express cleanly.
@@ -87,7 +91,6 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 ## Notes
 
-- `'use client'` is not needed for every hook or component by default. Use it only in files that declare a client boundary.
-- A client boundary is a module that may be imported directly by a Server Component and therefore must explicitly opt into client-side execution. Files that are only imported from other client modules usually do not need their own `'use client'` directive.
+- Never add `'use client'` to hooks. Hooks are not server-component entry points and should only be used from client modules that already define the client boundary when needed.
 - This file is the repository-wide, tool-agnostic source of agent instructions.
 - If a tool supports its own instruction format, prefer pointing it to this file instead of duplicating rules.
