@@ -1,5 +1,3 @@
-'use client';
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchFeedAvailableDates } from './feedApi';
 import { clientEnv } from '@/env/client-env';
@@ -50,12 +48,12 @@ export function useCalendarAvailableDates(
     },
   });
 
-  const { isSuccess, isPending, isFetching, isError, error, data: availableDates } = query;
+  const { isSuccess, isPending, isError, error, data: availableDates } = query;
 
   return {
     availableDates,
     error,
-    isLoading: isEnabled && (isPending || isFetching),
+    isLoading: isEnabled && isPending,
     isError,
     isSuccess,
   };
