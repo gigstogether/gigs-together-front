@@ -76,6 +76,7 @@ export function useEditGigFormData(params: UseEditGigFormDataParams): UseEditGig
     enabled: Boolean(trimmedGigPublicId),
     retry: false,
     queryFn: async ({ signal }): Promise<EditGigFormQueryData> => {
+      // TODO: fix error "signal is aborted without reason"
       const timeoutController = new AbortController();
       const timeoutId = window.setTimeout(() => {
         timeoutController.abort();

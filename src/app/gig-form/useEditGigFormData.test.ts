@@ -31,7 +31,7 @@ vi.mock('@/lib/telegram-init-data-expired', () => ({
 }));
 
 vi.mock('@/lib/gig-form-api', async () => {
-  const actual = await vi.importActual<typeof import('@/lib/gig-form-api')>('@/lib/gig-form-api');
+  const actual = await vi.importActual('@/lib/gig-form-api');
   return {
     ...actual,
     fetchGigByPublicId: fetchGigByPublicIdMock,
