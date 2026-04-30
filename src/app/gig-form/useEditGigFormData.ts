@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 
 import { toast } from '@/hooks/use-toast';
-import { fetchGigByPublicId } from '@/lib/gig-form-api';
+import { fetchGigByPublicId, normalizeGigApiDate } from '@/lib/gig-form-api';
 import { getTelegramInitDataExpiredToastContent } from '@/lib/telegram-init-data-expired';
-import { dateToYMD, defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
+import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
 
 import type { GigFormData } from '@/lib/gig-form-api';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
@@ -33,15 +33,8 @@ interface UseEditGigFormDataResult {
 }
 
 function buildEditGigFormQueryData(data: GigFormData): EditGigFormQueryData {
-  const date = dateToYMD(data.date);
-  if (!date) {
-    throw new Error('Invalid API response: "gig.date" must be YYYY-MM-DD (or ISO)');
-  }
-
-  const endDate = data.endDate ? dateToYMD(data.endDate) : undefined;
-  if (data.endDate && !endDate) {
-    throw new Error('Invalid API response: "gig.endDate" must be YYYY-MM-DD (or ISO)');
-  }
+  const date = normalizeGigApiDate(data.date, 'gig.date');
+  const endDate = data.endDate ? normalizeGigApiDate(data.endDate, 'gig.endDate') : undefined;
 
   return {
     formValues: {

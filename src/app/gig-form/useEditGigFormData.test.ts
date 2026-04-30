@@ -30,9 +30,13 @@ vi.mock('@/lib/telegram-init-data-expired', () => ({
   getTelegramInitDataExpiredToastContent: vi.fn(() => null),
 }));
 
-vi.mock('@/lib/gig-form-api', () => ({
-  fetchGigByPublicId: fetchGigByPublicIdMock,
-}));
+vi.mock('@/lib/gig-form-api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/gig-form-api')>('@/lib/gig-form-api');
+  return {
+    ...actual,
+    fetchGigByPublicId: fetchGigByPublicIdMock,
+  };
+});
 
 function createTestQueryClient(): QueryClient {
   return new QueryClient({

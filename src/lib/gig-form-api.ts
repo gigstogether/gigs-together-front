@@ -85,6 +85,8 @@ interface GigLookupApiResponseBody {
   gig: unknown;
 }
 
+export type GigApiDateFieldPath = 'gig.date' | 'gig.endDate';
+
 function asRecordOrThrow(raw: unknown): Record<string, unknown> {
   if (!isRecord(raw)) {
     throw new Error('Invalid API response: expected an object');
@@ -156,7 +158,7 @@ function parseGigLookupData(raw: unknown): ParsedGigLookupData {
   };
 }
 
-function normalizeGigLookupDate(date: string, fieldPath: 'gig.date' | 'gig.endDate'): string {
+export function normalizeGigApiDate(date: string, fieldPath: GigApiDateFieldPath): string {
   try {
     return gigDateToYMD(date);
   } catch {
@@ -171,8 +173,8 @@ function normalizeGigLookupData(data: ParsedGigLookupData): GigLookupData {
 
   return {
     title: data.title,
-    date: normalizeGigLookupDate(data.date, 'gig.date'),
-    endDate: data.endDate ? normalizeGigLookupDate(data.endDate, 'gig.endDate') : undefined,
+    date: normalizeGigApiDate(data.date, 'gig.date'),
+    endDate: data.endDate ? normalizeGigApiDate(data.endDate, 'gig.endDate') : undefined,
     city: data.city,
     country: data.country,
     venue: data.venue,
