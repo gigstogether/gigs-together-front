@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchFeedAvailableDates } from './feedApi';
+import { feedKeys } from './feedKeys';
 import { clientEnv } from '@/env/client-env';
 
 export interface UseCalendarAvailableDatesParams {
@@ -22,10 +23,9 @@ export function useCalendarAvailableDates(
   params: UseCalendarAvailableDatesParams,
 ): UseCalendarAvailableDatesResult {
   const { country, city, isEnabled } = params;
-  const locationKey = `${country}|${city}`;
 
   const query = useQuery<string[], Error>({
-    queryKey: ['feed', 'calendar-available-dates', locationKey],
+    queryKey: feedKeys.calendarAvailableDates({ country, city }),
     enabled: isEnabled,
     staleTime: clientEnv.feedCalendarDatesStaleTimeMs,
     queryFn: async ({ signal }) => {

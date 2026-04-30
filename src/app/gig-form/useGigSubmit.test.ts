@@ -8,6 +8,7 @@ import type { PropsWithChildren, ReactElement } from 'react';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import type { GigUpsertApiParams } from '@/lib/gig-form-api';
 
+import { feedKeys } from '@/app/feed/_components/feed-client/feedKeys';
 import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
 import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
 
@@ -110,7 +111,7 @@ describe('useGigSubmit', () => {
         url: 'https://images.example/poster.png',
       },
     });
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['feed'] });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: feedKeys.all() });
     expect(onSuccess).toHaveBeenCalledTimes(1);
   });
 
