@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useReducer, useRef, useState } from 'react';
 import styles from '@/app/page.module.css';
 import { toLocalYMD } from '@/lib/utils';
 import '@/app/style.css';
@@ -16,16 +16,12 @@ import { gigToEvent } from '@/lib/feed.mapper';
 import { useHashAutoScroll } from './feed-client/useHashAutoScroll';
 import { useInfiniteScroll } from './feed-client/useInfiniteScroll';
 import { useVisibleEventDateOnScroll } from './feed-client/useVisibleEventDateOnScroll';
-import { createInitialFeedLoadingState, feedLoadingReducer } from './feed-client/feedLoading';
-import type { FeedLoadingState } from './feed-client/feedLoading';
-import { mergeUniqueSorted, sortEventsAsc } from './feed-client/feedEvents';
+import { feedLoadingReducer } from './feed-client/feedLoading';
+import { mergeUniqueSorted } from './feed-client/feedEvents';
 import { usePrependScrollRestore } from './feed-client/usePrependScrollRestore';
 import { useEventHashLoader } from './feed-client/useEventHashLoader';
-import {
-  fetchFeedAnchorYmdByPublicId,
-  fetchFeedAroundWindow,
-  fetchFeedPage,
-} from './feed-client/feedApi';
+import { fetchFeedAnchorYmdByPublicId, fetchFeedAroundWindow } from './feed-client/feedApi';
+import { useFeedInfiniteQuery } from './feed-client/useFeedInfiniteQuery';
 
 interface FeedClientProps {
   country: string; // ISO like "es"
@@ -42,22 +38,37 @@ export default function FeedClient(props: FeedClientProps) {
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 44
 
-  const [events, setEvents] = useState<Event[]>(() => initialEvents ?? []);
-  const [loading, dispatchLoading] = useReducer(
-    feedLoadingReducer,
-    initialEvents !== undefined,
-    (hasInitialEvents): FeedLoadingState => createInitialFeedLoadingState({ hasInitialEvents }),
-  );
+  const feedQuery = useFeedInfiniteQuery({
+    country,
+    city,
+    initialEvents,
+    initialPrevCursor,
+    initialNextCursor,
+    resolveCountryName: (iso) => t('country', iso),
+  });
+  const {
+    events,
+    hasMore,
+    hasPrev,
+    isInitialLoading,
+    isLoadingNext,
+    isLoadingPrev,
+    error: feedError,
+    fetchNextPage: fetchNextFeedPage,
+    fetchPrevPage: fetchPrevFeedPage,
+    replaceWithWindow,
+  } = feedQuery;
   const [error, setError] = useState<string | null>(null);
-  const [nextCursor, setNextCursor] = useState<string | undefined>(() => initialNextCursor);
-  const [prevCursor, setPrevCursor] = useState<string | undefined>(() => initialPrevCursor);
+  const [loading, dispatchLoading] = useReducer(feedLoadingReducer, {
+    initial: false,
+    next: false,
+    prev: false,
+    jump: false,
+  });
   const [infiniteScrollResetKey, setInfiniteScrollResetKey] = useState(0);
 
   const eventRefs = useRef<Map<string, HTMLElement>>(new Map());
-  const inFlightNextRef = useRef(false);
-  const inFlightPrevRef = useRef(false);
   const inFlightJumpRef = useRef(false);
-  const appliedInitialSnapshotRef = useRef<string | null>(null);
   const { capture: capturePrependAnchor, clear: clearPrependAnchor } = usePrependScrollRestore({
     events,
     headerOffsetPx: headerH ?? 0,
@@ -84,14 +95,15 @@ export default function FeedClient(props: FeedClientProps) {
         gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
       );
 
-      setPrevCursor(res.prevCursor);
-      setNextCursor(res.nextCursor);
-
       const windowEvents = mergeUniqueSorted(mappedBefore, mappedAfter);
-      setEvents(windowEvents);
+      replaceWithWindow({
+        events: windowEvents,
+        prevCursor: res.prevCursor,
+        nextCursor: res.nextCursor,
+      });
       return windowEvents;
     },
-    [city, country, t],
+    [city, country, replaceWithWindow, t],
   );
 
   const fetchHashTargetAnchorYmd = useCallback(async (publicId: string): Promise<string> => {
@@ -99,148 +111,21 @@ export default function FeedClient(props: FeedClientProps) {
   }, []);
 
   const fetchNextPage = useCallback(async () => {
-    if (!nextCursor) return;
-    if (inFlightNextRef.current) return;
-    inFlightNextRef.current = true;
-
-    try {
-      dispatchLoading({ type: 'next:start' });
-      const res = await fetchFeedPage({
-        limit: clientEnv.feedPageSize,
-        cursor: nextCursor,
-        country,
-        city,
-      });
-      const mapped: Event[] = res.gigs.map((gig) =>
-        gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
-      );
-
-      setEvents((prev) => mergeUniqueSorted(prev, mapped));
-      setNextCursor(res.nextCursor);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      dispatchLoading({ type: 'next:end' });
-      inFlightNextRef.current = false;
-    }
-  }, [city, country, nextCursor, t]);
+    await fetchNextFeedPage();
+  }, [fetchNextFeedPage]);
 
   const fetchPrevPage = useCallback(async () => {
-    if (!prevCursor) return;
-    if (inFlightPrevRef.current) return;
-    inFlightPrevRef.current = true;
-
     capturePrependAnchor();
 
     try {
-      dispatchLoading({ type: 'prev:start' });
-      const res = await fetchFeedPage({
-        limit: clientEnv.feedPageSize,
-        cursor: prevCursor,
-        direction: 'prev',
-        country,
-        city,
-      });
-      const mapped: Event[] = res.gigs.map((gig) =>
-        gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
-      );
-
-      if (mapped.length === 0) {
-        clearPrependAnchor();
-        setPrevCursor(undefined);
-        return;
-      }
-
-      setEvents((prev) => mergeUniqueSorted(prev, mapped));
-      if (!res.prevCursor || res.prevCursor === prevCursor) {
-        setPrevCursor(undefined);
-        return;
-      }
-      setPrevCursor(res.prevCursor);
+      await fetchPrevFeedPage();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      dispatchLoading({ type: 'prev:end' });
-      inFlightPrevRef.current = false;
+      clearPrependAnchor();
+      throw err;
     }
-  }, [capturePrependAnchor, city, clearPrependAnchor, country, prevCursor, t]);
+  }, [capturePrependAnchor, clearPrependAnchor, fetchPrevFeedPage]);
 
-  const fetchInitial = useCallback(
-    async (cursor?: string) => {
-      try {
-        dispatchLoading({ type: 'initial:start' });
-        setError(null);
-        const res = await fetchFeedPage({
-          limit: clientEnv.feedPageSize,
-          cursor,
-          country,
-          city,
-        });
-        setPrevCursor(res.prevCursor);
-
-        const mapped: Event[] = res.gigs.map((gig) =>
-          gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
-        );
-
-        setEvents(sortEventsAsc(mapped));
-        setNextCursor(res.nextCursor);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        dispatchLoading({ type: 'initial:end' });
-        dispatchLoading({ type: 'next:end' });
-        dispatchLoading({ type: 'prev:end' });
-        dispatchLoading({ type: 'jump:end' });
-        inFlightNextRef.current = false;
-        inFlightPrevRef.current = false;
-        inFlightJumpRef.current = false;
-      }
-    },
-    [city, country, t],
-  );
-
-  useEffect(() => {
-    if (initialEvents === undefined) {
-      appliedInitialSnapshotRef.current = null;
-      return;
-    }
-
-    const firstId = initialEvents[0]?.id ?? '';
-    const lastId = initialEvents[initialEvents.length - 1]?.id ?? '';
-    const snapshot = [
-      country,
-      city,
-      initialPrevCursor ?? '',
-      initialNextCursor ?? '',
-      String(initialEvents.length),
-      firstId,
-      lastId,
-    ].join('|');
-
-    if (appliedInitialSnapshotRef.current === snapshot) {
-      return;
-    }
-    appliedInitialSnapshotRef.current = snapshot;
-
-    setEvents(initialEvents);
-    setNextCursor(initialNextCursor);
-    setError(null);
-    setPrevCursor(initialPrevCursor);
-    dispatchLoading({ type: 'reset' });
-    inFlightNextRef.current = false;
-    inFlightPrevRef.current = false;
-    inFlightJumpRef.current = false;
-  }, [city, country, initialEvents, initialNextCursor, initialPrevCursor]);
-
-  useEffect(() => {
-    if (initialEvents !== undefined) {
-      return;
-    }
-    void fetchInitial();
-  }, [fetchInitial, initialEvents]);
-
-  const hasMore = Boolean(nextCursor);
-  const hasPrev = Boolean(prevCursor);
+  const visibleError = error ?? feedError;
 
   const {
     availableDates: calendarAvailableDates,
@@ -251,7 +136,7 @@ export default function FeedClient(props: FeedClientProps) {
   } = useCalendarAvailableDates({
     country,
     city,
-    isEnabled: !loading.initial && !error,
+    isEnabled: !isInitialLoading && !visibleError,
   });
 
   const calendarDatesError = calendarDatesIsError
@@ -265,12 +150,13 @@ export default function FeedClient(props: FeedClientProps) {
 
   useHashAutoScroll({ events, headerOffsetPx: headerH ?? 0, extraOffsetPx: 32 });
   useEventHashLoader({
-    isEnabled: !loading.initial,
+    isEnabled: !isInitialLoading,
     isBusyRef: inFlightJumpRef,
     setIsBusy: (next) => {
       inFlightJumpRef.current = next;
     },
     dispatchLoading,
+    // TODO: extract error into a hook return value
     setError,
     bumpInfiniteScrollResetKey,
     resolveAnchorYmdByEventId: fetchHashTargetAnchorYmd,
@@ -281,16 +167,16 @@ export default function FeedClient(props: FeedClientProps) {
 
   const { sentinelRef: bottomSentinelRef } = useInfiniteScroll({
     isEnabled: true,
-    canLoadMore: hasMore && !loading.initial && !loading.next && !loading.jump,
-    isLoading: loading.initial || loading.next || loading.jump,
+    canLoadMore: hasMore && !isInitialLoading && !isLoadingNext && !loading.jump,
+    isLoading: isInitialLoading || isLoadingNext || loading.jump,
     onLoadMore: fetchNextPage,
     infiniteScrollResetKey,
   });
 
   const { sentinelRef: topSentinelRef } = useInfiniteScroll({
     isEnabled: true,
-    canLoadMore: hasPrev && !loading.initial && !loading.prev && !loading.jump,
-    isLoading: loading.initial || loading.prev || loading.jump,
+    canLoadMore: hasPrev && !isInitialLoading && !isLoadingPrev && !loading.jump,
+    isLoading: isInitialLoading || isLoadingPrev || loading.jump,
     onLoadMore: fetchPrevPage,
     rootMargin: '400px 0px',
     infiniteScrollResetKey,
@@ -372,7 +258,7 @@ export default function FeedClient(props: FeedClientProps) {
     onDayClick: handleDayClick,
   });
 
-  if (loading.initial) {
+  if (isInitialLoading) {
     return (
       <div className="min-h-[100svh]">
         <main className={styles.main}>
@@ -384,12 +270,12 @@ export default function FeedClient(props: FeedClientProps) {
     );
   }
 
-  if (error) {
+  if (visibleError) {
     return (
       <div className="min-h-[100svh]">
         <main className={styles.main}>
           <div className="flex justify-center items-center h-96">
-            <div className="text-lg text-red-600">Error: {error}</div>
+            <div className="text-lg text-red-600">Error: {visibleError}</div>
           </div>
         </main>
       </div>
@@ -416,7 +302,7 @@ export default function FeedClient(props: FeedClientProps) {
             className="h-px"
             aria-hidden
           />
-          {loading.prev ? (
+          {isLoadingPrev ? (
             <div className="py-4 text-center text-gray-500">Loading previous…</div>
           ) : null}
           <FeedMonths
@@ -429,7 +315,7 @@ export default function FeedClient(props: FeedClientProps) {
             className="h-12"
             aria-hidden
           />
-          {loading.next ? (
+          {isLoadingNext ? (
             <div className="py-4 text-center text-gray-500">Loading more…</div>
           ) : null}
         </div>
