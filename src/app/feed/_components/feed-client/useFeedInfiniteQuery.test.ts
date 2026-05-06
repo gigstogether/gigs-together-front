@@ -1,7 +1,10 @@
 // @vitest-environment jsdom
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { createElement } from 'react';
 
+import type { PropsWithChildren, ReactElement } from 'react';
 import type { Event, V1GigGetResponseBody } from '@/lib/types';
 
 import { useFeedInfiniteQuery } from './useFeedInfiniteQuery';
@@ -12,6 +15,7 @@ interface FetchFeedPageParams {
   readonly direction?: 'prev';
   readonly country?: string;
   readonly city?: string;
+  readonly signal?: AbortSignal;
 }
 
 const { fetchFeedPageMock } = vi.hoisted(() => ({
@@ -21,6 +25,44 @@ const { fetchFeedPageMock } = vi.hoisted(() => ({
 vi.mock('./feedApi', () => ({
   fetchFeedPage: fetchFeedPageMock,
 }));
+
+function createTestQueryClient(): QueryClient {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: 0,
+      },
+    },
+  });
+}
+
+function createWrapper(queryClient: QueryClient): (props: PropsWithChildren) => ReactElement {
+  return function TestQueryClientProvider({ children }: PropsWithChildren): ReactElement {
+    return createElement(QueryClientProvider, { client: queryClient }, children);
+  };
+}
+
+interface Deferred<TValue> {
+  readonly promise: Promise<TValue>;
+  readonly resolve: (value: TValue) => void;
+}
+
+function createDeferred<TValue>(): Deferred<TValue> {
+  let resolve: ((value: TValue) => void) | undefined;
+  const promise = new Promise<TValue>((promiseResolve) => {
+    resolve = promiseResolve;
+  });
+
+  if (!resolve) {
+    throw new Error('Deferred promise resolver was not initialized.');
+  }
+
+  return {
+    promise,
+    resolve,
+  };
+}
 
 function createEvent(overrides: Partial<Event> = {}): Event {
   return {
@@ -43,15 +85,21 @@ describe('useFeedInfiniteQuery', () => {
   });
 
   it('should expose initial events from server data immediately', () => {
-    const { result } = renderHook(() =>
-      useFeedInfiniteQuery({
-        country: 'es',
-        city: 'barcelona',
-        initialEvents: [createEvent()],
-        initialPrevCursor: 'prev-1',
-        initialNextCursor: 'next-1',
-        resolveCountryName: () => 'Spain',
-      }),
+    const queryClient = createTestQueryClient();
+
+    const { result } = renderHook(
+      () =>
+        useFeedInfiniteQuery({
+          country: 'es',
+          city: 'barcelona',
+          initialEvents: [createEvent()],
+          initialPrevCursor: 'prev-1',
+          initialNextCursor: 'next-1',
+          resolveCountryName: () => 'Spain',
+        }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
     );
 
     expect(result.current.events).toEqual([createEvent()]);
@@ -61,6 +109,8 @@ describe('useFeedInfiniteQuery', () => {
   });
 
   it('should fetch initial events when no initial snapshot is provided', async () => {
+    const queryClient = createTestQueryClient();
+
     fetchFeedPageMock.mockResolvedValueOnce({
       gigs: [
         {
@@ -76,12 +126,16 @@ describe('useFeedInfiniteQuery', () => {
       nextCursor: 'next-2',
     });
 
-    const { result } = renderHook(() =>
-      useFeedInfiniteQuery({
-        country: 'es',
-        city: 'barcelona',
-        resolveCountryName: () => 'Spain',
-      }),
+    const { result } = renderHook(
+      () =>
+        useFeedInfiniteQuery({
+          country: 'es',
+          city: 'barcelona',
+          resolveCountryName: () => 'Spain',
+        }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
     );
 
     await waitFor(() => {
@@ -92,12 +146,17 @@ describe('useFeedInfiniteQuery', () => {
       limit: expect.any(Number),
       country: 'es',
       city: 'barcelona',
+      cursor: undefined,
+      direction: undefined,
+      signal: expect.any(AbortSignal),
     });
     expect(result.current.events.map((event) => event.id)).toEqual(['gig-2']);
     expect(result.current.hasMore).toBe(true);
   });
 
   it('should fetch the next page and merge events when requested', async () => {
+    const queryClient = createTestQueryClient();
+
     fetchFeedPageMock.mockResolvedValueOnce({
       gigs: [
         {
@@ -114,14 +173,18 @@ describe('useFeedInfiniteQuery', () => {
       nextCursor: 'next-2',
     });
 
-    const { result } = renderHook(() =>
-      useFeedInfiniteQuery({
-        country: 'es',
-        city: 'barcelona',
-        initialEvents: [createEvent()],
-        initialNextCursor: 'next-1',
-        resolveCountryName: () => 'Spain',
-      }),
+    const { result } = renderHook(
+      () =>
+        useFeedInfiniteQuery({
+          country: 'es',
+          city: 'barcelona',
+          initialEvents: [createEvent()],
+          initialNextCursor: 'next-1',
+          resolveCountryName: () => 'Spain',
+        }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
     );
 
     await act(async () => {
@@ -131,9 +194,117 @@ describe('useFeedInfiniteQuery', () => {
     expect(fetchFeedPageMock).toHaveBeenCalledWith({
       limit: expect.any(Number),
       cursor: 'next-1',
+      direction: undefined,
       country: 'es',
       city: 'barcelona',
+      signal: expect.any(AbortSignal),
     });
-    expect(result.current.events.map((event) => event.id)).toEqual(['gig-1', 'gig-2']);
+    await waitFor(() => {
+      expect(result.current.events.map((event) => event.id)).toEqual(['gig-1', 'gig-2']);
+    });
+  });
+
+  it('should fetch the previous page when requested', async () => {
+    const queryClient = createTestQueryClient();
+
+    fetchFeedPageMock.mockResolvedValueOnce({
+      gigs: [
+        {
+          id: 'gig-0',
+          title: 'Phoenix',
+          date: '2026-06-30',
+          city: 'Barcelona',
+          country: 'es',
+          venue: 'Sala',
+          ticketsUrl: 'https://tickets.example/gig-0',
+        },
+      ],
+      prevCursor: 'prev-0',
+      nextCursor: 'next-0',
+    });
+
+    const { result } = renderHook(
+      () =>
+        useFeedInfiniteQuery({
+          country: 'es',
+          city: 'barcelona',
+          initialEvents: [createEvent()],
+          initialPrevCursor: 'prev-1',
+          resolveCountryName: () => 'Spain',
+        }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
+    );
+
+    await act(async () => {
+      await result.current.fetchPrevPage();
+    });
+
+    expect(fetchFeedPageMock).toHaveBeenCalledWith({
+      limit: expect.any(Number),
+      cursor: 'prev-1',
+      direction: 'prev',
+      country: 'es',
+      city: 'barcelona',
+      signal: expect.any(AbortSignal),
+    });
+    await waitFor(() => {
+      expect(result.current.events.map((event) => event.id)).toEqual(['gig-0', 'gig-1']);
+    });
+  });
+
+  it('should not restart the previous page request when called twice before completion', async () => {
+    const queryClient = createTestQueryClient();
+    const deferredResponse = createDeferred<V1GigGetResponseBody>();
+
+    fetchFeedPageMock.mockReturnValueOnce(deferredResponse.promise);
+
+    const { result } = renderHook(
+      () =>
+        useFeedInfiniteQuery({
+          country: 'es',
+          city: 'barcelona',
+          initialEvents: [createEvent()],
+          initialPrevCursor: 'prev-1',
+          resolveCountryName: () => 'Spain',
+        }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
+    );
+
+    const requests: Promise<void>[] = [];
+
+    await act(async () => {
+      requests.push(result.current.fetchPrevPage(), result.current.fetchPrevPage());
+      await Promise.resolve();
+    });
+
+    expect(fetchFeedPageMock).toHaveBeenCalledTimes(1);
+
+    deferredResponse.resolve({
+      gigs: [
+        {
+          id: 'gig-0',
+          title: 'Phoenix',
+          date: '2026-06-30',
+          city: 'Barcelona',
+          country: 'es',
+          venue: 'Sala',
+          ticketsUrl: 'https://tickets.example/gig-0',
+        },
+      ],
+      prevCursor: 'prev-0',
+      nextCursor: 'next-0',
+    });
+
+    await act(async () => {
+      await Promise.all(requests);
+    });
+
+    await waitFor(() => {
+      expect(result.current.events.map((event) => event.id)).toEqual(['gig-0', 'gig-1']);
+    });
   });
 });

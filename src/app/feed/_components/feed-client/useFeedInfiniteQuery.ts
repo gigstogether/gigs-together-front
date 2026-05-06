@@ -1,11 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 
+import type { InfiniteData } from '@tanstack/react-query';
 import type { Event, V1GigGetResponseBodyGig } from '@/lib/types';
 
 import { clientEnv } from '@/env/client-env';
 import { gigToEvent } from '@/lib/feed.mapper';
+import { mergeUniqueSorted } from './feedEvents';
 import { fetchFeedPage } from './feedApi';
-import { mergeUniqueSorted, sortEventsAsc } from './feedEvents';
+import { feedKeys } from './feedKeys';
+
+export type ResolveCountryName = (iso: string) => string;
 
 export interface UseFeedInfiniteQueryParams {
   readonly country: string;
@@ -13,7 +18,7 @@ export interface UseFeedInfiniteQueryParams {
   readonly initialEvents?: readonly Event[];
   readonly initialPrevCursor?: string;
   readonly initialNextCursor?: string;
-  readonly resolveCountryName: (iso: string) => string;
+  readonly resolveCountryName: ResolveCountryName;
 }
 
 export interface ReplaceFeedWindowParams {
@@ -35,144 +40,130 @@ export interface UseFeedInfiniteQueryResult {
   readonly replaceWithWindow: (params: ReplaceFeedWindowParams) => void;
 }
 
+type FeedPageDirection = 'initial' | 'next' | 'prev';
+
+interface FeedPageParam {
+  readonly cursor?: string;
+  readonly direction: FeedPageDirection;
+}
+
+interface FeedEventsPage {
+  readonly events: readonly Event[];
+  readonly prevCursor?: string;
+  readonly nextCursor?: string;
+  readonly requestedCursor?: string;
+}
+
+interface CreateInitialInfiniteDataParams {
+  readonly initialEvents: readonly Event[];
+  readonly initialPrevCursor?: string;
+  readonly initialNextCursor?: string;
+}
+
+const INITIAL_FEED_PAGE_PARAM = { direction: 'initial' } satisfies FeedPageParam;
+
 function mapGigsToEvents(
   gigs: readonly V1GigGetResponseBodyGig[],
-  resolveCountryName: (iso: string) => string,
+  resolveCountryName: ResolveCountryName,
 ): Event[] {
   return gigs.map((gig) => gigToEvent(gig, { resolveCountryName }));
+}
+
+function createInitialInfiniteData(
+  params: CreateInitialInfiniteDataParams,
+): InfiniteData<FeedEventsPage, FeedPageParam> {
+  return {
+    pages: [
+      {
+        events: [...params.initialEvents],
+        prevCursor: params.initialPrevCursor,
+        nextCursor: params.initialNextCursor,
+      },
+    ],
+    pageParams: [INITIAL_FEED_PAGE_PARAM],
+  };
 }
 
 export function useFeedInfiniteQuery(
   params: UseFeedInfiniteQueryParams,
 ): UseFeedInfiniteQueryResult {
-  const { country, city, initialEvents, initialPrevCursor, initialNextCursor, resolveCountryName } =
-    params;
-
-  const [events, setEvents] = useState<Event[]>(() => [...(initialEvents ?? [])]);
-  const [nextCursor, setNextCursor] = useState<string | undefined>(() => initialNextCursor);
-  const [prevCursor, setPrevCursor] = useState<string | undefined>(() => initialPrevCursor);
-  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(
-    () => initialEvents === undefined,
-  );
-  const [isLoadingNext, setIsLoadingNext] = useState<boolean>(false);
-  const [isLoadingPrev, setIsLoadingPrev] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const inFlightNextRef = useRef(false);
-  const inFlightPrevRef = useRef(false);
+  const queryClient = useQueryClient();
+  const resolveCountryNameRef = useRef(params.resolveCountryName);
   const appliedInitialSnapshotRef = useRef<string | null>(null);
-  const resolveCountryNameRef = useRef(resolveCountryName);
 
   useEffect(() => {
-    resolveCountryNameRef.current = resolveCountryName;
-  }, [resolveCountryName]);
+    resolveCountryNameRef.current = params.resolveCountryName;
+  }, [params.resolveCountryName]);
 
-  const fetchNextPage = useCallback(async (): Promise<void> => {
-    if (!nextCursor) return;
-    if (inFlightNextRef.current) return;
-    inFlightNextRef.current = true;
+  const queryKey = useMemo(
+    () => feedKeys.events({ country: params.country, city: params.city }),
+    [params.city, params.country],
+  );
 
-    try {
-      setIsLoadingNext(true);
+  const query = useInfiniteQuery({
+    queryKey,
+    initialPageParam: INITIAL_FEED_PAGE_PARAM,
+    initialData: params.initialEvents
+      ? createInitialInfiniteData({
+          initialEvents: params.initialEvents,
+          initialPrevCursor: params.initialPrevCursor,
+          initialNextCursor: params.initialNextCursor,
+        })
+      : undefined,
+    refetchOnMount: false,
+    queryFn: async ({ pageParam, signal }) => {
       const result = await fetchFeedPage({
         limit: clientEnv.feedPageSize,
-        cursor: nextCursor,
-        country,
-        city,
+        cursor: pageParam.cursor,
+        direction: pageParam.direction === 'prev' ? 'prev' : undefined,
+        country: params.country,
+        city: params.city,
+        signal,
       });
-      const mappedEvents = mapGigsToEvents(result.gigs, resolveCountryNameRef.current);
 
-      setEvents((prev) => mergeUniqueSorted(prev, mappedEvents));
-      setNextCursor(result.nextCursor);
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : 'An error occurred');
-    } finally {
-      setIsLoadingNext(false);
-      inFlightNextRef.current = false;
-    }
-  }, [city, country, nextCursor]);
+      return {
+        events: mapGigsToEvents(result.gigs, resolveCountryNameRef.current),
+        prevCursor: result.prevCursor,
+        nextCursor: result.nextCursor,
+        requestedCursor: pageParam.cursor,
+      } satisfies FeedEventsPage;
+    },
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.nextCursor || lastPage.nextCursor === lastPage.requestedCursor) {
+        return undefined;
+      }
 
-  const fetchPrevPage = useCallback(async (): Promise<void> => {
-    if (!prevCursor) return;
-    if (inFlightPrevRef.current) return;
-    inFlightPrevRef.current = true;
+      return {
+        cursor: lastPage.nextCursor,
+        direction: 'next',
+      } satisfies FeedPageParam;
+    },
+    getPreviousPageParam: (firstPage) => {
+      if (!firstPage.prevCursor || firstPage.prevCursor === firstPage.requestedCursor) {
+        return undefined;
+      }
 
-    try {
-      setIsLoadingPrev(true);
-      const result = await fetchFeedPage({
-        limit: clientEnv.feedPageSize,
-        cursor: prevCursor,
+      return {
+        cursor: firstPage.prevCursor,
         direction: 'prev',
-        country,
-        city,
-      });
-      const mappedEvents = mapGigsToEvents(result.gigs, resolveCountryNameRef.current);
-
-      if (mappedEvents.length === 0) {
-        setPrevCursor(undefined);
-        return;
-      }
-
-      setEvents((prev) => mergeUniqueSorted(prev, mappedEvents));
-      if (!result.prevCursor || result.prevCursor === prevCursor) {
-        setPrevCursor(undefined);
-        return;
-      }
-      setPrevCursor(result.prevCursor);
-    } catch (prevError) {
-      setError(prevError instanceof Error ? prevError.message : 'An error occurred');
-    } finally {
-      setIsLoadingPrev(false);
-      inFlightPrevRef.current = false;
-    }
-  }, [city, country, prevCursor]);
-
-  const fetchInitial = useCallback(async (): Promise<void> => {
-    try {
-      setIsInitialLoading(true);
-      setError(null);
-      const result = await fetchFeedPage({
-        limit: clientEnv.feedPageSize,
-        country,
-        city,
-      });
-      const mappedEvents = mapGigsToEvents(result.gigs, resolveCountryNameRef.current);
-
-      setPrevCursor(result.prevCursor);
-      setNextCursor(result.nextCursor);
-      setEvents(sortEventsAsc(mappedEvents));
-    } catch (initialError) {
-      setError(initialError instanceof Error ? initialError.message : 'An error occurred');
-    } finally {
-      setIsInitialLoading(false);
-      setIsLoadingNext(false);
-      setIsLoadingPrev(false);
-      inFlightNextRef.current = false;
-      inFlightPrevRef.current = false;
-    }
-  }, [city, country]);
-
-  const replaceWithWindow = useCallback((replaceParams: ReplaceFeedWindowParams): void => {
-    setEvents([...replaceParams.events]);
-    setPrevCursor(replaceParams.prevCursor);
-    setNextCursor(replaceParams.nextCursor);
-    setError(null);
-  }, []);
+      } satisfies FeedPageParam;
+    },
+  });
 
   useEffect(() => {
-    if (initialEvents === undefined) {
+    if (params.initialEvents === undefined) {
       appliedInitialSnapshotRef.current = null;
       return;
     }
 
-    const firstId = initialEvents[0]?.id ?? '';
-    const lastId = initialEvents[initialEvents.length - 1]?.id ?? '';
+    const firstId = params.initialEvents[0]?.id ?? '';
+    const lastId = params.initialEvents[params.initialEvents.length - 1]?.id ?? '';
     const snapshot = [
-      country,
-      city,
-      initialPrevCursor ?? '',
-      initialNextCursor ?? '',
-      String(initialEvents.length),
+      params.country,
+      params.city,
+      params.initialPrevCursor ?? '',
+      params.initialNextCursor ?? '',
+      String(params.initialEvents.length),
       firstId,
       lastId,
     ].join('|');
@@ -182,32 +173,61 @@ export function useFeedInfiniteQuery(
     }
     appliedInitialSnapshotRef.current = snapshot;
 
-    setEvents([...initialEvents]);
-    setPrevCursor(initialPrevCursor);
-    setNextCursor(initialNextCursor);
-    setError(null);
-    setIsInitialLoading(false);
-    setIsLoadingNext(false);
-    setIsLoadingPrev(false);
-    inFlightNextRef.current = false;
-    inFlightPrevRef.current = false;
-  }, [city, country, initialEvents, initialNextCursor, initialPrevCursor]);
+    queryClient.setQueryData<InfiniteData<FeedEventsPage, FeedPageParam>>(
+      queryKey,
+      createInitialInfiniteData({
+        initialEvents: params.initialEvents,
+        initialPrevCursor: params.initialPrevCursor,
+        initialNextCursor: params.initialNextCursor,
+      }),
+    );
+  }, [
+    params.city,
+    params.country,
+    params.initialEvents,
+    params.initialNextCursor,
+    params.initialPrevCursor,
+    queryClient,
+    queryKey,
+  ]);
 
-  useEffect(() => {
-    if (initialEvents !== undefined) {
-      return;
-    }
-    void fetchInitial();
-  }, [fetchInitial, initialEvents]);
+  const events = useMemo(() => {
+    const pages = query.data?.pages ?? [];
+    return pages.reduce<Event[]>((acc, page) => mergeUniqueSorted(acc, page.events), []);
+  }, [query.data]);
+
+  const replaceWithWindow = useCallback(
+    (replaceParams: ReplaceFeedWindowParams): void => {
+      queryClient.setQueryData<InfiniteData<FeedEventsPage, FeedPageParam>>(queryKey, {
+        pages: [
+          {
+            events: [...replaceParams.events],
+            prevCursor: replaceParams.prevCursor,
+            nextCursor: replaceParams.nextCursor,
+          },
+        ],
+        pageParams: [INITIAL_FEED_PAGE_PARAM],
+      });
+    },
+    [queryClient, queryKey],
+  );
+
+  const fetchNextPage = useCallback(async (): Promise<void> => {
+    await query.fetchNextPage({ cancelRefetch: false });
+  }, [query]);
+
+  const fetchPrevPage = useCallback(async (): Promise<void> => {
+    await query.fetchPreviousPage({ cancelRefetch: false });
+  }, [query]);
 
   return {
     events,
-    hasMore: Boolean(nextCursor),
-    hasPrev: Boolean(prevCursor),
-    isInitialLoading,
-    isLoadingNext,
-    isLoadingPrev,
-    error,
+    hasMore: Boolean(query.hasNextPage),
+    hasPrev: Boolean(query.hasPreviousPage),
+    isInitialLoading: query.isPending && !query.data,
+    isLoadingNext: query.isFetchingNextPage,
+    isLoadingPrev: query.isFetchingPreviousPage,
+    error: query.error?.message ?? null,
     fetchNextPage,
     fetchPrevPage,
     replaceWithWindow,

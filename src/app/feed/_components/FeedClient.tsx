@@ -5,6 +5,8 @@ import styles from '@/app/page.module.css';
 import { toLocalYMD } from '@/lib/utils';
 import '@/app/style.css';
 import type { Event } from '@/lib/types';
+import type { ResolveCountryName } from './feed-client/useFeedInfiniteQuery';
+
 import { useT } from '@/lib/i18n';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
 import { FeedMonths } from './feed-client/FeedMonths';
@@ -24,11 +26,11 @@ import { fetchFeedAnchorYmdByPublicId, fetchFeedAroundWindow } from './feed-clie
 import { useFeedInfiniteQuery } from './feed-client/useFeedInfiniteQuery';
 
 interface FeedClientProps {
-  country: string; // ISO like "es"
-  city: string; // slug like "barcelona"
-  initialEvents?: Event[];
-  initialPrevCursor?: string;
-  initialNextCursor?: string;
+  readonly country: string; // ISO like "es"
+  readonly city: string; // slug like "barcelona"
+  readonly initialEvents?: Event[];
+  readonly initialPrevCursor?: string;
+  readonly initialNextCursor?: string;
 }
 
 export default function FeedClient(props: FeedClientProps) {
@@ -37,6 +39,7 @@ export default function FeedClient(props: FeedClientProps) {
   const t = useT();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 44
+  const resolveCountryName = useCallback<ResolveCountryName>((iso) => t('country', iso), [t]);
 
   const feedQuery = useFeedInfiniteQuery({
     country,
@@ -44,7 +47,7 @@ export default function FeedClient(props: FeedClientProps) {
     initialEvents,
     initialPrevCursor,
     initialNextCursor,
-    resolveCountryName: (iso) => t('country', iso),
+    resolveCountryName,
   });
   const {
     events,
@@ -88,13 +91,12 @@ export default function FeedClient(props: FeedClientProps) {
         city,
       });
 
-      const mappedBefore: Event[] = res.before.map((gig) =>
-        gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
-      );
-      const mappedAfter: Event[] = res.after.map((gig) =>
-        gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
-      );
-
+      const mappedBefore: Event[] = res.before.map((gig) => {
+        return gigToEvent(gig, { resolveCountryName });
+      });
+      const mappedAfter: Event[] = res.after.map((gig) => {
+        return gigToEvent(gig, { resolveCountryName });
+      });
       const windowEvents = mergeUniqueSorted(mappedBefore, mappedAfter);
       replaceWithWindow({
         events: windowEvents,
@@ -103,7 +105,7 @@ export default function FeedClient(props: FeedClientProps) {
       });
       return windowEvents;
     },
-    [city, country, replaceWithWindow, t],
+    [city, country, replaceWithWindow, resolveCountryName],
   );
 
   const fetchHashTargetAnchorYmd = useCallback(async (publicId: string): Promise<string> => {
