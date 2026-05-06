@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useReducer, useRef, useState } from 'react';
 import styles from '@/app/page.module.css';
 import { toLocalYMD } from '@/lib/utils';
@@ -22,7 +23,8 @@ import { feedLoadingReducer } from './feed-client/feedLoading';
 import { mergeUniqueSorted } from './feed-client/feedEvents';
 import { usePrependScrollRestore } from './feed-client/usePrependScrollRestore';
 import { useEventHashLoader } from './feed-client/useEventHashLoader';
-import { fetchFeedAnchorYmdByPublicId, fetchFeedAroundWindow } from './feed-client/feedApi';
+import { fetchFeedAroundWindow } from './feed-client/feedApi';
+import { feedAnchorDateByPublicIdQueryOptions } from './feed-client/fetchFeedAnchorDateQuery';
 import { useFeedInfiniteQuery } from './feed-client/useFeedInfiniteQuery';
 
 interface FeedClientProps {
@@ -40,6 +42,7 @@ export default function FeedClient(props: FeedClientProps) {
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 44
   const resolveCountryName = useCallback<ResolveCountryName>((iso) => t('country', iso), [t]);
+  const queryClient = useQueryClient();
 
   const feedQuery = useFeedInfiniteQuery({
     country,
@@ -108,9 +111,12 @@ export default function FeedClient(props: FeedClientProps) {
     [city, country, replaceWithWindow, resolveCountryName],
   );
 
-  const fetchHashTargetAnchorYmd = useCallback(async (publicId: string): Promise<string> => {
-    return fetchFeedAnchorYmdByPublicId({ publicId });
-  }, []);
+  const fetchHashTargetAnchorYmd = useCallback(
+    (publicId: string): Promise<string> => {
+      return queryClient.fetchQuery(feedAnchorDateByPublicIdQueryOptions(publicId));
+    },
+    [queryClient],
+  );
 
   const fetchNextPage = useCallback(async () => {
     await fetchNextFeedPage();

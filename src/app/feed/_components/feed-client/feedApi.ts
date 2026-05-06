@@ -26,7 +26,7 @@ interface FetchFeedAroundParams extends FeedLocationParams {
   readonly afterLimit: number;
 }
 
-interface FetchFeedAnchorYmdByPublicIdParams {
+export interface FetchFeedAnchorYmdByPublicIdParams {
   readonly publicId: string;
   readonly signal?: AbortSignal;
 }
