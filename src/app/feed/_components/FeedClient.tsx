@@ -1,6 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useReducer, useRef, useState } from 'react';
 import styles from '@/app/page.module.css';
 import { toLocalYMD } from '@/lib/utils';
@@ -38,6 +39,9 @@ interface FeedClientProps {
 export default function FeedClient(props: FeedClientProps) {
   const { country, city, initialEvents, initialPrevCursor, initialNextCursor } = props;
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const t = useT();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 44
@@ -117,6 +121,14 @@ export default function FeedClient(props: FeedClientProps) {
     },
     [queryClient],
   );
+
+  const clearFeedLocationHash = useCallback(() => {
+    if (!window.location.hash) return;
+    const search = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    const url = `${pathname ?? ''}${search}`;
+    window.history.replaceState(null, '', url);
+    router.replace(url as Parameters<typeof router.replace>[0]);
+  }, [pathname, router, searchParams]);
 
   const fetchNextPage = useCallback(async () => {
     await fetchNextFeedPage();
@@ -202,6 +214,8 @@ export default function FeedClient(props: FeedClientProps) {
     async (day: Date) => {
       const key = toLocalYMD(day);
 
+      clearFeedLocationHash();
+
       const scrollToTarget = (el: HTMLElement) => {
         const headerPx = headerH ?? 0;
         const EXTRA_OFFSET_PX = 32;
@@ -252,7 +266,7 @@ export default function FeedClient(props: FeedClientProps) {
         inFlightJumpRef.current = false;
       }
     },
-    [events, fetchAroundAndReplace, headerH, bumpInfiniteScrollResetKey],
+    [clearFeedLocationHash, events, fetchAroundAndReplace, headerH, bumpInfiniteScrollResetKey],
   );
 
   useFeedHeaderConfigSync({
