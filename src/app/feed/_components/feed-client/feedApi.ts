@@ -20,7 +20,7 @@ interface FetchFeedPageParams extends FeedLocationParams {
   readonly direction?: 'prev';
 }
 
-export interface FetchFeedAroundParams extends FeedLocationParams {
+interface FetchFeedAroundParams extends FeedLocationParams {
   readonly anchorYmd: string;
   readonly beforeLimit: number;
   readonly afterLimit: number;

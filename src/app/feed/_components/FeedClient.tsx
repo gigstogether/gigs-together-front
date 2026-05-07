@@ -23,28 +23,9 @@ import { feedLoadingReducer } from './feed-client/feedLoading';
 import { mergeUniqueSorted } from './feed-client/feedEvents';
 import { usePrependScrollRestore } from './feed-client/usePrependScrollRestore';
 import { useEventHashLoader } from './feed-client/useEventHashLoader';
+import { fetchFeedAroundWindow } from './feed-client/feedApi';
 import { feedAnchorDateByPublicIdQueryOptions } from './feed-client/fetchFeedAnchorDateQuery';
-import { feedAroundWindowQueryOptions } from './feed-client/fetchFeedAroundWindowQuery';
 import { useFeedInfiniteQuery } from './feed-client/useFeedInfiniteQuery';
-
-function queryFeedDayAnchorElement(dateKey: string): HTMLElement | null {
-  const byFirstOfDate = document.querySelector<HTMLElement>(`[data-date="${dateKey}"]`);
-  if (byFirstOfDate) {
-    return byFirstOfDate;
-  }
-  return document.querySelector<HTMLElement>(`[data-event-date="${dateKey}"]`);
-}
-
-/** Same timing as useEventHashLoader: first rAF before paint, second after React commits list/refs. */
-function waitForLayoutAfterFeedStateCommit(): Promise<void> {
-  return new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        resolve();
-      });
-    });
-  });
-}
 
 interface FeedClientProps {
   readonly country: string; // ISO like "es"
@@ -105,16 +86,13 @@ export default function FeedClient(props: FeedClientProps) {
 
   const fetchAroundAndReplace = useCallback(
     async (anchorYmd: string): Promise<Event[]> => {
-      const pageSize = clientEnv.feedPageSize;
-      const res = await queryClient.fetchQuery(
-        feedAroundWindowQueryOptions({
-          country,
-          city,
-          anchorYmd,
-          beforeLimit: pageSize,
-          afterLimit: pageSize,
-        }),
-      );
+      const res = await fetchFeedAroundWindow({
+        anchorYmd,
+        beforeLimit: clientEnv.feedPageSize,
+        afterLimit: clientEnv.feedPageSize,
+        country,
+        city,
+      });
 
       const mappedBefore: Event[] = res.before.map((gig) => {
         return gigToEvent(gig, { resolveCountryName });
@@ -130,7 +108,7 @@ export default function FeedClient(props: FeedClientProps) {
       });
       return windowEvents;
     },
-    [city, country, queryClient, replaceWithWindow, resolveCountryName],
+    [city, country, replaceWithWindow, resolveCountryName],
   );
 
   const fetchHashTargetAnchorYmd = useCallback(
@@ -232,7 +210,7 @@ export default function FeedClient(props: FeedClientProps) {
       };
 
       // 1) Try to scroll to an already-loaded anchor.
-      let target = queryFeedDayAnchorElement(key);
+      let target = document.querySelector<HTMLElement>(`[data-date="${key}"]`);
       if (!target) {
         const firstEvent = events.find((e) => e.date === key);
         if (firstEvent) {
@@ -254,8 +232,8 @@ export default function FeedClient(props: FeedClientProps) {
       try {
         const windowEvents = await fetchAroundAndReplace(key);
 
-        await waitForLayoutAfterFeedStateCommit();
-        target = queryFeedDayAnchorElement(key);
+        await new Promise<void>((r) => requestAnimationFrame(() => r()));
+        target = document.querySelector<HTMLElement>(`[data-date="${key}"]`);
         if (!target) {
           const firstEvent = windowEvents.find((e) => e.date === key);
           if (firstEvent) {

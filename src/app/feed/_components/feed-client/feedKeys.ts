@@ -3,17 +3,17 @@ export interface FeedLocationKeyParams {
   readonly city: string;
 }
 
-type FeedLocationKeyValue = FeedLocationKeyParams;
-
-export interface FeedAroundWindowKeyParams {
+interface FeedLocationKeyValue {
   readonly country: string;
   readonly city: string;
-  readonly anchorYmd: string;
-  readonly beforeLimit: number;
-  readonly afterLimit: number;
 }
 
-type FeedAroundWindowKeyValue = FeedAroundWindowKeyParams;
+function buildFeedLocationKeyValue(params: FeedLocationKeyParams): FeedLocationKeyValue {
+  return {
+    country: params.country,
+    city: params.city,
+  };
+}
 
 export const feedKeys = {
   all(): readonly ['feed'] {
@@ -21,22 +21,16 @@ export const feedKeys = {
   },
 
   events(params: FeedLocationKeyParams): readonly ['feed', 'events', FeedLocationKeyValue] {
-    return ['feed', 'events', params];
+    return ['feed', 'events', buildFeedLocationKeyValue(params)];
   },
 
   calendarAvailableDates(
     params: FeedLocationKeyParams,
   ): readonly ['feed', 'calendar-available-dates', FeedLocationKeyValue] {
-    return ['feed', 'calendar-available-dates', params];
+    return ['feed', 'calendar-available-dates', buildFeedLocationKeyValue(params)];
   },
 
   anchorDateByPublicId(publicId: string): readonly ['feed', 'anchor-date', string] {
     return ['feed', 'anchor-date', publicId];
-  },
-
-  aroundWindow(
-    params: FeedAroundWindowKeyParams,
-  ): readonly ['feed', 'around-window', FeedAroundWindowKeyValue] {
-    return ['feed', 'around-window', params];
   },
 } as const;
