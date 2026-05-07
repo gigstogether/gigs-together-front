@@ -11,6 +11,13 @@ interface QueryProviderProps {
   readonly children: ReactNode;
 }
 
+// TODO (React Query + Next.js RSC): Optional SSR prefetch path — on the server, create a QueryClient
+// per request (never a singleton), prefetch with fetchQuery/prefetchQuery, dehydrate the cache, pass
+// dehydrated state into HydrationBoundary on the client so useQuery/useInfiniteQuery hydrate without
+// duplicating initialData from props. Factors: align query keys with client hooks; infinite feed today
+// relies on SSR props + initialData/setQueryData — migrating needs a deliberate shape for dehydrated
+// infinite data; streaming and which routes benefit vs added wiring.
+
 export function QueryProvider({ children }: QueryProviderProps) {
   const [queryClient] = useState(
     () =>

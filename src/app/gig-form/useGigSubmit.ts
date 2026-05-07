@@ -65,6 +65,11 @@ export function useGigSubmit(params: UseGigSubmitParams): UseGigSubmitResult {
       });
     },
     onSuccess: async () => {
+      // TODO: Invalidate only query keys that a gig edit actually affects (e.g. feed events for the
+      // current country/city, calendar-available-dates for that pair, edit-by-public-id for this gig)
+      // instead of feedKeys.all(). Broad prefixes mark every feed query stale (all locations, anchor
+      // dates, calendar lists), which is simple and correct today but may cause extra refetches and
+      // network work as the feed surface grows.
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: feedKeys.all() }),
         queryClient.invalidateQueries({ queryKey: gigFormKeys.all() }),
