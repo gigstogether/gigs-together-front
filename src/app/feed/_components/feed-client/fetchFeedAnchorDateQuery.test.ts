@@ -1,7 +1,6 @@
-import { QueryClient } from '@tanstack/react-query';
-
 import type { FetchFeedAnchorYmdByPublicIdParams } from './feedApi';
 import { feedAnchorDateByPublicIdQueryOptions } from './fetchFeedAnchorDateQuery';
+import { createTestQueryClient } from '@/test-utils/react-query-client';
 
 const { fetchFeedAnchorYmdByPublicIdMock } = vi.hoisted(() => ({
   fetchFeedAnchorYmdByPublicIdMock:
@@ -11,17 +10,6 @@ const { fetchFeedAnchorYmdByPublicIdMock } = vi.hoisted(() => ({
 vi.mock('./feedApi', () => ({
   fetchFeedAnchorYmdByPublicId: fetchFeedAnchorYmdByPublicIdMock,
 }));
-
-function createTestQueryClient(): QueryClient {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        gcTime: 0,
-      },
-    },
-  });
-}
 
 describe('feedAnchorDateByPublicIdQueryOptions', () => {
   beforeEach(() => {

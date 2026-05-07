@@ -1,11 +1,8 @@
 // @vitest-environment jsdom
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
-import { createElement } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { PropsWithChildren, ReactElement } from 'react';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import type { GigLookupData } from '@/lib/gig-form-api';
 import type { UseFormReturn } from 'react-hook-form';
@@ -13,6 +10,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import { lookupGig } from '@/lib/gig-form-api';
 import { useGigLookup } from '@/app/gig-form/useGigLookup';
 import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
+import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
 
 const { toastMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
@@ -33,26 +31,6 @@ vi.mock('@/lib/telegram-init-data-expired', () => ({
 vi.mock('@/lib/gig-form-api', () => ({
   lookupGig: lookupGigMock,
 }));
-
-function createTestQueryClient(): QueryClient {
-  return new QueryClient({
-    defaultOptions: {
-      mutations: {
-        retry: false,
-      },
-      queries: {
-        retry: false,
-        gcTime: 0,
-      },
-    },
-  });
-}
-
-function createWrapper(queryClient: QueryClient): (props: PropsWithChildren) => ReactElement {
-  return function TestQueryClientProvider({ children }: PropsWithChildren): ReactElement {
-    return createElement(QueryClientProvider, { client: queryClient }, children);
-  };
-}
 
 interface RenderUseGigLookupParams {
   readonly formValues?: Partial<GigFormValues>;
@@ -105,7 +83,7 @@ function renderUseGigLookup(params: RenderUseGigLookupParams = {}) {
       };
     },
     {
-      wrapper: createWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     },
   );
 }

@@ -1,13 +1,10 @@
 // @vitest-environment jsdom
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { createElement } from 'react';
-
-import type { PropsWithChildren, ReactElement } from 'react';
 
 import { fetchFeedAvailableDates } from './feedApi';
 import { useCalendarAvailableDates } from './useCalendarAvailableDates';
+import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
 
 interface FetchFeedAvailableDatesParams {
   readonly country: string;
@@ -23,23 +20,6 @@ const { fetchFeedAvailableDatesMock } = vi.hoisted(() => ({
 vi.mock('./feedApi', () => ({
   fetchFeedAvailableDates: fetchFeedAvailableDatesMock,
 }));
-
-function createTestQueryClient(): QueryClient {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        gcTime: 0,
-      },
-    },
-  });
-}
-
-function createWrapper(queryClient: QueryClient): (props: PropsWithChildren) => ReactElement {
-  return function TestQueryClientProvider({ children }: PropsWithChildren): ReactElement {
-    return createElement(QueryClientProvider, { client: queryClient }, children);
-  };
-}
 
 describe('useCalendarAvailableDates', () => {
   beforeEach(() => {
@@ -64,7 +44,7 @@ describe('useCalendarAvailableDates', () => {
           isEnabled: true,
         }),
       {
-        wrapper: createWrapper(queryClient),
+        wrapper: createQueryClientWrapper(queryClient),
       },
     );
 
@@ -91,7 +71,7 @@ describe('useCalendarAvailableDates', () => {
           isEnabled: false,
         }),
       {
-        wrapper: createWrapper(queryClient),
+        wrapper: createQueryClientWrapper(queryClient),
       },
     );
 
@@ -120,7 +100,7 @@ describe('useCalendarAvailableDates', () => {
           isEnabled: true,
         }),
       {
-        wrapper: createWrapper(queryClient),
+        wrapper: createQueryClientWrapper(queryClient),
       },
     );
 
@@ -143,7 +123,7 @@ describe('useCalendarAvailableDates', () => {
           isEnabled: true,
         }),
       {
-        wrapper: createWrapper(queryClient),
+        wrapper: createQueryClientWrapper(queryClient),
       },
     );
 
@@ -174,7 +154,7 @@ describe('useCalendarAvailableDates', () => {
           country: 'es',
           city: 'barcelona',
         },
-        wrapper: createWrapper(queryClient),
+        wrapper: createQueryClientWrapper(queryClient),
       },
     );
 
@@ -222,7 +202,7 @@ describe('useCalendarAvailableDates', () => {
           isEnabled: true,
         }),
       {
-        wrapper: createWrapper(queryClient),
+        wrapper: createQueryClientWrapper(queryClient),
       },
     );
 
@@ -258,7 +238,7 @@ describe('useCalendarAvailableDates', () => {
           isEnabled: true,
         }),
       {
-        wrapper: createWrapper(queryClient),
+        wrapper: createQueryClientWrapper(queryClient),
       },
     );
 

@@ -1,10 +1,7 @@
 // @vitest-environment jsdom
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
-import { createElement } from 'react';
 
-import type { PropsWithChildren, ReactElement } from 'react';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import type { GigUpsertApiParams } from '@/lib/gig-form-api';
 
@@ -12,6 +9,7 @@ import { feedKeys } from '@/app/feed/_components/feed-client/feedKeys';
 import { gigFormKeys } from '@/app/gig-form/gigFormKeys';
 import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
 import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
+import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
 
 const { toastMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
@@ -28,26 +26,6 @@ vi.mock('@/hooks/use-toast', () => ({
 vi.mock('@/lib/telegram-init-data-expired', () => ({
   toastTelegramInitDataExpired: toastTelegramInitDataExpiredMock,
 }));
-
-function createTestQueryClient(): QueryClient {
-  return new QueryClient({
-    defaultOptions: {
-      mutations: {
-        retry: false,
-      },
-      queries: {
-        retry: false,
-        gcTime: 0,
-      },
-    },
-  });
-}
-
-function createWrapper(queryClient: QueryClient): (props: PropsWithChildren) => ReactElement {
-  return function TestQueryClientProvider({ children }: PropsWithChildren): ReactElement {
-    return createElement(QueryClientProvider, { client: queryClient }, children);
-  };
-}
 
 const DEFAULT_SUBMIT_VALUES: GigFormValues = {
   ...defaultGigFormValues,
@@ -88,7 +66,7 @@ describe('useGigSubmit', () => {
           onSuccess,
         }),
       {
-        wrapper: createWrapper(queryClient),
+        wrapper: createQueryClientWrapper(queryClient),
       },
     );
 
@@ -131,7 +109,7 @@ describe('useGigSubmit', () => {
           onSuccess,
         }),
       {
-        wrapper: createWrapper(queryClient),
+        wrapper: createQueryClientWrapper(queryClient),
       },
     );
 
@@ -164,7 +142,7 @@ describe('useGigSubmit', () => {
           onSuccess,
         }),
       {
-        wrapper: createWrapper(queryClient),
+        wrapper: createQueryClientWrapper(queryClient),
       },
     );
 
