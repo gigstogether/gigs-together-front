@@ -3,17 +3,11 @@ import { createElement } from 'react';
 
 import type { PropsWithChildren, ReactElement } from 'react';
 
+import { buildTestQueryClientDefaultOptions } from '@/lib/react-query-client-defaults';
+
 export function createTestQueryClient(): QueryClient {
   return new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        gcTime: 0,
-      },
-      mutations: {
-        retry: false,
-      },
-    },
+    defaultOptions: buildTestQueryClientDefaultOptions(),
   });
 }
 
