@@ -122,6 +122,13 @@ export default function FeedClient(props: FeedClientProps) {
     [queryClient],
   );
 
+  const loadAroundAndReplace = useCallback(
+    async (anchorYmd: string): Promise<void> => {
+      await fetchAroundAndReplace(anchorYmd);
+    },
+    [fetchAroundAndReplace],
+  );
+
   const clearFeedLocationHash = useCallback(() => {
     if (!window.location.hash) return;
     const search = searchParams.toString() ? `?${searchParams.toString()}` : '';
@@ -176,13 +183,10 @@ export default function FeedClient(props: FeedClientProps) {
       inFlightJumpRef.current = next;
     },
     dispatchLoading,
-    // TODO: extract error into a hook return value
     setError,
     bumpInfiniteScrollResetKey,
     resolveAnchorYmdByEventId: fetchHashTargetAnchorYmd,
-    loadAroundAndReplace: async (anchorYmd) => {
-      await fetchAroundAndReplace(anchorYmd);
-    },
+    loadAroundAndReplace,
   });
 
   const { sentinelRef: bottomSentinelRef } = useInfiniteScroll({

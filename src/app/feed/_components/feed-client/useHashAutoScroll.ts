@@ -1,6 +1,4 @@
-'use client';
-
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Event } from '@/lib/types';
 
 export interface UseHashAutoScrollParams {
@@ -20,16 +18,30 @@ export function useHashAutoScroll(params: UseHashAutoScrollParams) {
     extraOffsetPx = 0,
   } = params;
 
-  const lastAutoScrolledHashRef = useRef<string | null>(null);
+  /**
+   * Once we have run auto-scroll+highlight for this hash, do not repeat on `events` updates
+   * (e.g. infinite scroll).
+   * */
+  const completedAutoScrollForHashRef = useRef<string | null>(null);
+  const [hashBump, setHashBump] = useState(0);
   const autoHighlightTimeoutRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      completedAutoScrollForHashRef.current = null;
+      setHashBump((b) => b + 1);
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash) {
-      lastAutoScrolledHashRef.current = null;
+      completedAutoScrollForHashRef.current = null;
       return;
     }
-    if (lastAutoScrolledHashRef.current === hash) return;
+    if (completedAutoScrollForHashRef.current === hash) return;
 
     const id = hash.startsWith('#') ? hash.slice(1) : hash;
     if (!id) return;
@@ -37,7 +49,7 @@ export function useHashAutoScroll(params: UseHashAutoScrollParams) {
     const el = document.getElementById(id);
     if (!el) return;
 
-    lastAutoScrolledHashRef.current = hash;
+    completedAutoScrollForHashRef.current = hash;
     requestAnimationFrame(() => {
       const top = window.scrollY + el.getBoundingClientRect().top - headerOffsetPx - extraOffsetPx;
       window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
@@ -55,7 +67,7 @@ export function useHashAutoScroll(params: UseHashAutoScrollParams) {
         el.classList.remove(highlightClass);
       }, highlightDurationMs);
     });
-  }, [events, extraOffsetPx, headerOffsetPx, highlightClass, highlightDurationMs]);
+  }, [events, extraOffsetPx, headerOffsetPx, highlightClass, highlightDurationMs, hashBump]);
 
   useEffect(() => {
     return () => {
