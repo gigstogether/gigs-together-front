@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext } from 'react';
 import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
 

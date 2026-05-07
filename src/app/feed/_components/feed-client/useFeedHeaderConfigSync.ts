@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect } from 'react';
 import type { HeaderConfig } from '@/app/_components/HeaderConfigProvider';
 import type { VisibleEventDateRange } from './useVisibleEventDateOnScroll';
