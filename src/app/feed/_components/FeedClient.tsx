@@ -252,7 +252,11 @@ export default function FeedClient(props: FeedClientProps) {
       try {
         const windowEvents = await fetchAroundAndReplace(key);
 
-        await new Promise<void>((r) => requestAnimationFrame(() => r()));
+        // Double rAF: with a React Query cache hit, fetchAroundAndReplace can return before
+        // the next paint; one frame is not always enough for FeedMonths to mount [data-date].
+        await new Promise<void>((r) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => r())),
+        );
         target = document.querySelector<HTMLElement>(`[data-date="${key}"]`);
         if (!target) {
           const firstEvent = windowEvents.find((e) => e.date === key);
