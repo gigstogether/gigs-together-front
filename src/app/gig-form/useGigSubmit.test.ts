@@ -9,6 +9,7 @@ import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import type { GigUpsertApiParams } from '@/lib/gig-form-api';
 
 import { feedKeys } from '@/app/feed/_components/feed-client/feedKeys';
+import { gigFormKeys } from '@/app/gig-form/gigFormKeys';
 import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
 import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
 
@@ -70,7 +71,7 @@ describe('useGigSubmit', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it('should call submit API and invalidate feed queries when submission succeeds', async () => {
+  it('should call submit API and invalidate feed and gig-form queries when submission succeeds', async () => {
     const queryClient = createTestQueryClient();
     const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
     const apiCall = vi
@@ -112,6 +113,7 @@ describe('useGigSubmit', () => {
       },
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: feedKeys.all() });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: gigFormKeys.all() });
     expect(onSuccess).toHaveBeenCalledTimes(1);
   });
 

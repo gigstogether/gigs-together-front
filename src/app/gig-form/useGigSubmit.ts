@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { feedKeys } from '@/app/feed/_components/feed-client/feedKeys';
+import { gigFormKeys } from '@/app/gig-form/gigFormKeys';
 import { toastTelegramInitDataExpired } from '@/lib/telegram-init-data-expired';
 
 import type { GigUpsertApiParams, GigUpsertPayload } from '@/lib/gig-form-api';
@@ -64,7 +65,10 @@ export function useGigSubmit(params: UseGigSubmitParams): UseGigSubmitResult {
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: feedKeys.all() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: feedKeys.all() }),
+        queryClient.invalidateQueries({ queryKey: gigFormKeys.all() }),
+      ]);
       onSuccess();
     },
   });

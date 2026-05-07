@@ -6,6 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { fetchGigByPublicId, normalizeGigApiDate } from '@/lib/gig-form-api';
 import { getTelegramInitDataExpiredToastContent } from '@/lib/telegram-init-data-expired';
 import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
+import { gigFormKeys } from '@/app/gig-form/gigFormKeys';
 
 import type { GigFormData } from '@/lib/gig-form-api';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
@@ -72,7 +73,7 @@ export function useEditGigFormData(params: UseEditGigFormDataParams): UseEditGig
   const trimmedGigPublicId = gigPublicId.trim();
 
   const query = useQuery<EditGigFormQueryData, Error>({
-    queryKey: ['gig-form', 'edit-gig', trimmedGigPublicId],
+    queryKey: gigFormKeys.editByPublicId(gigPublicId),
     enabled: Boolean(trimmedGigPublicId),
     retry: false,
     queryFn: async ({ signal }): Promise<EditGigFormQueryData> => {
