@@ -44,4 +44,26 @@ describe('feedKeys', () => {
       'gig-public-id',
     ]);
   });
+
+  it('should build a stable around-window key', () => {
+    expect(
+      feedKeys.aroundWindow({
+        country: 'es',
+        city: 'barcelona',
+        anchorYmd: '2026-05-07',
+        beforeLimit: 10,
+        afterLimit: 12,
+      }),
+    ).toEqual([
+      'feed',
+      'around-window',
+      {
+        country: 'es',
+        city: 'barcelona',
+        anchorYmd: '2026-05-07',
+        beforeLimit: 10,
+        afterLimit: 12,
+      },
+    ]);
+  });
 });
