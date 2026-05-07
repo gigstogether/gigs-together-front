@@ -25,6 +25,7 @@ function getLocationFromPath(pathname: string): { country: string; city: string 
   return { country, city };
 }
 
+// TODO: merge with Header.tsx ?
 export default function AppHeader() {
   const pathname = usePathname() ?? '/';
   const { config } = useHeaderConfig();
@@ -41,7 +42,8 @@ export default function AppHeader() {
       earliestEventDate={config.earliestEventDate}
       visibleEventDateRange={config.visibleEventDateRange}
       availableDates={config.availableDates}
-      calendarDatesStatus={config.calendarDatesStatus}
+      calendarDatesIsLoading={config.calendarDatesIsLoading}
+      calendarDatesIsError={config.calendarDatesIsError}
       calendarDatesError={config.calendarDatesError}
       onDayClick={config.onDayClick}
     />

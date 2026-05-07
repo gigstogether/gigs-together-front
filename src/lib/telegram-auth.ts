@@ -1,4 +1,5 @@
 import { fetchApiJson } from '@/lib/api-core';
+import { clientEnv } from '@/env/client-env';
 import { isRecord } from '@/lib/is-record';
 import type { TelegramAuthExchangeResponse } from '@/types/telegram-auth-exchange-response';
 import type { TelegramStoredClientProfile } from '@/types/telegram-client-profile';
@@ -6,8 +7,6 @@ import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 export type { TelegramAuthExchangeResponse };
 
-/** Default localStorage key for the non-sensitive Telegram profile cache. */
-const DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY = 'gt_tg_client_profile';
 const TELEGRAM_SIGN_IN_REQUIRED_EVENT = 'gt:telegram-sign-in-required';
 const telegramMiniAppBootstrapListeners = new Set<() => void>();
 let telegramMiniAppBootstrapPromise: Promise<boolean> | null = null;
@@ -17,9 +16,7 @@ let isTelegramMiniAppBootstrapPending = false;
  * localStorage key for the cached Telegram profile (`NEXT_PUBLIC_*` is inlined at build time).
  */
 function getTelegramClientProfileStorageKey(): string {
-  const raw = process.env.NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY;
-  const trimmed = typeof raw === 'string' ? raw.trim() : '';
-  return trimmed || DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY;
+  return clientEnv.telegramClientProfileStorageKey;
 }
 
 /** Subscribers for `useSyncExternalStore` + same-tab updates after localStorage writes. */

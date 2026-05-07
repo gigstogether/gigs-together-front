@@ -1,8 +1,5 @@
-'use client';
-
 import { useEffect } from 'react';
 import type { HeaderConfig } from '@/app/_components/HeaderConfigProvider';
-import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
 import type { VisibleEventDateRange } from './useVisibleEventDateOnScroll';
 
 export interface UseFeedHeaderConfigSyncParams {
@@ -10,7 +7,8 @@ export interface UseFeedHeaderConfigSyncParams {
   visibleEventDate: string | undefined;
   visibleEventDateRange: VisibleEventDateRange | undefined;
   availableDates: string[] | undefined;
-  calendarDatesStatus: CalendarDatesStatus;
+  calendarDatesIsLoading: boolean;
+  calendarDatesIsError: boolean;
   calendarDatesError: string | undefined;
   onDayClick: (day: Date) => void;
 }
@@ -21,7 +19,8 @@ export function useFeedHeaderConfigSync(params: UseFeedHeaderConfigSyncParams) {
     visibleEventDate,
     visibleEventDateRange,
     availableDates,
-    calendarDatesStatus,
+    calendarDatesIsLoading,
+    calendarDatesIsError,
     calendarDatesError,
     onDayClick,
   } = params;
@@ -31,7 +30,8 @@ export function useFeedHeaderConfigSync(params: UseFeedHeaderConfigSyncParams) {
       earliestEventDate: visibleEventDate,
       visibleEventDateRange,
       availableDates,
-      calendarDatesStatus,
+      calendarDatesIsLoading,
+      calendarDatesIsError,
       calendarDatesError,
       onDayClick,
     });
@@ -42,7 +42,8 @@ export function useFeedHeaderConfigSync(params: UseFeedHeaderConfigSyncParams) {
   }, [
     availableDates,
     calendarDatesError,
-    calendarDatesStatus,
+    calendarDatesIsLoading,
+    calendarDatesIsError,
     onDayClick,
     setHeaderConfig,
     visibleEventDate,

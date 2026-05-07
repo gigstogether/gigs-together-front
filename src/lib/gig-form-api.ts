@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/api';
+import { gigDateToYMD } from '@/lib/feed.mapper';
 import { isRecord } from '@/lib/is-record';
 
 export type PosterMode = 'upload' | 'url';
@@ -36,6 +37,17 @@ export interface GigFormData extends GigDraftData {
 
 export interface GigLookupData {
   title?: string;
+  date: string;
+  endDate?: string;
+  city?: string;
+  country?: string;
+  venue?: string;
+  ticketsUrl?: string;
+  posterUrl?: string;
+}
+
+interface ParsedGigLookupData {
+  title?: string;
   date?: string;
   endDate?: string;
   city?: string;
@@ -72,6 +84,8 @@ export interface UpdateGigParams extends GigUpsertApiParams {
 interface GigLookupApiResponseBody {
   gig: unknown;
 }
+
+export type GigApiDateFieldPath = 'gig.date' | 'gig.endDate';
 
 function asRecordOrThrow(raw: unknown): Record<string, unknown> {
   if (!isRecord(raw)) {
@@ -130,7 +144,7 @@ function parseGigFormData(raw: unknown): GigFormData {
   };
 }
 
-function parseGigLookupData(raw: unknown): GigLookupData {
+function parseGigLookupData(raw: unknown): ParsedGigLookupData {
   const obj = asRecordOrThrow(raw);
   return {
     title: optionalNonEmptyString(obj, 'title'),
@@ -144,6 +158,31 @@ function parseGigLookupData(raw: unknown): GigLookupData {
   };
 }
 
+export function normalizeGigApiDate(date: string, fieldPath: GigApiDateFieldPath): string {
+  try {
+    return gigDateToYMD(date);
+  } catch {
+    throw new Error(`Invalid API response: "${fieldPath}" must be YYYY-MM-DD (or ISO)`);
+  }
+}
+
+function normalizeGigLookupData(data: ParsedGigLookupData): GigLookupData {
+  if (!data.date) {
+    throw new Error('Lookup did not return a date');
+  }
+
+  return {
+    title: data.title,
+    date: normalizeGigApiDate(data.date, 'gig.date'),
+    endDate: data.endDate ? normalizeGigApiDate(data.endDate, 'gig.endDate') : undefined,
+    city: data.city,
+    country: data.country,
+    venue: data.venue,
+    ticketsUrl: data.ticketsUrl,
+    posterUrl: data.posterUrl,
+  };
+}
+
 /** `null` means the API found no matching future gig. */
 function parseGigLookupApiResponse(raw: unknown): GigLookupData | null {
   const obj = asRecordOrThrow(raw);
@@ -153,7 +192,8 @@ function parseGigLookupApiResponse(raw: unknown): GigLookupData | null {
   if (obj.gig === undefined) {
     throw new Error('Invalid API response: "gig" is required (use null when there is no match)');
   }
-  return parseGigLookupData(obj.gig);
+  const parsedGigLookupData = parseGigLookupData(obj.gig);
+  return normalizeGigLookupData(parsedGigLookupData);
 }
 
 function getPosterUrlOrUndefined(poster: PosterSelection): string | undefined {

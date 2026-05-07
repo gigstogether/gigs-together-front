@@ -3,6 +3,7 @@ import { LocationIcon } from '@/components/ui/location-icon';
 import { Calendar, Ticket } from 'lucide-react';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { GigPoster } from '@/app/_components/GigPoster';
+import { clientEnv } from '@/env/client-env';
 
 interface GigCardProps {
   gig: Event;
@@ -101,7 +102,7 @@ export function GigCard({ gig }: GigCardProps) {
   const mapsHref = location
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
     : undefined;
-  const telegramUrl = gig.postUrl ?? process.env.NEXT_PUBLIC_TELEGRAM_URL;
+  const telegramUrl = gig.postUrl ?? clientEnv.telegramUrl;
 
   return (
     <div className="flex w-full flex-col bg-white rounded-lg dark:bg-gray-800 dark:border-gray-700">

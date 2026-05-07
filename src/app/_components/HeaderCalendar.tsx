@@ -2,7 +2,6 @@
 
 import type { MouseEvent } from 'react';
 import { useMemo, useState } from 'react';
-import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
 import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -10,12 +9,13 @@ import { cn, toLocalYMD } from '@/lib/utils';
 import { FaRegCalendar } from 'react-icons/fa';
 import type { Modifiers } from 'react-day-picker';
 
-interface TopFormProps {
+interface HeaderCalendarProps {
   visibleEventDate?: string;
   visibleEventDateRange?: VisibleEventDateRange;
   onDayClick?: (day: Date, modifiers?: Modifiers, e?: MouseEvent) => void;
   availableDates?: string[]; // list of dates that have events (YYYY-MM-DD)
-  calendarDatesStatus?: CalendarDatesStatus;
+  calendarDatesIsLoading?: boolean;
+  calendarDatesIsError?: boolean;
   calendarDatesError?: string;
 }
 
@@ -65,13 +65,14 @@ const formatDisplayMonth = (
   return `${formatMonthYear(start)} ${DASH} ${formatMonthYear(end)}`;
 };
 
-const TopForm = (props: TopFormProps) => {
+export default function HeaderCalendar(props: HeaderCalendarProps) {
   const {
     visibleEventDate,
     visibleEventDateRange,
     onDayClick,
     availableDates,
-    calendarDatesStatus,
+    calendarDatesIsLoading = true,
+    calendarDatesIsError = false,
     calendarDatesError,
   } = props;
 
@@ -114,7 +115,7 @@ const TopForm = (props: TopFormProps) => {
   };
 
   const disabledMatcher = (date: Date) => {
-    if (calendarDatesStatus === 'loading' || calendarDatesStatus === 'error') return true;
+    if (calendarDatesIsLoading || calendarDatesIsError) return true;
     return !availableSet.has(toLocalYMD(date));
   };
 
@@ -140,10 +141,10 @@ const TopForm = (props: TopFormProps) => {
           className="w-auto p-0"
           align="center"
         >
-          {calendarDatesStatus === 'loading' ? (
+          {calendarDatesIsLoading ? (
             <div className="px-3 py-2 text-sm text-gray-600">Loading calendar…</div>
           ) : null}
-          {calendarDatesStatus === 'error' ? (
+          {calendarDatesIsError ? (
             <div className="px-3 py-2 text-sm text-red-600">
               Failed to load calendar dates{calendarDatesError ? `: ${calendarDatesError}` : '.'}
             </div>
@@ -166,6 +167,4 @@ const TopForm = (props: TopFormProps) => {
       </Popover>
     </form>
   );
-};
-
-export default TopForm;
+}

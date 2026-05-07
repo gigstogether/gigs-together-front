@@ -1,5 +1,3 @@
-'use client';
-
 import { useContext } from 'react';
 import { I18nContext } from './i18n-context';
 import type { I18nContextValue, TFunction } from './i18n-context';

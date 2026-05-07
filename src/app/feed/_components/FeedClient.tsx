@@ -1,62 +1,83 @@
 'use client';
 
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useCallback, useReducer, useRef, useState } from 'react';
 import styles from '@/app/page.module.css';
 import { toLocalYMD } from '@/lib/utils';
 import '@/app/style.css';
 import type { Event } from '@/lib/types';
-import type { V1GigGetResponseBody } from '@/lib/types';
+import type { ResolveCountryName } from './feed-client/useFeedInfiniteQuery';
+
 import { useT } from '@/lib/i18n';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
 import { FeedMonths } from './feed-client/FeedMonths';
 import { useCalendarAvailableDates } from './feed-client/useCalendarAvailableDates';
 import { useFeedHeaderConfigSync } from './feed-client/useFeedHeaderConfigSync';
 import { useHeaderHeight } from './feed-client/useHeaderHeight';
-import { FEED_PAGE_SIZE } from '@/lib/feed.constants';
-import { gigDateToYMD, gigToEvent } from '@/lib/feed.mapper';
-import { apiRequest } from '@/lib/api';
+import { clientEnv } from '@/env/client-env';
+import { gigToEvent } from '@/lib/feed.mapper';
 import { useHashAutoScroll } from './feed-client/useHashAutoScroll';
 import { useInfiniteScroll } from './feed-client/useInfiniteScroll';
 import { useVisibleEventDateOnScroll } from './feed-client/useVisibleEventDateOnScroll';
-import { createInitialFeedLoadingState, feedLoadingReducer } from './feed-client/feedLoading';
-import type { FeedLoadingState } from './feed-client/feedLoading';
-import {
-  isV1GigAroundGetResponseBody,
-  isV1GigByPublicIdGetResponseBody,
-} from './feed-client/utils';
-import { mergeUniqueSorted, sortEventsAsc } from './feed-client/feedEvents';
+import { feedLoadingReducer } from './feed-client/feedLoading';
+import { mergeUniqueSorted } from './feed-client/feedEvents';
 import { usePrependScrollRestore } from './feed-client/usePrependScrollRestore';
 import { useEventHashLoader } from './feed-client/useEventHashLoader';
+import { feedAroundQueryOptions } from './feed-client/fetchFeedAroundQuery';
+import { feedAnchorDateByPublicIdQueryOptions } from './feed-client/fetchFeedAnchorDateQuery';
+import { useFeedInfiniteQuery } from './feed-client/useFeedInfiniteQuery';
 
 interface FeedClientProps {
-  country: string; // ISO like "es"
-  city: string; // slug like "barcelona"
-  initialEvents?: Event[];
-  initialPrevCursor?: string;
-  initialNextCursor?: string;
+  readonly country: string; // ISO like "es"
+  readonly city: string; // slug like "barcelona"
+  readonly initialEvents?: Event[];
+  readonly initialPrevCursor?: string;
+  readonly initialNextCursor?: string;
 }
 
 export default function FeedClient(props: FeedClientProps) {
   const { country, city, initialEvents, initialPrevCursor, initialNextCursor } = props;
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const t = useT();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 44
+  const resolveCountryName = useCallback<ResolveCountryName>((iso) => t('country', iso), [t]);
+  const queryClient = useQueryClient();
 
-  const [events, setEvents] = useState<Event[]>(() => initialEvents ?? []);
-  const [loading, dispatchLoading] = useReducer(
-    feedLoadingReducer,
-    initialEvents !== undefined,
-    (hasInitialEvents): FeedLoadingState => createInitialFeedLoadingState({ hasInitialEvents }),
-  );
+  const feedQuery = useFeedInfiniteQuery({
+    country,
+    city,
+    initialEvents,
+    initialPrevCursor,
+    initialNextCursor,
+    resolveCountryName,
+  });
+  const {
+    events,
+    hasMore,
+    hasPrev,
+    isInitialLoading,
+    isLoadingNext,
+    isLoadingPrev,
+    error: feedError,
+    fetchNextPage: fetchNextFeedPage,
+    fetchPrevPage: fetchPrevFeedPage,
+    replaceWithWindow,
+  } = feedQuery;
   const [error, setError] = useState<string | null>(null);
-  const [nextCursor, setNextCursor] = useState<string | undefined>(() => initialNextCursor);
-  const [prevCursor, setPrevCursor] = useState<string | undefined>(() => initialPrevCursor);
+  const [loading, dispatchLoading] = useReducer(feedLoadingReducer, {
+    initial: false,
+    next: false,
+    prev: false,
+    jump: false,
+  });
   const [infiniteScrollResetKey, setInfiniteScrollResetKey] = useState(0);
 
   const eventRefs = useRef<Map<string, HTMLElement>>(new Map());
-  const inFlightNextRef = useRef(false);
-  const inFlightPrevRef = useRef(false);
   const inFlightJumpRef = useRef(false);
   const { capture: capturePrependAnchor, clear: clearPrependAnchor } = usePrependScrollRestore({
     events,
@@ -69,176 +90,87 @@ export default function FeedClient(props: FeedClientProps) {
 
   const fetchAroundAndReplace = useCallback(
     async (anchorYmd: string): Promise<Event[]> => {
-      const qs = new URLSearchParams();
-      qs.set('anchor', anchorYmd);
-      qs.set('beforeLimit', String(FEED_PAGE_SIZE));
-      qs.set('afterLimit', String(FEED_PAGE_SIZE));
-      if (country) qs.set('country', country);
-      if (city) qs.set('city', city);
-
-      const res = await apiRequest<unknown>(`v1/gig/around?${qs.toString()}`, 'GET');
-      if (!isV1GigAroundGetResponseBody(res)) {
-        throw new Error('Invalid API response: expected { before: [], after: [] }');
-      }
-
-      const mappedBefore: Event[] = res.before.map((gig) =>
-        gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
-      );
-      const mappedAfter: Event[] = res.after.map((gig) =>
-        gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
+      const res = await queryClient.fetchQuery(
+        feedAroundQueryOptions({
+          anchorYmd,
+          beforeLimit: clientEnv.feedPageSize,
+          afterLimit: clientEnv.feedPageSize,
+          country,
+          city,
+        }),
       );
 
-      setPrevCursor(res.prevCursor);
-      setNextCursor(res.nextCursor);
-
+      const mappedBefore: Event[] = res.before.map((gig) => {
+        return gigToEvent(gig, { resolveCountryName });
+      });
+      const mappedAfter: Event[] = res.after.map((gig) => {
+        return gigToEvent(gig, { resolveCountryName });
+      });
       const windowEvents = mergeUniqueSorted(mappedBefore, mappedAfter);
-      setEvents(windowEvents);
+      replaceWithWindow({
+        events: windowEvents,
+        prevCursor: res.prevCursor,
+        nextCursor: res.nextCursor,
+      });
       return windowEvents;
     },
-    [city, country, t],
+    [city, country, queryClient, replaceWithWindow, resolveCountryName],
   );
 
-  const fetchHashTargetAnchorYmd = useCallback(async (publicId: string): Promise<string> => {
-    const res = await apiRequest<unknown>(`v1/gig/date/${encodeURIComponent(publicId)}`, 'GET');
-    if (!isV1GigByPublicIdGetResponseBody(res)) {
-      throw new Error('Invalid API response: expected { date }');
-    }
+  const fetchHashTargetAnchorYmd = useCallback(
+    (publicId: string): Promise<string> => {
+      return queryClient.fetchQuery(feedAnchorDateByPublicIdQueryOptions(publicId));
+    },
+    [queryClient],
+  );
 
-    return gigDateToYMD(res.date);
-  }, []);
+  const loadAroundAndReplace = useCallback(
+    async (anchorYmd: string): Promise<void> => {
+      await fetchAroundAndReplace(anchorYmd);
+    },
+    [fetchAroundAndReplace],
+  );
+
+  const clearFeedLocationHash = useCallback(() => {
+    if (!window.location.hash) return;
+    const search = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    const url = `${pathname ?? ''}${search}`;
+    window.history.replaceState(null, '', url);
+    router.replace(url as Parameters<typeof router.replace>[0]);
+  }, [pathname, router, searchParams]);
 
   const fetchNextPage = useCallback(async () => {
-    if (!nextCursor) return;
-    if (inFlightNextRef.current) return;
-    inFlightNextRef.current = true;
-
-    const qs = new URLSearchParams();
-    qs.set('limit', String(FEED_PAGE_SIZE));
-    qs.set('cursor', nextCursor);
-    if (country) qs.set('country', country);
-    if (city) qs.set('city', city);
-
-    try {
-      dispatchLoading({ type: 'next:start' });
-      const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
-      const mapped: Event[] = res.gigs.map((gig) =>
-        gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
-      );
-
-      setEvents((prev) => mergeUniqueSorted(prev, mapped));
-      setNextCursor(res.nextCursor);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      dispatchLoading({ type: 'next:end' });
-      inFlightNextRef.current = false;
-    }
-  }, [city, country, nextCursor, t]);
+    await fetchNextFeedPage();
+  }, [fetchNextFeedPage]);
 
   const fetchPrevPage = useCallback(async () => {
-    if (!prevCursor) return;
-    if (inFlightPrevRef.current) return;
-    inFlightPrevRef.current = true;
-
     capturePrependAnchor();
 
-    const qs = new URLSearchParams();
-    qs.set('limit', String(FEED_PAGE_SIZE));
-    qs.set('cursor', prevCursor);
-    qs.set('direction', 'prev');
-    if (country) qs.set('country', country);
-    if (city) qs.set('city', city);
-
     try {
-      dispatchLoading({ type: 'prev:start' });
-      const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
-      const mapped: Event[] = res.gigs.map((gig) =>
-        gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
-      );
-
-      if (mapped.length === 0) {
-        clearPrependAnchor();
-        setPrevCursor(undefined);
-        return;
-      }
-
-      setEvents((prev) => mergeUniqueSorted(prev, mapped));
-      if (!res.prevCursor || res.prevCursor === prevCursor) {
-        setPrevCursor(undefined);
-        return;
-      }
-      setPrevCursor(res.prevCursor);
+      await fetchPrevFeedPage();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      dispatchLoading({ type: 'prev:end' });
-      inFlightPrevRef.current = false;
+      clearPrependAnchor();
+      throw err;
     }
-  }, [capturePrependAnchor, city, clearPrependAnchor, country, prevCursor, t]);
+  }, [capturePrependAnchor, clearPrependAnchor, fetchPrevFeedPage]);
 
-  const fetchInitial = useCallback(
-    async (cursor?: string) => {
-      const qs = new URLSearchParams();
-      qs.set('limit', String(FEED_PAGE_SIZE));
-      if (cursor) qs.set('cursor', cursor);
-      if (country) qs.set('country', country);
-      if (city) qs.set('city', city);
-
-      try {
-        dispatchLoading({ type: 'initial:start' });
-        setError(null);
-        const res = await apiRequest<V1GigGetResponseBody>(`v1/gig?${qs.toString()}`, 'GET');
-        setPrevCursor(res.prevCursor);
-
-        const mapped: Event[] = res.gigs.map((gig) =>
-          gigToEvent(gig, { resolveCountryName: (iso) => t('country', iso) }),
-        );
-
-        setEvents(sortEventsAsc(mapped));
-        setNextCursor(res.nextCursor);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        dispatchLoading({ type: 'initial:end' });
-        dispatchLoading({ type: 'next:end' });
-        dispatchLoading({ type: 'prev:end' });
-        dispatchLoading({ type: 'jump:end' });
-        inFlightNextRef.current = false;
-        inFlightPrevRef.current = false;
-        inFlightJumpRef.current = false;
-      }
-    },
-    [city, country, t],
-  );
-
-  useEffect(() => {
-    if (initialEvents !== undefined) {
-      setEvents(initialEvents);
-      setNextCursor(initialNextCursor);
-      setError(null);
-      setPrevCursor(initialPrevCursor);
-      dispatchLoading({ type: 'reset' });
-      inFlightNextRef.current = false;
-      inFlightPrevRef.current = false;
-      inFlightJumpRef.current = false;
-      return;
-    }
-
-    void fetchInitial();
-  }, [country, city, fetchInitial, initialEvents, initialNextCursor, initialPrevCursor]);
-
-  const hasMore = Boolean(nextCursor);
-  const hasPrev = Boolean(prevCursor);
+  const visibleError = error ?? feedError;
 
   const {
     availableDates: calendarAvailableDates,
-    status: calendarDatesStatus,
-    error: calendarDatesError,
+    isLoading: calendarDatesIsLoading,
+    isError: calendarDatesIsError,
+    isSuccess: isCalendarDatesSuccess,
+    error: calendarDatesQueryError,
   } = useCalendarAvailableDates({
     country,
     city,
-    enabled: !loading.initial && !error,
+    isEnabled: !isInitialLoading && !visibleError,
   });
+
+  const calendarDatesError = calendarDatesIsError
+    ? (calendarDatesQueryError?.message ?? 'Failed to load calendar dates.')
+    : undefined;
 
   const { visibleEventDate, visibleEventDateRange } = useVisibleEventDateOnScroll({
     events,
@@ -247,7 +179,7 @@ export default function FeedClient(props: FeedClientProps) {
 
   useHashAutoScroll({ events, headerOffsetPx: headerH ?? 0, extraOffsetPx: 32 });
   useEventHashLoader({
-    isEnabled: !loading.initial,
+    isEnabled: !isInitialLoading,
     isBusyRef: inFlightJumpRef,
     setIsBusy: (next) => {
       inFlightJumpRef.current = next;
@@ -256,23 +188,21 @@ export default function FeedClient(props: FeedClientProps) {
     setError,
     bumpInfiniteScrollResetKey,
     resolveAnchorYmdByEventId: fetchHashTargetAnchorYmd,
-    loadAroundAndReplace: async (anchorYmd) => {
-      await fetchAroundAndReplace(anchorYmd);
-    },
+    loadAroundAndReplace,
   });
 
   const { sentinelRef: bottomSentinelRef } = useInfiniteScroll({
     isEnabled: true,
-    canLoadMore: hasMore && !loading.initial && !loading.next && !loading.jump,
-    isLoading: loading.initial || loading.next || loading.jump,
+    canLoadMore: hasMore && !isInitialLoading && !isLoadingNext && !loading.jump,
+    isLoading: isInitialLoading || isLoadingNext || loading.jump,
     onLoadMore: fetchNextPage,
     infiniteScrollResetKey,
   });
 
   const { sentinelRef: topSentinelRef } = useInfiniteScroll({
     isEnabled: true,
-    canLoadMore: hasPrev && !loading.initial && !loading.prev && !loading.jump,
-    isLoading: loading.initial || loading.prev || loading.jump,
+    canLoadMore: hasPrev && !isInitialLoading && !isLoadingPrev && !loading.jump,
+    isLoading: isInitialLoading || isLoadingPrev || loading.jump,
     onLoadMore: fetchPrevPage,
     rootMargin: '400px 0px',
     infiniteScrollResetKey,
@@ -289,6 +219,8 @@ export default function FeedClient(props: FeedClientProps) {
   const handleDayClick = useCallback(
     async (day: Date) => {
       const key = toLocalYMD(day);
+
+      clearFeedLocationHash();
 
       const scrollToTarget = (el: HTMLElement) => {
         const headerPx = headerH ?? 0;
@@ -320,7 +252,11 @@ export default function FeedClient(props: FeedClientProps) {
       try {
         const windowEvents = await fetchAroundAndReplace(key);
 
-        await new Promise<void>((r) => requestAnimationFrame(() => r()));
+        // Double rAF: with a React Query cache hit, fetchAroundAndReplace can return before
+        // the next paint; one frame is not always enough for FeedMonths to mount [data-date].
+        await new Promise<void>((r) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => r())),
+        );
         target = document.querySelector<HTMLElement>(`[data-date="${key}"]`);
         if (!target) {
           const firstEvent = windowEvents.find((e) => e.date === key);
@@ -340,20 +276,21 @@ export default function FeedClient(props: FeedClientProps) {
         inFlightJumpRef.current = false;
       }
     },
-    [events, fetchAroundAndReplace, headerH, bumpInfiniteScrollResetKey],
+    [clearFeedLocationHash, events, fetchAroundAndReplace, headerH, bumpInfiniteScrollResetKey],
   );
 
   useFeedHeaderConfigSync({
     setHeaderConfig,
     visibleEventDate,
     visibleEventDateRange,
-    availableDates: calendarDatesStatus === 'ready' ? calendarAvailableDates : undefined,
-    calendarDatesStatus,
+    availableDates: isCalendarDatesSuccess ? calendarAvailableDates : undefined,
+    calendarDatesIsLoading,
+    calendarDatesIsError,
     calendarDatesError,
     onDayClick: handleDayClick,
   });
 
-  if (loading.initial) {
+  if (isInitialLoading) {
     return (
       <div className="min-h-[100svh]">
         <main className={styles.main}>
@@ -365,12 +302,12 @@ export default function FeedClient(props: FeedClientProps) {
     );
   }
 
-  if (error) {
+  if (visibleError) {
     return (
       <div className="min-h-[100svh]">
         <main className={styles.main}>
           <div className="flex justify-center items-center h-96">
-            <div className="text-lg text-red-600">Error: {error}</div>
+            <div className="text-lg text-red-600">Error: {visibleError}</div>
           </div>
         </main>
       </div>
@@ -397,7 +334,7 @@ export default function FeedClient(props: FeedClientProps) {
             className="h-px"
             aria-hidden
           />
-          {loading.prev ? (
+          {isLoadingPrev ? (
             <div className="py-4 text-center text-gray-500">Loading previous…</div>
           ) : null}
           <FeedMonths
@@ -410,7 +347,7 @@ export default function FeedClient(props: FeedClientProps) {
             className="h-12"
             aria-hidden
           />
-          {loading.next ? (
+          {isLoadingNext ? (
             <div className="py-4 text-center text-gray-500">Loading more…</div>
           ) : null}
         </div>

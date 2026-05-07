@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -10,31 +10,24 @@ import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
-import { fetchGigByPublicId, updateGig } from '@/lib/gig-form-api';
-import { getTelegramInitDataExpiredToastContent } from '@/lib/telegram-init-data-expired';
-import { dateToYMD, defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
+import { updateGig } from '@/lib/gig-form-api';
+import { defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
+import { useEditGigFormData } from '@/app/gig-form/useEditGigFormData';
 import { useGigLookup } from '@/app/gig-form/useGigLookup';
 import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
 
 interface EditGigFormClientProps {
-  countries: Country[];
-  gigPublicId: string;
+  readonly countries: Country[];
+  readonly gigPublicId: string;
 }
 
 export default function EditGigFormClient({ countries, gigPublicId }: EditGigFormClientProps) {
   const router = useRouter();
-  const [isLoadingGig, setIsLoadingGig] = useState<boolean>(false);
-  const [loadGigError, setLoadGigError] = useState<string | null>(null);
-  const [isPrefilled, setIsPrefilled] = useState<boolean>(false);
-  const [reloadKey, setReloadKey] = useState<number>(0);
+
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState<string>('');
-  const [existingPosterUrl, setExistingPosterUrl] = useState<string>('');
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
-  const loadedGigRef = useRef<string | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  const requestSeqRef = useRef<number>(0);
 
   const form = useForm<GigFormValues>({
     resolver: zodResolver(gigFormSchema),
@@ -56,97 +49,13 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
     },
   });
 
-  useEffect(() => {
-    if (!gigPublicId) return;
-    if (loadedGigRef.current === gigPublicId) return;
-
-    setIsPrefilled(false);
-    setPosterFile(null);
-    setPosterUrl('');
-    const ac = new AbortController();
-    abortRef.current?.abort();
-    abortRef.current = ac;
-    const seq = (requestSeqRef.current += 1);
-    const timeoutId = window.setTimeout(() => {
-      ac.abort();
-    }, 15_000);
-
-    const run = async () => {
-      if (seq === requestSeqRef.current) {
-        setIsLoadingGig(true);
-        setLoadGigError(null);
-      }
-      try {
-        const data = await fetchGigByPublicId({
-          publicId: gigPublicId,
-          signal: ac.signal,
-        });
-
-        const ymd = dateToYMD(data.date);
-        if (!ymd) {
-          throw new Error('Invalid API response: "gig.date" must be YYYY-MM-DD (or ISO)');
-        }
-        const ymd2 = data.endDate ? dateToYMD(data.endDate) : undefined;
-        if (data.endDate && !ymd2) {
-          throw new Error('Invalid API response: "gig.endDate" must be YYYY-MM-DD (or ISO)');
-        }
-        if (ac.signal.aborted) return;
-
-        form.reset({
-          ...defaultGigFormValues,
-          title: data.title,
-          date: ymd,
-          endDate: ymd2 ?? '',
-          city: data.city,
-          country: data.country.toUpperCase(),
-          venue: data.venue,
-          ticketsUrl: data.ticketsUrl,
-        });
-
-        setExistingPosterUrl(data.posterUrl ?? '');
-        loadedGigRef.current = gigPublicId;
-        if (seq === requestSeqRef.current) {
-          setIsPrefilled(true);
-        }
-      } catch (e) {
-        if (ac.signal.aborted) {
-          return;
-        }
-        const expiredContent = getTelegramInitDataExpiredToastContent(e);
-        const message = expiredContent
-          ? expiredContent.description
-          : e instanceof Error
-            ? e.message
-            : 'There was an error loading gig data for editing.';
-        if (seq === requestSeqRef.current) {
-          setLoadGigError(message);
-          setIsPrefilled(false);
-        }
-        toast(
-          expiredContent
-            ? { ...expiredContent, variant: 'destructive' }
-            : {
-                title: 'Couldn’t load gig',
-                description: message,
-                variant: 'destructive',
-              },
-        );
-        console.error(e);
-      } finally {
-        window.clearTimeout(timeoutId);
-        if (abortRef.current === ac) abortRef.current = null;
-        if (seq === requestSeqRef.current) {
-          setIsLoadingGig(false);
-        }
-      }
-    };
-
-    void run();
-    return () => {
-      window.clearTimeout(timeoutId);
-      ac.abort();
-    };
-  }, [form, gigPublicId, reloadKey]);
+  const { existingPosterUrl, isLoadingGig, loadGigError, isPrefilled, retryLoadingGig } =
+    useEditGigFormData({
+      form,
+      gigPublicId,
+      setPosterFile,
+      setPosterUrl,
+    });
 
   function clearPoster() {
     setPosterFile(null);
@@ -171,7 +80,9 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => setReloadKey((x) => x + 1)}
+                onClick={() => {
+                  void retryLoadingGig();
+                }}
               >
                 Retry
               </Button>

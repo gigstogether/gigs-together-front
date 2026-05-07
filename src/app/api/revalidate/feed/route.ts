@@ -1,7 +1,9 @@
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getFeedRevalidateSecretOrThrow } from '@/env/server-env';
 import { buildFeedPath, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed.routes';
+import { isRecord } from '@/lib/is-record';
 
 export const runtime = 'nodejs';
 
@@ -9,17 +11,9 @@ interface RevalidateFeedRequestBody {
   readonly paths?: readonly string[];
 }
 
-const getSecretOrThrow = (): string => {
-  const secret = (process.env.FEED_REVALIDATE_SECRET ?? '').trim();
-  if (!secret) {
-    throw new Error('Missing FEED_REVALIDATE_SECRET');
-  }
-  return secret;
-};
-
 const isRevalidateFeedRequestBody = (x: unknown): x is RevalidateFeedRequestBody => {
-  if (!x || typeof x !== 'object') return false;
-  const body = x as Record<string, unknown>;
+  if (!isRecord(x)) return false;
+  const body = x;
   if (body.paths === undefined) return true;
   if (!Array.isArray(body.paths)) return false;
   return body.paths.every((p) => typeof p === 'string');
@@ -28,7 +22,7 @@ const isRevalidateFeedRequestBody = (x: unknown): x is RevalidateFeedRequestBody
 export async function POST(req: NextRequest) {
   let secret: string;
   try {
-    secret = getSecretOrThrow();
+    secret = getFeedRevalidateSecretOrThrow();
   } catch (e) {
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : 'Server misconfigured' },
@@ -50,13 +44,15 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  if (body !== undefined && !isRevalidateFeedRequestBody(body)) {
-    return NextResponse.json({ ok: false, error: 'Invalid body' }, { status: 400 });
+  let bodyPaths: readonly string[] | undefined;
+  if (body !== undefined) {
+    if (!isRevalidateFeedRequestBody(body)) {
+      return NextResponse.json({ ok: false, error: 'Invalid body' }, { status: 400 });
+    }
+    bodyPaths = body.paths;
   }
 
-  const paths =
-    (body as RevalidateFeedRequestBody | undefined)?.paths ??
-    SUPPORTED_FEED_LOCATIONS.map(buildFeedPath);
+  const paths = bodyPaths ?? SUPPORTED_FEED_LOCATIONS.map(buildFeedPath);
   for (const path of paths) {
     revalidatePath(path);
   }

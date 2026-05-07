@@ -1,5 +1,3 @@
-'use client';
-
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import {
   bootstrapTelegramAuthFromWebApp,

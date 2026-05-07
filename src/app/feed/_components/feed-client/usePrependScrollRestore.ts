@@ -1,5 +1,3 @@
-'use client';
-
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import type { Event } from '@/lib/types';
 

@@ -1,6 +1,6 @@
 {
   "name": "gigs-together-front",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Next.js frontend for browsing gigs, submitting events, and managing content.",
   "private": false,
   "author": "Arina M",
@@ -11,6 +11,8 @@
     "lint:format:fix": "npm run lint:fix && npm run format:write",
     "lint:fix": "eslint --fix .",
     "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "format:write": "prettier --write .",
     "build": "next build",
     "start": "next start",
@@ -26,6 +28,8 @@
     "@radix-ui/react-toast": "^1.2.2",
     "@radix-ui/react-toggle": "^1.1.0",
     "@radix-ui/react-toggle-group": "^1.1.0",
+    "@tanstack/react-query": "^5.99.2",
+    "@tanstack/react-query-devtools": "^5.99.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.453.0",
@@ -47,6 +51,7 @@
     "@eslint/js": "^9.35.0",
     "@next/eslint-plugin-next": "^16.1.4",
     "@stylistic/eslint-plugin": "^5.3.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
@@ -61,12 +66,14 @@
     "eslint-plugin-react-refresh": "^0.5.0",
     "globals": "^16.3.0",
     "husky": "^9.1.7",
+    "jsdom": "^29.0.2",
     "lint-staged": "^16.1.6",
     "postcss": "^8.4.47",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.14",
     "tsx": "^4.20.3",
     "typescript": "^5",
-    "typescript-eslint": "^8.42.0"
+    "typescript-eslint": "^8.42.0",
+    "vitest": "^3.2.4"
   }
 }

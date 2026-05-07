@@ -1,5 +1,3 @@
-'use client';
-
 // Inspired by react-hot-toast library
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';

@@ -6,6 +6,8 @@ import type { ReactNode } from 'react';
 import { HeaderConfigProvider } from '@/app/_components/HeaderConfigProvider';
 import AppHeader from '@/app/_components/AppHeader';
 import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
+import { QueryProvider } from '@/app/_providers/QueryProvider';
+import { serverEnv } from '@/env/server-env';
 
 const geistSans = localFont({
   src: '../../public/fonts/GeistVF.woff',
@@ -19,17 +21,17 @@ const geistMono = localFont({
   weight: '100 900',
 });
 
-const SITE_BASE_URL = process.env.NEXT_PUBLIC_APP_BASE_URL;
+const SITE_BASE_URL = serverEnv.appBaseUrl;
 
-const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Gigs Together';
-const TITLE = process.env.NEXT_PUBLIC_SITE_PREVIEW_TITLE ?? 'Gigs Together!';
-const DESCRIPTION =
-  process.env.NEXT_PUBLIC_SITE_PREVIEW_DESCRIPTION ?? 'Find gigs and company in your city.';
+const BRAND_NAME = serverEnv.brandName;
+const TITLE = serverEnv.sitePreviewTitle;
+const DESCRIPTION = serverEnv.sitePreviewDescription;
 const IMAGE_WIDTH = 1200;
 const IMAGE_HEIGHT = 630;
 const PREVIEW_IMAGE = `/logo-${IMAGE_WIDTH}x${IMAGE_HEIGHT}.png`;
-const FAVICON_URL =
-  process.env.NODE_ENV === 'development' ? '/logo-dev-circle-96x96.png' : '/logo-circle-96x96.png';
+const FAVICON_URL = serverEnv.isDevelopment
+  ? '/logo-dev-circle-96x96.png'
+  : '/logo-circle-96x96.png';
 
 const metadataBase = SITE_BASE_URL ? new URL(SITE_BASE_URL) : undefined;
 const previewImage = new URL(PREVIEW_IMAGE, metadataBase).toString();
@@ -84,18 +86,20 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <TelegramWebAppScript />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
-          }}
-        />
-        <HeaderConfigProvider>
-          <AppHeader />
-          <div className="pt-[45px]">{children}</div>
-          <Toaster />
-        </HeaderConfigProvider>
+        <QueryProvider>
+          <TelegramWebAppScript />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+            }}
+          />
+          <HeaderConfigProvider>
+            <AppHeader />
+            <div className="pt-[45px]">{children}</div>
+            <Toaster />
+          </HeaderConfigProvider>
+        </QueryProvider>
       </body>
     </html>
   );

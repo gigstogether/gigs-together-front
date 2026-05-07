@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext } from 'react';
 import type { V1TranslationsByNamespace } from '@/lib/translations.server';
 

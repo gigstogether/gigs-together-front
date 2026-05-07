@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 
 export function useHeaderHeight(selector = '[data-app-header]', fallback = 44) {

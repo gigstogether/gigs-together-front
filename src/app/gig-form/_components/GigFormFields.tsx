@@ -17,7 +17,7 @@ interface GigFormFieldsProps {
   isLookingUp: boolean;
   isSubmitting: boolean;
   isLoading?: boolean;
-  onLookup: () => void;
+  onLookup: () => Promise<void>;
 }
 
 export default function GigFormFields(props: GigFormFieldsProps) {
@@ -98,7 +98,9 @@ export default function GigFormFields(props: GigFormFieldsProps) {
           type="button"
           variant="secondary"
           disabled={isLookingUp || isSubmitting || !!isLoading}
-          onClick={onLookup}
+          onClick={() => {
+            void onLookup();
+          }}
         >
           {isLookingUp ? 'Looking up...' : 'Find info with AI'}
         </Button>

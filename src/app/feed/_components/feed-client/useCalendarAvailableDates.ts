@@ -1,106 +1,60 @@
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
-import { apiRequest } from '@/lib/api';
-import { gigDateToYMD } from '@/lib/feed.mapper';
-import type { CalendarDatesStatus } from '@/app/_components/HeaderConfigProvider';
-import { isV1GigDatesGetResponseBody } from './utils';
+import { useQuery } from '@tanstack/react-query';
+import { fetchFeedAvailableDates } from './feedApi';
+import { feedKeys } from './feedKeys';
+import { clientEnv } from '@/env/client-env';
 
 export interface UseCalendarAvailableDatesParams {
   country: string;
   city: string;
-  enabled: boolean;
+  isEnabled: boolean;
 }
 
 export interface UseCalendarAvailableDatesResult {
-  availableDates: string[] | undefined;
-  status: CalendarDatesStatus;
-  error: string | undefined;
+  readonly availableDates: string[] | undefined;
+  readonly isError: boolean;
+  readonly isSuccess: boolean;
+  readonly isLoading: boolean;
+  readonly error: Error | null;
 }
+
+const CALENDAR_DATES_TIMEOUT_MS = 15_000; // 15 seconds
 
 export function useCalendarAvailableDates(
   params: UseCalendarAvailableDatesParams,
 ): UseCalendarAvailableDatesResult {
-  const { country, city, enabled } = params;
+  const { country, city, isEnabled } = params;
 
-  const [availableDates, setAvailableDates] = useState<string[] | undefined>();
-  const [status, setStatus] = useState<CalendarDatesStatus>('loading');
-  const [error, setError] = useState<string | undefined>(undefined);
+  const query = useQuery<string[], Error>({
+    queryKey: feedKeys.calendarAvailableDates({ country, city }),
+    enabled: isEnabled,
+    staleTime: clientEnv.feedCalendarDatesStaleTimeMs,
+    queryFn: async ({ signal }) => {
+      const timeoutController = new AbortController();
+      const timeoutId = window.setTimeout(() => {
+        timeoutController.abort();
+      }, CALENDAR_DATES_TIMEOUT_MS);
 
-  const calendarAbortRef = useRef<AbortController | null>(null);
-  const calendarRequestSeqRef = useRef<number>(0);
-  const calendarDatesLoadedForLocationRef = useRef<string | null>(null);
-  const lastLocationKeyRef = useRef<string | null>(null);
+      const abortFromQuerySignal = () => {
+        timeoutController.abort();
+      };
 
-  useEffect(() => {
-    const locationKey = `${country}|${city}`;
-
-    if (lastLocationKeyRef.current !== locationKey) {
-      lastLocationKeyRef.current = locationKey;
-      calendarDatesLoadedForLocationRef.current = null;
-      setStatus('loading');
-      setError(undefined);
-      setAvailableDates(undefined);
-    }
-
-    if (!enabled) return;
-    if (calendarDatesLoadedForLocationRef.current === locationKey) return;
-
-    const ac = new AbortController();
-    calendarAbortRef.current?.abort();
-    calendarAbortRef.current = ac;
-    const seq = (calendarRequestSeqRef.current += 1);
-    const timeoutId = window.setTimeout(() => {
-      ac.abort();
-    }, 15_000);
-
-    setStatus('loading');
-    setError(undefined);
-    setAvailableDates(undefined);
-
-    const run = async () => {
+      signal.addEventListener('abort', abortFromQuerySignal);
       try {
-        const qs = new URLSearchParams();
-        if (country) qs.set('country', country);
-        if (city) qs.set('city', city);
-
-        const res = await apiRequest<unknown>(`v1/gig/dates?${qs.toString()}`, 'GET', undefined, {
-          signal: ac.signal,
-        });
-
-        if (!isV1GigDatesGetResponseBody(res)) {
-          throw new Error('Invalid API response: expected { dates: (string | number)[] }');
-        }
-
-        const ymd = res.dates.map((x) => gigDateToYMD(String(x)));
-        const unique = Array.from(new Set(ymd)).sort();
-
-        if (ac.signal.aborted) return;
-        if (seq !== calendarRequestSeqRef.current) return;
-
-        setAvailableDates(unique);
-        setStatus('ready');
-        calendarDatesLoadedForLocationRef.current = locationKey;
-      } catch (e) {
-        if (ac.signal.aborted) return;
-        if (seq !== calendarRequestSeqRef.current) return;
-
-        const message = e instanceof Error ? e.message : 'Failed to load calendar dates.';
-        setStatus('error');
-        setError(message);
-        setAvailableDates(undefined);
+        return await fetchFeedAvailableDates({ country, city, signal: timeoutController.signal });
       } finally {
         window.clearTimeout(timeoutId);
-        if (calendarAbortRef.current === ac) calendarAbortRef.current = null;
+        signal.removeEventListener('abort', abortFromQuerySignal);
       }
-    };
+    },
+  });
 
-    void run();
-    return () => {
-      window.clearTimeout(timeoutId);
-      ac.abort();
-    };
-  }, [city, country, enabled]);
+  const { isSuccess, isPending, isError, error, data: availableDates } = query;
 
-  return { availableDates, status, error };
+  return {
+    availableDates,
+    error,
+    isLoading: isEnabled && isPending,
+    isError,
+    isSuccess,
+  };
 }

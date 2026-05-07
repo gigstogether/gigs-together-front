@@ -1,6 +1,8 @@
 import 'server-only';
 
 import { apiRequest } from '@/lib/api';
+import { parseLanguageGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
+import { serverEnv } from '@/env/server-env';
 import type { Language } from '@/lib/types';
 
 export type TranslationFormat = 'plain' | 'icu';
@@ -18,12 +20,6 @@ export interface V1LanguageGetTranslationsResponseBody {
   readonly locale: string;
   readonly translations: V1TranslationsByNamespace;
 }
-
-const getTranslationsRevalidateSeconds = (): number | false => {
-  const value = Number(process.env.NEXT_PUBLIC_TRANSLATIONS_REVALIDATE_SECONDS);
-  return isNaN(value) ? false : value;
-};
-const TRANSLATIONS_REVALIDATE_SECONDS = getTranslationsRevalidateSeconds(); // 1h
 
 const DEFAULT_LANGUAGE: Language = 'en';
 
@@ -59,11 +55,11 @@ export async function getTranslations(
 
   const url = `/v1/language/translations${qs.size ? `?${qs.toString()}` : ''}`;
 
-  const data = await apiRequest<V1LanguageGetTranslationsResponseBody>(url, 'GET', undefined, {
+  const raw = await apiRequest<unknown>(url, 'GET', undefined, {
     // Explicitly set accept-language; otherwise some runtimes send "*" by default.
     headers: { 'accept-language': acceptLanguage },
     next: {
-      revalidate: TRANSLATIONS_REVALIDATE_SECONDS,
+      revalidate: serverEnv.translationsRevalidateSeconds,
       // tags: [
       //   TRANSLATIONS_TAG_ALL,
       //   ...(acceptLanguage ? [tagLocale(acceptLanguage)] : []),
@@ -72,13 +68,5 @@ export async function getTranslations(
     },
   });
 
-  // Safety net: keep return shape stable even if backend misbehaves.
-  if (!data || typeof data !== 'object') {
-    return { locale: acceptLanguage ?? 'en', translations: {} };
-  }
-  if (!data.translations || typeof data.translations !== 'object') {
-    return { locale: data.locale ?? acceptLanguage ?? 'en', translations: {} };
-  }
-
-  return data;
+  return parseLanguageGetTranslationsResponseBody(raw);
 }
