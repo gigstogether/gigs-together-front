@@ -24,7 +24,7 @@ import { feedLoadingReducer } from './feed-client/feedLoading';
 import { mergeUniqueSorted } from './feed-client/feedEvents';
 import { usePrependScrollRestore } from './feed-client/usePrependScrollRestore';
 import { useEventHashLoader } from './feed-client/useEventHashLoader';
-import { fetchFeedAroundWindow } from './feed-client/feedApi';
+import { feedAroundQueryOptions } from './feed-client/fetchFeedAroundQuery';
 import { feedAnchorDateByPublicIdQueryOptions } from './feed-client/fetchFeedAnchorDateQuery';
 import { useFeedInfiniteQuery } from './feed-client/useFeedInfiniteQuery';
 
@@ -90,13 +90,15 @@ export default function FeedClient(props: FeedClientProps) {
 
   const fetchAroundAndReplace = useCallback(
     async (anchorYmd: string): Promise<Event[]> => {
-      const res = await fetchFeedAroundWindow({
-        anchorYmd,
-        beforeLimit: clientEnv.feedPageSize,
-        afterLimit: clientEnv.feedPageSize,
-        country,
-        city,
-      });
+      const res = await queryClient.fetchQuery(
+        feedAroundQueryOptions({
+          anchorYmd,
+          beforeLimit: clientEnv.feedPageSize,
+          afterLimit: clientEnv.feedPageSize,
+          country,
+          city,
+        }),
+      );
 
       const mappedBefore: Event[] = res.before.map((gig) => {
         return gigToEvent(gig, { resolveCountryName });
@@ -112,7 +114,7 @@ export default function FeedClient(props: FeedClientProps) {
       });
       return windowEvents;
     },
-    [city, country, replaceWithWindow, resolveCountryName],
+    [city, country, queryClient, replaceWithWindow, resolveCountryName],
   );
 
   const fetchHashTargetAnchorYmd = useCallback(

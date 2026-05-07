@@ -1,7 +1,7 @@
 import { apiRequest } from '@/lib/api';
 import {
   fetchFeedAnchorYmdByPublicId,
-  fetchFeedAroundWindow,
+  fetchFeedAround,
   fetchFeedAvailableDates,
   fetchFeedPage,
 } from '@/app/feed/_components/feed-client/feedApi';
@@ -46,12 +46,12 @@ describe('fetchFeedPage', () => {
   });
 });
 
-describe('fetchFeedAroundWindow', () => {
+describe('fetchFeedAround', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should request around window when anchor and limits are provided', async () => {
+  it('should request around endpoint when anchor and limits are provided', async () => {
     const apiRequestMock = vi.mocked(apiRequest);
     apiRequestMock.mockResolvedValueOnce({
       before: [],
@@ -60,7 +60,7 @@ describe('fetchFeedAroundWindow', () => {
       nextCursor: 'next',
     });
 
-    const result = await fetchFeedAroundWindow({
+    const result = await fetchFeedAround({
       anchorYmd: '2026-04-21',
       beforeLimit: 10,
       afterLimit: 10,

@@ -54,7 +54,7 @@ export async function fetchFeedPage(params: FetchFeedPageParams): Promise<V1GigG
   return parseV1GigGetResponseBody(raw);
 }
 
-export async function fetchFeedAroundWindow(
+export async function fetchFeedAround(
   params: FetchFeedAroundParams,
 ): Promise<V1GigAroundGetResponseBody> {
   const qs = new URLSearchParams();
