@@ -5,9 +5,6 @@ import {
   optionalTrimmedStringFromEnvSchema,
 } from '@/env/shared-env';
 
-const DEFAULT_BRAND_NAME = 'Gigs Together';
-const DEFAULT_SITE_PREVIEW_TITLE = 'Gigs Together!';
-const DEFAULT_SITE_PREVIEW_DESCRIPTION = 'Find gigs and company in your city.';
 const DEFAULT_ADMIN_API_BASE_URL = '/api/admin';
 const DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY = 'gt_tg_client_profile';
 
@@ -17,17 +14,9 @@ const DEFAULT_FEED_CALENDAR_DATES_STALE_TIME_MS = 600_000; // 10 minutes
 const clientEnvSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).optional(),
-    NEXT_PUBLIC_APP_BASE_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_APP_API_BASE_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_ADMIN_API_BASE_URL: optionalTrimmedStringFromEnvSchema.default(
       DEFAULT_ADMIN_API_BASE_URL,
-    ),
-    NEXT_PUBLIC_BRAND_NAME: optionalTrimmedStringFromEnvSchema.default(DEFAULT_BRAND_NAME),
-    NEXT_PUBLIC_SITE_PREVIEW_TITLE: optionalTrimmedStringFromEnvSchema.default(
-      DEFAULT_SITE_PREVIEW_TITLE,
-    ),
-    NEXT_PUBLIC_SITE_PREVIEW_DESCRIPTION: optionalTrimmedStringFromEnvSchema.default(
-      DEFAULT_SITE_PREVIEW_DESCRIPTION,
     ),
     NEXT_PUBLIC_TELEGRAM_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_GITHUB_URL: optionalTrimmedStringFromEnvSchema,
@@ -58,12 +47,8 @@ const clientEnvSchema = z
 
 const parsedClientEnv = clientEnvSchema.parse({
   NODE_ENV: process.env.NODE_ENV,
-  NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
   NEXT_PUBLIC_APP_API_BASE_URL: process.env.NEXT_PUBLIC_APP_API_BASE_URL,
   NEXT_PUBLIC_ADMIN_API_BASE_URL: process.env.NEXT_PUBLIC_ADMIN_API_BASE_URL,
-  NEXT_PUBLIC_BRAND_NAME: process.env.NEXT_PUBLIC_BRAND_NAME,
-  NEXT_PUBLIC_SITE_PREVIEW_TITLE: process.env.NEXT_PUBLIC_SITE_PREVIEW_TITLE,
-  NEXT_PUBLIC_SITE_PREVIEW_DESCRIPTION: process.env.NEXT_PUBLIC_SITE_PREVIEW_DESCRIPTION,
   NEXT_PUBLIC_TELEGRAM_URL: process.env.NEXT_PUBLIC_TELEGRAM_URL,
   NEXT_PUBLIC_GITHUB_URL: process.env.NEXT_PUBLIC_GITHUB_URL,
   NEXT_PUBLIC_SUGGEST_GIG_LINK: process.env.NEXT_PUBLIC_SUGGEST_GIG_LINK,
@@ -81,12 +66,8 @@ const parsedClientEnv = clientEnvSchema.parse({
 export const clientEnv = {
   nodeEnv: parsedClientEnv.NODE_ENV,
   isDevelopment: parsedClientEnv.NODE_ENV === 'development',
-  appBaseUrl: parsedClientEnv.NEXT_PUBLIC_APP_BASE_URL,
   appApiBaseUrl: parsedClientEnv.NEXT_PUBLIC_APP_API_BASE_URL,
   adminApiBaseUrl: parsedClientEnv.NEXT_PUBLIC_ADMIN_API_BASE_URL,
-  brandName: parsedClientEnv.NEXT_PUBLIC_BRAND_NAME,
-  sitePreviewTitle: parsedClientEnv.NEXT_PUBLIC_SITE_PREVIEW_TITLE,
-  sitePreviewDescription: parsedClientEnv.NEXT_PUBLIC_SITE_PREVIEW_DESCRIPTION,
   telegramUrl: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_URL,
   githubUrl: parsedClientEnv.NEXT_PUBLIC_GITHUB_URL,
   suggestGigLink: parsedClientEnv.NEXT_PUBLIC_SUGGEST_GIG_LINK,
@@ -99,11 +80,3 @@ export const clientEnv = {
     parsedClientEnv.NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS ??
     DEFAULT_FEED_CALENDAR_DATES_STALE_TIME_MS,
 } as const;
-
-export function getPublicAppBaseUrlOrThrow(): string {
-  if (!clientEnv.appBaseUrl) {
-    throw new Error('Missing NEXT_PUBLIC_APP_BASE_URL');
-  }
-
-  return clientEnv.appBaseUrl.replace(/\/$/, '');
-}

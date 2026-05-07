@@ -1,8 +1,4 @@
-import {
-  captureRejectedError,
-  captureThrownErrorInstance,
-  expectZodIssue,
-} from '@/env/env-test-helpers';
+import { captureRejectedError, expectZodIssue } from '@/env/env-test-helpers';
 
 async function importClientEnv() {
   return import('@/env/client-env');
@@ -16,25 +12,6 @@ describe('env/client', () => {
 
   afterEach(() => {
     vi.unstubAllEnvs();
-  });
-
-  describe('getPublicAppBaseUrlOrThrow', () => {
-    it('should return normalized app base url when env var has trailing slash', async () => {
-      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', 'https://example.com/');
-
-      const clientEnvModule = await importClientEnv();
-
-      expect(clientEnvModule.getPublicAppBaseUrlOrThrow()).toBe('https://example.com');
-    });
-
-    it('should throw when app base url env var is missing', async () => {
-      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', undefined);
-
-      const clientEnvModule = await importClientEnv();
-      const error = captureThrownErrorInstance(() => clientEnvModule.getPublicAppBaseUrlOrThrow());
-
-      expect(error.message).toBe('Missing NEXT_PUBLIC_APP_BASE_URL');
-    });
   });
 
   describe('auth config', () => {

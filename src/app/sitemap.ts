@@ -1,8 +1,8 @@
 import type { MetadataRoute } from 'next';
-import { getPublicAppBaseUrlOrThrow } from '@/env/client-env';
+import { getAppBaseUrlOrThrow } from '@/env/server-env';
 import { SUPPORTED_FEED_LOCATIONS, buildFeedPath } from '@/lib/feed.routes';
 
-const baseUrl = getPublicAppBaseUrlOrThrow();
+const baseUrl = getAppBaseUrlOrThrow();
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const feedUrls = SUPPORTED_FEED_LOCATIONS.map((loc) => ({

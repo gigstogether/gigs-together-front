@@ -7,7 +7,7 @@ import { HeaderConfigProvider } from '@/app/_components/HeaderConfigProvider';
 import AppHeader from '@/app/_components/AppHeader';
 import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
 import { QueryProvider } from '@/app/_providers/QueryProvider';
-import { clientEnv } from '@/env/client-env';
+import { serverEnv } from '@/env/server-env';
 
 const geistSans = localFont({
   src: '../../public/fonts/GeistVF.woff',
@@ -21,15 +21,15 @@ const geistMono = localFont({
   weight: '100 900',
 });
 
-const SITE_BASE_URL = clientEnv.appBaseUrl;
+const SITE_BASE_URL = serverEnv.appBaseUrl;
 
-const BRAND_NAME = clientEnv.brandName;
-const TITLE = clientEnv.sitePreviewTitle;
-const DESCRIPTION = clientEnv.sitePreviewDescription;
+const BRAND_NAME = serverEnv.brandName;
+const TITLE = serverEnv.sitePreviewTitle;
+const DESCRIPTION = serverEnv.sitePreviewDescription;
 const IMAGE_WIDTH = 1200;
 const IMAGE_HEIGHT = 630;
 const PREVIEW_IMAGE = `/logo-${IMAGE_WIDTH}x${IMAGE_HEIGHT}.png`;
-const FAVICON_URL = clientEnv.isDevelopment
+const FAVICON_URL = serverEnv.isDevelopment
   ? '/logo-dev-circle-96x96.png'
   : '/logo-circle-96x96.png';
 

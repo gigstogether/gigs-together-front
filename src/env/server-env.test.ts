@@ -75,4 +75,25 @@ describe('env/server', () => {
       expect(error.message).toBe('Missing FEED_REVALIDATE_SECRET');
     });
   });
+
+  describe('getAppBaseUrlOrThrow', () => {
+    it('should return normalized app base url when env var has trailing slash', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('APP_BASE_URL', 'https://example.com/');
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.getAppBaseUrlOrThrow()).toBe('https://example.com');
+    });
+
+    it('should throw when app base url env var is missing', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('APP_BASE_URL', undefined);
+
+      const serverEnvModule = await importServerEnv();
+      const error = captureThrownErrorInstance(() => serverEnvModule.getAppBaseUrlOrThrow());
+
+      expect(error.message).toBe('Missing APP_BASE_URL');
+    });
+  });
 });
