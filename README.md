@@ -5,7 +5,7 @@ Frontend for the Gigs Together platform. This repository contains a Next.js app 
 - redirects the root route to the public gigs feed
 - renders the public feed for supported locations
 - provides a gig submission and edit flow
-- includes a client-side admin panel built with `react-admin`
+- exposes a moderator-only `/admin` entry (Telegram sign-in, same access rules as the gig form)
 - exposes revalidation endpoints for cached content
 
 At the moment, the default public feed points to `es/barcelona`.
@@ -172,7 +172,7 @@ Key areas:
 
 - `src/app/feed` contains the public feed pages and feed client logic
 - `src/app/gig-form` contains create/edit gig flows
-- `src/app/admin` contains the `react-admin` application
+- `src/app/admin` contains the moderator-only admin shell
 - `src/app/api/revalidate` contains manual cache revalidation endpoints
 - `src/lib/api.ts` contains the shared API request wrapper
 
@@ -217,13 +217,6 @@ This is the first thing to try before debugging tunnel, HMR, or Telegram-specifi
 ### `Missing NEXT_PUBLIC_APP_API_BASE_URL for direct API calls`
 
 Set `NEXT_PUBLIC_APP_API_BASE_URL` in your local env file and restart the dev server.
-
-### Admin panel cannot load data
-
-Check one of these:
-
-- `NEXT_PUBLIC_ADMIN_API_BASE_URL` points to a valid admin API
-- your environment provides a working `/api/admin` endpoint
 
 ### Revalidation endpoint returns `401`
 

@@ -82,6 +82,7 @@ const jsonLd = {
   url: SITE_BASE_URL,
 };
 
+// TODO: refactor
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
