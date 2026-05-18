@@ -1,50 +1,40 @@
 import { render, screen } from '@testing-library/react';
-import type { UseTelegramAuthResult } from '@/hooks/use-telegram-auth';
 import AdminPageClient from '@/app/admin/AdminPageClient';
+import type { UseModeratorTelegramSessionResult } from '@/hooks/use-moderator-telegram-session';
 
-const mockUseTelegramAuth = vi.fn<() => UseTelegramAuthResult>();
+const mockUseModeratorTelegramSession = vi.fn<() => UseModeratorTelegramSessionResult>();
 
-vi.mock('@/hooks/use-telegram-auth', () => ({
-  useTelegramAuth: () => mockUseTelegramAuth(),
-}));
-
-vi.mock('@/hooks/use-telegram-mini-app-env', () => ({
-  useTelegramMiniAppEnv: () => 'browser' as const,
+vi.mock('@/hooks/use-moderator-telegram-session', () => ({
+  useModeratorTelegramSession: () => mockUseModeratorTelegramSession(),
 }));
 
 vi.mock('@/app/_components/SignInContent', () => ({
   default: () => <div data-testid="sign-in-stub" />,
 }));
 
-vi.mock('@/hooks/use-toast', () => ({
-  toast: vi.fn(),
-}));
-
-vi.mock('@/env/client-env', () => ({
-  clientEnv: {
-    isAuthEnabled: true,
-    telegramBotUsername: 'gigs_test_bot',
-  },
-}));
-
-function authMock(partial: Partial<UseTelegramAuthResult>): UseTelegramAuthResult {
+function sessionMock(
+  partial: Partial<UseModeratorTelegramSessionResult>,
+): UseModeratorTelegramSessionResult {
   return {
     authState: null,
     isLoadingAuthState: false,
-    signIn: vi.fn(),
-    signOut: vi.fn(),
+    telegramBotUsername: 'gigs_test_bot',
+    isTelegramSignInAvailable: true,
+    miniAppEnv: 'browser',
+    handleAuthenticated: vi.fn(),
+    handleSignOut: vi.fn(),
     ...partial,
   };
 }
 
 describe('AdminPageClient', () => {
   beforeEach(() => {
-    mockUseTelegramAuth.mockReset();
+    mockUseModeratorTelegramSession.mockReset();
   });
 
   it('should show a loading state when auth bootstrap is not finished', () => {
-    mockUseTelegramAuth.mockReturnValue(
-      authMock({
+    mockUseModeratorTelegramSession.mockReturnValue(
+      sessionMock({
         isLoadingAuthState: true,
       }),
     );
@@ -55,8 +45,8 @@ describe('AdminPageClient', () => {
   });
 
   it('should explain access restriction to guests', () => {
-    mockUseTelegramAuth.mockReturnValue(
-      authMock({
+    mockUseModeratorTelegramSession.mockReturnValue(
+      sessionMock({
         authState: null,
         isLoadingAuthState: false,
       }),
@@ -69,8 +59,8 @@ describe('AdminPageClient', () => {
   });
 
   it('should deny access to signed-in non-admin users', () => {
-    mockUseTelegramAuth.mockReturnValue(
-      authMock({
+    mockUseModeratorTelegramSession.mockReturnValue(
+      sessionMock({
         authState: { displayLabel: '@someone', isAdmin: false },
       }),
     );
@@ -82,8 +72,8 @@ describe('AdminPageClient', () => {
   });
 
   it('should confirm access for admin users', () => {
-    mockUseTelegramAuth.mockReturnValue(
-      authMock({
+    mockUseModeratorTelegramSession.mockReturnValue(
+      sessionMock({
         authState: { displayLabel: '@admin', isAdmin: true },
       }),
     );

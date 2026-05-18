@@ -1,63 +1,20 @@
 'use client';
 
-import { useCallback } from 'react';
 import SignInContent from '@/app/_components/SignInContent';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
-import { toast } from '@/hooks/use-toast';
-import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { ApiError } from '@/lib/api-errors';
-import type { TelegramWidgetUser } from '@/types/telegram-login';
-import { clientEnv } from '@/env/client-env';
+import { useModeratorTelegramSession } from '@/hooks/use-moderator-telegram-session';
 
 export default function AdminPageClient() {
-  // TODO: extract duplicated fragment
-  const { authState, isLoadingAuthState, signIn, signOut } = useTelegramAuth();
-  const telegramBotUsername = clientEnv.isAuthEnabled ? clientEnv.telegramBotUsername : undefined;
-  const isTelegramSignInAvailable = Boolean(telegramBotUsername?.trim());
-  const miniAppEnv = useTelegramMiniAppEnv();
-
-  const handleAuthenticated = useCallback(
-    async (user: TelegramWidgetUser) => {
-      try {
-        const { profile } = await signIn(user);
-        const label =
-          profile.displayLabel || (user.username ? `@${user.username}` : user.first_name);
-        if (profile.isAdmin) {
-          toast({
-            title: 'Signed in',
-            description: label,
-          });
-          return;
-        }
-        toast({
-          title: 'Access denied',
-          description: 'This page is available only for admin accounts.',
-          variant: 'destructive',
-        });
-      } catch (error) {
-        const description =
-          error instanceof ApiError
-            ? error.message
-            : 'Could not complete sign in. Please try again.';
-        toast({
-          title: 'Sign in failed',
-          description,
-          variant: 'destructive',
-        });
-      }
-    },
-    [signIn],
-  );
-
-  const handleSignOut = useCallback(async () => {
-    await signOut();
-    toast({
-      title: 'Signed out',
-      ...(authState?.displayLabel ? { description: authState.displayLabel } : {}),
-    });
-  }, [authState, signOut]);
+  const {
+    authState,
+    isLoadingAuthState,
+    telegramBotUsername,
+    isTelegramSignInAvailable,
+    miniAppEnv,
+    handleAuthenticated,
+    handleSignOut,
+  } = useModeratorTelegramSession();
 
   if (isLoadingAuthState) {
     return (
