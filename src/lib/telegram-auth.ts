@@ -1,8 +1,6 @@
 import { fetchApiJson } from '@/lib/api-core';
-import { clientEnv } from '@/env/client-env';
-import { isRecord } from '@/lib/is-record';
 import { parseAuthClientProfileResponseBody } from '@/lib/parse-auth-client-profile-response';
-import type { AuthClientProfile, AuthClientProfileResponseBody } from '@/types/auth-client-profile';
+import type { AuthClientProfileResponseBody } from '@/types/auth-client-profile';
 import type { TelegramAuthExchangeResponse } from '@/types/telegram-auth-exchange-response';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
@@ -12,21 +10,6 @@ const TELEGRAM_SIGN_IN_REQUIRED_EVENT = 'gt:telegram-sign-in-required';
 const telegramMiniAppBootstrapListeners = new Set<() => void>();
 let telegramMiniAppBootstrapPromise: Promise<boolean> | null = null;
 let isTelegramMiniAppBootstrapPending = false;
-
-/**
- * localStorage key for the cached Telegram profile (`NEXT_PUBLIC_*` is inlined at build time).
- */
-function getTelegramClientProfileStorageKey(): string {
-  return clientEnv.telegramClientProfileStorageKey;
-}
-
-/** Subscribers for `useSyncExternalStore` + same-tab updates after localStorage writes. */
-const telegramClientProfileListeners = new Set<() => void>();
-let isCrossTabStorageListenerAttached = false;
-
-function notifyTelegramClientProfileListeners(): void {
-  telegramClientProfileListeners.forEach((listener) => listener());
-}
 
 function notifyTelegramMiniAppBootstrapListeners(): void {
   telegramMiniAppBootstrapListeners.forEach((listener) => listener());
@@ -40,27 +23,6 @@ function setTelegramMiniAppBootstrapPending(next: boolean): void {
   notifyTelegramMiniAppBootstrapListeners();
 }
 
-/** `storage` fires for other tabs; same-tab updates call {@link notifyTelegramClientProfileListeners} explicitly. */
-function ensureCrossTabStorageListenerAttached(): void {
-  if (typeof window === 'undefined' || isCrossTabStorageListenerAttached) {
-    return;
-  }
-  isCrossTabStorageListenerAttached = true;
-  window.addEventListener('storage', (event: StorageEvent) => {
-    if (event.key === getTelegramClientProfileStorageKey() || event.key === null) {
-      notifyTelegramClientProfileListeners();
-    }
-  });
-}
-
-export function subscribeTelegramClientProfile(listener: () => void): () => void {
-  telegramClientProfileListeners.add(listener);
-  ensureCrossTabStorageListenerAttached();
-  return () => {
-    telegramClientProfileListeners.delete(listener);
-  };
-}
-
 export function subscribeTelegramMiniAppBootstrap(listener: () => void): () => void {
   telegramMiniAppBootstrapListeners.add(listener);
   return () => {
@@ -72,88 +34,8 @@ export function getTelegramMiniAppBootstrapSnapshot(): boolean {
   return isTelegramMiniAppBootstrapPending;
 }
 
-/**
- * Last `localStorage` payload for the profile key and its parsed value. `useSyncExternalStore`
- * requires {@link getTelegramClientProfileSnapshot} to return the same object reference when the
- * underlying storage string is unchanged (see React `getSnapshot` caching).
- */
-let lastProfileStorageRaw: string | null | undefined;
-let lastProfileStorageParsed: AuthClientProfile | null | undefined;
-
-function parseStoredProfileJson(raw: string): AuthClientProfile | null {
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed)) return null;
-    const displayLabel = parsed.displayLabel;
-    if (typeof displayLabel !== 'string' || !displayLabel.trim()) return null;
-    const photoUrlRaw = parsed.photoUrl;
-    if (photoUrlRaw !== undefined && (typeof photoUrlRaw !== 'string' || !photoUrlRaw.trim())) {
-      return null;
-    }
-    const isAdmin = parsed.isAdmin;
-    if (typeof isAdmin !== 'boolean') {
-      return null;
-    }
-    return {
-      displayLabel: displayLabel.trim(),
-      ...(typeof photoUrlRaw === 'string' && photoUrlRaw.trim()
-        ? { photoUrl: photoUrlRaw.trim() }
-        : {}),
-      isAdmin,
-    };
-  } catch {
-    return null;
-  }
-}
-
-export function getTelegramClientProfileSnapshot(): AuthClientProfile | null {
-  return getStoredTelegramClientProfile();
-}
-
 function parseAuthExchangeResponse(raw: unknown): AuthClientProfileResponseBody {
   return parseAuthClientProfileResponseBody(raw);
-}
-
-export function getStoredTelegramClientProfile(): AuthClientProfile | null {
-  if (typeof localStorage === 'undefined') return null;
-  let raw: string | null;
-  try {
-    raw = localStorage.getItem(getTelegramClientProfileStorageKey());
-  } catch {
-    lastProfileStorageRaw = undefined;
-    return null;
-  }
-  if (raw === lastProfileStorageRaw) {
-    return lastProfileStorageParsed ?? null;
-  }
-  lastProfileStorageRaw = raw;
-  if (!raw) {
-    lastProfileStorageParsed = null;
-    return null;
-  }
-  const parsed = parseStoredProfileJson(raw);
-  lastProfileStorageParsed = parsed;
-  return parsed;
-}
-
-export function setStoredTelegramClientProfile(profile: AuthClientProfile): void {
-  if (typeof localStorage === 'undefined') return;
-  try {
-    localStorage.setItem(getTelegramClientProfileStorageKey(), JSON.stringify(profile));
-    notifyTelegramClientProfileListeners();
-  } catch {
-    /* quota / private mode */
-  }
-}
-
-export function clearStoredTelegramClientProfile(): void {
-  if (typeof localStorage === 'undefined') return;
-  try {
-    localStorage.removeItem(getTelegramClientProfileStorageKey());
-  } catch {
-    /* ignore */
-  }
-  notifyTelegramClientProfileListeners();
 }
 
 export function requestTelegramSignIn(): void {
@@ -185,12 +67,12 @@ export async function signOutTelegramAuthOnServer(): Promise<void> {
       credentials: 'include',
     });
   } catch {
-    /* best-effort: still clear local profile */
+    /* best-effort */
   }
 }
 
 export async function exchangeTelegramAuthFromWebApp(initData: string): Promise<void> {
-  const raw = await fetchApiJson<unknown>(
+  await fetchApiJson<unknown>(
     'v1/auth/telegram/web-app',
     'POST',
     {
@@ -198,8 +80,6 @@ export async function exchangeTelegramAuthFromWebApp(initData: string): Promise<
     },
     { credentials: 'include' },
   );
-  const { profile } = parseAuthExchangeResponse(raw);
-  setStoredTelegramClientProfile(profile);
 }
 
 export async function bootstrapTelegramAuthFromWebApp(): Promise<boolean> {
@@ -232,17 +112,12 @@ export async function bootstrapTelegramAuthFromWebApp(): Promise<boolean> {
   return telegramMiniAppBootstrapPromise;
 }
 
-/**
- * Telegram Login Widget: exchanges the callback payload for an access JWT (HttpOnly cookie) and
- * persists the non-sensitive profile in localStorage (see `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY`).
- */
+/** Exchanges Telegram Login Widget payload for HttpOnly session cookies. */
 export async function exchangeTelegramAuthFromLoginWidget(
   user: TelegramWidgetUser,
 ): Promise<TelegramAuthExchangeResponse> {
   const raw = await fetchApiJson<unknown>('v1/auth/telegram/login-widget', 'POST', user, {
     credentials: 'include',
   });
-  const response = parseAuthExchangeResponse(raw);
-  setStoredTelegramClientProfile(response.profile);
-  return response;
+  return parseAuthExchangeResponse(raw);
 }

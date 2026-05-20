@@ -1,9 +1,11 @@
 import { ApiError } from '@/lib/api-errors';
 import {
   bootstrapMiniAppSessionAndRefreshMe,
+  clearAuthMeProfileCache,
   fetchAuthMeProfile,
   invalidateAuthMeQuery,
   prefetchAuthMeProfile,
+  registerAuthMeQueryClient,
   setAuthMeProfileQueryData,
 } from '@/lib/auth-me';
 import { authKeys } from '@/lib/auth-keys';
@@ -59,6 +61,30 @@ describe('fetchAuthMeProfile', () => {
 
     await expect(fetchAuthMeProfile()).rejects.toMatchObject({
       statusCode: 500,
+    });
+  });
+});
+
+describe('registerAuthMeQueryClient', () => {
+  it('should clear auth me cache when clearAuthMeProfileCache runs after register', () => {
+    const queryClient = createTestQueryClient();
+    setAuthMeProfileQueryData(queryClient, { displayLabel: '@user', isAdmin: false });
+    registerAuthMeQueryClient(queryClient);
+
+    clearAuthMeProfileCache();
+
+    expect(queryClient.getQueryData(authKeys.me())).toBeNull();
+  });
+
+  it('should no-op clearAuthMeProfileCache when query client is not registered', () => {
+    const queryClient = createTestQueryClient();
+    setAuthMeProfileQueryData(queryClient, { displayLabel: '@user', isAdmin: false });
+
+    clearAuthMeProfileCache();
+
+    expect(queryClient.getQueryData(authKeys.me())).toEqual({
+      displayLabel: '@user',
+      isAdmin: false,
     });
   });
 });

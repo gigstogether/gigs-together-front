@@ -5,8 +5,6 @@ import {
   optionalTrimmedStringFromEnvSchema,
 } from '@/env/shared-env';
 
-const DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY = 'gt_tg_client_profile';
-
 const DEFAULT_FEED_PAGE_SIZE = 10;
 const DEFAULT_FEED_CALENDAR_DATES_STALE_TIME_MS = 600_000; // 10 minutes
 
@@ -20,9 +18,6 @@ const clientEnvSchema = z
     NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_AUTH_ENABLED: optionalBooleanFromEnvSchema.default(false),
     NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: optionalTrimmedStringFromEnvSchema,
-    NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY: optionalTrimmedStringFromEnvSchema.default(
-      DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY,
-    ),
     NEXT_PUBLIC_FEED_PAGE_SIZE: createOptionalPositiveIntegerFromEnvSchema(
       'NEXT_PUBLIC_FEED_PAGE_SIZE',
     ),
@@ -51,8 +46,6 @@ const parsedClientEnv = clientEnvSchema.parse({
     process.env.NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL,
   NEXT_PUBLIC_AUTH_ENABLED: process.env.NEXT_PUBLIC_AUTH_ENABLED,
   NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME,
-  NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY:
-    process.env.NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY,
   NEXT_PUBLIC_FEED_PAGE_SIZE: process.env.NEXT_PUBLIC_FEED_PAGE_SIZE,
   NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS:
     process.env.NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS,
@@ -68,7 +61,6 @@ export const clientEnv = {
   telegramAuthSessionHelpUrl: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL,
   isAuthEnabled: parsedClientEnv.NEXT_PUBLIC_AUTH_ENABLED,
   telegramBotUsername: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME,
-  telegramClientProfileStorageKey: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY,
   feedPageSize: parsedClientEnv.NEXT_PUBLIC_FEED_PAGE_SIZE ?? DEFAULT_FEED_PAGE_SIZE,
   feedCalendarDatesStaleTimeMs:
     parsedClientEnv.NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS ??

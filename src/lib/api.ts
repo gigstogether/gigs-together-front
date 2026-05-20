@@ -1,6 +1,7 @@
 import { fetchApiJson } from '@/lib/api-core';
 import { logger } from '@/lib/logger';
-import { clearStoredTelegramClientProfile, requestTelegramSignIn } from '@/lib/telegram-auth';
+import { clearAuthMeProfileCache } from '@/lib/auth-me';
+import { requestTelegramSignIn } from '@/lib/telegram-auth';
 import { isTelegramMiniApp } from '@/lib/telegram-webapp';
 
 export {
@@ -23,7 +24,7 @@ export async function apiRequest<TResponse = unknown, TBody = unknown>(
       ...init,
       headers,
       onUnauthorized: () => {
-        clearStoredTelegramClientProfile();
+        clearAuthMeProfileCache();
         if (!isTelegramMiniApp()) {
           requestTelegramSignIn();
         }
