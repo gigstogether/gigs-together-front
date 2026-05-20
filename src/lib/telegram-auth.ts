@@ -1,8 +1,9 @@
 import { fetchApiJson } from '@/lib/api-core';
 import { clientEnv } from '@/env/client-env';
 import { isRecord } from '@/lib/is-record';
+import { parseAuthClientProfileResponseBody } from '@/lib/parse-auth-client-profile-response';
+import type { AuthClientProfile, AuthClientProfileResponseBody } from '@/types/auth-client-profile';
 import type { TelegramAuthExchangeResponse } from '@/types/telegram-auth-exchange-response';
-import type { TelegramStoredClientProfile } from '@/types/telegram-client-profile';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 export type { TelegramAuthExchangeResponse };
@@ -77,9 +78,9 @@ export function getTelegramMiniAppBootstrapSnapshot(): boolean {
  * underlying storage string is unchanged (see React `getSnapshot` caching).
  */
 let lastProfileStorageRaw: string | null | undefined;
-let lastProfileStorageParsed: TelegramStoredClientProfile | null | undefined;
+let lastProfileStorageParsed: AuthClientProfile | null | undefined;
 
-function parseStoredProfileJson(raw: string): TelegramStoredClientProfile | null {
+function parseStoredProfileJson(raw: string): AuthClientProfile | null {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!isRecord(parsed)) return null;
@@ -105,43 +106,15 @@ function parseStoredProfileJson(raw: string): TelegramStoredClientProfile | null
   }
 }
 
-export function getTelegramClientProfileSnapshot(): TelegramStoredClientProfile | null {
+export function getTelegramClientProfileSnapshot(): AuthClientProfile | null {
   return getStoredTelegramClientProfile();
 }
 
-function parseAuthExchangeResponse(raw: unknown): TelegramAuthExchangeResponse {
-  if (!isRecord(raw)) {
-    throw new Error('Invalid auth exchange response');
-  }
-  const profileRaw = raw.profile;
-  if (!isRecord(profileRaw)) {
-    throw new Error('Invalid auth exchange response: profile');
-  }
-  const displayLabel = profileRaw.displayLabel;
-  if (typeof displayLabel !== 'string' || !displayLabel.trim()) {
-    throw new Error('Invalid auth exchange response: profile.displayLabel');
-  }
-  const photoUrlRaw = profileRaw.photoUrl;
-  let photoUrl: string | undefined;
-  if (photoUrlRaw !== undefined) {
-    if (typeof photoUrlRaw !== 'string' || !photoUrlRaw.trim()) {
-      throw new Error('Invalid auth exchange response: profile.photoUrl');
-    }
-    photoUrl = photoUrlRaw.trim();
-  }
-  const isAdmin = profileRaw.isAdmin;
-  if (typeof isAdmin !== 'boolean') {
-    throw new Error('Invalid auth exchange response: profile.isAdmin');
-  }
-  const profile: TelegramStoredClientProfile = {
-    displayLabel: displayLabel.trim(),
-    ...(photoUrl ? { photoUrl } : {}),
-    isAdmin,
-  };
-  return { profile };
+function parseAuthExchangeResponse(raw: unknown): AuthClientProfileResponseBody {
+  return parseAuthClientProfileResponseBody(raw);
 }
 
-export function getStoredTelegramClientProfile(): TelegramStoredClientProfile | null {
+export function getStoredTelegramClientProfile(): AuthClientProfile | null {
   if (typeof localStorage === 'undefined') return null;
   let raw: string | null;
   try {
@@ -163,7 +136,7 @@ export function getStoredTelegramClientProfile(): TelegramStoredClientProfile | 
   return parsed;
 }
 
-export function setStoredTelegramClientProfile(profile: TelegramStoredClientProfile): void {
+export function setStoredTelegramClientProfile(profile: AuthClientProfile): void {
   if (typeof localStorage === 'undefined') return;
   try {
     localStorage.setItem(getTelegramClientProfileStorageKey(), JSON.stringify(profile));

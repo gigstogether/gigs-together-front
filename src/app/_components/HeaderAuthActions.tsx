@@ -1,6 +1,6 @@
 'use client';
 
-import { LogIn, LogOut } from 'lucide-react';
+import { Loader2, LogIn, LogOut } from 'lucide-react';
 import { useCallback } from 'react';
 import { clientEnv } from '@/env/client-env';
 import { toast } from '@/hooks/use-toast';
@@ -12,7 +12,7 @@ const menuRowClass =
   'flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted';
 
 export default function HeaderAuthActions() {
-  const { authState, signOut } = useTelegramAuth();
+  const { authState, isLoadingAuthState, signOut } = useTelegramAuth();
   const telegramBotUsername = clientEnv.isAuthEnabled ? clientEnv.telegramBotUsername : undefined;
   const miniAppEnv = useTelegramMiniAppEnv();
 
@@ -29,12 +29,25 @@ export default function HeaderAuthActions() {
     return null;
   }
 
-  const showSignInButton = !authState && miniAppEnv === 'browser';
+  const showSignInButton = !isLoadingAuthState && !authState && miniAppEnv === 'browser';
   const showSignOutButton = authState && miniAppEnv !== 'mini';
 
   return (
     <>
-      {authState ? (
+      {isLoadingAuthState ? (
+        <div
+          className={`${menuRowClass} text-muted-foreground`}
+          aria-busy="true"
+          aria-label="Loading account"
+        >
+          <Loader2
+            className="h-4 w-4 shrink-0 animate-spin"
+            aria-hidden
+          />
+          Loading…
+        </div>
+      ) : null}
+      {!isLoadingAuthState && authState ? (
         <div className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm">
           <div className="flex min-w-0 flex-1 cursor-default items-center gap-2">
             {authState.photoUrl ? (

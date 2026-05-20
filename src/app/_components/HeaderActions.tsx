@@ -41,13 +41,14 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const [locationTipOpen, setLocationTipOpen] = useState(false);
-  const { authState } = useTelegramAuth();
+  const { authState, isLoadingAuthState } = useTelegramAuth();
   const miniAppEnv = useTelegramMiniAppEnv();
   const telegramBotUsername = clientEnv.isAuthEnabled ? clientEnv.telegramBotUsername : undefined;
-  const isSignInShownInMenu = Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
+  const isSignInShownInMenu =
+    !isLoadingAuthState && Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
 
-  /** Profile / Sign in row is visible — same predicates as HeaderAuthActions non-empty UX. */
-  const hasAuthPrimaryRow = Boolean(authState) || isSignInShownInMenu;
+  /** Profile / Sign in / loading row — aligned with HeaderAuthActions. */
+  const hasAuthPrimaryRow = isLoadingAuthState || Boolean(authState) || isSignInShownInMenu;
 
   /** Desktop burger menu rows between auth header and About (excluding the About divider slot). */
   const hasMiddleRowsBeforeAboutDesktop = Boolean(authState?.isAdmin);
@@ -57,7 +58,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const showDividerAfterAuthMobile = hasAuthPrimaryRow;
 
   /** Desktop: About separated when the menu shows account UX (not Telegram-only About row). */
-  const showDividerBeforeAboutDesktop = Boolean(authState) || isSignInShownInMenu;
+  const showDividerBeforeAboutDesktop = hasAuthPrimaryRow;
 
   return (
     <div className="min-w-0 justify-self-end flex items-center space-x-4">

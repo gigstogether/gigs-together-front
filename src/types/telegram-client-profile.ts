@@ -1,8 +1,4 @@
-/**
- * Persisted Telegram user fields for UI (non-sensitive). Access JWT lives in an HttpOnly cookie.
- */
-export interface TelegramStoredClientProfile {
-  readonly displayLabel: string;
-  readonly photoUrl?: string;
-  readonly isAdmin: boolean;
-}
+import type { AuthClientProfile } from '@/types/auth-client-profile';
+
+/** @deprecated Use {@link AuthClientProfile}. Kept for localStorage helpers until removed. */
+export type TelegramStoredClientProfile = AuthClientProfile;
