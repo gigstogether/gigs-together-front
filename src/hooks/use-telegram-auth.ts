@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-
-import { useMe } from '@/hooks/use-me';
-import { bootstrapMiniAppSessionAndRefreshMe, setAuthMeProfileQueryData } from '@/lib/auth-me';
 import {
+  bootstrapTelegramAuthFromWebApp,
   clearStoredTelegramClientProfile,
   exchangeTelegramAuthFromLoginWidget,
   getTelegramMiniAppBootstrapSnapshot,
+  getTelegramClientProfileSnapshot,
   signOutTelegramAuthOnServer,
   subscribeTelegramMiniAppBootstrap,
+  subscribeTelegramClientProfile,
 } from '@/lib/telegram-auth';
 import type { TelegramAuthExchangeResponse } from '@/types/telegram-auth-exchange-response';
 import type { TelegramAuthState } from '@/types/telegram-auth';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
+
+function subscribeNoop(): () => void {
+  return () => undefined;
+}
 
 export interface UseTelegramAuthResult {
   readonly authState: TelegramAuthState | null;
@@ -22,8 +25,20 @@ export interface UseTelegramAuthResult {
 }
 
 export function useTelegramAuth(): UseTelegramAuthResult {
-  const queryClient = useQueryClient();
-  const { data: profile, isPending } = useMe();
+  // `authState` comes from localStorage, so SSR always sees "signed out". We use
+  // `useSyncExternalStore` with a server snapshot of `false` and a client snapshot of `true` to
+  // detect when hydration has completed. This lets screens show a short loading state until the
+  // client snapshot is available, avoiding a flash of the sign-in UI for already authenticated users.
+  const isHydrated = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
+  const profileSnapshot = useSyncExternalStore(
+    subscribeTelegramClientProfile,
+    getTelegramClientProfileSnapshot,
+    () => null,
+  );
   const isTelegramMiniAppBootstrapPending = useSyncExternalStore(
     subscribeTelegramMiniAppBootstrap,
     getTelegramMiniAppBootstrapSnapshot,
@@ -32,39 +47,37 @@ export function useTelegramAuth(): UseTelegramAuthResult {
   const hasAttemptedMiniAppBootstrapRef = useRef(false);
 
   const authState = useMemo((): TelegramAuthState | null => {
-    if (profile == null) {
+    if (!profileSnapshot) {
       return null;
     }
-    return profile;
-  }, [profile]);
+    return {
+      displayLabel: profileSnapshot.displayLabel,
+      ...(profileSnapshot.photoUrl ? { photoUrl: profileSnapshot.photoUrl } : {}),
+      isAdmin: profileSnapshot.isAdmin,
+    };
+  }, [profileSnapshot]);
 
-  const signIn = useCallback(
-    async (user: TelegramWidgetUser) => {
-      const response = await exchangeTelegramAuthFromLoginWidget(user);
-      setAuthMeProfileQueryData(queryClient, response.profile);
-      return response;
-    },
-    [queryClient],
-  );
+  const signIn = useCallback(async (user: TelegramWidgetUser) => {
+    return exchangeTelegramAuthFromLoginWidget(user);
+  }, []);
 
   const signOut = useCallback(async () => {
     await signOutTelegramAuthOnServer();
-    setAuthMeProfileQueryData(queryClient, null);
     clearStoredTelegramClientProfile();
-  }, [queryClient]);
+  }, []);
 
   useEffect(() => {
-    if (isPending || authState || hasAttemptedMiniAppBootstrapRef.current) {
+    if (!isHydrated || authState || hasAttemptedMiniAppBootstrapRef.current) {
       return;
     }
 
     hasAttemptedMiniAppBootstrapRef.current = true;
-    void bootstrapMiniAppSessionAndRefreshMe(queryClient);
-  }, [authState, isPending, queryClient]);
+    void bootstrapTelegramAuthFromWebApp();
+  }, [authState, isHydrated]);
 
   return {
     authState,
-    isLoadingAuthState: isPending || isTelegramMiniAppBootstrapPending,
+    isLoadingAuthState: !isHydrated || isTelegramMiniAppBootstrapPending,
     signIn,
     signOut,
   };
