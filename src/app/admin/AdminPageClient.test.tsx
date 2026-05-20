@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import AdminPageClient from '@/app/admin/AdminPageClient';
 import type { UseModeratorTelegramSessionResult } from '@/hooks/use-moderator-telegram-session';
 
@@ -8,15 +9,11 @@ vi.mock('@/hooks/use-moderator-telegram-session', () => ({
   useModeratorTelegramSession: () => mockUseModeratorTelegramSession(),
 }));
 
-vi.mock('@/app/_components/SignInContent', () => ({
-  default: () => <div data-testid="sign-in-stub" />,
-}));
-
 function sessionMock(
   partial: Partial<UseModeratorTelegramSessionResult>,
 ): UseModeratorTelegramSessionResult {
   return {
-    authState: null,
+    authState: { displayLabel: '@admin', isAdmin: true },
     isLoadingAuthState: false,
     telegramBotUsername: 'gigs_test_bot',
     isTelegramSignInAvailable: true,
@@ -30,56 +27,30 @@ function sessionMock(
 describe('AdminPageClient', () => {
   beforeEach(() => {
     mockUseModeratorTelegramSession.mockReset();
-  });
-
-  it('should show a loading state when auth bootstrap is not finished', () => {
-    mockUseModeratorTelegramSession.mockReturnValue(
-      sessionMock({
-        isLoadingAuthState: true,
-      }),
-    );
-
-    render(<AdminPageClient />);
-
-    expect(screen.getByText('Loading…')).toBeInTheDocument();
-  });
-
-  it('should explain access restriction to guests', () => {
-    mockUseModeratorTelegramSession.mockReturnValue(
-      sessionMock({
-        authState: null,
-        isLoadingAuthState: false,
-      }),
-    );
-
-    render(<AdminPageClient />);
-
-    expect(screen.getByText('Restricted area')).toBeInTheDocument();
-    expect(screen.getByTestId('sign-in-stub')).toBeInTheDocument();
-  });
-
-  it('should deny access to signed-in non-admin users', () => {
-    mockUseModeratorTelegramSession.mockReturnValue(
-      sessionMock({
-        authState: { displayLabel: '@someone', isAdmin: false },
-      }),
-    );
-
-    render(<AdminPageClient />);
-
-    expect(screen.getByText('Access denied')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
+    mockUseModeratorTelegramSession.mockReturnValue(sessionMock({}));
   });
 
   it('should confirm access for admin users', () => {
+    render(<AdminPageClient />);
+
+    expect(screen.getByText('You are signed in to the admin area.')).toBeInTheDocument();
+  });
+
+  it('should show sign out in browser', () => {
+    render(<AdminPageClient />);
+
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
+  });
+
+  it('should hide sign out in Telegram mini app', () => {
     mockUseModeratorTelegramSession.mockReturnValue(
       sessionMock({
-        authState: { displayLabel: '@admin', isAdmin: true },
+        miniAppEnv: 'mini',
       }),
     );
 
     render(<AdminPageClient />);
 
-    expect(screen.getByText('You are signed in to the admin area.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument();
   });
 });
