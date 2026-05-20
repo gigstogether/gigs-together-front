@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { clientEnv } from '@/env/client-env';
-import { prefetchAuthMeProfile, registerAuthMeQueryClient } from '@/lib/auth-me';
+import { prefetchAuthMeProfile } from '@/lib/auth-me';
 import { appQueryClientDefaultOptions } from '@/lib/react-query-client-defaults';
 
 interface QueryProviderProps {
@@ -28,7 +28,6 @@ export function QueryProvider({ children }: QueryProviderProps) {
   );
 
   useEffect(() => {
-    registerAuthMeQueryClient(queryClient);
     void prefetchAuthMeProfile(queryClient);
   }, [queryClient]);
 

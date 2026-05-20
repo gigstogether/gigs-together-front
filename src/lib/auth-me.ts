@@ -7,42 +7,6 @@ import { parseAuthClientProfileResponseBody } from '@/lib/parse-auth-client-prof
 import { bootstrapTelegramAuthFromWebApp } from '@/lib/telegram-auth';
 import type { AuthClientProfile } from '@/types/auth-client-profile';
 
-// TODO(next iteration): Remove legacy localStorage cleanup below once deployed users no longer
-// have `gt_tg_client_profile` from the old profile-in-localStorage flow.
-/** Former default for `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` (removed). */
-const LEGACY_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY = 'gt_tg_client_profile';
-
-let registeredAuthMeQueryClient: QueryClient | null = null;
-
-/**
- * Registers the app QueryClient so non-React code (e.g. API 401 handlers) can clear `auth/me` cache.
- */
-export function registerAuthMeQueryClient(queryClient: QueryClient): void {
-  registeredAuthMeQueryClient = queryClient;
-  removeLegacyTelegramClientProfileStorage();
-}
-
-// TODO: Cross-tab sync — `clearAuthMeProfileCache` only affects this tab; on 401,
-// other tabs may still show a signed-in header until refocus/refetch (see TODO on `useMe`).
-export function clearAuthMeProfileCache(): void {
-  if (!registeredAuthMeQueryClient) {
-    return;
-  }
-  setAuthMeProfileQueryData(registeredAuthMeQueryClient, null);
-}
-
-/** One-time migration: drop cached profile left by the removed localStorage auth flow. */
-function removeLegacyTelegramClientProfileStorage(): void {
-  if (typeof localStorage === 'undefined') {
-    return;
-  }
-  try {
-    localStorage.removeItem(LEGACY_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY);
-  } catch {
-    /* ignore */
-  }
-}
-
 /**
  * Loads the current session profile from `GET v1/auth/me` (HttpOnly access cookie).
  * Returns `null` when unauthenticated.

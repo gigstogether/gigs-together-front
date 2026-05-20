@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMe } from '@/hooks/use-me';
 import { bootstrapMiniAppSessionAndRefreshMe, setAuthMeProfileQueryData } from '@/lib/auth-me';
 import {
+  clearStoredTelegramClientProfile,
   exchangeTelegramAuthFromLoginWidget,
   getTelegramMiniAppBootstrapSnapshot,
   signOutTelegramAuthOnServer,
@@ -37,8 +38,6 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     return profile;
   }, [profile]);
 
-  // TODO: Cross-tab sync — broadcast sign-in/sign-out so other tabs update or clear
-  // `authKeys.me()` (see TODO on `useMe`).
   const signIn = useCallback(
     async (user: TelegramWidgetUser) => {
       const response = await exchangeTelegramAuthFromLoginWidget(user);
@@ -51,6 +50,7 @@ export function useTelegramAuth(): UseTelegramAuthResult {
   const signOut = useCallback(async () => {
     await signOutTelegramAuthOnServer();
     setAuthMeProfileQueryData(queryClient, null);
+    clearStoredTelegramClientProfile();
   }, [queryClient]);
 
   useEffect(() => {
