@@ -1,29 +1,69 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { useModeratorTelegramSession } from '@/hooks/use-moderator-telegram-session';
+import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
+
+import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
+import { adminNavItems } from '@/app/admin/admin-nav-config';
+import { adminKeys } from '@/app/admin/adminKeys';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { fetchAdminDashboard } from '@/lib/admin-api';
 
 export default function AdminPageClient() {
-  const { miniAppEnv, handleSignOut } = useModeratorTelegramSession();
+  const dashboardQuery = useQuery({
+    queryKey: adminKeys.dashboard(),
+    queryFn: fetchAdminDashboard,
+  });
+  const summary = dashboardQuery.data?.summary;
+
+  const sectionLinks = adminNavItems.filter((item) => item.href !== '/admin');
 
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 py-12 text-center">
-      <p className="text-lg font-medium text-foreground">You are signed in to the admin area.</p>
-      <p className="mt-2 max-w-md text-sm text-muted-foreground">
-        Moderator tools will appear here as they are added.
-      </p>
-      {miniAppEnv !== 'mini' ? (
-        <Button
-          type="button"
-          variant="outline"
-          className="mt-8"
-          onClick={() => {
-            void handleSignOut();
-          }}
-        >
-          Sign out
-        </Button>
+    <>
+      <AdminPageHeader
+        title="Dashboard"
+        description="Overview of moderation work and quick links to admin tools."
+      />
+      <div className="mb-8 grid gap-4 sm:grid-cols-2">
+        <Card className="border shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>Pending events</CardDescription>
+            <CardTitle className="text-3xl tabular-nums">
+              {dashboardQuery.isLoading ? '—' : (summary?.pendingGigsCount ?? 0)}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card className="border shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>Published events</CardDescription>
+            <CardTitle className="text-3xl tabular-nums">
+              {dashboardQuery.isLoading ? '—' : (summary?.publishedGigsCount ?? 0)}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+      {dashboardQuery.isError ? (
+        <p className="mb-6 text-sm text-destructive">Could not load dashboard summary.</p>
       ) : null}
-    </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {sectionLinks.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="block rounded-xl border bg-card shadow-sm transition-colors hover:bg-muted/40"
+          >
+            <Card className="border-0 shadow-none">
+              <CardHeader>
+                <CardTitle className="text-base">{item.label}</CardTitle>
+                <CardDescription>{item.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <span className="text-sm font-medium text-primary">Open →</span>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    </>
   );
 }

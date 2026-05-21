@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 
 import SignInContent from '@/app/_components/SignInContent';
 import AdminDeniedGate from '@/app/admin/AdminDeniedGate';
+import AdminShell from '@/app/admin/_components/AdminShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useModeratorTelegramSession } from '@/hooks/use-moderator-telegram-session';
 
@@ -59,5 +60,5 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
     return <AdminDeniedGate />;
   }
 
-  return children;
+  return <AdminShell>{children}</AdminShell>;
 }

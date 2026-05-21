@@ -1,56 +1,52 @@
-import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, waitFor } from '@testing-library/react';
 
 import AdminPageClient from '@/app/admin/AdminPageClient';
-import type { UseModeratorTelegramSessionResult } from '@/hooks/use-moderator-telegram-session';
 
-const mockUseModeratorTelegramSession = vi.fn<() => UseModeratorTelegramSessionResult>();
+const mockFetchAdminDashboard = vi.fn();
 
-vi.mock('@/hooks/use-moderator-telegram-session', () => ({
-  useModeratorTelegramSession: () => mockUseModeratorTelegramSession(),
+vi.mock('@/lib/admin-api', () => ({
+  fetchAdminDashboard: () => mockFetchAdminDashboard(),
 }));
 
-function sessionMock(
-  partial: Partial<UseModeratorTelegramSessionResult>,
-): UseModeratorTelegramSessionResult {
-  return {
-    authState: { displayLabel: '@admin', isAdmin: true },
-    isLoadingAuthState: false,
-    telegramBotUsername: 'gigs_test_bot',
-    isTelegramSignInAvailable: true,
-    miniAppEnv: 'browser',
-    handleAuthenticated: vi.fn(),
-    handleSignOut: vi.fn(),
-    ...partial,
-  };
+function renderWithQueryClient() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <AdminPageClient />
+    </QueryClientProvider>,
+  );
 }
 
 describe('AdminPageClient', () => {
   beforeEach(() => {
-    mockUseModeratorTelegramSession.mockReset();
-    mockUseModeratorTelegramSession.mockReturnValue(sessionMock({}));
+    mockFetchAdminDashboard.mockReset();
+    mockFetchAdminDashboard.mockResolvedValue({
+      summary: {
+        pendingGigsCount: 3,
+        publishedGigsCount: 12,
+      },
+    });
   });
 
-  it('should confirm access for admin users', () => {
-    render(<AdminPageClient />);
+  it('should show dashboard summary counts', async () => {
+    renderWithQueryClient();
 
-    expect(screen.getByText('You are signed in to the admin area.')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('3')).toBeInTheDocument();
+      expect(screen.getByText('12')).toBeInTheDocument();
+    });
   });
 
-  it('should show sign out in browser', () => {
-    render(<AdminPageClient />);
+  it('should show section quick links', () => {
+    renderWithQueryClient();
 
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
-  });
-
-  it('should hide sign out in Telegram mini app', () => {
-    mockUseModeratorTelegramSession.mockReturnValue(
-      sessionMock({
-        miniAppEnv: 'mini',
-      }),
-    );
-
-    render(<AdminPageClient />);
-
-    expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument();
+    expect(screen.getByText('Events')).toBeInTheDocument();
+    expect(screen.getByText('Translations')).toBeInTheDocument();
   });
 });

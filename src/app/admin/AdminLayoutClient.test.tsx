@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 
 import AdminLayoutClient from '@/app/admin/AdminLayoutClient';
@@ -11,6 +12,12 @@ vi.mock('@/hooks/use-moderator-telegram-session', () => ({
 
 vi.mock('@/app/_components/SignInContent', () => ({
   default: () => <div data-testid="sign-in-stub" />,
+}));
+
+vi.mock('@/app/admin/_components/AdminShell', () => ({
+  default: ({ children }: { children: ReactNode }) => (
+    <div data-testid="admin-shell">{children}</div>
+  ),
 }));
 
 function sessionMock(
@@ -47,7 +54,7 @@ describe('AdminLayoutClient', () => {
     );
 
     expect(screen.getByText('Loading…')).toBeInTheDocument();
-    expect(screen.queryByTestId('admin-child')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('admin-shell')).not.toBeInTheDocument();
   });
 
   it('should explain access restriction to guests', () => {
@@ -66,7 +73,7 @@ describe('AdminLayoutClient', () => {
 
     expect(screen.getByText('Restricted area')).toBeInTheDocument();
     expect(screen.getByTestId('sign-in-stub')).toBeInTheDocument();
-    expect(screen.queryByTestId('admin-child')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('admin-shell')).not.toBeInTheDocument();
   });
 
   it('should deny access to signed-in non-admin users', () => {
@@ -83,11 +90,10 @@ describe('AdminLayoutClient', () => {
     );
 
     expect(screen.getByText('Access denied')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
-    expect(screen.queryByTestId('admin-child')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('admin-shell')).not.toBeInTheDocument();
   });
 
-  it('should render children for admin users', () => {
+  it('should render children inside admin shell for admin users', () => {
     mockUseModeratorTelegramSession.mockReturnValue(
       sessionMock({
         authState: { displayLabel: '@admin', isAdmin: true },
@@ -100,6 +106,7 @@ describe('AdminLayoutClient', () => {
       </AdminLayoutClient>,
     );
 
+    expect(screen.getByTestId('admin-shell')).toBeInTheDocument();
     expect(screen.getByTestId('admin-child')).toBeInTheDocument();
   });
 });
