@@ -17,6 +17,7 @@ interface HeaderProps {
   calendarDatesError?: string;
   showCalendar?: boolean;
   showSuggestGig?: boolean;
+  centerLabel?: string;
   country: string;
   city: string;
 }
@@ -32,6 +33,7 @@ export default function Header(props: HeaderProps) {
     calendarDatesError,
     showCalendar = true,
     showSuggestGig = true,
+    centerLabel,
     country,
     city,
   } = props;
@@ -57,7 +59,9 @@ export default function Header(props: HeaderProps) {
             </h1>
           </div>
           <div className="min-w-0 justify-self-center">
-            {showCalendar ? (
+            {centerLabel ? (
+              <span className="text-sm font-medium text-muted-foreground">{centerLabel}</span>
+            ) : showCalendar ? (
               <HeaderCalendar
                 visibleEventDate={earliestEventDate}
                 visibleEventDateRange={visibleEventDateRange}

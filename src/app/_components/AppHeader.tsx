@@ -1,8 +1,10 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+
 import Header from '@/app/_components/Header';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
+import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 
 const DEFAULT_COUNTRY = 'es';
 const DEFAULT_CITY = 'barcelona';
@@ -25,13 +27,19 @@ function getLocationFromPath(pathname: string): { country: string; city: string 
   return { country, city };
 }
 
+function isAdminRoute(pathname: string): boolean {
+  return pathname === '/admin' || pathname.startsWith('/admin/');
+}
+
 // TODO: merge with Header.tsx ?
 export default function AppHeader() {
   const pathname = usePathname() ?? '/';
   const { config } = useHeaderConfig();
+  const { authState } = useTelegramAuth();
   const isFeed = pathname === '/feed' || pathname.startsWith('/feed/');
   const isGigForm = pathname === '/gig-form' || pathname.startsWith('/gig-form/');
   const { country, city } = getLocationFromPath(pathname);
+  const centerLabel = isAdminRoute(pathname) && authState?.isAdmin ? 'ADMIN' : undefined;
 
   return (
     <Header
@@ -39,6 +47,7 @@ export default function AppHeader() {
       city={city}
       showCalendar={isFeed}
       showSuggestGig={!isGigForm}
+      centerLabel={centerLabel}
       earliestEventDate={config.earliestEventDate}
       visibleEventDateRange={config.visibleEventDateRange}
       availableDates={config.availableDates}

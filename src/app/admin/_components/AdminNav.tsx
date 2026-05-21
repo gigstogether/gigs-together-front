@@ -6,6 +6,10 @@ import { usePathname } from 'next/navigation';
 import { adminNavItems } from '@/app/admin/admin-nav-config';
 import { cn } from '@/lib/utils';
 
+interface AdminNavProps {
+  readonly onNavigate?: () => void;
+}
+
 function isNavItemActive(pathname: string, href: string): boolean {
   if (href === '/admin') {
     return pathname === '/admin';
@@ -13,7 +17,8 @@ function isNavItemActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function AdminNav() {
+export default function AdminNav(props: AdminNavProps) {
+  const { onNavigate } = props;
   const pathname = usePathname() ?? '/admin';
 
   return (
@@ -28,6 +33,7 @@ export default function AdminNav() {
             key={item.href}
             href={item.href}
             aria-current={isActive ? 'page' : undefined}
+            onClick={onNavigate}
             className={cn(
               'rounded-lg px-3 py-2 text-sm transition-colors',
               isActive
