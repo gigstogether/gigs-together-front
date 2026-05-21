@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 
 import Header from '@/app/_components/Header';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
+import AdminHeaderNavMenu from '@/app/admin/_components/AdminHeaderNavMenu';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 
 const DEFAULT_COUNTRY = 'es';
@@ -39,15 +40,16 @@ export default function AppHeader() {
   const isFeed = pathname === '/feed' || pathname.startsWith('/feed/');
   const isGigForm = pathname === '/gig-form' || pathname.startsWith('/gig-form/');
   const { country, city } = getLocationFromPath(pathname);
-  const centerLabel = isAdminRoute(pathname) && authState?.isAdmin ? 'ADMIN' : undefined;
+  const showAdminHeaderNav = isAdminRoute(pathname) && authState?.isAdmin === true;
 
+  // TODO: showCalendar -> centerContent
   return (
     <Header
       country={country}
       city={city}
       showCalendar={isFeed}
       showSuggestGig={!isGigForm}
-      centerLabel={centerLabel}
+      centerContent={showAdminHeaderNav ? <AdminHeaderNavMenu /> : undefined}
       earliestEventDate={config.earliestEventDate}
       visibleEventDateRange={config.visibleEventDateRange}
       availableDates={config.availableDates}

@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import type { ReactNode } from 'react';
 import type { Route } from 'next';
 import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
 
@@ -17,7 +18,7 @@ interface HeaderProps {
   calendarDatesError?: string;
   showCalendar?: boolean;
   showSuggestGig?: boolean;
-  centerLabel?: string;
+  centerContent?: ReactNode;
   country: string;
   city: string;
 }
@@ -33,7 +34,7 @@ export default function Header(props: HeaderProps) {
     calendarDatesError,
     showCalendar = true,
     showSuggestGig = true,
-    centerLabel,
+    centerContent,
     country,
     city,
   } = props;
@@ -59,8 +60,8 @@ export default function Header(props: HeaderProps) {
             </h1>
           </div>
           <div className="min-w-0 justify-self-center">
-            {centerLabel ? (
-              <span className="text-sm font-medium text-muted-foreground">{centerLabel}</span>
+            {centerContent ? (
+              centerContent
             ) : showCalendar ? (
               <HeaderCalendar
                 visibleEventDate={earliestEventDate}

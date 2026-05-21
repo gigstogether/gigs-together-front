@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 
 import AdminLayoutClient from '@/app/admin/AdminLayoutClient';
 import type { UseModeratorTelegramSessionResult } from '@/hooks/use-moderator-telegram-session';
+import { buildModeratorTelegramSessionMock } from '@/test-utils/moderator-telegram-session-mock';
 
 const mockUseModeratorTelegramSession = vi.fn<() => UseModeratorTelegramSessionResult>();
 
@@ -20,21 +21,6 @@ vi.mock('@/app/admin/_components/AdminShell', () => ({
   ),
 }));
 
-function sessionMock(
-  partial: Partial<UseModeratorTelegramSessionResult>,
-): UseModeratorTelegramSessionResult {
-  return {
-    authState: null,
-    isLoadingAuthState: false,
-    telegramBotUsername: 'gigs_test_bot',
-    isTelegramSignInAvailable: true,
-    miniAppEnv: 'browser',
-    handleAuthenticated: vi.fn(),
-    handleSignOut: vi.fn(),
-    ...partial,
-  };
-}
-
 describe('AdminLayoutClient', () => {
   beforeEach(() => {
     mockUseModeratorTelegramSession.mockReset();
@@ -42,7 +28,7 @@ describe('AdminLayoutClient', () => {
 
   it('should show a loading state when auth bootstrap is not finished', () => {
     mockUseModeratorTelegramSession.mockReturnValue(
-      sessionMock({
+      buildModeratorTelegramSessionMock({
         isLoadingAuthState: true,
       }),
     );
@@ -59,7 +45,7 @@ describe('AdminLayoutClient', () => {
 
   it('should explain access restriction to guests', () => {
     mockUseModeratorTelegramSession.mockReturnValue(
-      sessionMock({
+      buildModeratorTelegramSessionMock({
         authState: null,
         isLoadingAuthState: false,
       }),
@@ -78,7 +64,7 @@ describe('AdminLayoutClient', () => {
 
   it('should deny access to signed-in non-admin users', () => {
     mockUseModeratorTelegramSession.mockReturnValue(
-      sessionMock({
+      buildModeratorTelegramSessionMock({
         authState: { displayLabel: '@someone', isAdmin: false },
       }),
     );
@@ -95,7 +81,7 @@ describe('AdminLayoutClient', () => {
 
   it('should render children inside admin shell for admin users', () => {
     mockUseModeratorTelegramSession.mockReturnValue(
-      sessionMock({
+      buildModeratorTelegramSessionMock({
         authState: { displayLabel: '@admin', isAdmin: true },
       }),
     );

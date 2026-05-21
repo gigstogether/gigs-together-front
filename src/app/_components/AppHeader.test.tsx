@@ -25,6 +25,10 @@ vi.mock('@/app/_components/HeaderActions', () => ({
   default: () => <div data-testid="header-actions" />,
 }));
 
+vi.mock('@/app/admin/_components/AdminHeaderNavMenu', () => ({
+  default: () => <div data-testid="admin-header-nav-menu" />,
+}));
+
 describe('AppHeader', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/feed/es/barcelona');
@@ -33,21 +37,21 @@ describe('AppHeader', () => {
     });
   });
 
-  it('should show Admin label in the center when admin visits an admin route', () => {
+  it('should show admin header navigation when admin visits an admin route', () => {
     mockUsePathname.mockReturnValue('/admin/gigs');
 
     render(<AppHeader />);
 
-    expect(screen.getByText('Admin')).toBeInTheDocument();
+    expect(screen.getByTestId('admin-header-nav-menu')).toBeInTheDocument();
     expect(screen.queryByTestId('header-calendar')).not.toBeInTheDocument();
   });
 
-  it('should not show Admin label when user is not admin', () => {
+  it('should not show admin header navigation when user is not admin', () => {
     mockUsePathname.mockReturnValue('/admin');
     mockUseTelegramAuth.mockReturnValue({ authState: null });
 
     render(<AppHeader />);
 
-    expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('admin-header-nav-menu')).not.toBeInTheDocument();
   });
 });
