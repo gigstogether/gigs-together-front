@@ -39,8 +39,8 @@ export default function AdminLanguagesPageClient() {
 
   const reorderMutation = useMutation({
     mutationFn: patchAdminLanguagesOrder,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: adminKeys.languages() });
+    onSuccess: (languages) => {
+      queryClient.setQueryData(adminKeys.languages(), languages);
     },
   });
 
