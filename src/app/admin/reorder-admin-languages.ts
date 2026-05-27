@@ -1,9 +1,4 @@
-import type { AdminLanguage } from '@/lib/admin-api';
-
-export interface AdminLanguageOrderUpdate {
-  readonly iso: string;
-  readonly order: number;
-}
+import type { AdminLanguage, AdminLanguageOrderUpdate } from '@/lib/admin-api';
 
 function compareLanguages(a: AdminLanguage, b: AdminLanguage): number {
   if (a.order !== b.order) {

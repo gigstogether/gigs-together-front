@@ -28,17 +28,7 @@ const v1AdminLanguageItemSchema = z
   })
   .strict();
 
-const v1AdminLanguagesListResponseBodySchema = z
-  .object({
-    languages: z.array(v1AdminLanguageItemSchema),
-  })
-  .strict();
-
-const v1AdminLanguageResponseBodySchema = z
-  .object({
-    language: v1AdminLanguageItemSchema,
-  })
-  .strict();
+const v1AdminLanguagesListSchema = z.array(v1AdminLanguageItemSchema);
 
 export type AdminLanguage = z.infer<typeof v1AdminLanguageItemSchema>;
 
@@ -46,6 +36,11 @@ export interface PatchAdminLanguageBody {
   readonly name?: string;
   readonly isActive?: boolean;
   readonly order?: number;
+}
+
+export interface AdminLanguageOrderUpdate {
+  readonly iso: string;
+  readonly order: number;
 }
 
 function parseAdminDashboard(payload: unknown): AdminDashboard {
@@ -57,19 +52,19 @@ function parseAdminDashboard(payload: unknown): AdminDashboard {
 }
 
 function parseAdminLanguagesList(payload: unknown): readonly AdminLanguage[] {
-  const parsed = v1AdminLanguagesListResponseBodySchema.safeParse(payload);
+  const parsed = v1AdminLanguagesListSchema.safeParse(payload);
   if (!parsed.success) {
     throw new Error(`Invalid admin languages response: ${JSON.stringify(parsed.error.issues)}`);
   }
-  return parsed.data.languages;
+  return parsed.data;
 }
 
 function parseAdminLanguageResponse(payload: unknown): AdminLanguage {
-  const parsed = v1AdminLanguageResponseBodySchema.safeParse(payload);
+  const parsed = v1AdminLanguageItemSchema.safeParse(payload);
   if (!parsed.success) {
     throw new Error(`Invalid admin language response: ${JSON.stringify(parsed.error.issues)}`);
   }
-  return parsed.data.language;
+  return parsed.data;
 }
 
 export async function fetchAdminDashboard(): Promise<AdminDashboard> {
@@ -92,4 +87,13 @@ export async function patchAdminLanguage(
     body,
   );
   return parseAdminLanguageResponse(raw);
+}
+
+export async function patchAdminLanguagesOrder(
+  languages: readonly AdminLanguageOrderUpdate[],
+): Promise<readonly AdminLanguage[]> {
+  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}languages/order`, 'PATCH', {
+    languages,
+  });
+  return parseAdminLanguagesList(raw);
 }

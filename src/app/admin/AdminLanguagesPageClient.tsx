@@ -11,7 +11,7 @@ import {
   reorderAdminLanguagesByIso,
 } from '@/app/admin/reorder-admin-languages';
 import { Card, CardContent } from '@/components/ui/card';
-import { fetchAdminLanguages, patchAdminLanguage } from '@/lib/admin-api';
+import { fetchAdminLanguages, patchAdminLanguage, patchAdminLanguagesOrder } from '@/lib/admin-api';
 import type { AdminLanguage, PatchAdminLanguageBody } from '@/lib/admin-api';
 
 export default function AdminLanguagesPageClient() {
@@ -37,9 +37,16 @@ export default function AdminLanguagesPageClient() {
     },
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: patchAdminLanguagesOrder,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: adminKeys.languages() });
+    },
+  });
+
   const queryLanguages = languagesQuery.data ?? [];
   const languages = optimisticLanguages ?? queryLanguages;
-  const isSaving = updateMutation.isPending;
+  const isSaving = updateMutation.isPending || reorderMutation.isPending;
 
   const clearDragState = () => {
     setDraggedIso(null);
@@ -55,10 +62,7 @@ export default function AdminLanguagesPageClient() {
     setReorderError(null);
     setOptimisticLanguages(nextLanguages);
     try {
-      await Promise.all(
-        updates.map((update) => patchAdminLanguage(update.iso, { order: update.order })),
-      );
-      await queryClient.invalidateQueries({ queryKey: adminKeys.languages() });
+      await reorderMutation.mutateAsync(updates);
     } catch {
       setReorderError('Could not save language order.');
     } finally {

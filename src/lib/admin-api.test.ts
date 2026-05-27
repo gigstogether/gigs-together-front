@@ -1,4 +1,9 @@
-import { fetchAdminDashboard, fetchAdminLanguages, patchAdminLanguage } from '@/lib/admin-api';
+import {
+  fetchAdminDashboard,
+  fetchAdminLanguages,
+  patchAdminLanguage,
+  patchAdminLanguagesOrder,
+} from '@/lib/admin-api';
 
 const mockApiRequest = vi.fn();
 
@@ -41,9 +46,7 @@ describe('fetchAdminLanguages', () => {
   });
 
   it('should parse admin languages response when payload is valid', async () => {
-    mockApiRequest.mockResolvedValue({
-      languages: [{ iso: 'en', name: 'English', isActive: true, order: 0 }],
-    });
+    mockApiRequest.mockResolvedValue([{ iso: 'en', name: 'English', isActive: true, order: 0 }]);
 
     await expect(fetchAdminLanguages()).resolves.toEqual([
       { iso: 'en', name: 'English', isActive: true, order: 0 },
@@ -52,7 +55,7 @@ describe('fetchAdminLanguages', () => {
   });
 
   it('should throw when admin languages response is invalid', async () => {
-    mockApiRequest.mockResolvedValue({ languages: [{ iso: 'en' }] });
+    mockApiRequest.mockResolvedValue([{ iso: 'en' }]);
 
     await expect(fetchAdminLanguages()).rejects.toThrow('Invalid admin languages response');
   });
@@ -65,7 +68,10 @@ describe('patchAdminLanguage', () => {
 
   it('should parse admin language patch response when payload is valid', async () => {
     mockApiRequest.mockResolvedValue({
-      language: { iso: 'en', name: 'English', isActive: false, order: 0 },
+      iso: 'en',
+      name: 'English',
+      isActive: false,
+      order: 0,
     });
 
     await expect(patchAdminLanguage('en', { isActive: false })).resolves.toEqual({
@@ -81,17 +87,44 @@ describe('patchAdminLanguage', () => {
 
   it('should throw when admin language patch response includes unknown fields', async () => {
     mockApiRequest.mockResolvedValue({
-      language: {
-        _id: '507f1f77bcf86cd799439011',
-        iso: 'en',
-        name: 'English',
-        isActive: false,
-        order: 0,
-      },
+      _id: '507f1f77bcf86cd799439011',
+      iso: 'en',
+      name: 'English',
+      isActive: false,
+      order: 0,
     });
 
     await expect(patchAdminLanguage('en', { isActive: false })).rejects.toThrow(
       'Invalid admin language response',
     );
+  });
+});
+
+describe('patchAdminLanguagesOrder', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should parse admin languages order patch response when payload is valid', async () => {
+    mockApiRequest.mockResolvedValue([
+      { iso: 'es', name: 'Español', isActive: true, order: 0 },
+      { iso: 'en', name: 'English', isActive: true, order: 1 },
+    ]);
+
+    await expect(
+      patchAdminLanguagesOrder([
+        { iso: 'es', order: 0 },
+        { iso: 'en', order: 1 },
+      ]),
+    ).resolves.toEqual([
+      { iso: 'es', name: 'Español', isActive: true, order: 0 },
+      { iso: 'en', name: 'English', isActive: true, order: 1 },
+    ]);
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/languages/order', 'PATCH', {
+      languages: [
+        { iso: 'es', order: 0 },
+        { iso: 'en', order: 1 },
+      ],
+    });
   });
 });

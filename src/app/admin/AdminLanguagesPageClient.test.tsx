@@ -5,10 +5,12 @@ import AdminLanguagesPageClient from '@/app/admin/AdminLanguagesPageClient';
 
 const mockFetchAdminLanguages = vi.fn();
 const mockPatchAdminLanguage = vi.fn();
+const mockPatchAdminLanguagesOrder = vi.fn();
 
 vi.mock('@/lib/admin-api', () => ({
   fetchAdminLanguages: () => mockFetchAdminLanguages(),
   patchAdminLanguage: (...args: unknown[]) => mockPatchAdminLanguage(...args),
+  patchAdminLanguagesOrder: (...args: unknown[]) => mockPatchAdminLanguagesOrder(...args),
 }));
 
 function renderWithQueryClient() {
@@ -29,6 +31,7 @@ describe('AdminLanguagesPageClient', () => {
   beforeEach(() => {
     mockFetchAdminLanguages.mockReset();
     mockPatchAdminLanguage.mockReset();
+    mockPatchAdminLanguagesOrder.mockReset();
     mockFetchAdminLanguages.mockResolvedValue([
       { iso: 'en', name: 'English', isActive: true, order: 0 },
       { iso: 'es', name: 'Español', isActive: true, order: 1 },
@@ -39,6 +42,10 @@ describe('AdminLanguagesPageClient', () => {
       isActive: false,
       order: 1,
     });
+    mockPatchAdminLanguagesOrder.mockResolvedValue([
+      { iso: 'es', name: 'Español', isActive: true, order: 0 },
+      { iso: 'en', name: 'English', isActive: true, order: 1 },
+    ]);
   });
 
   it('should render languages list when data is loaded', async () => {
@@ -86,8 +93,13 @@ describe('AdminLanguagesPageClient', () => {
     fireEvent.drop(screen.getByLabelText('Language en'), { dataTransfer });
 
     await waitFor(() => {
-      expect(mockPatchAdminLanguage).toHaveBeenCalledWith('es', { order: 0 });
-      expect(mockPatchAdminLanguage).toHaveBeenCalledWith('en', { order: 1 });
+      expect(mockPatchAdminLanguagesOrder).toHaveBeenCalledWith(
+        [
+          { iso: 'es', order: 0 },
+          { iso: 'en', order: 1 },
+        ],
+        expect.anything(),
+      );
     });
   });
 });
