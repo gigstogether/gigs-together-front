@@ -65,40 +65,49 @@ export default function AdminLanguageItem(props: AdminLanguageItemProps) {
         onDrop();
       }}
     >
-      <div className="flex shrink-0 items-center gap-3">
-        <button
-          type="button"
-          draggable={!isSaving}
-          aria-label={`Reorder ${language.iso}`}
+      <div className="flex items-center justify-between gap-3 sm:contents">
+        <div className="flex shrink-0 items-center gap-3">
+          <button
+            type="button"
+            draggable={!isSaving}
+            aria-label={`Reorder ${language.iso}`}
+            disabled={isSaving}
+            className="inline-flex cursor-grab items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
+            onDragStart={(event) => {
+              event.dataTransfer.effectAllowed = 'move';
+              event.dataTransfer.setData(DRAG_DATA_MIME, language.iso);
+              onDragStart();
+            }}
+            onDragEnd={onDragEnd}
+          >
+            <GripVertical
+              className="h-4 w-4"
+              aria-hidden
+            />
+          </button>
+          <span
+            className="inline-flex w-8 items-center justify-center font-mono text-sm tabular-nums text-muted-foreground"
+            aria-label={`Order for ${language.iso}`}
+          >
+            {language.order}
+          </span>
+          <span className="inline-flex min-w-12 items-center justify-center rounded-md bg-muted px-2 py-1 font-mono text-xs uppercase">
+            {language.iso}
+          </span>
+        </div>
+        <Switch
+          checked={language.isActive}
           disabled={isSaving}
-          className="inline-flex cursor-grab items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
-          onDragStart={(event) => {
-            event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData(DRAG_DATA_MIME, language.iso);
-            onDragStart();
-          }}
-          onDragEnd={onDragEnd}
-        >
-          <GripVertical
-            className="h-4 w-4"
-            aria-hidden
-          />
-        </button>
-        <span
-          className="inline-flex w-8 items-center justify-center font-mono text-sm tabular-nums text-muted-foreground"
-          aria-label={`Order for ${language.iso}`}
-        >
-          {language.order}
-        </span>
-        <span className="inline-flex min-w-12 items-center justify-center rounded-md bg-muted px-2 py-1 font-mono text-xs uppercase">
-          {language.iso}
-        </span>
+          aria-label={`Active for ${language.iso}`}
+          className="shrink-0 sm:order-3 sm:ml-auto"
+          onCheckedChange={(checked) => onUpdate({ isActive: checked })}
+        />
       </div>
       <Input
         value={nameDraft}
         disabled={isSaving}
         aria-label={`Name for ${language.iso}`}
-        className="sm:flex-1"
+        className="w-full sm:order-2 sm:flex-1"
         onChange={(event) => setNameDraft(event.target.value)}
         onBlur={commitName}
         onKeyDown={(event) => {
@@ -106,13 +115,6 @@ export default function AdminLanguageItem(props: AdminLanguageItemProps) {
             event.currentTarget.blur();
           }
         }}
-      />
-      <Switch
-        checked={language.isActive}
-        disabled={isSaving}
-        aria-label={`Active for ${language.iso}`}
-        className="shrink-0 sm:ml-auto"
-        onCheckedChange={(checked) => onUpdate({ isActive: checked })}
       />
     </li>
   );
