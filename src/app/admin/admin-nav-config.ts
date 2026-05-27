@@ -14,7 +14,7 @@ export const adminNavItems: readonly AdminNavItem[] = [
   },
   {
     href: '/admin/gigs',
-    label: 'Events',
+    label: 'Gigs',
     description: 'Create, edit, and moderate gigs',
     isEnabled: true,
   },

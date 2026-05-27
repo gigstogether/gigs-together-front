@@ -46,7 +46,7 @@ describe('AdminPageClient', () => {
   it('should show section quick links', () => {
     renderWithQueryClient();
 
-    expect(screen.getByText('Events')).toBeInTheDocument();
+    expect(screen.getByText('Gigs')).toBeInTheDocument();
     expect(screen.getByText('Translations')).toBeInTheDocument();
   });
 });

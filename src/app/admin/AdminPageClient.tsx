@@ -26,16 +26,16 @@ export default function AdminPageClient() {
       />
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
         <Card className="border shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription>Pending events</CardDescription>
+          <CardHeader className="min-h-24 justify-center">
+            <CardDescription>Pending gigs</CardDescription>
             <CardTitle className="text-3xl tabular-nums">
               {dashboardQuery.isLoading ? '—' : (summary?.pendingGigsCount ?? 0)}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card className="border shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription>Published events</CardDescription>
+          <CardHeader className="min-h-24 justify-center">
+            <CardDescription>Published gigs</CardDescription>
             <CardTitle className="text-3xl tabular-nums">
               {dashboardQuery.isLoading ? '—' : (summary?.publishedGigsCount ?? 0)}
             </CardTitle>

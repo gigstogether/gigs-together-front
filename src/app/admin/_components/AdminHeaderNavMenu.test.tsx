@@ -12,6 +12,6 @@ describe('AdminHeaderNavMenu', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Admin navigation menu' }));
 
-    expect(screen.getByRole('link', { name: 'Events' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Gigs' })).toBeInTheDocument();
   });
 });

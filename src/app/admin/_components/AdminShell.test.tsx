@@ -19,6 +19,6 @@ describe('AdminShell', () => {
       </AdminShell>,
     );
 
-    expect(screen.getByRole('link', { name: 'Events' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Gigs' })).toBeInTheDocument();
   });
 });
