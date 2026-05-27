@@ -8,4 +8,8 @@ describe('adminKeys', () => {
   it('should build dashboard key', () => {
     expect(adminKeys.dashboard()).toEqual(['admin', 'dashboard']);
   });
+
+  it('should build languages key', () => {
+    expect(adminKeys.languages()).toEqual(['admin', 'languages']);
+  });
 });
