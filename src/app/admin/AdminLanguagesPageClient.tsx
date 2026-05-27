@@ -216,6 +216,12 @@ function AdminLanguageItem(props: AdminLanguageItemProps) {
             aria-hidden
           />
         </button>
+        <span
+          className="inline-flex w-8 items-center justify-center font-mono text-sm tabular-nums text-muted-foreground"
+          aria-label={`Order for ${language.iso}`}
+        >
+          {language.order}
+        </span>
         <span className="inline-flex min-w-12 items-center justify-center rounded-md bg-muted px-2 py-1 font-mono text-xs uppercase">
           {language.iso}
         </span>

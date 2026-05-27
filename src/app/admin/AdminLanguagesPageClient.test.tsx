@@ -48,6 +48,8 @@ describe('AdminLanguagesPageClient', () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue('English')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Español')).toBeInTheDocument();
+      expect(screen.getByLabelText('Order for en')).toHaveTextContent('0');
+      expect(screen.getByLabelText('Order for es')).toHaveTextContent('1');
     });
   });
 
