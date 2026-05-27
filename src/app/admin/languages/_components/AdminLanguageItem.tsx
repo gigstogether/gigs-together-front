@@ -1,25 +1,23 @@
 'use client';
 
 import { GripVertical } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
+import { bindAdminLanguagePointerReorder } from '@/app/admin/languages/admin-language-pointer-reorder';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import type { AdminLanguage, PatchAdminLanguageBody } from '@/lib/admin-api';
-
-const DRAG_DATA_MIME = 'application/x-admin-language-iso';
 
 interface AdminLanguageItemProps {
   readonly language: AdminLanguage;
   readonly isSaving: boolean;
   readonly isDragging: boolean;
   readonly isDragOver: boolean;
-  readonly onDragStart: () => void;
-  readonly onDragOver: () => void;
-  readonly onDragLeave: () => void;
-  readonly onDrop: () => void;
-  readonly onDragEnd: () => void;
+  readonly onReorderStart: () => void;
+  readonly onReorderOver: (iso: string) => void;
+  readonly onReorderDropOn: (targetIso: string) => void;
+  readonly onReorderEnd: () => void;
   readonly onUpdate: (body: PatchAdminLanguageBody) => void;
 }
 
@@ -29,14 +27,26 @@ export default function AdminLanguageItem(props: AdminLanguageItemProps) {
     isSaving,
     isDragging,
     isDragOver,
-    onDragStart,
-    onDragOver,
-    onDragLeave,
-    onDrop,
-    onDragEnd,
+    onReorderStart,
+    onReorderOver,
+    onReorderDropOn,
+    onReorderEnd,
     onUpdate,
   } = props;
   const [nameDraft, setNameDraft] = useState(language.name);
+
+  const pointerReorder = useMemo(
+    () =>
+      bindAdminLanguagePointerReorder({
+        excludedIso: language.iso,
+        isDisabled: isSaving,
+        onStart: onReorderStart,
+        onOver: onReorderOver,
+        onDropOn: onReorderDropOn,
+        onEnd: onReorderEnd,
+      }),
+    [isSaving, language.iso, onReorderDropOn, onReorderEnd, onReorderOver, onReorderStart],
+  );
 
   const commitName = () => {
     const trimmed = nameDraft.trim();
@@ -49,36 +59,25 @@ export default function AdminLanguageItem(props: AdminLanguageItemProps) {
 
   return (
     <li
+      data-language-iso={language.iso}
       aria-label={`Language ${language.iso}`}
       className={cn(
         'flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center',
-        isDragging && 'opacity-50',
+        isDragging && 'pointer-events-none opacity-50',
         isDragOver && 'bg-muted/50',
       )}
-      onDragOver={(event) => {
-        event.preventDefault();
-        onDragOver();
-      }}
-      onDragLeave={onDragLeave}
-      onDrop={(event) => {
-        event.preventDefault();
-        onDrop();
-      }}
     >
       <div className="flex items-center justify-between gap-3 sm:contents">
         <div className="flex shrink-0 items-center gap-3">
           <button
             type="button"
-            draggable={!isSaving}
             aria-label={`Reorder ${language.iso}`}
             disabled={isSaving}
-            className="inline-flex cursor-grab items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
-            onDragStart={(event) => {
-              event.dataTransfer.effectAllowed = 'move';
-              event.dataTransfer.setData(DRAG_DATA_MIME, language.iso);
-              onDragStart();
-            }}
-            onDragEnd={onDragEnd}
+            className="inline-flex cursor-grab touch-none select-none items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
+            onPointerDown={pointerReorder.onPointerDown}
+            onPointerMove={pointerReorder.onPointerMove}
+            onPointerUp={pointerReorder.onPointerUp}
+            onPointerCancel={pointerReorder.onPointerCancel}
           >
             <GripVertical
               className="h-4 w-4"

@@ -13,6 +13,17 @@ vi.mock('@/lib/admin-api', () => ({
   patchAdminLanguagesOrder: (...args: unknown[]) => mockPatchAdminLanguagesOrder(...args),
 }));
 
+function mockPointerCapture(element: HTMLElement) {
+  const capturedPointerIds = new Set<number>();
+  element.setPointerCapture = vi.fn((pointerId: number) => {
+    capturedPointerIds.add(pointerId);
+  });
+  element.releasePointerCapture = vi.fn((pointerId: number) => {
+    capturedPointerIds.delete(pointerId);
+  });
+  element.hasPointerCapture = vi.fn((pointerId: number) => capturedPointerIds.has(pointerId));
+}
+
 function renderWithQueryClient() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -81,16 +92,14 @@ describe('AdminLanguagesPageClient', () => {
       expect(screen.getByLabelText('Reorder en')).toBeInTheDocument();
     });
 
-    const dataTransfer = {
-      effectAllowed: 'move',
-      dropEffect: 'move',
-      setData: vi.fn(),
-      getData: vi.fn(),
-    };
+    const reorderHandle = screen.getByLabelText('Reorder es');
+    const targetItem = screen.getByLabelText('Language en');
+    mockPointerCapture(reorderHandle);
+    document.elementFromPoint = vi.fn().mockReturnValue(targetItem);
 
-    fireEvent.dragStart(screen.getByLabelText('Reorder es'), { dataTransfer });
-    fireEvent.dragOver(screen.getByLabelText('Language en'), { dataTransfer });
-    fireEvent.drop(screen.getByLabelText('Language en'), { dataTransfer });
+    fireEvent.pointerDown(reorderHandle, { isPrimary: true, button: 0, pointerId: 1 });
+    fireEvent.pointerMove(reorderHandle, { pointerId: 1, clientX: 10, clientY: 10 });
+    fireEvent.pointerUp(reorderHandle, { pointerId: 1, clientX: 10, clientY: 10 });
 
     await waitFor(() => {
       expect(mockPatchAdminLanguagesOrder).toHaveBeenCalledWith(

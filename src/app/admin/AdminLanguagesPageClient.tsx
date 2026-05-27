@@ -119,13 +119,10 @@ export default function AdminLanguagesPageClient() {
                   isSaving={isSaving}
                   isDragging={draggedIso === language.iso}
                   isDragOver={dragOverIso === language.iso && draggedIso !== language.iso}
-                  onDragStart={() => setDraggedIso(language.iso)}
-                  onDragOver={() => setDragOverIso(language.iso)}
-                  onDragLeave={() => {
-                    setDragOverIso((current) => (current === language.iso ? null : current));
-                  }}
-                  onDrop={() => handleDrop(language.iso)}
-                  onDragEnd={clearDragState}
+                  onReorderStart={() => setDraggedIso(language.iso)}
+                  onReorderOver={setDragOverIso}
+                  onReorderDropOn={handleDrop}
+                  onReorderEnd={clearDragState}
                   onUpdate={(body) => updateMutation.mutate({ iso: language.iso, body })}
                 />
               ))}
