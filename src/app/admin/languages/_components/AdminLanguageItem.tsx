@@ -90,7 +90,7 @@ export default function AdminLanguageItem(props: AdminLanguageItemProps) {
           >
             {language.order}
           </span>
-          <span className="inline-flex min-w-12 items-center justify-center rounded-md bg-muted px-2 py-1 font-mono text-xs uppercase">
+          <span className="rounded-md border border-border/70 px-1.5 py-0.5 font-mono text-sm uppercase tracking-wide text-muted-foreground">
             {language.iso}
           </span>
         </div>
