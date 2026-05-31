@@ -40,7 +40,7 @@ const parseYearMonth = (dateString?: string): ParsedYearMonth | undefined => {
 };
 
 const getMonthName = (value: ParsedYearMonth): string => {
-  return new Date(value.year, value.monthIndex, 1).toLocaleString('en-US', { month: 'long' });
+  return new Date(value.year, value.monthIndex, 1).toLocaleString('en-GB', { month: 'long' });
 };
 
 const formatMonthYear = (value: ParsedYearMonth): string => {

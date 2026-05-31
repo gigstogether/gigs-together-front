@@ -4,25 +4,11 @@ import { Calendar, Ticket } from 'lucide-react';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { GigPoster } from '@/app/_components/GigPoster';
 import { clientEnv } from '@/env/client-env';
+import { formatGigDate } from '@/lib/gig-date-format';
 
 interface GigCardProps {
   gig: Event;
 }
-
-const DEFAULT_LOCALE = 'en-US';
-
-const formatGigDate = (dateString?: string) => {
-  if (!dateString) return '';
-  // Parse as local date to avoid timezone shifts (don't use new Date("YYYY-MM-DD"))
-  const [y, m, day] = dateString.split('-').map(Number);
-  const d = new Date(y, (m ?? 1) - 1, day ?? 1);
-  return d.toLocaleDateString(DEFAULT_LOCALE, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-};
 
 interface GigDateProps {
   date: string;
@@ -36,7 +22,7 @@ function GigDates(props: GigDateProps) {
     props.endDate ? formatGigDate(props.endDate) : undefined,
   ]
     .filter(Boolean)
-    .join(' - ');
+    .join(' – ');
 
   const title = [datesStr, props.calendarUrl ? 'Add to Google Calendar' : undefined]
     .filter(Boolean)
