@@ -1,4 +1,4 @@
-import type { AdminGigDetail} from '@/app/admin/gigs/types';
+import type { AdminGigDetail } from '@/app/admin/gigs/types';
 import { GigStatus } from '@/app/admin/gigs/types';
 import Link from 'next/link';
 import { Check, ExternalLink, Link2, Pencil, X } from 'lucide-react';

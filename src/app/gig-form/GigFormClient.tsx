@@ -8,6 +8,8 @@ interface GigFormClientProps {
   countries: Country[];
   mode?: 'create' | 'edit';
   gigPublicId?: string;
+  /** Navigate here after a successful edit instead of `router.back()`. */
+  successReturnHref?: string;
 }
 
 export default function GigFormClient(props: GigFormClientProps) {

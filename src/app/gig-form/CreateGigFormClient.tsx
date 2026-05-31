@@ -77,9 +77,7 @@ export default function CreateGigFormClient({ countries }: CreateGigFormClientPr
     <Card className="w-full max-w-md m-auto border-0">
       <CardHeader>
         <CardTitle>Suggest a gig</CardTitle>
-        <CardDescription>
-          Looking for a gig company? Let us know which gig should we announce!
-        </CardDescription>
+        <CardDescription>Create a gig entry in the system.</CardDescription>
       </CardHeader>
       <CardContent>
         <form

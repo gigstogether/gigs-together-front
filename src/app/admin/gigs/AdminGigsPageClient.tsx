@@ -17,6 +17,7 @@ import {
   getGigStatusLabel,
 } from '@/app/admin/gigs/types';
 import type { AdminGigDetail, GigStatus } from '@/app/admin/gigs/types';
+import { GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -64,7 +65,7 @@ export default function AdminGigsPageClient() {
             variant="outline"
             className="w-full"
           >
-            <Link href="#">New gig</Link>
+            <Link href={`${GIG_FORM_ADMIN_BASE_PATH}/new`}>New gig</Link>
           </Button>
           <nav
             className="flex flex-wrap gap-x-4 gap-y-1 text-sm"
