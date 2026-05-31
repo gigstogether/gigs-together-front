@@ -20,9 +20,11 @@ import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
 interface EditGigFormClientProps {
   readonly countries: Country[];
   readonly gigPublicId: string;
+  readonly successReturnHref?: string;
 }
 
-export default function EditGigFormClient({ countries, gigPublicId }: EditGigFormClientProps) {
+export default function EditGigFormClient(props: EditGigFormClientProps) {
+  const { countries, gigPublicId, successReturnHref } = props;
   const router = useRouter();
 
   const [posterFile, setPosterFile] = useState<File | null>(null);
@@ -45,7 +47,11 @@ export default function EditGigFormClient({ countries, gigPublicId }: EditGigFor
         title: 'Updated!',
         description: 'Gig was updated.',
       });
-      router.back();
+      if (successReturnHref) {
+        router.push(successReturnHref);
+      } else {
+        router.back();
+      }
     },
   });
 

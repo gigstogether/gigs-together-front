@@ -13,7 +13,7 @@ interface GigFormClientProps {
 }
 
 export default function GigFormClient(props: GigFormClientProps) {
-  const { countries, mode = 'create', gigPublicId } = props;
+  const { countries, mode = 'create', gigPublicId, successReturnHref } = props;
 
   if (mode === 'edit') {
     if (!gigPublicId) {
@@ -23,6 +23,7 @@ export default function GigFormClient(props: GigFormClientProps) {
       <EditGigFormClient
         countries={countries}
         gigPublicId={gigPublicId}
+        successReturnHref={successReturnHref}
       />
     );
   }
