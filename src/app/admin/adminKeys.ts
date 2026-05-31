@@ -1,3 +1,5 @@
+import type { GigStatus } from '@/app/admin/gigs/types';
+
 export const adminKeys = {
   all(): readonly ['admin'] {
     return ['admin'];
@@ -9,5 +11,9 @@ export const adminKeys = {
 
   languages(): readonly ['admin', 'languages'] {
     return ['admin', 'languages'];
+  },
+
+  gigs(filter: GigStatus): readonly ['admin', 'gigs', GigStatus] {
+    return ['admin', 'gigs', filter];
   },
 } as const;

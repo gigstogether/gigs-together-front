@@ -1,10 +1,11 @@
-import AdminComingSoon from '@/app/admin/_components/AdminComingSoon';
+import { Suspense } from 'react';
+
+import AdminGigsPageClient from '@/app/admin/gigs/AdminGigsPageClient';
 
 export default function AdminGigsPage() {
   return (
-    <AdminComingSoon
-      title="Gigs"
-      description="Create, edit, approve, and publish gigs from the admin panel."
-    />
+    <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+      <AdminGigsPageClient />
+    </Suspense>
   );
 }
