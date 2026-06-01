@@ -60,10 +60,11 @@ describe('clearTelegramLaunchParamsFromUrl', () => {
   });
 
   it('should store startapp query param in memory when captured early', () => {
-    window.history.replaceState(null, '', '/gig-form?startapp=edit-token');
+    window.history.replaceState(null, '', '/admin/gigs/new?startapp=edit-token');
 
     captureTelegramLaunchParamsFromUrl();
 
+    expect(window.location.pathname).toBe('/admin/gigs/new');
     expect(window.location.search).toBe('');
     expect(getTelegramStartParam()).toBe('edit-token');
   });

@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
 import { HeaderConfigProvider } from '@/app/_components/HeaderConfigProvider';
 import AppHeader from '@/app/_components/AppHeader';
-import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
+import TelegramWebAppScript from '@/app/_components/TelegramWebAppScript';
 import { QueryProvider } from '@/app/_providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
 
