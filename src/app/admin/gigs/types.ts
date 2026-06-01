@@ -37,9 +37,10 @@ export function getGigStatusLabel(status: GigStatus): string {
   return GIG_STATUS_LABELS[status];
 }
 
-export interface AdminGigSubmitter {
-  readonly displayName: string;
-  readonly telegramUsername?: string;
+export interface AdminGigSuggestedBy {
+  readonly userId: string;
+  readonly name?: string;
+  readonly username?: string;
 }
 
 /** Compact row for the moderation queue list. */
@@ -48,14 +49,13 @@ export interface AdminGigQueueItem {
   readonly publicId: string;
   readonly title: string;
   readonly status: AdminGigStatusAPI;
-  readonly dateYmd: string;
-  readonly endDateYmd?: string;
+  readonly date: string;
+  readonly endDate?: string;
   readonly city: string;
   readonly countryCode: string;
   readonly venue: string;
   readonly posterUrl?: string;
-  readonly submittedAt: string;
-  readonly submitter: AdminGigSubmitter;
+  readonly suggestedBy: AdminGigSuggestedBy;
 }
 
 /** Full card shown in the detail panel (extends queue fields). */

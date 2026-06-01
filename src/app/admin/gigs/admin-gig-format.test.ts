@@ -39,12 +39,11 @@ describe('formatAdminGigListMeta', () => {
       publicId: 'a',
       title: 'T',
       status: 'Pending',
-      dateYmd: '2026-06-12',
+      date: '2026-06-12',
       city: 'barcelona',
       countryCode: 'ES',
       venue: 'V',
-      submittedAt: '2026-05-30T14:22:00.000Z',
-      submitter: { displayName: 'A' },
+      suggestedBy: { userId: '123', name: 'A' },
     };
     expect(formatAdminGigListMeta(gig)).toContain('barcelona');
   });

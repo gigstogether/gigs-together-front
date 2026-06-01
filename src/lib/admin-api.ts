@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import type { AdminGigDetail, GigStatus } from '@/app/admin/gigs/types';
 import { apiRequest } from '@/lib/api';
 
 const V1_ADMIN_API_PREFIX = 'v1/admin/';
@@ -43,6 +44,50 @@ export interface AdminLanguageOrderUpdate {
   readonly order: number;
 }
 
+const v1AdminGigStatusSchema = z.enum(['Pending', 'Published', 'Rejected', 'Approved', 'New']);
+
+const v1AdminGigSuggestedBySchema = z
+  .object({
+    userId: z.string(),
+    username: z.string().optional(),
+    name: z.string().optional(),
+  })
+  .strict();
+
+const v1AdminGigListItemSchema = z
+  .object({
+    id: z.string(),
+    publicId: z.string(),
+    title: z.string(),
+    status: v1AdminGigStatusSchema,
+    date: z.string(),
+    endDate: z.string().optional(),
+    city: z.string(),
+    countryCode: z.string(),
+    venue: z.string(),
+    posterUrl: z.string().optional(),
+    suggestedBy: v1AdminGigSuggestedBySchema,
+    ticketsUrl: z.string().optional(),
+    postUrl: z.string().optional(),
+    hasTelegramModerationPost: z.boolean(),
+  })
+  .strict();
+
+const v1AdminGigsListResponseSchema = z
+  .object({
+    gigs: z.array(v1AdminGigListItemSchema),
+  })
+  .strict();
+
+export interface AdminGigsList {
+  readonly gigs: readonly AdminGigDetail[];
+}
+
+export interface FetchAdminGigsParams {
+  readonly status: GigStatus;
+  readonly limit?: number;
+}
+
 function parseAdminDashboard(payload: unknown): AdminDashboard {
   const parsed = v1AdminDashboardResponseBodySchema.safeParse(payload);
   if (!parsed.success) {
@@ -55,6 +100,23 @@ function parseAdminLanguagesList(payload: unknown): readonly AdminLanguage[] {
   const parsed = v1AdminLanguagesListSchema.safeParse(payload);
   if (!parsed.success) {
     throw new Error(`Invalid admin languages response: ${JSON.stringify(parsed.error.issues)}`);
+  }
+  return parsed.data;
+}
+
+function buildAdminGigsEndpoint(params: FetchAdminGigsParams): string {
+  const qs = new URLSearchParams();
+  qs.set('status', params.status);
+  if (params.limit !== undefined) {
+    qs.set('limit', String(params.limit));
+  }
+  return `${V1_ADMIN_API_PREFIX}gigs?${qs.toString()}`;
+}
+
+function parseAdminGigsList(payload: unknown): AdminGigsList {
+  const parsed = v1AdminGigsListResponseSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new Error(`Invalid admin gigs response: ${JSON.stringify(parsed.error.issues)}`);
   }
   return parsed.data;
 }
@@ -75,6 +137,11 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
 export async function fetchAdminLanguages(): Promise<readonly AdminLanguage[]> {
   const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}languages`, 'GET');
   return parseAdminLanguagesList(raw);
+}
+
+export async function fetchAdminGigs(params: FetchAdminGigsParams): Promise<AdminGigsList> {
+  const raw = await apiRequest<unknown>(buildAdminGigsEndpoint(params), 'GET');
+  return parseAdminGigsList(raw);
 }
 
 export async function patchAdminLanguage(

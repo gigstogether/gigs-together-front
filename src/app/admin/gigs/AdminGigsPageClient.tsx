@@ -1,9 +1,11 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 
+import { adminKeys } from '@/app/admin/adminKeys';
 import AdminGigPreviewCard from '@/app/admin/gigs/_components/AdminGigPreviewCard';
 import AdminGigQueueList from '@/app/admin/gigs/_components/AdminGigQueueList';
 import {
@@ -16,12 +18,11 @@ import {
   getGigStatusEmptyMessage,
   getGigStatusLabel,
 } from '@/app/admin/gigs/types';
-import type { AdminGigDetail, GigStatus } from '@/app/admin/gigs/types';
+import type { GigStatus } from '@/app/admin/gigs/types';
 import { GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
 import { Button } from '@/components/ui/button';
+import { fetchAdminGigs } from '@/lib/admin-api';
 import { cn } from '@/lib/utils';
-
-const EMPTY_ADMIN_GIGS: readonly AdminGigDetail[] = [];
 
 export default function AdminGigsPageClient() {
   const router = useRouter();
@@ -29,7 +30,13 @@ export default function AdminGigsPageClient() {
   const searchParams = useSearchParams();
 
   const { filter, selectedGigId }: AdminGigsQueryState = readAdminGigsQueryState(searchParams);
-  const gigs = EMPTY_ADMIN_GIGS;
+
+  const gigsQuery = useQuery({
+    queryKey: adminKeys.gigs(filter),
+    queryFn: () => fetchAdminGigs({ status: filter }),
+  });
+
+  const gigs = gigsQuery.data?.gigs ?? [];
 
   const replaceQuery = useCallback(
     (next: AdminGigsQueryState) => {
@@ -90,12 +97,18 @@ export default function AdminGigsPageClient() {
         </div>
 
         <div className="overflow-hidden rounded-lg border sm:max-h-[calc(100dvh-11rem)] sm:overflow-y-auto">
-          <AdminGigQueueList
-            gigs={gigs}
-            selectedId={effectiveSelectedId}
-            onSelect={handleSelectGig}
-            emptyMessage={getGigStatusEmptyMessage(filter)}
-          />
+          {gigsQuery.isError ? (
+            <p className="px-3 py-10 text-center text-sm text-destructive">Could not load gigs.</p>
+          ) : gigsQuery.isLoading ? (
+            <p className="px-3 py-10 text-center text-sm text-muted-foreground">Loading gigs…</p>
+          ) : (
+            <AdminGigQueueList
+              gigs={gigs}
+              selectedId={effectiveSelectedId}
+              onSelect={handleSelectGig}
+              emptyMessage={getGigStatusEmptyMessage(filter)}
+            />
+          )}
         </div>
       </div>
 

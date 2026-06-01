@@ -35,12 +35,19 @@ export default function AdminGigQueueList(props: AdminGigQueueListProps) {
               aria-selected={isSelected}
               onClick={() => onSelect(gig.id)}
               className={cn(
-                'w-full px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted/60',
-                isSelected && 'bg-muted',
+                'w-full border-l-4 py-2.5 pr-3 pl-2.5 text-left text-sm transition-colors',
+                isSelected
+                  ? 'border-primary bg-primary/15 font-medium text-foreground shadow-sm'
+                  : 'border-transparent text-foreground hover:border-muted-foreground/30 hover:bg-muted/80',
               )}
             >
-              <span className="block truncate font-medium">{gig.title}</span>
-              <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+              <span className="block truncate">{gig.title}</span>
+              <span
+                className={cn(
+                  'mt-0.5 block truncate text-xs',
+                  isSelected ? 'text-foreground/75' : 'text-muted-foreground',
+                )}
+              >
                 {formatAdminGigListMeta(gig)}
               </span>
             </button>

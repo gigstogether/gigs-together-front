@@ -25,22 +25,26 @@ export default function AdminPageClient() {
         description="Overview of moderation work and quick links to admin tools."
       />
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
-        <Card className="border shadow-sm">
-          <CardHeader className="min-h-24 justify-center">
-            <CardDescription>Pending gigs</CardDescription>
-            <CardTitle className="text-3xl tabular-nums">
-              {dashboardQuery.isLoading ? '—' : (summary?.pendingGigsCount ?? 0)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card className="border shadow-sm">
-          <CardHeader className="min-h-24 justify-center">
-            <CardDescription>Published gigs</CardDescription>
-            <CardTitle className="text-3xl tabular-nums">
-              {dashboardQuery.isLoading ? '—' : (summary?.publishedGigsCount ?? 0)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <Link href="admin/gigs?status=pending">
+          <Card className="border shadow-sm">
+            <CardHeader className="min-h-24 justify-center">
+              <CardDescription>Pending gigs</CardDescription>
+              <CardTitle className="text-3xl tabular-nums">
+                {dashboardQuery.isLoading ? '—' : (summary?.pendingGigsCount ?? 0)}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        </Link>
+        <Link href="admin/gigs?status=published">
+          <Card className="border shadow-sm">
+            <CardHeader className="min-h-24 justify-center">
+              <CardDescription>Published gigs</CardDescription>
+              <CardTitle className="text-3xl tabular-nums">
+                {dashboardQuery.isLoading ? '—' : (summary?.publishedGigsCount ?? 0)}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        </Link>
       </div>
       {dashboardQuery.isError ? (
         <p className="mb-6 text-sm text-destructive">Could not load dashboard summary.</p>

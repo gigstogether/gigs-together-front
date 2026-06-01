@@ -1,9 +1,11 @@
 import {
   fetchAdminDashboard,
+  fetchAdminGigs,
   fetchAdminLanguages,
   patchAdminLanguage,
   patchAdminLanguagesOrder,
 } from '@/lib/admin-api';
+import { GigStatus } from '@/app/admin/gigs/types';
 
 const mockApiRequest = vi.fn();
 
@@ -37,6 +39,57 @@ describe('fetchAdminDashboard', () => {
     mockApiRequest.mockResolvedValue({ summary: {} });
 
     await expect(fetchAdminDashboard()).rejects.toThrow('Invalid admin dashboard response');
+  });
+});
+
+describe('fetchAdminGigs', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should parse admin gigs response when payload is valid', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigs: [
+        {
+          id: '507f1f77bcf86cd799439011',
+          publicId: 'my-gig',
+          title: 'My Gig',
+          status: 'Pending',
+          date: '2026-06-12',
+          city: 'barcelona',
+          countryCode: 'ES',
+          venue: 'Venue',
+          suggestedBy: { userId: '42' },
+          hasTelegramModerationPost: true,
+        },
+      ],
+    });
+
+    await expect(fetchAdminGigs({ status: GigStatus.Pending })).resolves.toEqual({
+      gigs: [
+        {
+          id: '507f1f77bcf86cd799439011',
+          publicId: 'my-gig',
+          title: 'My Gig',
+          status: 'Pending',
+          date: '2026-06-12',
+          city: 'barcelona',
+          countryCode: 'ES',
+          venue: 'Venue',
+          suggestedBy: { userId: '42' },
+          hasTelegramModerationPost: true,
+        },
+      ],
+    });
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gigs?status=pending', 'GET');
+  });
+
+  it('should throw when admin gigs response is invalid', async () => {
+    mockApiRequest.mockResolvedValue({ gigs: [{}] });
+
+    await expect(fetchAdminGigs({ status: GigStatus.Published })).rejects.toThrow(
+      'Invalid admin gigs response',
+    );
   });
 });
 

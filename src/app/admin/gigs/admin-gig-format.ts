@@ -1,16 +1,20 @@
-import type { AdminGigDetail, AdminGigQueueItem } from '@/app/admin/gigs/types';
+import type {
+  AdminGigDetail,
+  AdminGigQueueItem,
+  AdminGigSuggestedBy,
+} from '@/app/admin/gigs/types';
 import { buildFeedPath } from '@/lib/feed.routes';
 import { formatGigDate } from '@/lib/gig-date-format';
 
-export function formatAdminGigEventDate(ymd: string, endDateYmd?: string): string {
-  const start = formatGigDate(ymd);
-  if (!endDateYmd || endDateYmd === ymd) return start;
-  const end = formatGigDate(endDateYmd);
+export function formatAdminGigEventDate(date: string, endDate?: string): string {
+  const start = formatGigDate(date);
+  if (!endDate || endDate === date) return start;
+  const end = formatGigDate(endDate);
   return `${start} – ${end}`;
 }
 
 export function formatAdminGigListMeta(gig: AdminGigQueueItem): string {
-  return `${formatAdminGigEventDate(gig.dateYmd, gig.endDateYmd)} · ${gig.city}`;
+  return `${formatAdminGigEventDate(gig.date, gig.endDate)} · ${gig.city}`;
 }
 
 export function buildAdminGigFeedHref(
@@ -23,9 +27,11 @@ export function buildAdminGigFeedHref(
   return `${feedPath}#${gig.publicId}`;
 }
 
-export function formatAdminGigSubmittedBy(gig: AdminGigDetail): string {
-  if (gig.submitter.telegramUsername) {
-    return `${gig.submitter.displayName} (@${gig.submitter.telegramUsername})`;
+export function formatAdminGigSuggestedBy(suggestedBy: AdminGigSuggestedBy): string {
+  const { name, username, userId } = suggestedBy;
+  const PREFIX = 'Suggested by';
+  if (username && name) {
+    return `${PREFIX} @${username} (${name})`;
   }
-  return gig.submitter.displayName;
+  return `${PREFIX} ${username ?? name ?? userId}`;
 }
