@@ -38,7 +38,6 @@ export default function AppHeader() {
   const { config } = useHeaderConfig();
   const { authState } = useTelegramAuth();
   const isFeed = pathname === '/feed' || pathname.startsWith('/feed/');
-  const isGigForm = pathname === '/gig-form' || pathname.startsWith('/gig-form/');
   const { country, city } = getLocationFromPath(pathname);
   const showAdminHeaderNav = isAdminRoute(pathname) && authState?.isAdmin === true;
 
@@ -48,7 +47,7 @@ export default function AppHeader() {
       country={country}
       city={city}
       showCalendar={isFeed}
-      showSuggestGig={!isGigForm}
+      showSuggestGig={false}
       centerContent={showAdminHeaderNav ? <AdminHeaderNavMenu /> : undefined}
       earliestEventDate={config.earliestEventDate}
       visibleEventDateRange={config.visibleEventDateRange}

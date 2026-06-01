@@ -85,8 +85,6 @@ Useful routes:
 - `/` -> redirects to the default feed route
 - `/feed` -> redirects to the default feed route
 - `/feed/es/barcelona` -> current supported public feed
-- `/gig-form` -> create gig flow
-- `/gig-form/[publicId]/edit` -> edit gig flow
 - `/admin` -> admin UI
 - `/about` -> about page
 
@@ -171,7 +169,6 @@ src/
 Key areas:
 
 - `src/app/feed` contains the public feed pages and feed client logic
-- `src/app/gig-form` contains create/edit gig flows
 - `src/app/admin` contains the moderator-only admin shell
 - `src/app/api/revalidate` contains manual cache revalidation endpoints
 - `src/lib/api.ts` contains the shared API request wrapper
