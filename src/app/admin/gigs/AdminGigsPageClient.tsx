@@ -63,9 +63,9 @@ export default function AdminGigsPageClient() {
   };
 
   return (
-    <div className="grid gap-6 sm:grid-cols-[minmax(0,220px)_minmax(0,1fr)] sm:items-start">
-      <div className="flex min-w-0 flex-col gap-3">
-        <div className="space-y-2 border-b pb-2">
+    <div className="grid min-h-0 gap-6 sm:h-[calc(100dvh-var(--header-h)-3rem)] sm:grid-cols-[minmax(0,220px)_minmax(0,1fr)] sm:items-stretch">
+      <div className="flex min-h-0 min-w-0 flex-col gap-3">
+        <div className="shrink-0 space-y-2 border-b pb-2">
           <Button
             asChild
             size="sm"
@@ -96,7 +96,7 @@ export default function AdminGigsPageClient() {
           </nav>
         </div>
 
-        <div className="overflow-hidden rounded-lg border sm:max-h-[calc(100dvh-11rem)] sm:overflow-y-auto">
+        <div className="min-h-0 rounded-lg border sm:flex-1 sm:overflow-y-auto">
           {gigsQuery.isError ? (
             <p className="px-3 py-10 text-center text-sm text-destructive">Could not load gigs.</p>
           ) : gigsQuery.isLoading ? (
@@ -112,7 +112,7 @@ export default function AdminGigsPageClient() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-sm sm:sticky sm:top-[calc(var(--header-h)+1.5rem)] sm:mx-0 sm:max-w-md">
+      <div className="mx-auto flex w-full max-w-sm sm:h-full sm:min-h-0 sm:mx-0 sm:max-w-md">
         <AdminGigPreviewCard
           gig={selectedGig}
           listFilter={filter}

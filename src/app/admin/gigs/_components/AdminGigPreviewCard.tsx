@@ -38,7 +38,7 @@ export default function AdminGigPreviewCard(props: AdminGigPreviewCardProps) {
 
   if (!gig) {
     return (
-      <div className="flex min-h-[12rem] flex-1 items-center justify-center rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
+      <div className="flex h-full min-h-[12rem] flex-1 items-center justify-center rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
         Select a gig from the list
       </div>
     );
@@ -50,7 +50,7 @@ export default function AdminGigPreviewCard(props: AdminGigPreviewCardProps) {
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
 
   return (
-    <article className="flex max-h-[calc(100dvh-var(--header-h)-3rem)] w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
+    <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="relative space-y-2 px-3 pb-2 pt-3">
           <h2 className="pr-12 text-base font-semibold leading-snug">

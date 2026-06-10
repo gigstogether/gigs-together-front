@@ -97,7 +97,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           />
           <HeaderConfigProvider>
             <AppHeader />
-            <div className="pt-[45px]">{children}</div>
+            <div className="pt-[var(--header-h)]">{children}</div>
             <Toaster />
           </HeaderConfigProvider>
         </QueryProvider>

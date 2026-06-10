@@ -38,9 +38,9 @@ export default function AdminShell({ children }: AdminShellProps) {
       <div className="hidden w-full shrink-0 lg:block lg:w-56">
         <aside
           ref={asideRef}
-          className="fixed z-40 top-[calc(var(--header-h)+1.5rem)] lg:left-[calc((100vw-min(100vw,72rem))/2+1rem)] lg:w-56"
+          className="fixed z-40 top-[calc(var(--header-h)+1.5rem)] max-h-[calc(100dvh-var(--header-h)-3rem)] lg:left-[calc((100vw-min(100vw,72rem))/2+1rem)] lg:w-56"
         >
-          <div className="rounded-xl border bg-card p-4 shadow-sm">
+          <div className="max-h-[inherit] overflow-y-auto rounded-xl border bg-card p-4 shadow-sm">
             <AdminNav />
           </div>
         </aside>

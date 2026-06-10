@@ -8,7 +8,7 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-[calc(100dvh-var(--header-h))] bg-gray-50">
       <AdminLayoutClient>{children}</AdminLayoutClient>
     </div>
   );
