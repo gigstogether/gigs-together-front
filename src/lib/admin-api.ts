@@ -56,7 +56,6 @@ const v1AdminGigSuggestedBySchema = z
 
 const v1AdminGigListItemSchema = z
   .object({
-    id: z.string(),
     publicId: z.string(),
     title: z.string(),
     status: v1AdminGigStatusSchema,

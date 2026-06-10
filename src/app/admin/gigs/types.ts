@@ -45,7 +45,6 @@ export interface AdminGigSuggestedBy {
 
 /** Compact row for the moderation queue list. */
 export interface AdminGigQueueItem {
-  readonly id: string;
   readonly publicId: string;
   readonly title: string;
   readonly status: AdminGigStatusAPI;

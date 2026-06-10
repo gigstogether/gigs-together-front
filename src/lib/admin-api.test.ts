@@ -51,7 +51,6 @@ describe('fetchAdminGigs', () => {
     mockApiRequest.mockResolvedValue({
       gigs: [
         {
-          id: '507f1f77bcf86cd799439011',
           publicId: 'my-gig',
           title: 'My Gig',
           status: 'Pending',
@@ -68,7 +67,6 @@ describe('fetchAdminGigs', () => {
     await expect(fetchAdminGigs({ status: GigStatus.Pending })).resolves.toEqual({
       gigs: [
         {
-          id: '507f1f77bcf86cd799439011',
           publicId: 'my-gig',
           title: 'My Gig',
           status: 'Pending',

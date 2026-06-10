@@ -12,7 +12,7 @@ export function parseGigStatusFromQuery(value: string | null): GigStatus {
 
 export interface AdminGigsQueryState {
   readonly filter: GigStatus;
-  readonly selectedGigId: string | null;
+  readonly selectedGigPublicId: string | null;
 }
 
 export function readAdminGigsQueryState(
@@ -20,16 +20,16 @@ export function readAdminGigsQueryState(
 ): AdminGigsQueryState {
   const filter = parseGigStatusFromQuery(searchParams.get(ADMIN_GIGS_QUERY_STATUS));
   const gigRaw = searchParams.get(ADMIN_GIGS_QUERY_GIG);
-  const selectedGigId = gigRaw?.trim() ? gigRaw.trim() : null;
-  return { filter, selectedGigId };
+  const selectedGigPublicId = gigRaw?.trim() ? gigRaw.trim() : null;
+  return { filter, selectedGigPublicId };
 }
 
 export function buildAdminGigsSearchParams(params: AdminGigsQueryState): URLSearchParams {
   const next = new URLSearchParams();
   next.set(ADMIN_GIGS_QUERY_STATUS, params.filter);
-  const gigId = params.selectedGigId?.trim();
-  if (gigId) {
-    next.set(ADMIN_GIGS_QUERY_GIG, gigId);
+  const publicId = params.selectedGigPublicId?.trim();
+  if (publicId) {
+    next.set(ADMIN_GIGS_QUERY_GIG, publicId);
   }
   return next;
 }

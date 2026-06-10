@@ -29,7 +29,8 @@ export default function AdminGigsPageClient() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { filter, selectedGigId }: AdminGigsQueryState = readAdminGigsQueryState(searchParams);
+  const { filter, selectedGigPublicId }: AdminGigsQueryState =
+    readAdminGigsQueryState(searchParams);
 
   const gigsQuery = useQuery({
     queryKey: adminKeys.gigs(filter),
@@ -47,19 +48,19 @@ export default function AdminGigsPageClient() {
     [pathname, router],
   );
 
-  const effectiveSelectedId =
-    selectedGigId && gigs.some((g) => g.id === selectedGigId)
-      ? selectedGigId
-      : (gigs[0]?.id ?? null);
+  const effectiveSelectedPublicId =
+    selectedGigPublicId && gigs.some((g) => g.publicId === selectedGigPublicId)
+      ? selectedGigPublicId
+      : (gigs[0]?.publicId ?? null);
 
-  const selectedGig = gigs.find((g) => g.id === effectiveSelectedId) ?? null;
+  const selectedGig = gigs.find((g) => g.publicId === effectiveSelectedPublicId) ?? null;
 
   const handleFilterChange = (next: GigStatus) => {
-    replaceQuery({ filter: next, selectedGigId: null });
+    replaceQuery({ filter: next, selectedGigPublicId: null });
   };
 
-  const handleSelectGig = (id: string) => {
-    replaceQuery({ filter, selectedGigId: id });
+  const handleSelectGig = (publicId: string) => {
+    replaceQuery({ filter, selectedGigPublicId: publicId });
   };
 
   return (
@@ -104,7 +105,7 @@ export default function AdminGigsPageClient() {
           ) : (
             <AdminGigQueueList
               gigs={gigs}
-              selectedId={effectiveSelectedId}
+              selectedPublicId={effectiveSelectedPublicId}
               onSelect={handleSelectGig}
               emptyMessage={getGigStatusEmptyMessage(filter)}
             />

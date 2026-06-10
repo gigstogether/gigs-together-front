@@ -35,7 +35,6 @@ describe('buildAdminGigFeedHref', () => {
 describe('formatAdminGigListMeta', () => {
   it('should combine date and city', () => {
     const gig: AdminGigQueueItem = {
-      id: '1',
       publicId: 'a',
       title: 'T',
       status: 'Pending',
