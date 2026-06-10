@@ -60,7 +60,7 @@ describe('fetchAdminGigs', () => {
           countryCode: 'ES',
           venue: 'Venue',
           suggestedBy: { userId: '42' },
-          hasTelegramModerationPost: true,
+          hasModerationPost: true,
         },
       ],
     });
@@ -77,7 +77,7 @@ describe('fetchAdminGigs', () => {
           countryCode: 'ES',
           venue: 'Venue',
           suggestedBy: { userId: '42' },
-          hasTelegramModerationPost: true,
+          hasModerationPost: true,
         },
       ],
     });
