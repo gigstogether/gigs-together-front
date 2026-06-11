@@ -1,7 +1,6 @@
-import { GigStatus } from '@/app/admin/gigs/types';
+import type { GigStatus } from '@/app/admin/gigs/types';
 
 export enum AdminGigsSortBy {
-  PostDate = 'postDate',
   CreatedAt = 'createdAt',
   EventDate = 'eventDate',
 }
@@ -12,7 +11,6 @@ export enum AdminGigsSortOrder {
 }
 
 export const ADMIN_GIGS_SORT_BY_VALUES = [
-  AdminGigsSortBy.PostDate,
   AdminGigsSortBy.CreatedAt,
   AdminGigsSortBy.EventDate,
 ] as const;
@@ -24,15 +22,11 @@ export const ADMIN_GIGS_SORT_ORDER_VALUES = [
 
 export const ADMIN_GIGS_DEFAULT_SORT_ORDER = AdminGigsSortOrder.Desc;
 
-export function getDefaultAdminGigsSortBy(filter: GigStatus): AdminGigsSortBy {
-  if (filter === GigStatus.Published) {
-    return AdminGigsSortBy.PostDate;
-  }
+export function getDefaultAdminGigsSortBy(_filter: GigStatus): AdminGigsSortBy {
   return AdminGigsSortBy.CreatedAt;
 }
 
 export const ADMIN_GIGS_SORT_BY_LABELS: Record<AdminGigsSortBy, string> = {
-  [AdminGigsSortBy.PostDate]: 'Post date',
   [AdminGigsSortBy.CreatedAt]: 'Created',
   [AdminGigsSortBy.EventDate]: 'Event date',
 };

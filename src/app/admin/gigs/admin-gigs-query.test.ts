@@ -43,22 +43,32 @@ describe('readAdminGigsQueryState', () => {
     });
   });
 
-  it('should default to postDate sort for published when sortBy is missing', () => {
+  it('should default to createdAt sort for published when sortBy is missing', () => {
     const params = new URLSearchParams('status=published');
     expect(readAdminGigsQueryState(params)).toEqual({
       filter: GigStatus.Published,
       selectedGigPublicId: null,
-      sortBy: AdminGigsSortBy.PostDate,
+      sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
     });
   });
 
   it('should read explicit sort params from search params', () => {
+    const params = new URLSearchParams('status=published&sortBy=eventDate&sortOrder=asc');
+    expect(readAdminGigsQueryState(params)).toEqual({
+      filter: GigStatus.Published,
+      selectedGigPublicId: null,
+      sortBy: AdminGigsSortBy.EventDate,
+      sortOrder: AdminGigsSortOrder.Asc,
+    });
+  });
+
+  it('should fall back to createdAt when sortBy is postDate', () => {
     const params = new URLSearchParams('status=published&sortBy=postDate&sortOrder=asc');
     expect(readAdminGigsQueryState(params)).toEqual({
       filter: GigStatus.Published,
       selectedGigPublicId: null,
-      sortBy: AdminGigsSortBy.PostDate,
+      sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Asc,
     });
   });
