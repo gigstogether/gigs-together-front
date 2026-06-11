@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { AlertTriangle, Calendar, Link2, MapPin } from 'lucide-react';
+import { AlertTriangle, Calendar, Link2 } from 'lucide-react';
 import {
   buildAdminGigFeedHref,
   formatAdminGigEventDate,
@@ -76,20 +76,6 @@ export default function AdminGigPreviewCard(props: AdminGigPreviewCardProps) {
             }
           >
             {dateLabel}
-          </MetaRow>
-          <MetaRow
-            icon={
-              <MapPin
-                className="h-4 w-4"
-                aria-hidden
-              />
-            }
-          >
-            {gig.venue}
-            <span className="text-muted-foreground">
-              {' '}
-              · {gig.city}, {gig.countryCode}
-            </span>
           </MetaRow>
           {gig.ticketsUrl ? (
             <MetaRow

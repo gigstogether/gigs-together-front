@@ -33,7 +33,7 @@ describe('buildAdminGigFeedHref', () => {
 });
 
 describe('formatAdminGigListMeta', () => {
-  it('should combine date and city', () => {
+  it('should return formatted event date', () => {
     const gig: AdminGigQueueItem = {
       publicId: 'a',
       title: 'T',
@@ -44,6 +44,7 @@ describe('formatAdminGigListMeta', () => {
       venue: 'V',
       suggestedBy: { userId: '123', name: 'A' },
     };
-    expect(formatAdminGigListMeta(gig)).toContain('barcelona');
+    expect(formatAdminGigListMeta(gig)).toContain('2026');
+    expect(formatAdminGigListMeta(gig)).not.toContain('barcelona');
   });
 });

@@ -14,7 +14,7 @@ export function formatAdminGigEventDate(date: string, endDate?: string): string 
 }
 
 export function formatAdminGigListMeta(gig: AdminGigQueueItem): string {
-  return `${formatAdminGigEventDate(gig.date, gig.endDate)} · ${gig.city}`;
+  return formatAdminGigEventDate(gig.date, gig.endDate);
 }
 
 export function buildAdminGigFeedHref(
