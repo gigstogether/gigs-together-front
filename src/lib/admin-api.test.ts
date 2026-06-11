@@ -59,7 +59,6 @@ describe('fetchAdminGigs', () => {
           countryCode: 'ES',
           venue: 'Venue',
           suggestedBy: { userId: '42' },
-          hasModerationPost: true,
         },
       ],
     });
@@ -75,14 +74,13 @@ describe('fetchAdminGigs', () => {
           countryCode: 'ES',
           venue: 'Venue',
           suggestedBy: { userId: '42' },
-          hasModerationPost: true,
         },
       ],
     });
     expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gigs?status=pending', 'GET');
   });
 
-  it('should parse published gigs when mainPostPostedAt is present', async () => {
+  it('should parse post dates when publishPostDate and moderationPostDate are present', async () => {
     mockApiRequest.mockResolvedValue({
       gigs: [
         {
@@ -94,8 +92,8 @@ describe('fetchAdminGigs', () => {
           countryCode: 'ES',
           venue: 'Venue',
           suggestedBy: { userId: '42' },
-          hasModerationPost: true,
-          mainPostPostedAt: 1_748_784_000_000,
+          publishPostDate: 1_748_784_000_000,
+          moderationPostDate: 1_748_697_600_000,
         },
       ],
     });
@@ -110,7 +108,8 @@ describe('fetchAdminGigs', () => {
       gigs: [
         expect.objectContaining({
           publicId: 'published-gig',
-          mainPostPostedAt: 1_748_784_000_000,
+          publishPostDate: 1_748_784_000_000,
+          moderationPostDate: 1_748_697_600_000,
         }),
       ],
     });

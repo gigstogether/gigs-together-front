@@ -62,7 +62,6 @@ export interface AdminGigDetail extends AdminGigQueueItem {
   readonly ticketsUrl?: string;
   /** Telegram channel post URL when published. */
   readonly postUrl?: string;
-  readonly hasModerationPost: boolean;
-  /** Unix ms from publish post (published) or moderation post when exposed by API. */
-  readonly mainPostPostedAt?: number;
+  readonly publishPostDate?: number;
+  readonly moderationPostDate?: number;
 }
