@@ -5,6 +5,7 @@ import {
   patchAdminLanguage,
   patchAdminLanguagesOrder,
 } from '@/lib/admin-api';
+import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 import { GigStatus } from '@/app/admin/gigs/types';
 
 const mockApiRequest = vi.fn();
@@ -101,8 +102,8 @@ describe('fetchAdminGigs', () => {
     await expect(
       fetchAdminGigs({
         status: GigStatus.Published,
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
+        sortBy: AdminGigsSortBy.CreatedAt,
+        sortOrder: AdminGigsSortOrder.Desc,
       }),
     ).resolves.toEqual({
       gigs: [
@@ -120,8 +121,8 @@ describe('fetchAdminGigs', () => {
 
     await fetchAdminGigs({
       status: GigStatus.Published,
-      sortBy: 'eventDate',
-      sortOrder: 'desc',
+      sortBy: AdminGigsSortBy.EventDate,
+      sortOrder: AdminGigsSortOrder.Desc,
     });
 
     expect(mockApiRequest).toHaveBeenCalledWith(
