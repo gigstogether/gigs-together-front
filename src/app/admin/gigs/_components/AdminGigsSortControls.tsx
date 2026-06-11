@@ -40,8 +40,11 @@ export default function AdminGigsSortControls(props: AdminGigsSortControlsProps)
   };
 
   return (
-    <div className="flex shrink-0 items-center gap-2 border-b bg-muted/20 px-3 py-2">
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+    <div
+      className="shrink-0 border-b bg-muted/20 px-2 pt-1 pb-2"
+      aria-label="Sort gigs"
+    >
+      <div className="flex min-w-0 w-full">
         <Popover
           open={isSortMenuOpen}
           onOpenChange={setIsSortMenuOpen}
@@ -51,7 +54,7 @@ export default function AdminGigsSortControls(props: AdminGigsSortControlsProps)
               type="button"
               variant="outline"
               size="sm"
-              className="h-8 min-w-0 flex-1 justify-between gap-1 px-2.5 text-xs font-normal"
+              className="h-8 min-w-0 flex-1 justify-between gap-1 rounded-none rounded-l-md px-2.5 text-xs font-normal focus-visible:z-10"
               aria-label="Sort gigs by"
             >
               <span className="truncate">{ADMIN_GIGS_SORT_BY_LABELS[sortBy]}</span>
@@ -105,19 +108,19 @@ export default function AdminGigsSortControls(props: AdminGigsSortControlsProps)
             </ul>
           </PopoverContent>
         </Popover>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="h-8 shrink-0 -ml-px gap-1 rounded-l-none rounded-r-md px-2.5 text-xs font-normal focus-visible:z-10"
+          aria-label={`Sort order: ${sortOrderLabel}`}
+          title={sortOrderLabel}
+          onClick={onSortOrderToggle}
+        >
+          <SortOrderIcon className="size-3.5 shrink-0" />
+          <span>{sortOrderShortLabel}</span>
+        </Button>
       </div>
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        className="h-8 shrink-0 gap-1 px-2.5 text-xs font-normal"
-        aria-label={`Sort order: ${sortOrderLabel}`}
-        title={sortOrderLabel}
-        onClick={onSortOrderToggle}
-      >
-        <SortOrderIcon className="size-3.5 shrink-0" />
-        <span>{sortOrderShortLabel}</span>
-      </Button>
     </div>
   );
 }
