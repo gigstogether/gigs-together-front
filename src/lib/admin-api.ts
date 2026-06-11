@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import type { AdminGigDetail, GigStatus } from '@/app/admin/gigs/types';
+import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 import { apiRequest } from '@/lib/api';
 
 const V1_ADMIN_API_PREFIX = 'v1/admin/';
@@ -69,6 +70,7 @@ const v1AdminGigListItemSchema = z
     ticketsUrl: z.string().optional(),
     postUrl: z.string().optional(),
     hasModerationPost: z.boolean(),
+    mainPostPostedAt: z.number().optional(),
   })
   .strict();
 
@@ -85,6 +87,8 @@ export interface AdminGigsList {
 export interface FetchAdminGigsParams {
   readonly status: GigStatus;
   readonly limit?: number;
+  readonly sortBy?: AdminGigsSortBy;
+  readonly sortOrder?: AdminGigsSortOrder;
 }
 
 function parseAdminDashboard(payload: unknown): AdminDashboard {
@@ -106,6 +110,12 @@ function parseAdminLanguagesList(payload: unknown): readonly AdminLanguage[] {
 function buildAdminGigsEndpoint(params: FetchAdminGigsParams): string {
   const qs = new URLSearchParams();
   qs.set('status', params.status);
+  if (params.sortBy !== undefined) {
+    qs.set('sortBy', params.sortBy);
+  }
+  if (params.sortOrder !== undefined) {
+    qs.set('sortOrder', params.sortOrder);
+  }
   if (params.limit !== undefined) {
     qs.set('limit', String(params.limit));
   }

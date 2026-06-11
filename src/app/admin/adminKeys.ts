@@ -1,4 +1,5 @@
 import type { GigStatus } from '@/app/admin/gigs/types';
+import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 
 export const adminKeys = {
   all(): readonly ['admin'] {
@@ -13,7 +14,11 @@ export const adminKeys = {
     return ['admin', 'languages'];
   },
 
-  gigs(filter: GigStatus): readonly ['admin', 'gigs', GigStatus] {
-    return ['admin', 'gigs', filter];
+  gigs(
+    filter: GigStatus,
+    sortBy: AdminGigsSortBy,
+    sortOrder: AdminGigsSortOrder,
+  ): readonly ['admin', 'gigs', GigStatus, AdminGigsSortBy, AdminGigsSortOrder] {
+    return ['admin', 'gigs', filter, sortBy, sortOrder];
   },
 } as const;

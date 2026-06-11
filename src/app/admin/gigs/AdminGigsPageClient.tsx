@@ -8,11 +8,13 @@ import { useCallback } from 'react';
 import { adminKeys } from '@/app/admin/adminKeys';
 import AdminGigPreviewCard from '@/app/admin/gigs/_components/AdminGigPreviewCard';
 import AdminGigQueueList from '@/app/admin/gigs/_components/AdminGigQueueList';
+import AdminGigsSortControls from '@/app/admin/gigs/_components/AdminGigsSortControls';
 import {
   buildAdminGigsSearchParams,
   readAdminGigsQueryState,
 } from '@/app/admin/gigs/admin-gigs-query';
 import type { AdminGigsQueryState } from '@/app/admin/gigs/admin-gigs-query';
+import type { AdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
 import {
   GIG_FILTER_STATUSES,
   getGigStatusEmptyMessage,
@@ -29,12 +31,12 @@ export default function AdminGigsPageClient() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { filter, selectedGigPublicId }: AdminGigsQueryState =
+  const { filter, selectedGigPublicId, sortBy, sortOrder }: AdminGigsQueryState =
     readAdminGigsQueryState(searchParams);
 
   const gigsQuery = useQuery({
-    queryKey: adminKeys.gigs(filter),
-    queryFn: () => fetchAdminGigs({ status: filter }),
+    queryKey: adminKeys.gigs(filter, sortBy, sortOrder),
+    queryFn: () => fetchAdminGigs({ status: filter, sortBy, sortOrder }),
   });
 
   const gigs = gigsQuery.data?.gigs ?? [];
@@ -56,11 +58,29 @@ export default function AdminGigsPageClient() {
   const selectedGig = gigs.find((g) => g.publicId === effectiveSelectedPublicId) ?? null;
 
   const handleFilterChange = (next: GigStatus) => {
-    replaceQuery({ filter: next, selectedGigPublicId: null });
+    replaceQuery({ filter: next, selectedGigPublicId: null, sortBy, sortOrder });
   };
 
   const handleSelectGig = (publicId: string) => {
-    replaceQuery({ filter, selectedGigPublicId: publicId });
+    replaceQuery({ filter, selectedGigPublicId: publicId, sortBy, sortOrder });
+  };
+
+  const handleSortByChange = (nextSortBy: AdminGigsSortBy) => {
+    replaceQuery({
+      filter,
+      selectedGigPublicId: null,
+      sortBy: nextSortBy,
+      sortOrder,
+    });
+  };
+
+  const handleSortOrderToggle = () => {
+    replaceQuery({
+      filter,
+      selectedGigPublicId: null,
+      sortBy,
+      sortOrder: sortOrder === 'asc' ? 'desc' : 'asc',
+    });
   };
 
   return (
@@ -97,19 +117,29 @@ export default function AdminGigsPageClient() {
           </nav>
         </div>
 
-        <div className="min-h-0 rounded-lg border sm:flex-1 sm:overflow-y-auto">
-          {gigsQuery.isError ? (
-            <p className="px-3 py-10 text-center text-sm text-destructive">Could not load gigs.</p>
-          ) : gigsQuery.isLoading ? (
-            <p className="px-3 py-10 text-center text-sm text-muted-foreground">Loading gigs…</p>
-          ) : (
-            <AdminGigQueueList
-              gigs={gigs}
-              selectedPublicId={effectiveSelectedPublicId}
-              onSelect={handleSelectGig}
-              emptyMessage={getGigStatusEmptyMessage(filter)}
-            />
-          )}
+        <div className="flex min-h-0 flex-col rounded-lg border sm:flex-1 sm:overflow-hidden">
+          <AdminGigsSortControls
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSortByChange={handleSortByChange}
+            onSortOrderToggle={handleSortOrderToggle}
+          />
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            {gigsQuery.isError ? (
+              <p className="px-3 py-10 text-center text-sm text-destructive">
+                Could not load gigs.
+              </p>
+            ) : gigsQuery.isLoading ? (
+              <p className="px-3 py-10 text-center text-sm text-muted-foreground">Loading gigs…</p>
+            ) : (
+              <AdminGigQueueList
+                gigs={gigs}
+                selectedPublicId={effectiveSelectedPublicId}
+                onSelect={handleSelectGig}
+                emptyMessage={getGigStatusEmptyMessage(filter)}
+              />
+            )}
+          </div>
         </div>
       </div>
 

@@ -82,6 +82,55 @@ describe('fetchAdminGigs', () => {
     expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gigs?status=pending', 'GET');
   });
 
+  it('should parse published gigs when mainPostPostedAt is present', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigs: [
+        {
+          publicId: 'published-gig',
+          title: 'Published Gig',
+          status: 'Published',
+          date: '2026-06-12',
+          city: 'barcelona',
+          countryCode: 'ES',
+          venue: 'Venue',
+          suggestedBy: { userId: '42' },
+          hasModerationPost: true,
+          mainPostPostedAt: 1_748_784_000_000,
+        },
+      ],
+    });
+
+    await expect(
+      fetchAdminGigs({
+        status: GigStatus.Published,
+        sortBy: 'post_date',
+        sortOrder: 'desc',
+      }),
+    ).resolves.toEqual({
+      gigs: [
+        expect.objectContaining({
+          publicId: 'published-gig',
+          mainPostPostedAt: 1_748_784_000_000,
+        }),
+      ],
+    });
+  });
+
+  it('should include sort query params when sort options are provided', async () => {
+    mockApiRequest.mockResolvedValue({ gigs: [] });
+
+    await fetchAdminGigs({
+      status: GigStatus.Published,
+      sortBy: 'post_date',
+      sortOrder: 'desc',
+    });
+
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gigs?status=published&sortBy=post_date&sortOrder=desc',
+      'GET',
+    );
+  });
+
   it('should throw when admin gigs response is invalid', async () => {
     mockApiRequest.mockResolvedValue({ gigs: [{}] });
 

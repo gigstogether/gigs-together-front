@@ -27,6 +27,18 @@ describe('readAdminGigsQueryState', () => {
     expect(readAdminGigsQueryState(params)).toEqual({
       filter: GigStatus.Rejected,
       selectedGigPublicId: 'gig-42',
+      sortBy: 'post_date',
+      sortOrder: 'desc',
+    });
+  });
+
+  it('should read sort params from search params', () => {
+    const params = new URLSearchParams('status=published&sortBy=post_date&sortOrder=asc');
+    expect(readAdminGigsQueryState(params)).toEqual({
+      filter: GigStatus.Published,
+      selectedGigPublicId: null,
+      sortBy: 'post_date',
+      sortOrder: 'asc',
     });
   });
 });
@@ -36,15 +48,21 @@ describe('buildAdminGigsSearchParams', () => {
     const params = buildAdminGigsSearchParams({
       filter: GigStatus.Pending,
       selectedGigPublicId: null,
+      sortBy: 'post_date',
+      sortOrder: 'desc',
     });
-    expect(params.toString()).toBe('status=pending');
+    expect(params.toString()).toBe('status=pending&sortBy=post_date&sortOrder=desc');
   });
 
   it('should include gig param when gig is selected', () => {
     const params = buildAdminGigsSearchParams({
       filter: GigStatus.Pending,
       selectedGigPublicId: 'radiohead-barcelona-2026-06-12',
+      sortBy: 'post_date',
+      sortOrder: 'desc',
     });
-    expect(params.toString()).toBe('status=pending&gig=radiohead-barcelona-2026-06-12');
+    expect(params.toString()).toBe(
+      'status=pending&sortBy=post_date&sortOrder=desc&gig=radiohead-barcelona-2026-06-12',
+    );
   });
 });
