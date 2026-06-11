@@ -15,6 +15,7 @@ import {
 } from '@/app/admin/gigs/admin-gigs-query';
 import type { AdminGigsQueryState } from '@/app/admin/gigs/admin-gigs-query';
 import type { AdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
+import { AdminGigsSortOrder, getDefaultAdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
 import {
   GIG_FILTER_STATUSES,
   getGigStatusEmptyMessage,
@@ -58,7 +59,12 @@ export default function AdminGigsPageClient() {
   const selectedGig = gigs.find((g) => g.publicId === effectiveSelectedPublicId) ?? null;
 
   const handleFilterChange = (next: GigStatus) => {
-    replaceQuery({ filter: next, selectedGigPublicId: null, sortBy, sortOrder });
+    replaceQuery({
+      filter: next,
+      selectedGigPublicId: null,
+      sortBy: getDefaultAdminGigsSortBy(next),
+      sortOrder,
+    });
   };
 
   const handleSelectGig = (publicId: string) => {
@@ -79,7 +85,8 @@ export default function AdminGigsPageClient() {
       filter,
       selectedGigPublicId: null,
       sortBy,
-      sortOrder: sortOrder === 'asc' ? 'desc' : 'asc',
+      sortOrder:
+        sortOrder === AdminGigsSortOrder.Asc ? AdminGigsSortOrder.Desc : AdminGigsSortOrder.Asc,
     });
   };
 

@@ -101,7 +101,7 @@ describe('fetchAdminGigs', () => {
     await expect(
       fetchAdminGigs({
         status: GigStatus.Published,
-        sortBy: 'post_date',
+        sortBy: 'postDate',
         sortOrder: 'desc',
       }),
     ).resolves.toEqual({
@@ -120,12 +120,12 @@ describe('fetchAdminGigs', () => {
 
     await fetchAdminGigs({
       status: GigStatus.Published,
-      sortBy: 'post_date',
+      sortBy: 'postDate',
       sortOrder: 'desc',
     });
 
     expect(mockApiRequest).toHaveBeenCalledWith(
-      'v1/admin/gigs?status=published&sortBy=post_date&sortOrder=desc',
+      'v1/admin/gigs?status=published&sortBy=postDate&sortOrder=desc',
       'GET',
     );
   });

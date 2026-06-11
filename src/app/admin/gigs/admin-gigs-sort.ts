@@ -1,32 +1,58 @@
-export const ADMIN_GIGS_SORT_BY_VALUES = ['post_date'] as const;
+import { GigStatus } from '@/app/admin/gigs/types';
 
-export type AdminGigsSortBy = (typeof ADMIN_GIGS_SORT_BY_VALUES)[number];
+export enum AdminGigsSortBy {
+  PostDate = 'postDate',
+  CreatedAt = 'createdAt',
+  EventDate = 'eventDate',
+}
 
-export const ADMIN_GIGS_SORT_ORDER_VALUES = ['asc', 'desc'] as const;
+export enum AdminGigsSortOrder {
+  Asc = 'asc',
+  Desc = 'desc',
+}
 
-export type AdminGigsSortOrder = (typeof ADMIN_GIGS_SORT_ORDER_VALUES)[number];
+export const ADMIN_GIGS_SORT_BY_VALUES = [
+  AdminGigsSortBy.PostDate,
+  AdminGigsSortBy.CreatedAt,
+  AdminGigsSortBy.EventDate,
+] as const;
 
-export const ADMIN_GIGS_DEFAULT_SORT_BY: AdminGigsSortBy = 'post_date';
+export const ADMIN_GIGS_SORT_ORDER_VALUES = [
+  AdminGigsSortOrder.Asc,
+  AdminGigsSortOrder.Desc,
+] as const;
 
-export const ADMIN_GIGS_DEFAULT_SORT_ORDER: AdminGigsSortOrder = 'desc';
+export const ADMIN_GIGS_DEFAULT_SORT_ORDER = AdminGigsSortOrder.Desc;
+
+export function getDefaultAdminGigsSortBy(filter: GigStatus): AdminGigsSortBy {
+  if (filter === GigStatus.Published) {
+    return AdminGigsSortBy.PostDate;
+  }
+  return AdminGigsSortBy.CreatedAt;
+}
 
 export const ADMIN_GIGS_SORT_BY_LABELS: Record<AdminGigsSortBy, string> = {
-  post_date: 'Post date',
+  [AdminGigsSortBy.PostDate]: 'Post date',
+  [AdminGigsSortBy.CreatedAt]: 'Created',
+  [AdminGigsSortBy.EventDate]: 'Event date',
 };
 
 export function isAdminGigsSortBy(value: string): value is AdminGigsSortBy {
-  return (ADMIN_GIGS_SORT_BY_VALUES as readonly string[]).includes(value);
+  return ADMIN_GIGS_SORT_BY_VALUES.some((candidate) => candidate === value);
 }
 
 export function isAdminGigsSortOrder(value: string): value is AdminGigsSortOrder {
-  return (ADMIN_GIGS_SORT_ORDER_VALUES as readonly string[]).includes(value);
+  return ADMIN_GIGS_SORT_ORDER_VALUES.some((candidate) => candidate === value);
 }
 
-export function parseAdminGigsSortByFromQuery(value: string | null): AdminGigsSortBy {
+export function parseAdminGigsSortByFromQuery(
+  value: string | null,
+  filter: GigStatus,
+): AdminGigsSortBy {
   if (value && isAdminGigsSortBy(value)) {
     return value;
   }
-  return ADMIN_GIGS_DEFAULT_SORT_BY;
+  return getDefaultAdminGigsSortBy(filter);
 }
 
 export function parseAdminGigsSortOrderFromQuery(value: string | null): AdminGigsSortOrder {
@@ -37,9 +63,9 @@ export function parseAdminGigsSortOrderFromQuery(value: string | null): AdminGig
 }
 
 export function getAdminGigsSortOrderLabel(order: AdminGigsSortOrder): string {
-  return order === 'asc' ? 'Oldest first' : 'Newest first';
+  return order === AdminGigsSortOrder.Asc ? 'Oldest first' : 'Newest first';
 }
 
 export function getAdminGigsSortOrderShortLabel(order: AdminGigsSortOrder): string {
-  return order === 'asc' ? 'Oldest' : 'Newest';
+  return order === AdminGigsSortOrder.Asc ? 'Oldest' : 'Newest';
 }

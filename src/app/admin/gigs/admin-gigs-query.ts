@@ -30,7 +30,7 @@ export function readAdminGigsQueryState(
   const filter = parseGigStatusFromQuery(searchParams.get(ADMIN_GIGS_QUERY_STATUS));
   const gigRaw = searchParams.get(ADMIN_GIGS_QUERY_GIG);
   const selectedGigPublicId = gigRaw?.trim() ? gigRaw.trim() : null;
-  const sortBy = parseAdminGigsSortByFromQuery(searchParams.get(ADMIN_GIGS_QUERY_SORT_BY));
+  const sortBy = parseAdminGigsSortByFromQuery(searchParams.get(ADMIN_GIGS_QUERY_SORT_BY), filter);
   const sortOrder = parseAdminGigsSortOrderFromQuery(searchParams.get(ADMIN_GIGS_QUERY_SORT_ORDER));
   return { filter, selectedGigPublicId, sortBy, sortOrder };
 }
