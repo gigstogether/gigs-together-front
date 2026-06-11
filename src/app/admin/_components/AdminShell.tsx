@@ -34,7 +34,7 @@ export default function AdminShell({ children }: AdminShellProps) {
   }, []);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 lg:flex-row lg:gap-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-4 lg:py-6 lg:flex-row lg:gap-8">
       <div className="hidden w-full shrink-0 lg:block lg:w-56">
         <aside
           ref={asideRef}

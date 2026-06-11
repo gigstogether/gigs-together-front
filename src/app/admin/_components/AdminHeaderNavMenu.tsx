@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
 import AdminNav from '@/app/admin/_components/AdminNav';
@@ -15,6 +15,8 @@ export default function AdminHeaderNavMenu() {
     setIsOpen(false);
   };
 
+  const ChevronIcon = isOpen ? ChevronUp : ChevronDown;
+
   return (
     <>
       <Popover
@@ -26,10 +28,11 @@ export default function AdminHeaderNavMenu() {
             type="button"
             className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground lg:hidden"
             aria-label="Admin navigation menu"
+            aria-expanded={isOpen}
           >
             {ADMIN_LABEL}
-            <ChevronDown
-              className="h-4 w-4"
+            <ChevronIcon
+              className="h-4 w-4 shrink-0"
               aria-hidden
             />
           </button>

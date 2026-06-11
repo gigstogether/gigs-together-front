@@ -1,13 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowDownWideNarrow, ArrowUpWideNarrow, Check, ChevronDown } from 'lucide-react';
+import {
+  ArrowDownWideNarrow,
+  ArrowUpWideNarrow,
+  Check,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 
 import type { AdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
 import {
   AdminGigsSortOrder,
   ADMIN_GIGS_SORT_BY_LABELS,
   ADMIN_GIGS_SORT_BY_VALUES,
+  ADMIN_GIGS_SORT_ORDER_VALUES,
   getAdminGigsSortOrderLabel,
   getAdminGigsSortOrderShortLabel,
 } from '@/app/admin/gigs/admin-gigs-sort';
@@ -28,7 +35,7 @@ export default function AdminGigsSortControls(props: AdminGigsSortControlsProps)
   const SortOrderIcon =
     sortOrder === AdminGigsSortOrder.Asc ? ArrowUpWideNarrow : ArrowDownWideNarrow;
   const sortOrderLabel = getAdminGigsSortOrderLabel(sortOrder);
-  const sortOrderShortLabel = getAdminGigsSortOrderShortLabel(sortOrder);
+  const SortByChevronIcon = isSortMenuOpen ? ChevronUp : ChevronDown;
 
   const handleSortBySelect = (nextSortBy: AdminGigsSortBy) => {
     if (nextSortBy === sortBy) {
@@ -56,9 +63,10 @@ export default function AdminGigsSortControls(props: AdminGigsSortControlsProps)
               size="sm"
               className="h-8 min-w-0 flex-1 justify-between gap-1 rounded-none rounded-l-md px-2.5 text-xs font-normal focus-visible:z-10"
               aria-label="Sort gigs by"
+              aria-expanded={isSortMenuOpen}
             >
               <span className="truncate">{ADMIN_GIGS_SORT_BY_LABELS[sortBy]}</span>
-              <ChevronDown
+              <SortByChevronIcon
                 className="size-3.5 shrink-0 opacity-60"
                 aria-hidden
               />
@@ -118,7 +126,17 @@ export default function AdminGigsSortControls(props: AdminGigsSortControlsProps)
           onClick={onSortOrderToggle}
         >
           <SortOrderIcon className="size-3.5 shrink-0" />
-          <span>{sortOrderShortLabel}</span>
+          <span className="inline-grid">
+            {ADMIN_GIGS_SORT_ORDER_VALUES.map((order) => (
+              <span
+                key={order}
+                className={cn('col-start-1 row-start-1', order !== sortOrder && 'invisible')}
+                aria-hidden={order !== sortOrder}
+              >
+                {getAdminGigsSortOrderShortLabel(order)}
+              </span>
+            ))}
+          </span>
         </Button>
       </div>
     </div>
