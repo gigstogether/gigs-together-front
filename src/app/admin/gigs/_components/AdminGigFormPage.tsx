@@ -27,6 +27,7 @@ export default async function AdminGigFormPage(props: AdminGigFormPageProps) {
         >
           ← Gigs
         </Link>
+        {/* TODO: create gig-form context to prevent prop drilling? */}
         <GigFormClient
           countries={countries}
           mode={mode}

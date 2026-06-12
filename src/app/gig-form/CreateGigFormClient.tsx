@@ -19,10 +19,12 @@ import { useGigLookup } from '@/app/gig-form/useGigLookup';
 import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
 
 interface CreateGigFormClientProps {
-  countries: Country[];
+  readonly countries: Country[];
+  readonly successReturnHref?: string;
 }
 
-export default function CreateGigFormClient({ countries }: CreateGigFormClientProps) {
+export default function CreateGigFormClient(props: CreateGigFormClientProps) {
+  const { countries, successReturnHref } = props;
   const router = useRouter();
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState<string>('');
@@ -44,15 +46,11 @@ export default function CreateGigFormClient({ countries }: CreateGigFormClientPr
         title: 'Sent!',
         description: "Thanks — we'll review it and (hopefully) announce it soon.",
       });
-      // Reset form for the next submission (keep location defaults)
-      const currentCity = form.getValues('city') ?? defaultGigFormValues.city;
-      const currentCountry = form.getValues('country') ?? defaultGigFormValues.country;
-      form.reset({
-        ...defaultGigFormValues,
-        city: currentCity,
-        country: currentCountry,
-      });
-      clearPoster();
+      if (successReturnHref) {
+        router.push(successReturnHref);
+      } else {
+        router.back();
+      }
     },
   });
 
