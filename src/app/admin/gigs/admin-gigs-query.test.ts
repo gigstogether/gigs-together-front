@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  buildAdminGigEditHref,
+  buildAdminGigsPath,
   buildAdminGigsSearchParams,
   parseGigStatusFromQuery,
   readAdminGigsQueryState,
@@ -30,6 +32,7 @@ describe('readAdminGigsQueryState', () => {
       selectedGigPublicId: 'gig-42',
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
+      isEditing: false,
     });
   });
 
@@ -40,6 +43,7 @@ describe('readAdminGigsQueryState', () => {
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
+      isEditing: false,
     });
   });
 
@@ -50,6 +54,7 @@ describe('readAdminGigsQueryState', () => {
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
+      isEditing: false,
     });
   });
 
@@ -60,6 +65,7 @@ describe('readAdminGigsQueryState', () => {
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.EventDate,
       sortOrder: AdminGigsSortOrder.Asc,
+      isEditing: false,
     });
   });
 
@@ -70,6 +76,18 @@ describe('readAdminGigsQueryState', () => {
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Asc,
+      isEditing: false,
+    });
+  });
+
+  it('should read edit mode from search params', () => {
+    const params = new URLSearchParams('status=pending&gig=gig-42&edit=1');
+    expect(readAdminGigsQueryState(params)).toEqual({
+      filter: GigStatus.Pending,
+      selectedGigPublicId: 'gig-42',
+      sortBy: AdminGigsSortBy.CreatedAt,
+      sortOrder: AdminGigsSortOrder.Desc,
+      isEditing: true,
     });
   });
 });
@@ -81,6 +99,7 @@ describe('buildAdminGigsSearchParams', () => {
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
+      isEditing: false,
     });
     expect(params.toString()).toBe('status=pending&sortBy=createdAt&sortOrder=desc');
   });
@@ -91,9 +110,49 @@ describe('buildAdminGigsSearchParams', () => {
       selectedGigPublicId: 'radiohead-barcelona-2026-06-12',
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
+      isEditing: false,
     });
     expect(params.toString()).toBe(
       'status=pending&sortBy=createdAt&sortOrder=desc&gig=radiohead-barcelona-2026-06-12',
     );
+  });
+
+  it('should include edit param when editing', () => {
+    const params = buildAdminGigsSearchParams({
+      filter: GigStatus.Pending,
+      selectedGigPublicId: 'gig-42',
+      sortBy: AdminGigsSortBy.CreatedAt,
+      sortOrder: AdminGigsSortOrder.Desc,
+      isEditing: true,
+    });
+    expect(params.toString()).toBe(
+      'status=pending&sortBy=createdAt&sortOrder=desc&gig=gig-42&edit=1',
+    );
+  });
+});
+
+describe('buildAdminGigEditHref', () => {
+  it('should build inline edit href with gig and edit params', () => {
+    expect(buildAdminGigEditHref('placebo-2026-09-16')).toBe(
+      '/admin/gigs?status=pending&sortBy=createdAt&sortOrder=desc&gig=placebo-2026-09-16&edit=1',
+    );
+  });
+
+  it('should throw when publicId is empty', () => {
+    expect(() => buildAdminGigEditHref('   ')).toThrow('publicId is required');
+  });
+});
+
+describe('buildAdminGigsPath', () => {
+  it('should build preview href without edit param', () => {
+    expect(
+      buildAdminGigsPath({
+        filter: GigStatus.Published,
+        selectedGigPublicId: 'gig-42',
+        sortBy: AdminGigsSortBy.EventDate,
+        sortOrder: AdminGigsSortOrder.Asc,
+        isEditing: false,
+      }),
+    ).toBe('/admin/gigs?status=published&sortBy=eventDate&sortOrder=asc&gig=gig-42');
   });
 });

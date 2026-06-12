@@ -10,7 +10,7 @@ import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
-import { buildGigFormEditPath, GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
+import { buildAdminGigEditHref } from '@/app/admin/gigs/admin-gigs-query';
 import { createGig } from '@/lib/gig-form-api';
 import { getTelegramStartParam } from '@/lib/telegram-webapp';
 import { defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
@@ -61,7 +61,7 @@ export default function CreateGigFormClient(props: CreateGigFormClientProps) {
     if (!token) return;
     // Keep token format aligned with backend publicId rules.
     if (!/^[a-z0-9-]{1,64}$/i.test(token)) return;
-    router.replace(buildGigFormEditPath(GIG_FORM_ADMIN_BASE_PATH, token));
+    router.replace(buildAdminGigEditHref(token));
   }, [router]);
 
   function clearPoster() {

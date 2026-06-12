@@ -1,7 +1,7 @@
 import type { AdminGigDetail } from '@/app/admin/gigs/types';
 import { GigStatus } from '@/app/admin/gigs/types';
 import Link from 'next/link';
-import { Check, ExternalLink, Link2, Pencil, X } from 'lucide-react';
+import { Check, Link2, Pencil, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ActionButtonLink from '@/app/admin/gigs/_components/ActionButtonLink';
 
@@ -27,10 +27,6 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
           aria-hidden
         />
         Edit
-        <ExternalLink
-          className="ml-auto h-3 w-3 opacity-60"
-          aria-hidden
-        />
       </Link>
     </Button>
   );

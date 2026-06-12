@@ -6,13 +6,7 @@ import { I18nProvider } from '@/lib/i18n';
 import { getCountries } from '@/lib/countries.server';
 import { getTranslations } from '@/lib/translations.server';
 
-interface AdminGigFormPageProps {
-  readonly mode: 'create' | 'edit';
-  readonly gigPublicId?: string;
-}
-
-export default async function AdminGigFormPage(props: AdminGigFormPageProps) {
-  const { mode, gigPublicId } = props;
+export default async function AdminGigFormPage() {
   const [countries, i18n] = await Promise.all([getCountries(), getTranslations('en', 'country')]);
 
   return (
@@ -27,11 +21,9 @@ export default async function AdminGigFormPage(props: AdminGigFormPageProps) {
         >
           ← Gigs
         </Link>
-        {/* TODO: create gig-form context to prevent prop drilling? */}
+        {/* TODO: create countries context to prevent prop drilling? */}
         <GigFormClient
           countries={countries}
-          mode={mode}
-          gigPublicId={gigPublicId}
           successReturnHref={GIG_FORM_ADMIN_BASE_PATH}
         />
       </div>

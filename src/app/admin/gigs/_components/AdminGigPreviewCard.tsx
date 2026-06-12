@@ -11,7 +11,6 @@ import type { GigStatus } from '@/app/admin/gigs/types';
 import { cn } from '@/lib/utils';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
 import AdminGigPreviewPoster from '@/app/admin/gigs/_components/AdminGigPreviewPoster';
-import { buildGigFormEditPath, GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
 
 interface MetaRowProps {
   readonly icon: ReactNode;
@@ -31,10 +30,11 @@ function MetaRow(props: MetaRowProps) {
 interface AdminGigPreviewCardProps {
   readonly gig: AdminGigDetail | null;
   readonly listFilter: GigStatus;
+  readonly editHref: string;
 }
 
 export default function AdminGigPreviewCard(props: AdminGigPreviewCardProps) {
-  const { gig, listFilter } = props;
+  const { gig, listFilter, editHref } = props;
 
   if (!gig) {
     return (
@@ -44,7 +44,6 @@ export default function AdminGigPreviewCard(props: AdminGigPreviewCardProps) {
     );
   }
 
-  const editHref = buildGigFormEditPath(GIG_FORM_ADMIN_BASE_PATH, gig.publicId);
   const isPublished = gig.status === 'Published';
   const feedHref = isPublished ? buildAdminGigFeedHref(gig) : null;
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
