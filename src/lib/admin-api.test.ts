@@ -1,5 +1,6 @@
 import {
   fetchAdminDashboard,
+  fetchAdminGigByPublicId,
   fetchAdminGigs,
   fetchAdminLanguages,
   patchAdminLanguage,
@@ -57,7 +58,7 @@ describe('fetchAdminGigs', () => {
           status: 'Pending',
           date: '2026-06-12',
           city: 'barcelona',
-          countryCode: 'ES',
+          country: 'ES',
           venue: 'Venue',
           suggestedBy: { userId: '42' },
         },
@@ -72,7 +73,7 @@ describe('fetchAdminGigs', () => {
           status: 'Pending',
           date: '2026-06-12',
           city: 'barcelona',
-          countryCode: 'ES',
+          country: 'ES',
           venue: 'Venue',
           suggestedBy: { userId: '42' },
         },
@@ -90,7 +91,7 @@ describe('fetchAdminGigs', () => {
           status: 'Published',
           date: '2026-06-12',
           city: 'barcelona',
-          countryCode: 'ES',
+          country: 'ES',
           venue: 'Venue',
           suggestedBy: { userId: '42' },
           publishPostDate: 1_748_784_000_000,
@@ -136,6 +137,58 @@ describe('fetchAdminGigs', () => {
 
     await expect(fetchAdminGigs({ status: GigStatus.Published })).rejects.toThrow(
       'Invalid admin gigs response',
+    );
+  });
+});
+
+describe('fetchAdminGigByPublicId', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should parse admin gig form data when payload is valid', async () => {
+    mockApiRequest.mockResolvedValue({
+      publicId: 'radiohead-barcelona-2026-06-12',
+      title: 'Radiohead',
+      status: 'Pending',
+      date: '2026-06-12',
+      city: 'barcelona',
+      country: 'ES',
+      venue: 'Palau Sant Jordi',
+      ticketsUrl: 'https://example.com/tickets',
+      suggestedBy: { userId: '9001' },
+      publishPostUrl: 'https://t.me/channel/1',
+      moderationPostDate: 1_748_697_600_000,
+    });
+
+    await expect(
+      fetchAdminGigByPublicId({ publicId: 'radiohead-barcelona-2026-06-12' }),
+    ).resolves.toEqual({
+      publicId: 'radiohead-barcelona-2026-06-12',
+      title: 'Radiohead',
+      status: 'Pending',
+      date: '2026-06-12',
+      city: 'barcelona',
+      country: 'ES',
+      venue: 'Palau Sant Jordi',
+      ticketsUrl: 'https://example.com/tickets',
+      suggestedBy: { userId: '9001' },
+      publishPostUrl: 'https://t.me/channel/1',
+      moderationPostDate: 1_748_697_600_000,
+    });
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig/radiohead-barcelona-2026-06-12',
+      'GET',
+      undefined,
+      { signal: undefined },
+    );
+  });
+
+  it('should throw when admin gig response is invalid', async () => {
+    mockApiRequest.mockResolvedValue({ publicId: 'gig-42' });
+
+    await expect(fetchAdminGigByPublicId({ publicId: 'gig-42' })).rejects.toThrow(
+      'Invalid admin gig response',
     );
   });
 });

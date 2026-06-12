@@ -51,7 +51,7 @@ export interface AdminGigQueueItem {
   readonly date: string;
   readonly endDate?: string;
   readonly city: string;
-  readonly countryCode: string;
+  readonly country: string;
   readonly venue: string;
   readonly posterUrl?: string;
   readonly suggestedBy: AdminGigSuggestedBy;
@@ -62,6 +62,24 @@ export interface AdminGigDetail extends AdminGigQueueItem {
   readonly ticketsUrl?: string;
   /** Telegram channel post URL when published. */
   readonly postUrl?: string;
+  readonly publishPostDate?: number;
+  readonly moderationPostDate?: number;
+}
+
+/** Mirrors API `GigFormDataByPublicId` — GET v1/admin/gig/:publicId. */
+export interface AdminGigFormData {
+  readonly publicId: string;
+  readonly title: string;
+  readonly date: string;
+  readonly endDate?: string;
+  readonly city: string;
+  readonly country: string;
+  readonly venue: string;
+  readonly ticketsUrl: string;
+  readonly posterUrl?: string;
+  readonly status: AdminGigStatusAPI;
+  readonly suggestedBy: AdminGigSuggestedBy;
+  readonly publishPostUrl?: string;
   readonly publishPostDate?: number;
   readonly moderationPostDate?: number;
 }

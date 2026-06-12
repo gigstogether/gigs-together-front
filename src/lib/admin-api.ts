@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import type { AdminGigDetail, GigStatus } from '@/app/admin/gigs/types';
+import type { AdminGigDetail, AdminGigFormData, GigStatus } from '@/app/admin/gigs/types';
 import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 import { apiRequest } from '@/lib/api';
 
@@ -63,7 +63,7 @@ const v1AdminGigListItemSchema = z
     date: z.string(),
     endDate: z.string().optional(),
     city: z.string(),
-    countryCode: z.string(),
+    country: z.string(),
     venue: z.string(),
     posterUrl: z.string().optional(),
     suggestedBy: v1AdminGigSuggestedBySchema,
@@ -80,6 +80,25 @@ const v1AdminGigsListResponseSchema = z
   })
   .strict();
 
+const v1AdminGigFormDataSchema = z
+  .object({
+    publicId: z.string(),
+    title: z.string(),
+    date: z.string(),
+    endDate: z.string().optional(),
+    city: z.string(),
+    country: z.string(),
+    venue: z.string(),
+    ticketsUrl: z.string(),
+    posterUrl: z.string().optional(),
+    status: v1AdminGigStatusSchema,
+    suggestedBy: v1AdminGigSuggestedBySchema,
+    publishPostUrl: z.string().optional(),
+    publishPostDate: z.number().optional(),
+    moderationPostDate: z.number().optional(),
+  })
+  .strict();
+
 export interface AdminGigsList {
   readonly gigs: readonly AdminGigDetail[];
 }
@@ -89,6 +108,11 @@ export interface FetchAdminGigsParams {
   readonly limit?: number;
   readonly sortBy?: AdminGigsSortBy;
   readonly sortOrder?: AdminGigsSortOrder;
+}
+
+export interface FetchAdminGigByPublicIdParams {
+  readonly publicId: string;
+  readonly signal?: AbortSignal;
 }
 
 function parseAdminDashboard(payload: unknown): AdminDashboard {
@@ -130,6 +154,14 @@ function parseAdminGigsList(payload: unknown): AdminGigsList {
   return parsed.data;
 }
 
+function parseAdminGigFormData(payload: unknown): AdminGigFormData {
+  const parsed = v1AdminGigFormDataSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new Error(`Invalid admin gig response: ${JSON.stringify(parsed.error.issues)}`);
+  }
+  return parsed.data;
+}
+
 function parseAdminLanguageResponse(payload: unknown): AdminLanguage {
   const parsed = v1AdminLanguageItemSchema.safeParse(payload);
   if (!parsed.success) {
@@ -151,6 +183,16 @@ export async function fetchAdminLanguages(): Promise<readonly AdminLanguage[]> {
 export async function fetchAdminGigs(params: FetchAdminGigsParams): Promise<AdminGigsList> {
   const raw = await apiRequest<unknown>(buildAdminGigsEndpoint(params), 'GET');
   return parseAdminGigsList(raw);
+}
+
+export async function fetchAdminGigByPublicId(
+  params: FetchAdminGigByPublicIdParams,
+): Promise<AdminGigFormData> {
+  const publicId = encodeURIComponent(params.publicId.trim());
+  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}gig/${publicId}`, 'GET', undefined, {
+    signal: params.signal,
+  });
+  return parseAdminGigFormData(raw);
 }
 
 export async function patchAdminLanguage(

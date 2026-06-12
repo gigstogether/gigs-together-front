@@ -25,7 +25,7 @@ describe('buildAdminGigFeedHref', () => {
     expect(
       buildAdminGigFeedHref({
         publicId: 'radiohead-barcelona-2026-06-12',
-        countryCode: 'ES',
+        country: 'ES',
         city: 'barcelona',
       }),
     ).toBe('/feed/es/barcelona#radiohead-barcelona-2026-06-12');
@@ -40,7 +40,7 @@ describe('formatAdminGigListMeta', () => {
       status: 'Pending',
       date: '2026-06-12',
       city: 'barcelona',
-      countryCode: 'ES',
+      country: 'ES',
       venue: 'V',
       suggestedBy: { userId: '123', name: 'A' },
     };

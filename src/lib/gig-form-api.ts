@@ -20,21 +20,6 @@ export interface GigUpsertPayload {
   ticketsUrl: string;
 }
 
-export interface GigDraftData {
-  title: string;
-  date: string;
-  endDate?: string;
-  city: string;
-  country: string;
-  venue: string;
-  ticketsUrl: string;
-  posterUrl?: string;
-}
-
-export interface GigFormData extends GigDraftData {
-  publicId: string;
-}
-
 export interface GigLookupData {
   title?: string;
   date: string;
@@ -66,11 +51,6 @@ export interface GigUpsertApiParams {
   poster: PosterSelection;
 }
 
-export interface FetchGigByPublicIdParams {
-  publicId: string;
-  signal?: AbortSignal;
-}
-
 export interface LookupGigParams {
   name: string;
   location: string;
@@ -94,23 +74,6 @@ function asRecordOrThrow(raw: unknown): Record<string, unknown> {
   return raw;
 }
 
-function requireString(obj: Record<string, unknown>, key: string): string {
-  const v = obj[key];
-  if (typeof v !== 'string' || !v.trim()) {
-    throw new Error(`Invalid API response: "${key}" must be a non-empty string`);
-  }
-  return v;
-}
-
-function optionalString(obj: Record<string, unknown>, key: string): string | undefined {
-  const v = obj[key];
-  if (v === undefined || v === null || v === '') return undefined;
-  if (typeof v !== 'string') {
-    throw new Error(`Invalid API response: "${key}" must be a string when present`);
-  }
-  return v;
-}
-
 function optionalNonEmptyString(obj: Record<string, unknown>, key: string): string | undefined {
   const v = obj[key];
   if (v === undefined || v === null) return undefined;
@@ -119,29 +82,6 @@ function optionalNonEmptyString(obj: Record<string, unknown>, key: string): stri
   }
   const trimmed = v.trim();
   return trimmed ? trimmed : undefined;
-}
-
-function parseGigDraftData(raw: unknown): GigDraftData {
-  const obj = asRecordOrThrow(raw);
-  return {
-    title: requireString(obj, 'title'),
-    date: requireString(obj, 'date'),
-    endDate: optionalString(obj, 'endDate'),
-    city: requireString(obj, 'city'),
-    country: requireString(obj, 'country'),
-    venue: requireString(obj, 'venue'),
-    ticketsUrl: requireString(obj, 'ticketsUrl'),
-    posterUrl: optionalString(obj, 'posterUrl'),
-  };
-}
-
-function parseGigFormData(raw: unknown): GigFormData {
-  const obj = asRecordOrThrow(raw);
-  const draft = parseGigDraftData(obj);
-  return {
-    publicId: requireString(obj, 'publicId'),
-    ...draft,
-  };
 }
 
 function parseGigLookupData(raw: unknown): ParsedGigLookupData {
@@ -241,14 +181,6 @@ async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TRe
   return apiRequest<TResponse>(params.endpoint, params.method, {
     gig,
   });
-}
-
-export async function fetchGigByPublicId(params: FetchGigByPublicIdParams): Promise<GigFormData> {
-  const publicId = encodeURIComponent(params.publicId.trim());
-  const raw = await apiRequest<unknown>(`v1/gig/${publicId}`, 'GET', undefined, {
-    signal: params.signal,
-  });
-  return parseGigFormData(raw);
 }
 
 export async function lookupGig(params: LookupGigParams): Promise<GigLookupData | null> {

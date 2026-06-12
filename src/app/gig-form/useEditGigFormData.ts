@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 
 import { toast } from '@/hooks/use-toast';
-import { fetchGigByPublicId, normalizeGigApiDate } from '@/lib/gig-form-api';
+import { fetchAdminGigByPublicId } from '@/lib/admin-api';
+import { normalizeGigApiDate } from '@/lib/gig-form-api';
+import type { AdminGigFormData } from '@/app/admin/gigs/types';
 import { getTelegramInitDataExpiredToastContent } from '@/lib/telegram-init-data-expired';
 import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
 import { gigFormKeys } from '@/app/gig-form/gigFormKeys';
 
-import type { GigFormData } from '@/lib/gig-form-api';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 
 const EDIT_GIG_LOAD_TIMEOUT_MS = 15_000; // 15 seconds
@@ -33,7 +34,7 @@ interface UseEditGigFormDataResult {
   readonly retryLoadingGig: () => Promise<void>;
 }
 
-function buildEditGigFormQueryData(data: GigFormData): EditGigFormQueryData {
+function buildEditGigFormQueryData(data: AdminGigFormData): EditGigFormQueryData {
   const date = normalizeGigApiDate(data.date, 'gig.date');
   const endDate = data.endDate ? normalizeGigApiDate(data.endDate, 'gig.endDate') : undefined;
 
@@ -89,7 +90,7 @@ export function useEditGigFormData(params: UseEditGigFormDataParams): UseEditGig
 
       signal.addEventListener('abort', abortFromQuerySignal);
       try {
-        const data = await fetchGigByPublicId({
+        const data = await fetchAdminGigByPublicId({
           publicId: trimmedGigPublicId,
           signal: timeoutController.signal,
         });

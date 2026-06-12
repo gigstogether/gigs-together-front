@@ -3,12 +3,12 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
-import type { GigFormData } from '@/lib/gig-form-api';
+import type { AdminGigFormData } from '@/app/admin/gigs/types';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import type { UseFormReturn } from 'react-hook-form';
 
 import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
-import { fetchGigByPublicId } from '@/lib/gig-form-api';
+import { fetchAdminGigByPublicId } from '@/lib/admin-api';
 import { useEditGigFormData } from '@/app/gig-form/useEditGigFormData';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
 
@@ -16,8 +16,8 @@ const { toastMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
 }));
 
-const { fetchGigByPublicIdMock } = vi.hoisted(() => ({
-  fetchGigByPublicIdMock: vi.fn<typeof fetchGigByPublicId>(),
+const { fetchAdminGigByPublicIdMock } = vi.hoisted(() => ({
+  fetchAdminGigByPublicIdMock: vi.fn<typeof fetchAdminGigByPublicId>(),
 }));
 
 vi.mock('@/hooks/use-toast', () => ({
@@ -28,11 +28,11 @@ vi.mock('@/lib/telegram-init-data-expired', () => ({
   getTelegramInitDataExpiredToastContent: vi.fn(() => null),
 }));
 
-vi.mock('@/lib/gig-form-api', async () => {
-  const actual = await vi.importActual('@/lib/gig-form-api');
+vi.mock('@/lib/admin-api', async () => {
+  const actual = await vi.importActual('@/lib/admin-api');
   return {
     ...actual,
-    fetchGigByPublicId: fetchGigByPublicIdMock,
+    fetchAdminGigByPublicId: fetchAdminGigByPublicIdMock,
   };
 });
 
@@ -41,10 +41,11 @@ interface RenderUseEditGigFormDataResult {
   readonly editGigData: ReturnType<typeof useEditGigFormData>;
 }
 
-function createGigFormData(overrides: Partial<GigFormData> = {}): GigFormData {
+function createAdminGigFormData(overrides: Partial<AdminGigFormData> = {}): AdminGigFormData {
   return {
     publicId: 'gig-public-id',
     title: 'Arctic Monkeys',
+    status: 'Pending',
     date: '2026-07-01T20:00:00.000Z',
     endDate: '2026-07-02T22:00:00.000Z',
     city: 'Barcelona',
@@ -52,6 +53,7 @@ function createGigFormData(overrides: Partial<GigFormData> = {}): GigFormData {
     venue: 'Razzmatazz',
     ticketsUrl: 'https://tickets.example/gig',
     posterUrl: 'https://images.example/poster.png',
+    suggestedBy: { userId: '42' },
     ...overrides,
   };
 }
@@ -96,7 +98,7 @@ describe('useEditGigFormData', () => {
   });
 
   it('should prefill form values and poster URL when gig data loads successfully', async () => {
-    vi.mocked(fetchGigByPublicId).mockResolvedValueOnce(createGigFormData());
+    vi.mocked(fetchAdminGigByPublicId).mockResolvedValueOnce(createAdminGigFormData());
 
     const { result } = renderUseEditGigFormData();
 
@@ -104,7 +106,7 @@ describe('useEditGigFormData', () => {
       expect(result.current.editGigData.isPrefilled).toBe(true);
     });
 
-    expect(vi.mocked(fetchGigByPublicId)).toHaveBeenCalledWith({
+    expect(vi.mocked(fetchAdminGigByPublicId)).toHaveBeenCalledWith({
       publicId: 'gig-public-id',
       signal: expect.any(AbortSignal),
     });
@@ -121,7 +123,7 @@ describe('useEditGigFormData', () => {
   });
 
   it('should expose load error and show toast when gig data request fails', async () => {
-    vi.mocked(fetchGigByPublicId).mockRejectedValueOnce(new Error('Request failed'));
+    vi.mocked(fetchAdminGigByPublicId).mockRejectedValueOnce(new Error('Request failed'));
 
     const { result } = renderUseEditGigFormData();
 
@@ -139,9 +141,9 @@ describe('useEditGigFormData', () => {
   });
 
   it('should retry loading and prefill form when retry succeeds', async () => {
-    vi.mocked(fetchGigByPublicId)
+    vi.mocked(fetchAdminGigByPublicId)
       .mockRejectedValueOnce(new Error('Request failed'))
-      .mockResolvedValueOnce(createGigFormData());
+      .mockResolvedValueOnce(createAdminGigFormData());
 
     const { result } = renderUseEditGigFormData();
 
@@ -157,7 +159,7 @@ describe('useEditGigFormData', () => {
       expect(result.current.editGigData.isPrefilled).toBe(true);
     });
 
-    expect(vi.mocked(fetchGigByPublicId)).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(fetchAdminGigByPublicId)).toHaveBeenCalledTimes(2);
     expect(result.current.form.getValues()).toEqual({
       title: 'Arctic Monkeys',
       date: '2026-07-01',

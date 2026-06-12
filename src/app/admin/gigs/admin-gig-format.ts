@@ -18,10 +18,10 @@ export function formatAdminGigListMeta(gig: AdminGigQueueItem): string {
 }
 
 export function buildAdminGigFeedHref(
-  gig: Pick<AdminGigDetail, 'publicId' | 'countryCode' | 'city'>,
+  gig: Pick<AdminGigDetail, 'publicId' | 'country' | 'city'>,
 ): string {
   const feedPath = buildFeedPath({
-    country: gig.countryCode,
+    country: gig.country,
     city: gig.city,
   });
   return `${feedPath}#${gig.publicId}`;
