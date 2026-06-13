@@ -5,13 +5,11 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 
 import { adminKeys } from '@/app/admin/adminKeys';
-import AdminGigEditCard from '@/app/admin/gigs/_components/AdminGigEditCard';
 import AdminGigPreviewCard from '@/app/admin/gigs/_components/AdminGigPreviewCard';
 import AdminGigsFilterControls from '@/app/admin/gigs/_components/AdminGigsFilterControls';
 import AdminGigQueueList from '@/app/admin/gigs/_components/AdminGigQueueList';
 import AdminGigsSortControls from '@/app/admin/gigs/_components/AdminGigsSortControls';
 import {
-  buildAdminGigsPath,
   buildAdminGigsSearchParams,
   readAdminGigsQueryState,
 } from '@/app/admin/gigs/admin-gigs-query';
@@ -22,19 +20,13 @@ import { getGigStatusEmptyMessage } from '@/app/admin/gigs/types';
 import type { GigStatus } from '@/app/admin/gigs/types';
 import { GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
 import { fetchAdminGigs } from '@/lib/admin-api';
-import type { Country } from '@/lib/countries.server';
 
-interface AdminGigsPageClientProps {
-  readonly countries: Country[];
-}
-
-export default function AdminGigsPageClient(props: AdminGigsPageClientProps) {
-  const { countries } = props;
+export default function AdminGigsPageClient() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { filter, selectedGigPublicId, sortBy, sortOrder, isEditing }: AdminGigsQueryState =
+  const { filter, selectedGigPublicId, sortBy, sortOrder }: AdminGigsQueryState =
     readAdminGigsQueryState(searchParams);
 
   const gigsQuery = useQuery({
@@ -66,12 +58,11 @@ export default function AdminGigsPageClient(props: AdminGigsPageClientProps) {
       selectedGigPublicId: null,
       sortBy: getDefaultAdminGigsSortBy(next),
       sortOrder,
-      isEditing: false,
     });
   };
 
   const handleSelectGig = (publicId: string) => {
-    replaceQuery({ filter, selectedGigPublicId: publicId, sortBy, sortOrder, isEditing: false });
+    replaceQuery({ filter, selectedGigPublicId: publicId, sortBy, sortOrder });
   };
 
   const handleSortByChange = (nextSortBy: AdminGigsSortBy) => {
@@ -80,7 +71,6 @@ export default function AdminGigsPageClient(props: AdminGigsPageClientProps) {
       selectedGigPublicId: null,
       sortBy: nextSortBy,
       sortOrder,
-      isEditing: false,
     });
   };
 
@@ -91,20 +81,8 @@ export default function AdminGigsPageClient(props: AdminGigsPageClientProps) {
       sortBy,
       sortOrder:
         sortOrder === AdminGigsSortOrder.Asc ? AdminGigsSortOrder.Desc : AdminGigsSortOrder.Asc,
-      isEditing: false,
     });
   };
-
-  const previewQueryState: AdminGigsQueryState = {
-    filter,
-    selectedGigPublicId: effectiveSelectedPublicId,
-    sortBy,
-    sortOrder,
-    isEditing: false,
-  };
-  const previewHref = buildAdminGigsPath(previewQueryState);
-  const editHref = buildAdminGigsPath({ ...previewQueryState, isEditing: true });
-  const isShowingEditCard = isEditing && effectiveSelectedPublicId !== null;
 
   return (
     <div className="grid min-h-0 gap-6 sm:h-[calc(100dvh-var(--header-h)-3rem)] sm:grid-cols-[minmax(0,260px)_minmax(0,1fr)] sm:items-stretch">
@@ -142,19 +120,10 @@ export default function AdminGigsPageClient(props: AdminGigsPageClientProps) {
       </div>
 
       <div className="mx-auto flex w-full max-w-sm sm:h-full sm:min-h-0 sm:mx-0 sm:max-w-md">
-        {isShowingEditCard ? (
-          <AdminGigEditCard
-            countries={countries}
-            gigPublicId={effectiveSelectedPublicId}
-            previewHref={previewHref}
-          />
-        ) : (
-          <AdminGigPreviewCard
-            gig={selectedGig}
-            listFilter={filter}
-            editHref={editHref}
-          />
-        )}
+        <AdminGigPreviewCard
+          gig={selectedGig}
+          listFilter={filter}
+        />
       </div>
     </div>
   );
