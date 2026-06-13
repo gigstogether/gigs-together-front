@@ -37,6 +37,16 @@ export function getGigStatusLabel(status: GigStatus): string {
   return GIG_STATUS_LABELS[status];
 }
 
+export function getGigStatusFromAdminGigStatusAPI(status: AdminGigStatusAPI): GigStatus {
+  if (status === 'Published') {
+    return GigStatus.Published;
+  }
+  if (status === 'Rejected') {
+    return GigStatus.Rejected;
+  }
+  return GigStatus.Pending;
+}
+
 export interface AdminGigSuggestedBy {
   readonly userId: string;
   readonly name?: string;
@@ -60,8 +70,7 @@ export interface AdminGigQueueItem {
 /** Full card shown in the detail panel (extends queue fields). */
 export interface AdminGigDetail extends AdminGigQueueItem {
   readonly ticketsUrl?: string;
-  /** Telegram channel post URL when published. */
-  readonly postUrl?: string;
+  readonly publishPostUrl?: string;
   readonly publishPostDate?: number;
   readonly moderationPostDate?: number;
 }

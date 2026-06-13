@@ -68,7 +68,7 @@ const v1AdminGigListItemSchema = z
     posterUrl: z.string().optional(),
     suggestedBy: v1AdminGigSuggestedBySchema,
     ticketsUrl: z.string().optional(),
-    postUrl: z.string().optional(),
+    publishPostUrl: z.string().optional(),
     publishPostDate: z.number().optional(),
     moderationPostDate: z.number().optional(),
   })

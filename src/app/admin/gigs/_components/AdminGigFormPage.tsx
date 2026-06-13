@@ -1,6 +1,5 @@
-import Link from 'next/link';
-
 import GigFormClient from '@/app/gig-form/GigFormClient';
+import AdminGigDetailBackLink from '@/app/admin/gigs/_components/AdminGigDetailBackLink';
 import { GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
 import { I18nProvider } from '@/lib/i18n';
 import { getCountries } from '@/lib/countries.server';
@@ -21,12 +20,7 @@ export default async function AdminGigFormPage(props: AdminGigFormPageProps) {
       translations={i18n.translations}
     >
       <div className="mx-auto w-full max-w-md">
-        <Link
-          href={GIG_FORM_ADMIN_BASE_PATH}
-          className="mb-6 inline-block text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Gigs
-        </Link>
+        <AdminGigDetailBackLink />
         {/* TODO: create gig-form context to prevent prop drilling? */}
         <GigFormClient
           countries={countries}

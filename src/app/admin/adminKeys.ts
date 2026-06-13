@@ -21,4 +21,8 @@ export const adminKeys = {
   ): readonly ['admin', 'gigs', GigStatus, AdminGigsSortBy, AdminGigsSortOrder] {
     return ['admin', 'gigs', filter, sortBy, sortOrder];
   },
+
+  gigByPublicId(publicId: string): readonly ['admin', 'gig', string] {
+    return ['admin', 'gig', publicId.trim()];
+  },
 } as const;

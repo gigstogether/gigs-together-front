@@ -1,12 +1,13 @@
-import type { AdminGigDetail } from '@/app/admin/gigs/types';
+import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
 import { GigStatus } from '@/app/admin/gigs/types';
 import Link from 'next/link';
-import { Check, ExternalLink, Link2, Pencil, X } from 'lucide-react';
+import { Check, ExternalLink, Link2, Pencil, Rss, X } from 'lucide-react';
+import { buildAdminGigFeedHref } from '@/app/admin/gigs/admin-gig-format';
 import { Button } from '@/components/ui/button';
 import ActionButtonLink from '@/app/admin/gigs/_components/ActionButtonLink';
 
 interface AdminGigPreviewActionsProps {
-  readonly gig: AdminGigDetail;
+  readonly gig: AdminGigDetail | AdminGigFormData;
   readonly listFilter: GigStatus;
   readonly editHref: string;
 }
@@ -37,9 +38,9 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
 
   if (listFilter === GigStatus.Published) {
     return (
-      <div className="grid grid-cols-2 gap-2 border-t p-2">
+      <div className="grid grid-cols-3 gap-2 border-t p-2">
         <ActionButtonLink
-          href={gig.postUrl ?? ''}
+          href={gig.publishPostUrl ?? ''}
           label="Post"
           icon={
             <Link2
@@ -47,7 +48,17 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
               aria-hidden
             />
           }
-          isDisabled={!gig.postUrl}
+          isDisabled={!gig.publishPostUrl}
+        />
+        <ActionButtonLink
+          href={buildAdminGigFeedHref(gig)}
+          label="Feed"
+          icon={
+            <Rss
+              className="h-4 w-4 shrink-0"
+              aria-hidden
+            />
+          }
         />
         {editButton}
       </div>
