@@ -9,14 +9,6 @@ export function buildGigFormPublicIdPath(basePath: string, publicId: string): st
   return `${trimmedBase}/${encodeURIComponent(trimmedId)}`;
 }
 
-export function buildAdminGigSharePath(basePath: string, publicId: string): string {
-  return buildGigFormPublicIdPath(basePath, publicId);
-}
-
-export function buildAdminGigShareUrl(origin: string, sharePath: string): string {
-  return new URL(sharePath, origin).href;
-}
-
 export function buildGigFormEditPath(basePath: string, publicId: string): string {
   return `${buildGigFormPublicIdPath(basePath, publicId)}/edit`;
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { buildAdminGigShareUrl } from '@/app/gig-form/gig-form-paths';
 import CopyableTextRow from '@/components/CopyableTextRow';
 
 interface AdminGigPreviewTitleRowProps {
@@ -11,7 +10,7 @@ interface AdminGigPreviewTitleRowProps {
 export default function AdminGigPreviewTitleRow(props: AdminGigPreviewTitleRowProps) {
   const { title, sharePath } = props;
 
-  const copyText = buildAdminGigShareUrl(window.location.origin, sharePath);
+  const copyText = new URL(sharePath, window.location.origin).href;
 
   return (
     <CopyableTextRow

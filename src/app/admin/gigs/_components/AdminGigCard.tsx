@@ -11,8 +11,8 @@ import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreview
 import AdminGigPreviewPoster from '@/app/admin/gigs/_components/AdminGigPreviewPoster';
 import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPreviewTitleRow';
 import {
-  buildAdminGigSharePath,
   buildGigFormEditPath,
+  buildGigFormPublicIdPath,
   GIG_FORM_ADMIN_BASE_PATH,
 } from '@/app/gig-form/gig-form-paths';
 
@@ -40,7 +40,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
   const { gig, listFilter } = props;
 
   const editHref = buildGigFormEditPath(GIG_FORM_ADMIN_BASE_PATH, gig.publicId);
-  const shareHref = buildAdminGigSharePath(GIG_FORM_ADMIN_BASE_PATH, gig.publicId);
+  const shareHref = buildGigFormPublicIdPath(GIG_FORM_ADMIN_BASE_PATH, gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
 
   return (

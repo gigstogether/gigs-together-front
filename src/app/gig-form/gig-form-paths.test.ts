@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  buildAdminGigSharePath,
   buildGigFormEditPath,
+  buildGigFormPublicIdPath,
   GIG_FORM_ADMIN_BASE_PATH,
 } from '@/app/gig-form/gig-form-paths';
 
@@ -20,9 +20,9 @@ describe('buildGigFormEditPath', () => {
   });
 });
 
-describe('buildAdminGigSharePath', () => {
+describe('buildGigFormPublicIdPath', () => {
   it('should build share path for publicId', () => {
-    expect(buildAdminGigSharePath(GIG_FORM_ADMIN_BASE_PATH, 'my-gig-id')).toBe(
+    expect(buildGigFormPublicIdPath(GIG_FORM_ADMIN_BASE_PATH, 'my-gig-id')).toBe(
       '/admin/gigs/my-gig-id',
     );
   });
