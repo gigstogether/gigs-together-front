@@ -1,10 +1,13 @@
+'use client';
+
 import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
 import { GigStatus } from '@/app/admin/gigs/types';
 import Link from 'next/link';
-import { Check, ExternalLink, Link2, Pencil, Rss, X } from 'lucide-react';
+import { Check, ExternalLink, Link2, Loader2, Pencil, Rss, X } from 'lucide-react';
 import { buildAdminGigFeedHref } from '@/app/admin/gigs/admin-gig-format';
-import { Button } from '@/components/ui/button';
+import { useAdminGigModerationActions } from '@/app/admin/gigs/use-admin-gig-moderation-actions';
 import ActionButtonLink from '@/app/admin/gigs/_components/ActionButtonLink';
+import { Button } from '@/components/ui/button';
 
 interface AdminGigPreviewActionsProps {
   readonly gig: AdminGigDetail | AdminGigFormData;
@@ -14,6 +17,12 @@ interface AdminGigPreviewActionsProps {
 
 export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProps) {
   const { gig, listFilter, editHref } = props;
+
+  const { isApproving, isRejecting, approve, reject } = useAdminGigModerationActions({
+    publicId: gig.publicId,
+  });
+
+  const isModerating = isApproving || isRejecting;
 
   const editButton = (
     <Button
@@ -33,6 +42,54 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
           aria-hidden
         />
       </Link>
+    </Button>
+  );
+
+  const approveButton = (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="h-9 gap-1 px-2"
+      disabled={isModerating}
+      onClick={approve}
+    >
+      {isApproving ? (
+        <Loader2
+          className="h-4 w-4 animate-spin text-emerald-600"
+          aria-hidden
+        />
+      ) : (
+        <Check
+          className="h-4 w-4 text-emerald-600"
+          aria-hidden
+        />
+      )}
+      Approve
+    </Button>
+  );
+
+  const rejectButton = (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="h-9 gap-1 px-2"
+      disabled={isModerating}
+      onClick={reject}
+    >
+      {isRejecting ? (
+        <Loader2
+          className="h-4 w-4 animate-spin text-destructive"
+          aria-hidden
+        />
+      ) : (
+        <X
+          className="h-4 w-4 text-destructive"
+          aria-hidden
+        />
+      )}
+      Reject
     </Button>
   );
 
@@ -66,54 +123,14 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
   }
 
   if (listFilter === GigStatus.Rejected) {
-    return (
-      <div className="grid grid-cols-2 gap-2 border-t p-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 gap-1 px-2"
-          disabled
-          title="Approve is not available yet"
-        >
-          <Check
-            className="h-4 w-4 text-emerald-600"
-            aria-hidden
-          />
-          Approve
-        </Button>
-        {editButton}
-      </div>
-    );
+    return <div className="grid grid-cols-1 gap-2 border-t p-2">{editButton}</div>;
   }
 
   return (
     <div className="grid grid-cols-3 gap-2 border-t p-2">
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-9 gap-1 px-2"
-      >
-        <Check
-          className="h-4 w-4 text-emerald-600"
-          aria-hidden
-        />
-        Approve
-      </Button>
+      {approveButton}
       {editButton}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-9 gap-1 px-2"
-      >
-        <X
-          className="h-4 w-4 text-destructive"
-          aria-hidden
-        />
-        Reject
-      </Button>
+      {rejectButton}
     </div>
   );
 }

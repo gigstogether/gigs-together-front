@@ -5,6 +5,8 @@ import {
   fetchAdminLanguages,
   patchAdminLanguage,
   patchAdminLanguagesOrder,
+  postAdminGigApprove,
+  postAdminGigReject,
 } from '@/lib/admin-api';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 import { GigStatus } from '@/app/admin/gigs/types';
@@ -279,5 +281,37 @@ describe('patchAdminLanguagesOrder', () => {
         { iso: 'en', order: 1 },
       ],
     });
+  });
+});
+
+describe('postAdminGigApprove', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should post approve request when response succeeds', async () => {
+    mockApiRequest.mockResolvedValue(undefined);
+
+    await expect(postAdminGigApprove('radiohead-barcelona-2026-06-12')).resolves.toBeUndefined();
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig/radiohead-barcelona-2026-06-12/approve',
+      'POST',
+    );
+  });
+});
+
+describe('postAdminGigReject', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should post reject request when response succeeds', async () => {
+    mockApiRequest.mockResolvedValue(undefined);
+
+    await expect(postAdminGigReject('radiohead-barcelona-2026-06-12')).resolves.toBeUndefined();
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig/radiohead-barcelona-2026-06-12/reject',
+      'POST',
+    );
   });
 });

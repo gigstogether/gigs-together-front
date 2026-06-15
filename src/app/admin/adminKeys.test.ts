@@ -26,4 +26,8 @@ describe('adminKeys', () => {
       AdminGigsSortOrder.Desc,
     ]);
   });
+
+  it('should build gigs root key for partial invalidation', () => {
+    expect(adminKeys.gigsRoot()).toEqual(['admin', 'gigs']);
+  });
 });

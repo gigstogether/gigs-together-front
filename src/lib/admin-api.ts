@@ -215,3 +215,13 @@ export async function patchAdminLanguagesOrder(
   });
   return parseAdminLanguagesList(raw);
 }
+
+export function postAdminGigApprove(publicId: string): Promise<void> {
+  const encodedPublicId = encodeURIComponent(publicId.trim());
+  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/approve`, 'POST');
+}
+
+export function postAdminGigReject(publicId: string): Promise<void> {
+  const encodedPublicId = encodeURIComponent(publicId.trim());
+  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/reject`, 'POST');
+}

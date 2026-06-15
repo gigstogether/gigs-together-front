@@ -25,4 +25,8 @@ export const adminKeys = {
   gigByPublicId(publicId: string): readonly ['admin', 'gig', string] {
     return ['admin', 'gig', publicId.trim()];
   },
+
+  gigsRoot(): readonly ['admin', 'gigs'] {
+    return ['admin', 'gigs'];
+  },
 } as const;
