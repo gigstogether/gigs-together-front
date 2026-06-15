@@ -42,7 +42,7 @@ interface ParsedGigLookupData {
   posterUrl?: string;
 }
 
-export interface UpdateGigResponse {
+export interface GigUpsertResponse {
   publicId: string;
 }
 
@@ -204,8 +204,8 @@ export async function lookupGig(params: LookupGigParams): Promise<GigLookupData 
   return parseGigLookupApiResponse(raw);
 }
 
-export async function createGig(params: GigUpsertApiParams): Promise<void> {
-  await submitGig<void>({
+export function createGig(params: GigUpsertApiParams): Promise<GigUpsertResponse> {
+  return submitGig<GigUpsertResponse>({
     endpoint: 'v1/receiver/gig',
     method: 'POST',
     gig: params.gig,
@@ -213,8 +213,8 @@ export async function createGig(params: GigUpsertApiParams): Promise<void> {
   });
 }
 
-export async function updateGig(params: UpdateGigParams): Promise<UpdateGigResponse> {
-  return submitGig<UpdateGigResponse>({
+export function updateGig(params: UpdateGigParams): Promise<GigUpsertResponse> {
+  return submitGig<GigUpsertResponse>({
     endpoint: `v1/receiver/gig/${encodeURIComponent(params.publicId)}`,
     method: 'PATCH',
     gig: params.gig,

@@ -10,7 +10,12 @@ import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
-import { buildGigFormEditPath, GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
+import {
+  buildGigFormEditPath,
+  buildGigFormPublicIdPath,
+  GIG_FORM_ADMIN_BASE_PATH,
+} from '@/app/gig-form/gig-form-paths';
+import type { GigUpsertResponse } from '@/lib/gig-form-api';
 import { createGig } from '@/lib/gig-form-api';
 import { getTelegramStartParam } from '@/lib/telegram-webapp';
 import { defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
@@ -20,11 +25,11 @@ import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
 
 interface CreateGigFormClientProps {
   readonly countries: Country[];
-  readonly successReturnHref?: string;
 }
 
 export default function CreateGigFormClient(props: CreateGigFormClientProps) {
-  const { countries, successReturnHref } = props;
+  const { countries } = props;
+
   const router = useRouter();
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState<string>('');
@@ -41,13 +46,15 @@ export default function CreateGigFormClient(props: CreateGigFormClientProps) {
     posterFile,
     posterUrl,
     apiCall: ({ gig, poster }) => createGig({ gig, poster }),
-    onSuccess: () => {
+    onSuccess: (result: GigUpsertResponse) => {
       toast({
         title: 'Sent!',
         description: "Thanks — we'll review it and (hopefully) announce it soon.",
       });
-      if (successReturnHref) {
-        router.push(successReturnHref);
+      const returnHref =
+        result.publicId && buildGigFormPublicIdPath(GIG_FORM_ADMIN_BASE_PATH, result.publicId);
+      if (returnHref) {
+        router.push(returnHref);
       } else {
         router.back();
       }

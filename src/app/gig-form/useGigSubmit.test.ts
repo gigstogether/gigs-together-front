@@ -3,8 +3,7 @@
 import { act, renderHook } from '@testing-library/react';
 
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
-import type { GigUpsertApiParams } from '@/lib/gig-form-api';
-
+import type { GigUpsertApiParams, GigUpsertResponse } from '@/lib/gig-form-api';
 import { feedKeys } from '@/app/feed/_components/feed-client/feedKeys';
 import { gigFormKeys } from '@/app/gig-form/gigFormKeys';
 import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
@@ -53,8 +52,8 @@ describe('useGigSubmit', () => {
     const queryClient = createTestQueryClient();
     const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
     const apiCall = vi
-      .fn<(params: GigUpsertApiParams) => Promise<void>>()
-      .mockResolvedValueOnce(undefined);
+      .fn<(params: GigUpsertApiParams) => Promise<GigUpsertResponse>>()
+      .mockResolvedValueOnce({ publicId: 'arctic-monkeys-2026-07-01' });
     const onSuccess = vi.fn();
 
     const { result } = renderHook(
@@ -92,12 +91,12 @@ describe('useGigSubmit', () => {
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: feedKeys.all() });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: gigFormKeys.all() });
-    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledWith({ publicId: 'arctic-monkeys-2026-07-01' });
   });
 
   it('should show validation toast and skip submit when poster URL is invalid', async () => {
     const queryClient = createTestQueryClient();
-    const apiCall = vi.fn<(params: GigUpsertApiParams) => Promise<void>>();
+    const apiCall = vi.fn<(params: GigUpsertApiParams) => Promise<GigUpsertResponse>>();
     const onSuccess = vi.fn();
 
     const { result } = renderHook(
@@ -129,7 +128,7 @@ describe('useGigSubmit', () => {
   it('should show submit error toast when API request fails', async () => {
     const queryClient = createTestQueryClient();
     const apiCall = vi
-      .fn<(params: GigUpsertApiParams) => Promise<void>>()
+      .fn<(params: GigUpsertApiParams) => Promise<GigUpsertResponse>>()
       .mockRejectedValueOnce(new Error('Request failed'));
     const onSuccess = vi.fn();
 

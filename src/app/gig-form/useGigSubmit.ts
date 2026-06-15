@@ -4,14 +4,14 @@ import { feedKeys } from '@/app/feed/_components/feed-client/feedKeys';
 import { gigFormKeys } from '@/app/gig-form/gigFormKeys';
 import { toastTelegramInitDataExpired } from '@/lib/telegram-init-data-expired';
 
-import type { GigUpsertApiParams, GigUpsertPayload } from '@/lib/gig-form-api';
+import type { GigUpsertApiParams, GigUpsertPayload, GigUpsertResponse } from '@/lib/gig-form-api';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 
 interface UseGigSubmitParams {
   readonly posterFile: File | null;
   readonly posterUrl: string;
-  readonly apiCall: (params: GigUpsertApiParams) => Promise<unknown>;
-  readonly onSuccess: () => void;
+  readonly apiCall: (params: GigUpsertApiParams) => Promise<GigUpsertResponse>;
+  readonly onSuccess: (result: GigUpsertResponse) => void;
 }
 
 interface UseGigSubmitResult {
@@ -54,8 +54,8 @@ export function useGigSubmit(params: UseGigSubmitParams): UseGigSubmitResult {
   const { posterFile, posterUrl, apiCall, onSuccess } = params;
 
   const queryClient = useQueryClient();
-  const submitGigMutation = useMutation<unknown, unknown, SubmitGigInput>({
-    mutationFn: (input: SubmitGigInput): Promise<unknown> => {
+  const submitGigMutation = useMutation<GigUpsertResponse, unknown, SubmitGigInput>({
+    mutationFn: (input: SubmitGigInput): Promise<GigUpsertResponse> => {
       const gig = buildGigPayload(input.values);
       const posterMode = input.posterFile ? 'upload' : 'url';
 
@@ -64,7 +64,7 @@ export function useGigSubmit(params: UseGigSubmitParams): UseGigSubmitResult {
         poster: { mode: posterMode, file: input.posterFile, url: input.posterUrl },
       });
     },
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       // TODO: Invalidate only query keys that a gig edit actually affects (e.g. feed events for the
       // current country/city, calendar-available-dates for that pair, edit-by-public-id for this gig)
       // instead of feedKeys.all(). Broad prefixes mark every feed query stale (all locations, anchor
@@ -74,7 +74,7 @@ export function useGigSubmit(params: UseGigSubmitParams): UseGigSubmitResult {
         queryClient.invalidateQueries({ queryKey: feedKeys.all() }),
         queryClient.invalidateQueries({ queryKey: gigFormKeys.all() }),
       ]);
-      onSuccess();
+      onSuccess(result);
     },
   });
 

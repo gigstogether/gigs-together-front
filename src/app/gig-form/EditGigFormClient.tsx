@@ -10,21 +10,22 @@ import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
+import type { GigUpsertResponse} from '@/lib/gig-form-api';
 import { updateGig } from '@/lib/gig-form-api';
 import { defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import { useEditGigFormData } from '@/app/gig-form/useEditGigFormData';
 import { useGigLookup } from '@/app/gig-form/useGigLookup';
 import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
+import { buildGigFormPublicIdPath, GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
 
 interface EditGigFormClientProps {
   readonly countries: Country[];
   readonly gigPublicId: string;
-  readonly successReturnHref?: string;
 }
 
 export default function EditGigFormClient(props: EditGigFormClientProps) {
-  const { countries, gigPublicId, successReturnHref } = props;
+  const { countries, gigPublicId } = props;
   const router = useRouter();
 
   const [posterFile, setPosterFile] = useState<File | null>(null);
@@ -42,13 +43,15 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
     posterFile,
     posterUrl,
     apiCall: ({ gig, poster }) => updateGig({ publicId: gigPublicId, gig, poster }),
-    onSuccess: () => {
+    onSuccess: (result: GigUpsertResponse) => {
       toast({
         title: 'Updated!',
         description: 'Gig was updated.',
       });
-      if (successReturnHref) {
-        router.push(successReturnHref);
+      const returnHref =
+        result.publicId && buildGigFormPublicIdPath(GIG_FORM_ADMIN_BASE_PATH, result.publicId);
+      if (returnHref) {
+        router.push(returnHref);
       } else {
         router.back();
       }

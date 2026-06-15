@@ -8,12 +8,10 @@ interface GigFormClientProps {
   countries: Country[];
   mode?: 'create' | 'edit';
   gigPublicId?: string;
-  /** Navigate here after a successful create/edit instead of `router.back()`. */
-  successReturnHref?: string;
 }
 
 export default function GigFormClient(props: GigFormClientProps) {
-  const { countries, mode = 'create', gigPublicId, successReturnHref } = props;
+  const { countries, mode = 'create', gigPublicId } = props;
 
   if (mode === 'edit') {
     if (!gigPublicId) {
@@ -23,15 +21,9 @@ export default function GigFormClient(props: GigFormClientProps) {
       <EditGigFormClient
         countries={countries}
         gigPublicId={gigPublicId}
-        successReturnHref={successReturnHref}
       />
     );
   }
 
-  return (
-    <CreateGigFormClient
-      countries={countries}
-      successReturnHref={successReturnHref}
-    />
-  );
+  return <CreateGigFormClient countries={countries} />;
 }

@@ -1,6 +1,6 @@
 export const GIG_FORM_ADMIN_BASE_PATH = '/admin/gigs';
 
-function buildGigFormPublicIdPath(basePath: string, publicId: string): string {
+export function buildGigFormPublicIdPath(basePath: string, publicId: string): string {
   const trimmedBase = basePath.replace(/\/$/, '');
   const trimmedId = publicId.trim();
   if (!trimmedId) {
