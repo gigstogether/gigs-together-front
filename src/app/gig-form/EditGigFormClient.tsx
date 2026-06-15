@@ -10,14 +10,14 @@ import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
-import type { GigUpsertResponse} from '@/lib/gig-form-api';
+import type { GigUpsertResponse } from '@/lib/gig-form-api';
 import { updateGig } from '@/lib/gig-form-api';
 import { defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import { useEditGigFormData } from '@/app/gig-form/useEditGigFormData';
 import { useGigLookup } from '@/app/gig-form/useGigLookup';
 import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
-import { buildGigFormPublicIdPath, GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
+import { buildGigFormPublicIdPath, ADMIN_GIGS_BASE_PATH } from '@/app/gig-form/gig-form-paths';
 
 interface EditGigFormClientProps {
   readonly countries: Country[];
@@ -49,7 +49,7 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
         description: 'Gig was updated.',
       });
       const returnHref =
-        result.publicId && buildGigFormPublicIdPath(GIG_FORM_ADMIN_BASE_PATH, result.publicId);
+        result.publicId && buildGigFormPublicIdPath(ADMIN_GIGS_BASE_PATH, result.publicId);
       if (returnHref) {
         router.push(returnHref);
       } else {

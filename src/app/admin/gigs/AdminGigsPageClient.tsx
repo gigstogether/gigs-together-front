@@ -18,7 +18,7 @@ import type { AdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
 import { AdminGigsSortOrder, getDefaultAdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
 import { getGigStatusEmptyMessage } from '@/app/admin/gigs/types';
 import type { GigStatus } from '@/app/admin/gigs/types';
-import { GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
+import { ADMIN_GIGS_BASE_PATH } from '@/app/gig-form/gig-form-paths';
 import { fetchAdminGigs } from '@/lib/admin-api';
 
 export default function AdminGigsPageClient() {
@@ -96,7 +96,7 @@ export default function AdminGigsPageClient() {
           <AdminGigsFilterControls
             filter={filter}
             onFilterChange={handleFilterChange}
-            newGigHref={`${GIG_FORM_ADMIN_BASE_PATH}/new`}
+            newGigHref={`${ADMIN_GIGS_BASE_PATH}/new`}
           />
 
           <AdminGigsSortControls

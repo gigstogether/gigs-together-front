@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { GIG_FORM_ADMIN_BASE_PATH } from '@/app/gig-form/gig-form-paths';
+import { ADMIN_GIGS_BASE_PATH } from '@/app/gig-form/gig-form-paths';
 
 interface AdminGigDetailBackLinkProps {
   readonly returnHref?: string | null;
@@ -8,7 +8,7 @@ interface AdminGigDetailBackLinkProps {
 }
 
 export default function AdminGigDetailBackLink(props: AdminGigDetailBackLinkProps) {
-  const { returnHref, fallbackHref = GIG_FORM_ADMIN_BASE_PATH } = props;
+  const { returnHref, fallbackHref = ADMIN_GIGS_BASE_PATH } = props;
 
   const href = returnHref?.trim() || fallbackHref;
 

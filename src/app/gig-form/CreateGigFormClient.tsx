@@ -13,7 +13,7 @@ import PosterField from '@/app/gig-form/_components/PosterField';
 import {
   buildGigFormEditPath,
   buildGigFormPublicIdPath,
-  GIG_FORM_ADMIN_BASE_PATH,
+  ADMIN_GIGS_BASE_PATH,
 } from '@/app/gig-form/gig-form-paths';
 import type { GigUpsertResponse } from '@/lib/gig-form-api';
 import { createGig } from '@/lib/gig-form-api';
@@ -52,7 +52,7 @@ export default function CreateGigFormClient(props: CreateGigFormClientProps) {
         description: "Thanks — we'll review it and (hopefully) announce it soon.",
       });
       const returnHref =
-        result.publicId && buildGigFormPublicIdPath(GIG_FORM_ADMIN_BASE_PATH, result.publicId);
+        result.publicId && buildGigFormPublicIdPath(ADMIN_GIGS_BASE_PATH, result.publicId);
       if (returnHref) {
         router.push(returnHref);
       } else {
@@ -68,7 +68,7 @@ export default function CreateGigFormClient(props: CreateGigFormClientProps) {
     if (!token) return;
     // Keep token format aligned with backend publicId rules.
     if (!/^[a-z0-9-]{1,64}$/i.test(token)) return;
-    router.replace(buildGigFormEditPath(GIG_FORM_ADMIN_BASE_PATH, token));
+    router.replace(buildGigFormEditPath(ADMIN_GIGS_BASE_PATH, token));
   }, [router]);
 
   function clearPoster() {

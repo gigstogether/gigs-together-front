@@ -1,3 +1,5 @@
+import { ADMIN_GIGS_BASE_PATH } from '@/app/gig-form/gig-form-paths';
+
 export interface AdminNavItem {
   readonly href: string;
   readonly label: string;
@@ -13,7 +15,7 @@ export const adminNavItems: readonly AdminNavItem[] = [
     isEnabled: true,
   },
   {
-    href: '/admin/gigs',
+    href: ADMIN_GIGS_BASE_PATH,
     label: 'Gigs',
     description: 'Create, edit, and moderate gigs',
     isEnabled: true,

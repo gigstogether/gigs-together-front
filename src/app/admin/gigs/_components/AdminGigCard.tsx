@@ -13,7 +13,7 @@ import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPrevie
 import {
   buildGigFormEditPath,
   buildGigFormPublicIdPath,
-  GIG_FORM_ADMIN_BASE_PATH,
+  ADMIN_GIGS_BASE_PATH,
 } from '@/app/gig-form/gig-form-paths';
 
 interface MetaRowProps {
@@ -39,8 +39,8 @@ interface AdminGigCardProps {
 export default function AdminGigCard(props: AdminGigCardProps) {
   const { gig, listFilter } = props;
 
-  const editHref = buildGigFormEditPath(GIG_FORM_ADMIN_BASE_PATH, gig.publicId);
-  const shareHref = buildGigFormPublicIdPath(GIG_FORM_ADMIN_BASE_PATH, gig.publicId);
+  const editHref = buildGigFormEditPath(ADMIN_GIGS_BASE_PATH, gig.publicId);
+  const shareHref = buildGigFormPublicIdPath(ADMIN_GIGS_BASE_PATH, gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
 
   return (
