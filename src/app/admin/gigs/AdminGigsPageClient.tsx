@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { adminKeys } from '@/app/admin/adminKeys';
 import AdminGigPreviewCard from '@/app/admin/gigs/_components/AdminGigPreviewCard';
@@ -44,6 +44,11 @@ export default function AdminGigsPageClient() {
     },
     [pathname, router],
   );
+
+  useEffect(() => {
+    replaceQuery({ filter, selectedGigPublicId, sortBy, sortOrder });
+    // Sync query once from URL-derived state on mount; changes go through handlers below.
+  }, [replaceQuery]);
 
   const effectiveSelectedPublicId =
     selectedGigPublicId && gigs.some((g) => g.publicId === selectedGigPublicId)
