@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import AdminLanguagesPageClient from '@/app/admin/AdminLanguagesPageClient';
+import AdminLanguagesPageClient from '@/app/admin/languages/AdminLanguagesPageClient';
 
 const mockFetchAdminLanguages = vi.fn();
 const mockPatchAdminLanguage = vi.fn();

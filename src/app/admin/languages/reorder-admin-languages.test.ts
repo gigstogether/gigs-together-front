@@ -1,7 +1,7 @@
 import {
   getAdminLanguageOrderUpdates,
   reorderAdminLanguagesByIso,
-} from '@/app/admin/reorder-admin-languages';
+} from '@/app/admin/languages/reorder-admin-languages';
 import type { AdminLanguage } from '@/lib/admin-api';
 
 const languages: AdminLanguage[] = [

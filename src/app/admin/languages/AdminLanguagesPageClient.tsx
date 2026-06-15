@@ -5,11 +5,11 @@ import { useState } from 'react';
 
 import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 import AdminLanguageItem from '@/app/admin/languages/_components/AdminLanguageItem';
-import { adminKeys } from '@/app/admin/adminKeys';
 import {
   getAdminLanguageOrderUpdates,
   reorderAdminLanguagesByIso,
-} from '@/app/admin/reorder-admin-languages';
+} from '@/app/admin/languages/reorder-admin-languages';
+import { adminKeys } from '@/app/admin/adminKeys';
 import { Card, CardContent } from '@/components/ui/card';
 import { fetchAdminLanguages, patchAdminLanguage, patchAdminLanguagesOrder } from '@/lib/admin-api';
 import type { AdminLanguage, PatchAdminLanguageBody } from '@/lib/admin-api';
