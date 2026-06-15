@@ -102,7 +102,7 @@ describe('fetchAdminGigs', () => {
 
     await expect(
       fetchAdminGigs({
-        status: GigStatus.Published,
+        status: GigStatus.Approved,
         sortBy: AdminGigsSortBy.CreatedAt,
         sortOrder: AdminGigsSortOrder.Desc,
       }),
@@ -121,13 +121,13 @@ describe('fetchAdminGigs', () => {
     mockApiRequest.mockResolvedValue({ gigs: [] });
 
     await fetchAdminGigs({
-      status: GigStatus.Published,
+      status: GigStatus.Approved,
       sortBy: AdminGigsSortBy.EventDate,
       sortOrder: AdminGigsSortOrder.Desc,
     });
 
     expect(mockApiRequest).toHaveBeenCalledWith(
-      'v1/admin/gigs?status=published&sortBy=eventDate&sortOrder=desc',
+      'v1/admin/gigs?status=approved&sortBy=eventDate&sortOrder=desc',
       'GET',
     );
   });
@@ -135,7 +135,7 @@ describe('fetchAdminGigs', () => {
   it('should throw when admin gigs response is invalid', async () => {
     mockApiRequest.mockResolvedValue({ gigs: [{}] });
 
-    await expect(fetchAdminGigs({ status: GigStatus.Published })).rejects.toThrow(
+    await expect(fetchAdminGigs({ status: GigStatus.Approved })).rejects.toThrow(
       'Invalid admin gigs response',
     );
   });

@@ -35,10 +35,10 @@ export default function AdminPageClient() {
             </CardHeader>
           </Card>
         </Link>
-        <Link href="admin/gigs?status=published">
+        <Link href="admin/gigs?status=approved">
           <Card className="border shadow-sm">
             <CardHeader className="min-h-24 justify-center">
-              <CardDescription>Published gigs</CardDescription>
+              <CardDescription>Approved gigs</CardDescription>
               <CardTitle className="text-3xl tabular-nums">
                 {dashboardQuery.isLoading ? '—' : (summary?.publishedGigsCount ?? 0)}
               </CardTitle>

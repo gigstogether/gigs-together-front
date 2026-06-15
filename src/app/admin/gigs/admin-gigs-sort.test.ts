@@ -16,7 +16,7 @@ describe('getDefaultAdminGigsSortBy', () => {
   it('should return createdAt for all statuses', () => {
     expect(getDefaultAdminGigsSortBy(GigStatus.Pending)).toBe(AdminGigsSortBy.CreatedAt);
     expect(getDefaultAdminGigsSortBy(GigStatus.Rejected)).toBe(AdminGigsSortBy.CreatedAt);
-    expect(getDefaultAdminGigsSortBy(GigStatus.Published)).toBe(AdminGigsSortBy.CreatedAt);
+    expect(getDefaultAdminGigsSortBy(GigStatus.Approved)).toBe(AdminGigsSortBy.CreatedAt);
   });
 });
 
@@ -25,10 +25,8 @@ describe('parseAdminGigsSortByFromQuery', () => {
     expect(parseAdminGigsSortByFromQuery(null, GigStatus.Pending)).toBe(AdminGigsSortBy.CreatedAt);
   });
 
-  it('should return createdAt for published when query value is missing', () => {
-    expect(parseAdminGigsSortByFromQuery(null, GigStatus.Published)).toBe(
-      AdminGigsSortBy.CreatedAt,
-    );
+  it('should return createdAt for approved when query value is missing', () => {
+    expect(parseAdminGigsSortByFromQuery(null, GigStatus.Approved)).toBe(AdminGigsSortBy.CreatedAt);
   });
 
   it('should return default sort when query value is invalid', () => {
@@ -50,7 +48,7 @@ describe('parseAdminGigsSortByFromQuery', () => {
   });
 
   it('should return eventDate when query value is eventDate', () => {
-    expect(parseAdminGigsSortByFromQuery('eventDate', GigStatus.Published)).toBe(
+    expect(parseAdminGigsSortByFromQuery('eventDate', GigStatus.Approved)).toBe(
       AdminGigsSortBy.EventDate,
     );
   });

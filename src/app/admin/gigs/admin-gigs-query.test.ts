@@ -17,8 +17,12 @@ describe('parseGigStatusFromQuery', () => {
     expect(parseGigStatusFromQuery('unknown')).toBe(GigStatus.Pending);
   });
 
-  it('should return published when query value is published', () => {
-    expect(parseGigStatusFromQuery('published')).toBe(GigStatus.Published);
+  it('should return approved when query value is approved', () => {
+    expect(parseGigStatusFromQuery('approved')).toBe(GigStatus.Approved);
+  });
+
+  it('should return pending when query value is published', () => {
+    expect(parseGigStatusFromQuery('published')).toBe(GigStatus.Pending);
   });
 });
 
@@ -43,10 +47,10 @@ describe('readAdminGigsQueryState', () => {
     });
   });
 
-  it('should default to createdAt sort for published when sortBy is missing', () => {
-    const params = new URLSearchParams('status=published');
+  it('should default to createdAt sort for approved when sortBy is missing', () => {
+    const params = new URLSearchParams('status=approved');
     expect(readAdminGigsQueryState(params)).toEqual({
-      filter: GigStatus.Published,
+      filter: GigStatus.Approved,
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
@@ -54,9 +58,9 @@ describe('readAdminGigsQueryState', () => {
   });
 
   it('should read explicit sort params from search params', () => {
-    const params = new URLSearchParams('status=published&sortBy=eventDate&sortOrder=asc');
+    const params = new URLSearchParams('status=approved&sortBy=eventDate&sortOrder=asc');
     expect(readAdminGigsQueryState(params)).toEqual({
-      filter: GigStatus.Published,
+      filter: GigStatus.Approved,
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.EventDate,
       sortOrder: AdminGigsSortOrder.Asc,
@@ -64,9 +68,9 @@ describe('readAdminGigsQueryState', () => {
   });
 
   it('should fall back to createdAt when sortBy is postDate', () => {
-    const params = new URLSearchParams('status=published&sortBy=postDate&sortOrder=asc');
+    const params = new URLSearchParams('status=approved&sortBy=postDate&sortOrder=asc');
     expect(readAdminGigsQueryState(params)).toEqual({
-      filter: GigStatus.Published,
+      filter: GigStatus.Approved,
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Asc,

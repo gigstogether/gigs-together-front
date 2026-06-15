@@ -36,7 +36,7 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
     </Button>
   );
 
-  if (listFilter === GigStatus.Published) {
+  if (listFilter === GigStatus.Approved) {
     return (
       <div className="grid grid-cols-3 gap-2 border-t p-2">
         <ActionButtonLink

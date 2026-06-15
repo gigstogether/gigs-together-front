@@ -3,13 +3,13 @@ export type AdminGigStatusAPI = 'Pending' | 'Published' | 'Rejected' | 'Approved
 
 export enum GigStatus {
   Pending = 'pending',
-  Published = 'published',
+  Approved = 'approved',
   Rejected = 'rejected',
 }
 
 export const GIG_FILTER_STATUSES: readonly GigStatus[] = [
   GigStatus.Pending,
-  GigStatus.Published,
+  GigStatus.Approved,
   GigStatus.Rejected,
 ];
 
@@ -19,13 +19,13 @@ export function isGigStatus(value: string): value is GigStatus {
 
 export const GIG_STATUS_LABELS: Record<GigStatus, string> = {
   [GigStatus.Pending]: 'Pending',
-  [GigStatus.Published]: 'Published',
+  [GigStatus.Approved]: 'Approved',
   [GigStatus.Rejected]: 'Rejected',
 };
 
 export const GIG_STATUS_EMPTY_MESSAGES: Record<GigStatus, string> = {
   [GigStatus.Pending]: 'No pending gigs.',
-  [GigStatus.Published]: 'No published gigs.',
+  [GigStatus.Approved]: 'No approved gigs.',
   [GigStatus.Rejected]: 'No rejected gigs.',
 };
 
@@ -38,8 +38,8 @@ export function getGigStatusLabel(status: GigStatus): string {
 }
 
 export function getGigStatusFromAdminGigStatusAPI(status: AdminGigStatusAPI): GigStatus {
-  if (status === 'Published') {
-    return GigStatus.Published;
+  if (status === 'Approved' || status === 'Published') {
+    return GigStatus.Approved;
   }
   if (status === 'Rejected') {
     return GigStatus.Rejected;
