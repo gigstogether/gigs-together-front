@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { AlertTriangle, Calendar, Ticket } from 'lucide-react';
+import { LocationIcon } from '@/components/ui/location-icon';
 import {
   formatAdminGigEventDate,
   formatAdminGigSuggestedBy,
@@ -62,6 +63,16 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             }
           >
             {dateLabel}
+          </MetaRow>
+          <MetaRow
+            icon={
+              <LocationIcon
+                className="h-4 w-4"
+                aria-hidden
+              />
+            }
+          >
+            {gig.venue}
           </MetaRow>
           {gig.ticketsUrl ? (
             <MetaRow
