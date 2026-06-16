@@ -50,6 +50,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
           <AdminGigPreviewTitleRow
             title={gig.title}
             sharePath={shareHref}
+            status={gig.status}
           />
 
           <MetaRow

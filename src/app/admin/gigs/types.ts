@@ -1,5 +1,11 @@
 /** Mirrors API `Status` enum — keep in sync when wiring v1/admin/gigs. */
-export type AdminGigStatusAPI = 'Pending' | 'Published' | 'Rejected' | 'Approved' | 'New';
+export enum GigStatusAPI {
+  New = 'New',
+  Pending = 'Pending',
+  Approved = 'Approved',
+  Rejected = 'Rejected',
+  Published = 'Published',
+}
 
 export enum GigStatus {
   Pending = 'pending',
@@ -37,14 +43,21 @@ export function getGigStatusLabel(status: GigStatus): string {
   return GIG_STATUS_LABELS[status];
 }
 
-export function getGigStatusFromAdminGigStatusAPI(status: AdminGigStatusAPI): GigStatus {
-  if (status === 'Approved' || status === 'Published') {
-    return GigStatus.Approved;
+export function getGigStatusFromAdminGigStatusAPI(status: GigStatusAPI): GigStatus {
+  switch (status) {
+    case GigStatusAPI.Approved:
+    case GigStatusAPI.Published: {
+      return GigStatus.Approved;
+    }
+    case GigStatusAPI.Rejected: {
+      return GigStatus.Rejected;
+    }
+    case GigStatusAPI.Pending:
+    case GigStatusAPI.New:
+    default: {
+      return GigStatus.Pending;
+    }
   }
-  if (status === 'Rejected') {
-    return GigStatus.Rejected;
-  }
-  return GigStatus.Pending;
 }
 
 export interface AdminGigSuggestedBy {
@@ -57,7 +70,7 @@ export interface AdminGigSuggestedBy {
 export interface AdminGigQueueItem {
   readonly publicId: string;
   readonly title: string;
-  readonly status: AdminGigStatusAPI;
+  readonly status: GigStatusAPI;
   readonly date: string;
   readonly endDate?: string;
   readonly city: string;
@@ -86,7 +99,7 @@ export interface AdminGigFormData {
   readonly venue: string;
   readonly ticketsUrl: string;
   readonly posterUrl?: string;
-  readonly status: AdminGigStatusAPI;
+  readonly status: GigStatusAPI;
   readonly suggestedBy: AdminGigSuggestedBy;
   readonly publishPostUrl?: string;
   readonly publishPostDate?: number;

@@ -2,8 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
-import type { AdminGigDetail } from '@/app/admin/gigs/types';
-import { GigStatus } from '@/app/admin/gigs/types';
+import type { AdminGigDetail} from '@/app/admin/gigs/types';
+import { GigStatus, GigStatusAPI } from '@/app/admin/gigs/types';
 
 const mockPostAdminGigApprove = vi.fn();
 const mockPostAdminGigReject = vi.fn();
@@ -24,7 +24,7 @@ const gig: AdminGigDetail = {
   city: 'barcelona',
   country: 'ES',
   venue: 'Palau Sant Jordi',
-  status: 'Pending',
+  status: GigStatusAPI.Pending,
   suggestedBy: { userId: '42' },
 };
 
@@ -77,13 +77,11 @@ describe('AdminGigPreviewActions', () => {
     expect(mockPostAdminGigApprove).not.toHaveBeenCalled();
   });
 
-  it('should call approve endpoint when Approve is clicked on rejected gig', async () => {
+  it('should show only edit action when gig is rejected', () => {
     renderActions(GigStatus.Rejected);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
-
-    await waitFor(() => {
-      expect(mockPostAdminGigApprove).toHaveBeenCalledWith('radiohead-barcelona');
-    });
+    expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
   });
 });

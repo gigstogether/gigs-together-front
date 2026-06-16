@@ -46,7 +46,7 @@ describe('AdminGigDetailPageClient', () => {
     renderWithQueryClient('radiohead-barcelona');
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Radiohead' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Radiohead/ })).toBeInTheDocument();
     });
   });
 
