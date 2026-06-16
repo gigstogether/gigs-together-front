@@ -15,7 +15,7 @@ export default function AdminGigDetailBackLink(props: AdminGigDetailBackLinkProp
   return (
     <Link
       href={href}
-      className="mb-6 inline-block shrink-0 text-sm text-muted-foreground hover:text-foreground sm:mb-0"
+      className="mb-4 inline-block shrink-0 text-sm text-muted-foreground hover:text-foreground"
     >
       ← Gigs
     </Link>

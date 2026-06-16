@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { AlertTriangle, Calendar, Link2 } from 'lucide-react';
+import { AlertTriangle, Calendar, Ticket } from 'lucide-react';
 import {
   formatAdminGigEventDate,
   formatAdminGigSuggestedBy,
@@ -65,7 +65,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
           {gig.ticketsUrl ? (
             <MetaRow
               icon={
-                <Link2
+                <Ticket
                   className="h-4 w-4"
                   aria-hidden
                 />

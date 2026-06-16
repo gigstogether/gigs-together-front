@@ -29,10 +29,12 @@ export function buildAdminGigFeedHref(
 
 export function formatAdminGigSuggestedBy(suggestedBy: AdminGigSuggestedBy): string {
   const { name, username, userId } = suggestedBy;
+
   const PREFIX = 'Suggested by';
-  const formattedUsername = username ? `@${username}` : '';
+  const formattedUsername = username ? `@${username}` : undefined;
+
   if (username && name) {
     return `${PREFIX} ${formattedUsername} (${name})`;
   }
-  return `${PREFIX} ${formattedUsername ?? name ?? userId}`;
+  return `${PREFIX} ${formattedUsername ?? name ?? userId ?? 'Unknown'}`;
 }
