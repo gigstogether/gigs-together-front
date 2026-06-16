@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -10,14 +10,9 @@ import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/gig-form/_components/GigFormFields';
 import PosterField from '@/app/gig-form/_components/PosterField';
-import {
-  buildGigFormEditPath,
-  buildGigFormPublicIdPath,
-  ADMIN_GIGS_BASE_PATH,
-} from '@/app/gig-form/gig-form-paths';
+import { buildGigFormPublicIdPath, ADMIN_GIGS_BASE_PATH } from '@/app/gig-form/gig-form-paths';
 import type { GigUpsertResponse } from '@/lib/gig-form-api';
 import { createGig } from '@/lib/gig-form-api';
-import { getTelegramStartParam } from '@/lib/telegram-webapp';
 import { defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
 import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
 import { useGigLookup } from '@/app/gig-form/useGigLookup';
@@ -60,16 +55,6 @@ export default function CreateGigFormClient(props: CreateGigFormClientProps) {
       }
     },
   });
-
-  useEffect(() => {
-    // Telegram deep-link: https://t.me/<bot>/<app>?startapp=<token>
-    // Telegram passes it as `start_param` in initDataUnsafe and also duplicates as `tgWebAppStartParam` in query.
-    const token = getTelegramStartParam().trim();
-    if (!token) return;
-    // Keep token format aligned with backend publicId rules.
-    if (!/^[a-z0-9-]{1,64}$/i.test(token)) return;
-    router.replace(buildGigFormEditPath(ADMIN_GIGS_BASE_PATH, token));
-  }, [router]);
 
   function clearPoster() {
     setPosterFile(null);
