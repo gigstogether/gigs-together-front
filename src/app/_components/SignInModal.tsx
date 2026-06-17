@@ -1,7 +1,13 @@
 'use client';
 
 import SignInContent from '@/app/_components/SignInContent';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 export interface SignInModalProps {
@@ -24,7 +30,13 @@ export default function SignInModal(props: SignInModalProps) {
       open={isOpen}
       onOpenChange={onOpenChange}
     >
-      <DialogContent className="max-w-sm">
+      <DialogTrigger className="hidden">Open sign-in dialog</DialogTrigger>
+      <DialogContent
+        className="max-w-sm"
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+        }}
+      >
         <DialogTitle className="sr-only">Sign in</DialogTitle>
         <DialogDescription className="sr-only">
           Continue with the button below to sign in to your account.
