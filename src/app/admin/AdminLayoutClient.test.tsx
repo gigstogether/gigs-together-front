@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import AdminLayoutClient from '@/app/admin/AdminLayoutClient';
 import type { UseModeratorTelegramSessionResult } from '@/hooks/use-moderator-telegram-session';
+import { requestTelegramSignIn } from '@/lib/telegram-auth';
 import { buildModeratorTelegramSessionMock } from '@/test-utils/moderator-telegram-session-mock';
 
 const mockUseModeratorTelegramSession = vi.fn<() => UseModeratorTelegramSessionResult>();
@@ -11,8 +12,8 @@ vi.mock('@/hooks/use-moderator-telegram-session', () => ({
   useModeratorTelegramSession: () => mockUseModeratorTelegramSession(),
 }));
 
-vi.mock('@/app/_components/SignInContent', () => ({
-  default: () => <div data-testid="sign-in-stub" />,
+vi.mock('@/lib/telegram-auth', () => ({
+  requestTelegramSignIn: vi.fn(),
 }));
 
 vi.mock('@/app/admin/_components/AdminShell', () => ({
@@ -24,6 +25,7 @@ vi.mock('@/app/admin/_components/AdminShell', () => ({
 describe('AdminLayoutClient', () => {
   beforeEach(() => {
     mockUseModeratorTelegramSession.mockReset();
+    vi.mocked(requestTelegramSignIn).mockReset();
   });
 
   it('should show a loading state when auth bootstrap is not finished', () => {
@@ -58,8 +60,27 @@ describe('AdminLayoutClient', () => {
     );
 
     expect(screen.getByText('Restricted area')).toBeInTheDocument();
-    expect(screen.getByTestId('sign-in-stub')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
     expect(screen.queryByTestId('admin-shell')).not.toBeInTheDocument();
+  });
+
+  it('should open shared sign-in modal when guest clicks Sign in', () => {
+    mockUseModeratorTelegramSession.mockReturnValue(
+      buildModeratorTelegramSessionMock({
+        authState: null,
+        isLoadingAuthState: false,
+      }),
+    );
+
+    render(
+      <AdminLayoutClient>
+        <div data-testid="admin-child" />
+      </AdminLayoutClient>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    expect(requestTelegramSignIn).toHaveBeenCalledTimes(1);
   });
 
   it('should deny access to signed-in non-admin users', () => {

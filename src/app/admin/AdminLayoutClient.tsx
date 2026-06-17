@@ -2,24 +2,20 @@
 
 import type { ReactNode } from 'react';
 
-import SignInContent from '@/app/_components/SignInContent';
 import AdminDeniedGate from '@/app/admin/AdminDeniedGate';
 import AdminShell from '@/app/admin/_components/AdminShell';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useModeratorTelegramSession } from '@/hooks/use-moderator-telegram-session';
+import { requestTelegramSignIn } from '@/lib/telegram-auth';
 
 interface AdminLayoutClientProps {
   children: ReactNode;
 }
 
 export default function AdminLayoutClient({ children }: AdminLayoutClientProps) {
-  const {
-    authState,
-    isLoadingAuthState,
-    telegramBotUsername,
-    isTelegramSignInAvailable,
-    handleAuthenticated,
-  } = useModeratorTelegramSession();
+  const { authState, isLoadingAuthState, isTelegramSignInAvailable } =
+    useModeratorTelegramSession();
 
   if (isLoadingAuthState) {
     return (
@@ -36,15 +32,18 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
           <CardHeader>
             <CardTitle>Restricted area</CardTitle>
             <CardDescription>
-              This page is only for moderators. Sign in with Telegram if your account has access.
+              This page is only for moderators. Sign in if your account has access.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             {isTelegramSignInAvailable ? (
-              <SignInContent
-                telegramBotUsername={telegramBotUsername}
-                onAuthenticated={handleAuthenticated}
-              />
+              <Button
+                type="button"
+                className="w-full"
+                onClick={() => requestTelegramSignIn()}
+              >
+                Sign in
+              </Button>
             ) : (
               <p className="text-sm text-muted-foreground">
                 Sign-in is not configured on this deployment, so this page cannot be used.

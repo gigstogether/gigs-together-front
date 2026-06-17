@@ -15,7 +15,7 @@ export default function SignInModal(props: SignInModalProps) {
   const { isOpen, onOpenChange, telegramBotUsername, onAuthenticated } = props;
 
   const botUsername = telegramBotUsername?.trim();
-  if (!botUsername) {
+  if (!isOpen || !botUsername) {
     return null;
   }
 
@@ -29,15 +29,13 @@ export default function SignInModal(props: SignInModalProps) {
         <DialogDescription className="sr-only">
           Continue with the button below to sign in to your account.
         </DialogDescription>
-        {isOpen ? (
-          <SignInContent
-            telegramBotUsername={botUsername}
-            onAuthenticated={async (user) => {
-              await onAuthenticated(user);
-              onOpenChange(false);
-            }}
-          />
-        ) : null}
+        <SignInContent
+          telegramBotUsername={botUsername}
+          onAuthenticated={async (user) => {
+            await onAuthenticated(user);
+            onOpenChange(false);
+          }}
+        />
       </DialogContent>
     </Dialog>
   );
