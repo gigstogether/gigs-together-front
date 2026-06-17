@@ -13,59 +13,11 @@ export enum GigStatus {
   Rejected = 'rejected',
 }
 
-export const GIG_FILTER_STATUSES: readonly GigStatus[] = [
-  GigStatus.Pending,
-  GigStatus.Approved,
-  GigStatus.Rejected,
-];
-
-export function isGigStatus(value: string): value is GigStatus {
-  return (GIG_FILTER_STATUSES as readonly string[]).includes(value);
-}
-
-export const GIG_STATUS_LABELS: Record<GigStatus, string> = {
-  [GigStatus.Pending]: 'Pending',
-  [GigStatus.Approved]: 'Approved',
-  [GigStatus.Rejected]: 'Rejected',
-};
-
-export const GIG_STATUS_EMPTY_MESSAGES: Record<GigStatus, string> = {
-  [GigStatus.Pending]: 'No pending gigs.',
-  [GigStatus.Approved]: 'No approved gigs.',
-  [GigStatus.Rejected]: 'No rejected gigs.',
-};
-
-export function getGigStatusEmptyMessage(status: GigStatus): string {
-  return GIG_STATUS_EMPTY_MESSAGES[status];
-}
-
-export function getGigStatusLabel(status: GigStatus): string {
-  return GIG_STATUS_LABELS[status];
-}
-
-export function getGigStatusFromAdminGigStatusAPI(status: GigStatusAPI): GigStatus {
-  switch (status) {
-    case GigStatusAPI.Approved:
-    case GigStatusAPI.Published: {
-      return GigStatus.Approved;
-    }
-    case GigStatusAPI.Rejected: {
-      return GigStatus.Rejected;
-    }
-    case GigStatusAPI.Pending:
-    case GigStatusAPI.New:
-    default: {
-      return GigStatus.Pending;
-    }
-  }
-}
-
 export interface AdminGigSuggestedBy {
   readonly userId: string;
   readonly name?: string;
   readonly username?: string;
 }
-
 /** Compact row for the moderation queue list. */
 export interface AdminGigQueueItem {
   readonly publicId: string;

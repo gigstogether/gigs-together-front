@@ -1,5 +1,3 @@
-import type { GigStatus } from '@/app/admin/gigs/types';
-
 export enum AdminGigsSortBy {
   CreatedAt = 'createdAt',
   EventDate = 'eventDate',
@@ -21,10 +19,7 @@ export const ADMIN_GIGS_SORT_ORDER_VALUES = [
 ] as const;
 
 export const ADMIN_GIGS_DEFAULT_SORT_ORDER = AdminGigsSortOrder.Desc;
-
-export function getDefaultAdminGigsSortBy(_filter: GigStatus): AdminGigsSortBy {
-  return AdminGigsSortBy.CreatedAt;
-}
+export const ADMIN_GIGS_DEFAULT_SORT_BY = AdminGigsSortBy.CreatedAt;
 
 export const ADMIN_GIGS_SORT_BY_LABELS: Record<AdminGigsSortBy, string> = {
   [AdminGigsSortBy.CreatedAt]: 'Created',
@@ -39,14 +34,11 @@ export function isAdminGigsSortOrder(value: string): value is AdminGigsSortOrder
   return ADMIN_GIGS_SORT_ORDER_VALUES.some((candidate) => candidate === value);
 }
 
-export function parseAdminGigsSortByFromQuery(
-  value: string | null,
-  filter: GigStatus,
-): AdminGigsSortBy {
+export function parseAdminGigsSortByFromQuery(value: string | null): AdminGigsSortBy {
   if (value && isAdminGigsSortBy(value)) {
     return value;
   }
-  return getDefaultAdminGigsSortBy(filter);
+  return ADMIN_GIGS_DEFAULT_SORT_BY;
 }
 
 export function parseAdminGigsSortOrderFromQuery(value: string | null): AdminGigsSortOrder {

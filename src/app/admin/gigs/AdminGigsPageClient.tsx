@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { adminKeys } from '@/app/admin/adminKeys';
 import AdminGigPreviewCard from '@/app/admin/gigs/_components/AdminGigPreviewCard';
@@ -11,15 +11,16 @@ import AdminGigQueueList from '@/app/admin/gigs/_components/AdminGigQueueList';
 import AdminGigsSortControls from '@/app/admin/gigs/_components/AdminGigsSortControls';
 import {
   buildAdminGigsSearchParams,
-  readAdminGigsQueryState,
+  getAdminGigsQueryStateOrDefaults,
 } from '@/app/admin/gigs/admin-gigs-query';
 import type { AdminGigsQueryState } from '@/app/admin/gigs/admin-gigs-query';
 import type { AdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
-import { AdminGigsSortOrder, getDefaultAdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
-import { getGigStatusEmptyMessage } from '@/app/admin/gigs/types';
+import { ADMIN_GIGS_DEFAULT_SORT_BY } from '@/app/admin/gigs/admin-gigs-sort';
+import { AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 import type { GigStatus } from '@/app/admin/gigs/types';
 import { ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
 import { fetchAdminGigs } from '@/lib/admin-api';
+import { getGigStatusEmptyMessage } from '@/app/admin/gigs/admin-gigs-filter';
 
 export default function AdminGigsPageClient() {
   const router = useRouter();
@@ -27,7 +28,14 @@ export default function AdminGigsPageClient() {
   const searchParams = useSearchParams();
 
   const { filter, selectedGigPublicId, sortBy, sortOrder }: AdminGigsQueryState =
-    readAdminGigsQueryState(searchParams);
+    getAdminGigsQueryStateOrDefaults(searchParams);
+
+  const [initialQueryState] = useState<AdminGigsQueryState>(() => ({
+    filter,
+    selectedGigPublicId,
+    sortBy,
+    sortOrder,
+  }));
 
   const gigsQuery = useQuery({
     queryKey: adminKeys.gigs(filter, sortBy, sortOrder),
@@ -46,9 +54,9 @@ export default function AdminGigsPageClient() {
   );
 
   useEffect(() => {
-    replaceQuery({ filter, selectedGigPublicId, sortBy, sortOrder });
+    replaceQuery(initialQueryState);
     // Sync query once from URL-derived state on mount; changes go through handlers below.
-  }, [replaceQuery]);
+  }, [initialQueryState, replaceQuery]);
 
   const effectiveSelectedPublicId =
     selectedGigPublicId && gigs.some((g) => g.publicId === selectedGigPublicId)
@@ -61,7 +69,7 @@ export default function AdminGigsPageClient() {
     replaceQuery({
       filter: next,
       selectedGigPublicId: null,
-      sortBy: getDefaultAdminGigsSortBy(next),
+      sortBy: ADMIN_GIGS_DEFAULT_SORT_BY,
       sortOrder,
     });
   };

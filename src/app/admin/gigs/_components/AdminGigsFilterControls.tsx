@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 
-import { GIG_FILTER_STATUSES, getGigStatusLabel } from '@/app/admin/gigs/types';
+import { GIG_FILTER_STATUSES, getGigStatusLabel } from '@/app/admin/gigs/admin-gigs-filter';
 import type { GigStatus } from '@/app/admin/gigs/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

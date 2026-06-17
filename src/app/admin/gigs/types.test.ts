@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { getGigStatusFromAdminGigStatusAPI, GigStatus } from '@/app/admin/gigs/types';
+import { GigStatus, GigStatusAPI } from '@/app/admin/gigs/types';
+import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/admin-gigs-filter';
 
 describe('getGigStatusFromAdminGigStatusAPI', () => {
   it('should map API statuses to list filter statuses', () => {
-    expect(getGigStatusFromAdminGigStatusAPI('Approved')).toBe(GigStatus.Approved);
-    expect(getGigStatusFromAdminGigStatusAPI('Published')).toBe(GigStatus.Approved);
-    expect(getGigStatusFromAdminGigStatusAPI('Rejected')).toBe(GigStatus.Rejected);
-    expect(getGigStatusFromAdminGigStatusAPI('Pending')).toBe(GigStatus.Pending);
-    expect(getGigStatusFromAdminGigStatusAPI('New')).toBe(GigStatus.Pending);
+    expect(getGigStatusFromAdminGigStatusAPI(GigStatusAPI.Approved)).toBe(GigStatus.Approved);
+    expect(getGigStatusFromAdminGigStatusAPI(GigStatusAPI.Published)).toBe(GigStatus.Approved);
+    expect(getGigStatusFromAdminGigStatusAPI(GigStatusAPI.Rejected)).toBe(GigStatus.Rejected);
+    expect(getGigStatusFromAdminGigStatusAPI(GigStatusAPI.Pending)).toBe(GigStatus.Pending);
+    expect(getGigStatusFromAdminGigStatusAPI(GigStatusAPI.New)).toBe(GigStatus.Pending);
   });
 });

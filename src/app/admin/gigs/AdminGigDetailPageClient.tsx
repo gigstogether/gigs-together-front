@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { adminKeys } from '@/app/admin/adminKeys';
 import AdminGigCard from '@/app/admin/gigs/_components/AdminGigCard';
-import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/types';
+import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/admin-gigs-filter';
 import { fetchAdminGigByPublicId } from '@/lib/admin-api';
 
 interface AdminGigDetailPageClientProps {

@@ -1,7 +1,7 @@
 'use client';
 
 import CopyableTextRow from '@/components/CopyableTextRow';
-import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/types';
+import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/admin-gigs-filter';
 import type { GigStatusAPI } from '@/app/admin/gigs/types';
 import { cn } from '@/lib/utils';
 

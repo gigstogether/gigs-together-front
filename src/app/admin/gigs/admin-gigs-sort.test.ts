@@ -6,51 +6,21 @@ import {
   AdminGigsSortOrder,
   getAdminGigsSortOrderLabel,
   getAdminGigsSortOrderShortLabel,
-  getDefaultAdminGigsSortBy,
   parseAdminGigsSortByFromQuery,
   parseAdminGigsSortOrderFromQuery,
 } from '@/app/admin/gigs/admin-gigs-sort';
-import { GigStatus } from '@/app/admin/gigs/types';
-
-describe('getDefaultAdminGigsSortBy', () => {
-  it('should return createdAt for all statuses', () => {
-    expect(getDefaultAdminGigsSortBy(GigStatus.Pending)).toBe(AdminGigsSortBy.CreatedAt);
-    expect(getDefaultAdminGigsSortBy(GigStatus.Rejected)).toBe(AdminGigsSortBy.CreatedAt);
-    expect(getDefaultAdminGigsSortBy(GigStatus.Approved)).toBe(AdminGigsSortBy.CreatedAt);
-  });
-});
 
 describe('parseAdminGigsSortByFromQuery', () => {
-  it('should return createdAt for pending when query value is missing', () => {
-    expect(parseAdminGigsSortByFromQuery(null, GigStatus.Pending)).toBe(AdminGigsSortBy.CreatedAt);
-  });
-
-  it('should return createdAt for approved when query value is missing', () => {
-    expect(parseAdminGigsSortByFromQuery(null, GigStatus.Approved)).toBe(AdminGigsSortBy.CreatedAt);
-  });
-
-  it('should return default sort when query value is invalid', () => {
-    expect(parseAdminGigsSortByFromQuery('unknown', GigStatus.Rejected)).toBe(
-      AdminGigsSortBy.CreatedAt,
-    );
-  });
-
-  it('should return default sort when query value is postDate', () => {
-    expect(parseAdminGigsSortByFromQuery('postDate', GigStatus.Pending)).toBe(
-      AdminGigsSortBy.CreatedAt,
-    );
+  it('should return createdAt when query value is missing', () => {
+    expect(parseAdminGigsSortByFromQuery(null)).toBe(AdminGigsSortBy.CreatedAt);
   });
 
   it('should return createdAt when query value is createdAt', () => {
-    expect(parseAdminGigsSortByFromQuery('createdAt', GigStatus.Pending)).toBe(
-      AdminGigsSortBy.CreatedAt,
-    );
+    expect(parseAdminGigsSortByFromQuery('createdAt')).toBe(AdminGigsSortBy.CreatedAt);
   });
 
   it('should return eventDate when query value is eventDate', () => {
-    expect(parseAdminGigsSortByFromQuery('eventDate', GigStatus.Approved)).toBe(
-      AdminGigsSortBy.EventDate,
-    );
+    expect(parseAdminGigsSortByFromQuery('eventDate')).toBe(AdminGigsSortBy.EventDate);
   });
 });
 
