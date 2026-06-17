@@ -9,7 +9,7 @@ import {
   postAdminGigReject,
 } from '@/lib/admin-api';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
-import { GigStatus } from '@/app/admin/gigs/types';
+import { GigStatus, GigStatusAPI } from '@/app/admin/gigs/types';
 
 const mockApiRequest = vi.fn();
 
@@ -67,7 +67,9 @@ describe('fetchAdminGigs', () => {
       ],
     });
 
-    await expect(fetchAdminGigs({ status: GigStatus.Pending })).resolves.toEqual({
+    const result = await fetchAdminGigs({ status: GigStatus.Pending });
+
+    expect(result).toEqual({
       gigs: [
         {
           publicId: 'my-gig',
@@ -81,6 +83,7 @@ describe('fetchAdminGigs', () => {
         },
       ],
     });
+    expect(result.gigs[0]?.status).toBe(GigStatusAPI.Pending);
     expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gigs?status=pending', 'GET');
   });
 
@@ -163,9 +166,9 @@ describe('fetchAdminGigByPublicId', () => {
       moderationPostDate: 1_748_697_600_000,
     });
 
-    await expect(
-      fetchAdminGigByPublicId({ publicId: 'radiohead-barcelona-2026-06-12' }),
-    ).resolves.toEqual({
+    const result = await fetchAdminGigByPublicId({ publicId: 'radiohead-barcelona-2026-06-12' });
+
+    expect(result).toEqual({
       publicId: 'radiohead-barcelona-2026-06-12',
       title: 'Radiohead',
       status: 'Pending',
@@ -178,6 +181,7 @@ describe('fetchAdminGigByPublicId', () => {
       publishPostUrl: 'https://t.me/channel/1',
       moderationPostDate: 1_748_697_600_000,
     });
+    expect(result.status).toBe(GigStatusAPI.Pending);
     expect(mockApiRequest).toHaveBeenCalledWith(
       'v1/admin/gig/radiohead-barcelona-2026-06-12',
       'GET',
