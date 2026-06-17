@@ -1,6 +1,6 @@
 export const ADMIN_GIGS_BASE_PATH = '/admin/gigs';
 
-export function buildGigFormPublicIdPath(basePath: string, publicId: string): string {
+export function buildAdminGigPublicIdPath(basePath: string, publicId: string): string {
   const trimmedBase = basePath.replace(/\/$/, '');
   const trimmedId = publicId.trim();
   if (!trimmedId) {
@@ -9,6 +9,6 @@ export function buildGigFormPublicIdPath(basePath: string, publicId: string): st
   return `${trimmedBase}/${encodeURIComponent(trimmedId)}`;
 }
 
-export function buildGigFormEditPath(basePath: string, publicId: string): string {
-  return `${buildGigFormPublicIdPath(basePath, publicId)}/edit`;
+export function buildAdminGigEditPath(basePath: string, publicId: string): string {
+  return `${buildAdminGigPublicIdPath(basePath, publicId)}/edit`;
 }

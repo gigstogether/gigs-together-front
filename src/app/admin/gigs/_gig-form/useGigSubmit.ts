@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { feedKeys } from '@/app/feed/_components/feed-client/feedKeys';
-import { gigFormKeys } from '@/app/gig-form/gigFormKeys';
+import { gigFormKeys } from '@/app/admin/gigs/_gig-form/gigFormKeys';
 import { toastTelegramInitDataExpired } from '@/lib/telegram-init-data-expired';
 
 import type { GigUpsertApiParams, GigUpsertPayload, GigUpsertResponse } from '@/lib/gig-form-api';
-import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
+import type { GigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 
 interface UseGigSubmitParams {
   readonly posterFile: File | null;

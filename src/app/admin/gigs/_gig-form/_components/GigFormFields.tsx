@@ -6,8 +6,8 @@ import type { UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel, FieldSeparator } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
-import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
+import type { GigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
+import { defaultGigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 import type { Country } from '@/lib/countries.server';
 import { useT } from '@/lib/i18n';
 

@@ -7,10 +7,10 @@ import { fetchAdminGigByPublicId } from '@/lib/admin-api';
 import { normalizeGigApiDate } from '@/lib/gig-form-api';
 import type { AdminGigFormData } from '@/app/admin/gigs/types';
 import { getTelegramInitDataExpiredToastContent } from '@/lib/telegram-init-data-expired';
-import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
-import { gigFormKeys } from '@/app/gig-form/gigFormKeys';
+import { defaultGigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
+import { gigFormKeys } from '@/app/admin/gigs/_gig-form/gigFormKeys';
 
-import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
+import type { GigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 
 const EDIT_GIG_LOAD_TIMEOUT_MS = 15_000; // 15 seconds
 

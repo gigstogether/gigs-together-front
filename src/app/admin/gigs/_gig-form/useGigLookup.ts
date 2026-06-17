@@ -4,7 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { lookupGig } from '@/lib/gig-form-api';
 import type { GigLookupData } from '@/lib/gig-form-api';
 import { toastTelegramInitDataExpired } from '@/lib/telegram-init-data-expired';
-import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
+import type { GigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 
 export interface GigLookupInput {
   readonly title: string;

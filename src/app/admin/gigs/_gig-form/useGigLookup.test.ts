@@ -3,13 +3,13 @@
 import { act, renderHook } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
-import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
+import type { GigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 import type { GigLookupData } from '@/lib/gig-form-api';
 import type { UseFormReturn } from 'react-hook-form';
 
 import { lookupGig } from '@/lib/gig-form-api';
-import { useGigLookup } from '@/app/gig-form/useGigLookup';
-import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
+import { useGigLookup } from '@/app/admin/gigs/_gig-form/useGigLookup';
+import { defaultGigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
 
 const { toastMock } = vi.hoisted(() => ({

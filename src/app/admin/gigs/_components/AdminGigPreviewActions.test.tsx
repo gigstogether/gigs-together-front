@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
-import type { AdminGigDetail} from '@/app/admin/gigs/types';
+import type { AdminGigDetail } from '@/app/admin/gigs/types';
 import { GigStatus, GigStatusAPI } from '@/app/admin/gigs/types';
 
 const mockPostAdminGigApprove = vi.fn();

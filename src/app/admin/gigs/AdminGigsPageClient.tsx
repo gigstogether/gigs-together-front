@@ -18,7 +18,7 @@ import type { AdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
 import { AdminGigsSortOrder, getDefaultAdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
 import { getGigStatusEmptyMessage } from '@/app/admin/gigs/types';
 import type { GigStatus } from '@/app/admin/gigs/types';
-import { ADMIN_GIGS_BASE_PATH } from '@/app/gig-form/gig-form-paths';
+import { ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
 import { fetchAdminGigs } from '@/lib/admin-api';
 
 export default function AdminGigsPageClient() {

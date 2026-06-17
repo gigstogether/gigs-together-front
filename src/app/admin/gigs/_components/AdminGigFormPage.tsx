@@ -1,4 +1,4 @@
-import GigFormClient from '@/app/gig-form/GigFormClient';
+import GigFormClient from '@/app/admin/gigs/_gig-form/GigFormClient';
 import AdminGigDetailBackLink from '@/app/admin/gigs/_components/AdminGigDetailBackLink';
 import { I18nProvider } from '@/lib/i18n';
 import { getCountries } from '@/lib/countries.server';
@@ -20,7 +20,7 @@ export default async function AdminGigFormPage(props: AdminGigFormPageProps) {
     >
       <div className="mx-auto w-full max-w-md">
         <AdminGigDetailBackLink />
-        {/* TODO: create gig-form context to prevent prop drilling? */}
+        {/* TODO: create admin gig form context to prevent prop drilling? */}
         <GigFormClient
           countries={countries}
           mode={mode}

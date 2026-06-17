@@ -1,4 +1,4 @@
-import { ADMIN_GIGS_BASE_PATH } from '@/app/gig-form/gig-form-paths';
+import { ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
 
 export interface AdminNavItem {
   readonly href: string;

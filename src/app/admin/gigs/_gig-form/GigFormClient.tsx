@@ -1,7 +1,7 @@
 'use client';
 
-import CreateGigFormClient from '@/app/gig-form/CreateGigFormClient';
-import EditGigFormClient from '@/app/gig-form/EditGigFormClient';
+import CreateGigFormClient from '@/app/admin/gigs/_gig-form/CreateGigFormClient';
+import EditGigFormClient from '@/app/admin/gigs/_gig-form/EditGigFormClient';
 import type { Country } from '@/lib/countries.server';
 
 interface GigFormClientProps {

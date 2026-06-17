@@ -1,4 +1,4 @@
-import { dateToYMD } from '@/app/gig-form/gig-form.shared';
+import { dateToYMD } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 import { toLocalYMD } from '@/lib/utils';
 
 describe('dateToYMD', () => {

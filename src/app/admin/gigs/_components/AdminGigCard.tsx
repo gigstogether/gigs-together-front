@@ -12,10 +12,10 @@ import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreview
 import AdminGigPreviewPoster from '@/app/admin/gigs/_components/AdminGigPreviewPoster';
 import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPreviewTitleRow';
 import {
-  buildGigFormEditPath,
-  buildGigFormPublicIdPath,
+  buildAdminGigEditPath,
+  buildAdminGigPublicIdPath,
   ADMIN_GIGS_BASE_PATH,
-} from '@/app/gig-form/gig-form-paths';
+} from '@/app/admin/gigs/admin-gig-paths';
 
 interface MetaRowProps {
   readonly icon: ReactNode;
@@ -40,8 +40,8 @@ interface AdminGigCardProps {
 export default function AdminGigCard(props: AdminGigCardProps) {
   const { gig, listFilter } = props;
 
-  const editHref = buildGigFormEditPath(ADMIN_GIGS_BASE_PATH, gig.publicId);
-  const shareHref = buildGigFormPublicIdPath(ADMIN_GIGS_BASE_PATH, gig.publicId);
+  const editHref = buildAdminGigEditPath(ADMIN_GIGS_BASE_PATH, gig.publicId);
+  const shareHref = buildAdminGigPublicIdPath(ADMIN_GIGS_BASE_PATH, gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
 
   return (

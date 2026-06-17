@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { ADMIN_GIGS_BASE_PATH } from '@/app/gig-form/gig-form-paths';
+import { ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
 
 interface AdminGigDetailBackLinkProps {
   readonly returnHref?: string | null;

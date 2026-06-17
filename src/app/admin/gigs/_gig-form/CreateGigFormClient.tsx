@@ -8,15 +8,15 @@ import { toast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
-import GigFormFields from '@/app/gig-form/_components/GigFormFields';
-import PosterField from '@/app/gig-form/_components/PosterField';
-import { buildGigFormPublicIdPath, ADMIN_GIGS_BASE_PATH } from '@/app/gig-form/gig-form-paths';
+import GigFormFields from '@/app/admin/gigs/_gig-form/_components/GigFormFields';
+import PosterField from '@/app/admin/gigs/_gig-form/_components/PosterField';
+import { buildAdminGigPublicIdPath, ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
 import type { GigUpsertResponse } from '@/lib/gig-form-api';
 import { createGig } from '@/lib/gig-form-api';
-import { defaultGigFormValues, gigFormSchema } from '@/app/gig-form/gig-form.shared';
-import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
-import { useGigLookup } from '@/app/gig-form/useGigLookup';
-import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
+import { defaultGigFormValues, gigFormSchema } from '@/app/admin/gigs/_gig-form/gig-form.shared';
+import type { GigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
+import { useGigLookup } from '@/app/admin/gigs/_gig-form/useGigLookup';
+import { useGigSubmit } from '@/app/admin/gigs/_gig-form/useGigSubmit';
 
 interface CreateGigFormClientProps {
   readonly countries: Country[];
@@ -47,7 +47,7 @@ export default function CreateGigFormClient(props: CreateGigFormClientProps) {
         description: "Thanks — we'll review it and (hopefully) announce it soon.",
       });
       const returnHref =
-        result.publicId && buildGigFormPublicIdPath(ADMIN_GIGS_BASE_PATH, result.publicId);
+        result.publicId && buildAdminGigPublicIdPath(ADMIN_GIGS_BASE_PATH, result.publicId);
       if (returnHref) {
         router.push(returnHref);
       } else {

@@ -2,12 +2,12 @@
 
 import { act, renderHook } from '@testing-library/react';
 
-import type { GigFormValues } from '@/app/gig-form/gig-form.shared';
+import type { GigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 import type { GigUpsertApiParams, GigUpsertResponse } from '@/lib/gig-form-api';
 import { feedKeys } from '@/app/feed/_components/feed-client/feedKeys';
-import { gigFormKeys } from '@/app/gig-form/gigFormKeys';
-import { defaultGigFormValues } from '@/app/gig-form/gig-form.shared';
-import { useGigSubmit } from '@/app/gig-form/useGigSubmit';
+import { gigFormKeys } from '@/app/admin/gigs/_gig-form/gigFormKeys';
+import { defaultGigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
+import { useGigSubmit } from '@/app/admin/gigs/_gig-form/useGigSubmit';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
 
 const { toastMock } = vi.hoisted(() => ({
