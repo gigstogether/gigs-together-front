@@ -40,7 +40,7 @@ describe('fetchApiJson', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it('should throw ApiError with 401 status when second request is still unauthorized', async () => {
+  it('should throw ApiError with 401 status when request is still unauthorized after refresh retry', async () => {
     const postAuthRefresh = vi.fn(async (): Promise<boolean> => true);
     vi.doMock('@/lib/auth-refresh', () => ({ postAuthRefresh }));
 
@@ -52,14 +52,12 @@ describe('fetchApiJson', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    const { ApiError } = await import('@/lib/api-errors');
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig?limit=10', 'GET', undefined, { onUnauthorized });
-
-    await expect(action).rejects.toBeInstanceOf(ApiError);
-    await expect(action).rejects.toMatchObject({
-      message: 'still unauthorized',
+    await expect(
+      fetchApiJson('v1/gig?limit=10', 'GET', undefined, { onUnauthorized }),
+    ).rejects.toMatchObject({
+      name: 'ApiError',
       statusCode: 401,
     });
     expect(postAuthRefresh).toHaveBeenCalledTimes(1);

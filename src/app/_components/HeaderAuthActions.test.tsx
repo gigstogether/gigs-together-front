@@ -1,10 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
 
-const mockClientEnv = {
-  isAuthEnabled: true,
-  telegramBotUsername: 'bot',
-};
+const { mockClientEnv } = vi.hoisted(() => ({
+  mockClientEnv: {
+    isAuthEnabled: true,
+    telegramBotUsername: 'bot',
+  },
+}));
 
 vi.mock('@/hooks/use-telegram-mini-app-env', () => ({
   useTelegramMiniAppEnv: () => 'browser' as const,

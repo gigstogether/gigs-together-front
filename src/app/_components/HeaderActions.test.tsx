@@ -1,13 +1,15 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import HeaderActions from '@/app/_components/HeaderActions';
 
-const mockClientEnv = {
-  telegramUrl: undefined,
-  githubUrl: undefined,
-  suggestGigLink: undefined,
-  telegramBotUsername: 'bot',
-  isAuthEnabled: true,
-};
+const { mockClientEnv } = vi.hoisted(() => ({
+  mockClientEnv: {
+    telegramUrl: undefined,
+    githubUrl: undefined,
+    suggestGigLink: undefined,
+    telegramBotUsername: 'bot',
+    isAuthEnabled: true,
+  },
+}));
 
 vi.mock('@/app/_components/HeaderSignInModal', () => ({
   default: () => null,

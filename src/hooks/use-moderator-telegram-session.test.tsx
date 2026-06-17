@@ -2,12 +2,13 @@ import { renderHook, act } from '@testing-library/react';
 import { useModeratorTelegramSession } from '@/hooks/use-moderator-telegram-session';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
-const mockClientEnv = {
-  isAuthEnabled: true,
-  telegramBotUsername: 'gigs_test_bot',
-};
-
-const toastMock = vi.fn();
+const { mockClientEnv, toastMock } = vi.hoisted(() => ({
+  mockClientEnv: {
+    isAuthEnabled: true,
+    telegramBotUsername: 'gigs_test_bot',
+  },
+  toastMock: vi.fn(),
+}));
 
 const authMocks = vi.hoisted(() => ({
   signIn: vi.fn(),
