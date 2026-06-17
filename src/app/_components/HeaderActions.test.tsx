@@ -1,18 +1,20 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import HeaderActions from '@/app/_components/HeaderActions';
 
+const mockClientEnv = {
+  telegramUrl: undefined,
+  githubUrl: undefined,
+  suggestGigLink: undefined,
+  telegramBotUsername: 'bot',
+  isAuthEnabled: true,
+};
+
 vi.mock('@/app/_components/HeaderSignInModal', () => ({
   default: () => null,
 }));
 
 vi.mock('@/env/client-env', () => ({
-  clientEnv: {
-    telegramUrl: undefined,
-    githubUrl: undefined,
-    suggestGigLink: undefined,
-    telegramBotUsername: 'bot',
-    isAuthEnabled: true,
-  },
+  clientEnv: mockClientEnv,
 }));
 
 vi.mock('@/hooks/use-telegram-auth', () => ({
@@ -27,6 +29,7 @@ import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 
 describe('HeaderActions', () => {
   beforeEach(() => {
+    mockClientEnv.isAuthEnabled = true;
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: null,
       isLoadingAuthState: false,
@@ -81,6 +84,24 @@ describe('HeaderActions', () => {
 
     await waitFor(() => {
       expect(screen.queryByRole('link', { name: 'Admin panel' })).toBeNull();
+      expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument();
+    });
+  });
+
+  it('should hide Sign in in menu when auth is disabled for guests', async () => {
+    mockClientEnv.isAuthEnabled = false;
+
+    render(
+      <HeaderActions
+        country="es"
+        city="barcelona"
+      />,
+    );
+
+    clickFirstMenuTrigger();
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Sign in' })).toBeNull();
       expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument();
     });
   });

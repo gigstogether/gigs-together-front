@@ -2,6 +2,11 @@ import { renderHook, act } from '@testing-library/react';
 import { useModeratorTelegramSession } from '@/hooks/use-moderator-telegram-session';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
+const mockClientEnv = {
+  isAuthEnabled: true,
+  telegramBotUsername: 'gigs_test_bot',
+};
+
 const toastMock = vi.fn();
 
 const authMocks = vi.hoisted(() => ({
@@ -29,10 +34,7 @@ vi.mock('@/hooks/use-telegram-mini-app-env', () => ({
 }));
 
 vi.mock('@/env/client-env', () => ({
-  clientEnv: {
-    isAuthEnabled: true,
-    telegramBotUsername: 'gigs_test_bot',
-  },
+  clientEnv: mockClientEnv,
 }));
 
 const widgetUserFixture: TelegramWidgetUser = {
@@ -44,6 +46,8 @@ const widgetUserFixture: TelegramWidgetUser = {
 
 describe('useModeratorTelegramSession', () => {
   beforeEach(() => {
+    mockClientEnv.isAuthEnabled = true;
+    mockClientEnv.telegramBotUsername = 'gigs_test_bot';
     toastMock.mockReset();
     authMocks.signIn.mockReset();
     authMocks.signOut.mockReset();
@@ -99,5 +103,14 @@ describe('useModeratorTelegramSession', () => {
       description: 'Invalid session',
       variant: 'destructive',
     });
+  });
+
+  it('should keep Telegram sign-in available when auth is disabled', () => {
+    mockClientEnv.isAuthEnabled = false;
+
+    const { result } = renderHook(() => useModeratorTelegramSession());
+
+    expect(result.current.telegramBotUsername).toBe('gigs_test_bot');
+    expect(result.current.isTelegramSignInAvailable).toBe(true);
   });
 });

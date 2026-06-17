@@ -37,27 +37,30 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const telegramUrl = clientEnv.telegramUrl;
   const githubUrl = clientEnv.githubUrl;
   const suggestGigUrl = showSuggestGig ? clientEnv.suggestGigLink : undefined;
+  const isAuthEnabled = clientEnv.isAuthEnabled;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const [locationTipOpen, setLocationTipOpen] = useState(false);
   const { authState } = useTelegramAuth();
   const miniAppEnv = useTelegramMiniAppEnv();
-  const telegramBotUsername = clientEnv.isAuthEnabled ? clientEnv.telegramBotUsername : undefined;
-  const isSignInShownInMenu = Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
+  const telegramBotUsername = clientEnv.telegramBotUsername;
+  const isSignInShownInMenu =
+    isAuthEnabled && Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
+  const hasVisibleAuthState = Boolean(authState);
 
   /** Profile / Sign in row is visible — same predicates as HeaderAuthActions non-empty UX. */
-  const hasAuthPrimaryRow = Boolean(authState) || isSignInShownInMenu;
+  const hasAuthPrimaryRow = hasVisibleAuthState || isSignInShownInMenu;
 
   /** Desktop burger menu rows between auth header and About (excluding the About divider slot). */
-  const hasMiddleRowsBeforeAboutDesktop = Boolean(authState?.isAdmin);
+  const hasMiddleRowsBeforeAboutDesktop = authState?.isAdmin === true;
 
   const showDividerAfterAuthDesktop = hasAuthPrimaryRow && hasMiddleRowsBeforeAboutDesktop;
   /** Mobile menu always stacks Location links above About — separate account header from navigator. */
   const showDividerAfterAuthMobile = hasAuthPrimaryRow;
 
   /** Desktop: About separated when the menu shows account UX (not Telegram-only About row). */
-  const showDividerBeforeAboutDesktop = Boolean(authState) || isSignInShownInMenu;
+  const showDividerBeforeAboutDesktop = hasVisibleAuthState || isSignInShownInMenu;
 
   return (
     <div className="min-w-0 justify-self-end flex items-center space-x-4">

@@ -20,7 +20,8 @@ export interface UseModeratorTelegramSessionResult {
 
 export function useModeratorTelegramSession(): UseModeratorTelegramSessionResult {
   const { authState, isLoadingAuthState, signIn, signOut } = useTelegramAuth();
-  const telegramBotUsername = clientEnv.isAuthEnabled ? clientEnv.telegramBotUsername : undefined;
+
+  const telegramBotUsername = clientEnv.telegramBotUsername;
   const isTelegramSignInAvailable = Boolean(telegramBotUsername?.trim());
   const miniAppEnv = useTelegramMiniAppEnv();
 
