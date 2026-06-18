@@ -31,7 +31,9 @@ const IMAGE_HEIGHT = 630;
 const PREVIEW_IMAGE = `/logo-${IMAGE_WIDTH}x${IMAGE_HEIGHT}.png`;
 const FAVICON_URL = serverEnv.isDevelopment
   ? '/logo-dev-circle-96x96.png'
-  : '/logo-circle-96x96.png';
+  : serverEnv.isStaging
+    ? '/logo-stg-circle-96x96.png'
+    : '/logo-circle-96x96.png';
 
 const metadataBase = SITE_BASE_URL ? new URL(SITE_BASE_URL) : undefined;
 const previewImage = new URL(PREVIEW_IMAGE, metadataBase).toString();
