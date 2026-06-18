@@ -8,6 +8,7 @@ import {
   getTelegramInitData,
   getTelegramLaunchParamsSnapshot,
   getTelegramStartParam,
+  isTelegramMiniApp,
   resetTelegramLaunchParamsCaptureForTests,
 } from './telegram-webapp';
 
@@ -39,6 +40,20 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
     expect(window.location.hash).toBe('#khjkh');
     expect(getTelegramLaunchParamsSnapshot()).toBeUndefined();
   });
+
+  it('should keep returning true after telegram launch params were cleared from the url', () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
+    );
+
+    captureTelegramLaunchParamsFromUrl();
+
+    expect(isTelegramMiniApp()).toBe(true);
+    expect(window.location.hash).toBe('');
+    expect(isTelegramMiniApp()).toBe(true);
+  });
 });
 
 describe('clearTelegramLaunchParamsFromUrl', () => {
@@ -67,5 +82,18 @@ describe('clearTelegramLaunchParamsFromUrl', () => {
     expect(window.location.pathname).toBe('/admin/gigs/new');
     expect(window.location.search).toBe('');
     expect(getTelegramStartParam()).toBe('edit-token');
+  });
+});
+
+describe('isTelegramMiniApp', () => {
+  afterEach(() => {
+    resetTelegramLaunchParamsCaptureForTests();
+  });
+
+  it('should return true from localStorage marker after the url no longer has telegram params', () => {
+    localStorage.setItem('gt_tg_is_mini_app', '1');
+    window.history.replaceState(null, '', '/feed/es/barcelona');
+
+    expect(isTelegramMiniApp()).toBe(true);
   });
 });
