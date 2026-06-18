@@ -5,6 +5,7 @@ import {
   formatAdminGigEventDate,
   formatAdminGigListMeta,
 } from '@/app/admin/gigs/admin-gig-format';
+import { GigStatusAPI } from '@/app/admin/gigs/types';
 import type { AdminGigQueueItem } from '@/app/admin/gigs/types';
 
 describe('formatAdminGigEventDate', () => {
@@ -37,7 +38,7 @@ describe('formatAdminGigListMeta', () => {
     const gig: AdminGigQueueItem = {
       publicId: 'a',
       title: 'T',
-      status: 'Pending',
+      status: GigStatusAPI.Pending,
       date: '2026-06-12',
       city: 'barcelona',
       country: 'ES',
