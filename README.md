@@ -4,8 +4,8 @@ Frontend for the Gigs Together platform. This repository contains a Next.js app 
 
 - redirects the root route to the public gigs feed
 - renders the public feed for supported locations
-- provides a gig submission and edit flow
-- exposes a moderator-only `/admin` entry (Telegram sign-in, same access rules as the gig form)
+- exposes a public `/suggest` placeholder and a Telegram-aware `/suggest/launch` entry
+- exposes a moderator-only `/admin` area with gig moderation, create/edit flows, and language management
 - exposes revalidation endpoints for cached content
 
 At the moment, the default public feed points to `es/barcelona`.
@@ -47,7 +47,7 @@ You can also use `.env`, but `.env.local` is the safer default for machine-speci
 What they are used for:
 
 | Variable                                          | Required?                        | Purpose                                                                                                                                          |
-|---------------------------------------------------|----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `NEXT_PUBLIC_APP_API_BASE_URL`                    | Required                         | Base URL for backend API requests. Without it, direct API calls throw at runtime.                                                                |
 | `APP_BASE_URL`                                    | Optional\*                       | Public site base URL used for metadata, sitemap, and robots. \*Recommended; required at runtime for `/sitemap.xml` and `/robots.txt`.            |
 | `NEXT_PUBLIC_GITHUB_URL`                          | Optional                         | GitHub link rendered in the header.                                                                                                              |
@@ -85,7 +85,13 @@ Useful routes:
 - `/` -> redirects to the default feed route
 - `/feed` -> redirects to the default feed route
 - `/feed/es/barcelona` -> current supported public feed
-- `/admin` -> admin UI
+- `/suggest` -> public placeholder for the future suggestion flow
+- `/suggest/launch` -> Telegram-aware redirect into `/suggest` or the moderator gig flow
+- `/admin` -> moderator dashboard
+- `/admin/gigs` -> gig moderation queue and create/edit flows
+- `/admin/languages` -> locale activation and ordering
+- `/admin/translations` -> translations placeholder page
+- `/admin/admins` -> moderator access placeholder page
 - `/about` -> about page
 
 ## Production build and local production run
@@ -169,7 +175,8 @@ src/
 Key areas:
 
 - `src/app/feed` contains the public feed pages and feed client logic
-- `src/app/admin` contains the moderator-only admin shell
+- `src/app/suggest` contains the public suggest placeholder and Telegram launch routing
+- `src/app/admin` contains the moderator-only admin shell and moderation tools
 - `src/app/api/revalidate` contains manual cache revalidation endpoints
 - `src/lib/api.ts` contains the shared API request wrapper
 
@@ -190,12 +197,16 @@ There is no general CI workflow for linting, tests, or builds in this repository
 
 ## Testing status
 
-There are currently no dedicated test scripts in `package.json`.
+Available test scripts:
+
+- `npm run test` -> run the Vitest suite once
+- `npm run test:watch` -> run Vitest in watch mode
 
 Before opening a PR, at minimum run:
 
 ```bash
 npm run lint
+npm run test
 npm run build
 ```
 
