@@ -35,9 +35,20 @@ const parsedServerEnv = serverEnvSchema.parse({
   FEED_REVALIDATE_SECRET: process.env.FEED_REVALIDATE_SECRET,
 });
 
+function isStagingAppBaseUrl(appBaseUrl: string | undefined): boolean {
+  if (!appBaseUrl) {
+    return false;
+  }
+
+  const hostnameLabels = new URL(appBaseUrl).hostname.split('.');
+
+  return hostnameLabels.some((label) => label === 'stg' || label === 'staging');
+}
+
 export const serverEnv = {
   nodeEnv: parsedServerEnv.NODE_ENV,
   isDevelopment: parsedServerEnv.NODE_ENV === 'development',
+  isStaging: isStagingAppBaseUrl(parsedServerEnv.APP_BASE_URL),
   appBaseUrl: parsedServerEnv.APP_BASE_URL,
   brandName: parsedServerEnv.BRAND_NAME,
   sitePreviewTitle: parsedServerEnv.SITE_PREVIEW_TITLE,

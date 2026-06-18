@@ -1,13 +1,28 @@
 'use client';
 
 import { useState } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
+import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
 import HeaderSignInModal from '@/app/_components/HeaderSignInModal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationIcon } from '@/components/ui/location-icon';
 import { clientEnv } from '@/env/client-env';
+import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
+import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { normalizeLocationTitle } from '@/lib/utils';
-import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
+
+function HeaderMenuDivider() {
+  return (
+    <div
+      className="my-0.5 h-px w-full bg-border/40"
+      aria-hidden
+    />
+  );
+}
+
+const headerMenuNavItemClass =
+  'flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted';
 
 export interface HeaderActionsProps {
   readonly country: string;
@@ -22,10 +37,30 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const telegramUrl = clientEnv.telegramUrl;
   const githubUrl = clientEnv.githubUrl;
   const suggestGigUrl = showSuggestGig ? clientEnv.suggestGigLink : undefined;
+  const isAuthEnabled = clientEnv.isAuthEnabled;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const [locationTipOpen, setLocationTipOpen] = useState(false);
+  const { authState } = useTelegramAuth();
+  const miniAppEnv = useTelegramMiniAppEnv();
+  const telegramBotUsername = clientEnv.telegramBotUsername;
+  const isSignInShownInMenu =
+    isAuthEnabled && Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
+  const hasVisibleAuthState = Boolean(authState);
+
+  /** Profile / Sign in row is visible — same predicates as HeaderAuthActions non-empty UX. */
+  const hasAuthPrimaryRow = hasVisibleAuthState || isSignInShownInMenu;
+
+  /** Desktop burger menu rows between auth header and About (excluding the About divider slot). */
+  const hasMiddleRowsBeforeAboutDesktop = authState?.isAdmin === true;
+
+  const showDividerAfterAuthDesktop = hasAuthPrimaryRow && hasMiddleRowsBeforeAboutDesktop;
+  /** Mobile menu always stacks Location links above About — separate account header from navigator. */
+  const showDividerAfterAuthMobile = hasAuthPrimaryRow;
+
+  /** Desktop: About separated when the menu shows account UX (not Telegram-only About row). */
+  const showDividerBeforeAboutDesktop = hasVisibleAuthState || isSignInShownInMenu;
 
   return (
     <div className="min-w-0 justify-self-end flex items-center space-x-4">
@@ -108,14 +143,31 @@ export default function HeaderActions(props: HeaderActionsProps) {
             align="end"
             className="w-auto min-w-[13rem] max-w-[min(100vw-2rem,20rem)] p-2"
           >
-            <HeaderAuthActions />
-            <a
-              href="/about"
-              className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
-              onClick={() => setDesktopMenuOpen(false)}
-            >
-              About
-            </a>
+            <div className="flex flex-col gap-1">
+              <HeaderAuthActions />
+              {showDividerAfterAuthDesktop ? <HeaderMenuDivider /> : null}
+              {authState?.isAdmin ? (
+                <a
+                  href="/admin"
+                  className={headerMenuNavItemClass}
+                  onClick={() => setDesktopMenuOpen(false)}
+                >
+                  <SlidersHorizontal
+                    className="h-4 w-4 shrink-0"
+                    aria-hidden
+                  />
+                  Admin panel
+                </a>
+              ) : null}
+              {showDividerBeforeAboutDesktop ? <HeaderMenuDivider /> : null}
+              <a
+                href="/about"
+                className={headerMenuNavItemClass}
+                onClick={() => setDesktopMenuOpen(false)}
+              >
+                About
+              </a>
+            </div>
           </PopoverContent>
         </Popover>
       </div>
@@ -139,6 +191,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
           >
             <div className="flex flex-col gap-1">
               <HeaderAuthActions />
+              {showDividerAfterAuthMobile ? <HeaderMenuDivider /> : null}
 
               {!!suggestGigUrl && (
                 <>
@@ -146,17 +199,13 @@ export default function HeaderActions(props: HeaderActionsProps) {
                     href={suggestGigUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
+                    className={headerMenuNavItemClass}
                     onClick={() => setMobileMenuOpen(false)}
                     aria-label="Suggest a gig"
                   >
                     <FaRegLightbulb className="h-4 w-4" />
                     Suggest a gig
                   </a>
-                  <div
-                    className="my-0.5 h-px w-full bg-border/40"
-                    aria-hidden
-                  />
                 </>
               )}
 
@@ -183,7 +232,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
                   href={telegramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
+                  className={headerMenuNavItemClass}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <FaTelegramPlane className="text-lg" />
@@ -196,7 +245,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
                   href={githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
+                  className={headerMenuNavItemClass}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <FaGithub className="h-4 w-4" />
@@ -204,13 +253,24 @@ export default function HeaderActions(props: HeaderActionsProps) {
                 </a>
               )}
 
-              <div
-                className="my-0.5 h-px w-full bg-border/40"
-                aria-hidden
-              />
+              {authState?.isAdmin ? (
+                <a
+                  href="/admin"
+                  className={headerMenuNavItemClass}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <SlidersHorizontal
+                    className="h-4 w-4 shrink-0"
+                    aria-hidden
+                  />
+                  Admin panel
+                </a>
+              ) : null}
+
+              <HeaderMenuDivider />
               <a
                 href="/about"
-                className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
+                className={headerMenuNavItemClass}
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="About"
               >

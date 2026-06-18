@@ -4,8 +4,8 @@ Frontend for the Gigs Together platform. This repository contains a Next.js app 
 
 - redirects the root route to the public gigs feed
 - renders the public feed for supported locations
-- provides a gig submission and edit flow
-- includes a client-side admin panel built with `react-admin`
+- exposes a public `/suggest` placeholder and a Telegram-aware `/suggest/launch` entry
+- exposes a moderator-only `/admin` area with gig moderation, create/edit flows, and language management
 - exposes revalidation endpoints for cached content
 
 At the moment, the default public feed points to `es/barcelona`.
@@ -53,7 +53,7 @@ What they are used for:
 | `NEXT_PUBLIC_GITHUB_URL`                          | Optional                         | GitHub link rendered in the header.                                                                                                              |
 | `NEXT_PUBLIC_TELEGRAM_URL`                        | Optional                         | Telegram link used in the header and as a fallback on gig cards.                                                                                 |
 | `NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL`      | Optional                         | Deep link to the Telegram service chat where users can terminate an active login session.                                                        |
-| `NEXT_PUBLIC_AUTH_ENABLED`                        | Optional                         | Enables Telegram auth UI/features. Parsed as boolean. Default: `false`.                                                                          |
+| `NEXT_PUBLIC_AUTH_ENABLED`                        | Optional                         | Shows/hides auth menu button. Parsed as boolean. Default: `false`.                                                                               |
 | `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME`               | Required\*                       | Telegram bot username used by auth flow. \*Required when `NEXT_PUBLIC_AUTH_ENABLED` is `true`.                                                   |
 | `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` | Optional                         | localStorage key for the cached Telegram display profile. Default: `gt_tg_client_profile`.                                                       |
 | `NEXT_PUBLIC_FEED_PAGE_SIZE`                      | Optional                         | Feed page size. Must be a positive integer. Default is `10`.                                                                                     |
@@ -85,9 +85,13 @@ Useful routes:
 - `/` -> redirects to the default feed route
 - `/feed` -> redirects to the default feed route
 - `/feed/es/barcelona` -> current supported public feed
-- `/gig-form` -> create gig flow
-- `/gig-form/[publicId]/edit` -> edit gig flow
-- `/admin` -> admin UI
+- `/suggest` -> public placeholder for the future suggestion flow
+- `/suggest/launch` -> Telegram-aware redirect into `/suggest` or the moderator gig flow
+- `/admin` -> moderator dashboard
+- `/admin/gigs` -> gig moderation queue and create/edit flows
+- `/admin/languages` -> locale activation and ordering
+- `/admin/translations` -> translations placeholder page
+- `/admin/admins` -> moderator access placeholder page
 - `/about` -> about page
 
 ## Production build and local production run
@@ -171,8 +175,8 @@ src/
 Key areas:
 
 - `src/app/feed` contains the public feed pages and feed client logic
-- `src/app/gig-form` contains create/edit gig flows
-- `src/app/admin` contains the `react-admin` application
+- `src/app/suggest` contains the public suggest placeholder and Telegram launch routing
+- `src/app/admin` contains the moderator-only admin shell and moderation tools
 - `src/app/api/revalidate` contains manual cache revalidation endpoints
 - `src/lib/api.ts` contains the shared API request wrapper
 
@@ -193,12 +197,16 @@ There is no general CI workflow for linting, tests, or builds in this repository
 
 ## Testing status
 
-There are currently no dedicated test scripts in `package.json`.
+Available test scripts:
+
+- `npm run test` -> run the Vitest suite once
+- `npm run test:watch` -> run Vitest in watch mode
 
 Before opening a PR, at minimum run:
 
 ```bash
 npm run lint
+npm run test
 npm run build
 ```
 
@@ -217,13 +225,6 @@ This is the first thing to try before debugging tunnel, HMR, or Telegram-specifi
 ### `Missing NEXT_PUBLIC_APP_API_BASE_URL for direct API calls`
 
 Set `NEXT_PUBLIC_APP_API_BASE_URL` in your local env file and restart the dev server.
-
-### Admin panel cannot load data
-
-Check one of these:
-
-- `NEXT_PUBLIC_ADMIN_API_BASE_URL` points to a valid admin API
-- your environment provides a working `/api/admin` endpoint
 
 ### Revalidation endpoint returns `401`
 

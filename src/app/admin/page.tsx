@@ -1,12 +1,5 @@
-'use client';
-
-import dynamic from 'next/dynamic';
-
-const AdminApp = dynamic(() => import('@/app/admin/_components/AdminApp'), {
-  ssr: false,
-  loading: () => <div>Loading admin...</div>,
-});
+import AdminPageClient from '@/app/admin/AdminPageClient';
 
 export default function AdminPage() {
-  return <AdminApp />;
+  return <AdminPageClient />;
 }
