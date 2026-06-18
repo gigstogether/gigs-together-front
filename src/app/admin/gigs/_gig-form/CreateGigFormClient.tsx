@@ -10,7 +10,7 @@ import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/admin/gigs/_gig-form/_components/GigFormFields';
 import PosterField from '@/app/admin/gigs/_gig-form/_components/PosterField';
-import { buildAdminGigPublicIdPath, ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
+import { buildAdminGigPublicIdRoute } from '@/app/admin/gigs/admin-gig-paths';
 import type { GigUpsertResponse } from '@/lib/gig-form-api';
 import { createGig } from '@/lib/gig-form-api';
 import { defaultGigFormValues, gigFormSchema } from '@/app/admin/gigs/_gig-form/gig-form.shared';
@@ -46,8 +46,7 @@ export default function CreateGigFormClient(props: CreateGigFormClientProps) {
         title: 'Sent!',
         description: "Thanks — we'll review it and (hopefully) announce it soon.",
       });
-      const returnHref =
-        result.publicId && buildAdminGigPublicIdPath(ADMIN_GIGS_BASE_PATH, result.publicId);
+      const returnHref = result.publicId && buildAdminGigPublicIdRoute(result.publicId);
       if (returnHref) {
         router.push(returnHref);
       } else {

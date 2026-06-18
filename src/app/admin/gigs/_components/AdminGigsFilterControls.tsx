@@ -1,3 +1,4 @@
+import type { Route } from 'next';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 
@@ -9,7 +10,7 @@ import { cn } from '@/lib/utils';
 interface AdminGigsFilterControlsProps {
   readonly filter: GigStatus;
   readonly onFilterChange: (status: GigStatus) => void;
-  readonly newGigHref: string;
+  readonly newGigHref: Route;
 }
 
 export default function AdminGigsFilterControls(props: AdminGigsFilterControlsProps) {

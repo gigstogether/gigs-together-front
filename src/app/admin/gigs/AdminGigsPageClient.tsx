@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import { adminKeys } from '@/app/admin/adminKeys';
@@ -18,13 +18,12 @@ import type { AdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
 import { ADMIN_GIGS_DEFAULT_SORT_BY } from '@/app/admin/gigs/admin-gigs-sort';
 import { AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 import type { GigStatus } from '@/app/admin/gigs/types';
-import { ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
+import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/admin-gig-paths';
 import { fetchAdminGigs } from '@/lib/admin-api';
 import { getGigStatusEmptyMessage } from '@/app/admin/gigs/admin-gigs-filter';
 
 export default function AdminGigsPageClient() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const { filter, selectedGigPublicId, sortBy, sortOrder }: AdminGigsQueryState =
@@ -48,9 +47,9 @@ export default function AdminGigsPageClient() {
     (next: AdminGigsQueryState) => {
       const params = buildAdminGigsSearchParams(next);
       const query = params.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      router.replace(`?${query}`, { scroll: false });
     },
-    [pathname, router],
+    [router],
   );
 
   useEffect(() => {
@@ -104,7 +103,7 @@ export default function AdminGigsPageClient() {
           <AdminGigsFilterControls
             filter={filter}
             onFilterChange={handleFilterChange}
-            newGigHref={`${ADMIN_GIGS_BASE_PATH}/new`}
+            newGigHref={ADMIN_GIGS_NEW_ROUTE}
           />
 
           <AdminGigsSortControls
