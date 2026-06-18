@@ -1,19 +1,20 @@
 'use client';
 
 import { LogIn, LogOut } from 'lucide-react';
+import { useCallback } from 'react';
+import { clientEnv } from '@/env/client-env';
+import { toast } from '@/hooks/use-toast';
 import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { useCallback } from 'react';
-import { toast } from '@/hooks/use-toast';
 import { requestTelegramSignIn } from '@/lib/telegram-auth';
-import { clientEnv } from '@/env/client-env';
 
 const menuRowClass =
   'flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted';
 
 export default function HeaderAuthActions() {
   const { authState, signOut } = useTelegramAuth();
-  const telegramBotUsername = clientEnv.isAuthEnabled ? clientEnv.telegramBotUsername : undefined;
+  const isAuthEnabled = clientEnv.isAuthEnabled;
+  const telegramBotUsername = clientEnv.telegramBotUsername;
   const miniAppEnv = useTelegramMiniAppEnv();
 
   const handleSignOut = useCallback(async () => {
@@ -25,11 +26,12 @@ export default function HeaderAuthActions() {
     });
   }, [authState, signOut]);
 
-  if (!telegramBotUsername?.trim()) {
+  if (!authState && (!isAuthEnabled || !telegramBotUsername?.trim())) {
     return null;
   }
 
-  const showSignInButton = !authState && miniAppEnv === 'browser';
+  const showSignInButton =
+    !authState && isAuthEnabled && Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
   const showSignOutButton = authState && miniAppEnv !== 'mini';
 
   return (
@@ -72,7 +74,8 @@ export default function HeaderAuthActions() {
             </button>
           ) : null}
         </div>
-      ) : showSignInButton ? (
+      ) : null}
+      {!authState && showSignInButton ? (
         <button
           type="button"
           className={menuRowClass}
@@ -86,12 +89,6 @@ export default function HeaderAuthActions() {
           Sign in
         </button>
       ) : null}
-      {(authState || showSignInButton) && (
-        <div
-          className="my-0.5 h-px w-full bg-border/40"
-          aria-hidden
-        />
-      )}
     </>
   );
 }

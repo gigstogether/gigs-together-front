@@ -3,9 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useReducer, useRef, useState } from 'react';
-import styles from '@/app/page.module.css';
 import { toLocalYMD } from '@/lib/utils';
-import '@/app/style.css';
 import type { Event } from '@/lib/types';
 import type { ResolveCountryName } from './feed-client/useFeedInfiniteQuery';
 
@@ -28,6 +26,9 @@ import { feedAroundQueryOptions } from './feed-client/fetchFeedAroundQuery';
 import { feedAnchorDateByPublicIdQueryOptions } from './feed-client/fetchFeedAnchorDateQuery';
 import { useFeedInfiniteQuery } from './feed-client/useFeedInfiniteQuery';
 
+const feedMainClassName =
+  'mx-auto flex w-full flex-col gap-2.5 overflow-auto pb-5 max-[600px]:items-center';
+
 interface FeedClientProps {
   readonly country: string; // ISO like "es"
   readonly city: string; // slug like "barcelona"
@@ -44,7 +45,7 @@ export default function FeedClient(props: FeedClientProps) {
   const searchParams = useSearchParams();
   const t = useT();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
-  const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 44
+  const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 45
   const resolveCountryName = useCallback<ResolveCountryName>((iso) => t('country', iso), [t]);
   const queryClient = useQueryClient();
 
@@ -293,7 +294,7 @@ export default function FeedClient(props: FeedClientProps) {
   if (isInitialLoading) {
     return (
       <div className="min-h-[100svh]">
-        <main className={styles.main}>
+        <main className={feedMainClassName}>
           <div className="flex justify-center items-center h-96">
             <div className="text-lg">Loading events...</div>
           </div>
@@ -305,7 +306,7 @@ export default function FeedClient(props: FeedClientProps) {
   if (visibleError) {
     return (
       <div className="min-h-[100svh]">
-        <main className={styles.main}>
+        <main className={feedMainClassName}>
           <div className="flex justify-center items-center h-96">
             <div className="text-lg text-red-600">Error: {visibleError}</div>
           </div>
@@ -316,12 +317,12 @@ export default function FeedClient(props: FeedClientProps) {
 
   return (
     <div className="min-h-[100svh]">
-      <main className={styles.main}>
+      <main className={feedMainClassName}>
         <div className="px-8 md:px-8 py-8">
           {loading.jump ? (
             <div
               className="fixed left-1/2 -translate-x-1/2 z-50"
-              style={{ top: 'calc(var(--header-h, 44px) + 8px)' }}
+              style={{ top: 'calc(var(--header-h) + 8px)' }}
               aria-live="polite"
             >
               <div className="jump-toast-pulse rounded-lg border border-border bg-popover px-5 py-2.5 text-base text-popover-foreground shadow-lg">

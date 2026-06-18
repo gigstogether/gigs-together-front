@@ -53,6 +53,35 @@ describe('env/server', () => {
     });
   });
 
+  describe('isStaging', () => {
+    it('should be true when app base url hostname contains stg label', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('APP_BASE_URL', 'https://stg.example.com');
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.isStaging).toBe(true);
+    });
+
+    it('should be true when app base url hostname contains staging label', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('APP_BASE_URL', 'https://api.staging.example.com');
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.isStaging).toBe(true);
+    });
+
+    it('should be false when app base url hostname does not contain staging labels', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('APP_BASE_URL', 'https://example.com');
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.isStaging).toBe(false);
+    });
+  });
+
   describe('getFeedRevalidateSecretOrThrow', () => {
     it('should return trimmed feed revalidate secret when env var is set', async () => {
       vi.stubEnv('NODE_ENV', 'test');

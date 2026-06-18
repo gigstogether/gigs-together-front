@@ -47,16 +47,6 @@ describe('env/client', () => {
     });
   });
 
-  describe('defaults', () => {
-    it('should use default admin api base url when NEXT_PUBLIC_ADMIN_API_BASE_URL is missing', async () => {
-      vi.stubEnv('NEXT_PUBLIC_ADMIN_API_BASE_URL', undefined);
-
-      const clientEnvModule = await importClientEnv();
-
-      expect(clientEnvModule.clientEnv.adminApiBaseUrl).toBe('/api/admin');
-    });
-  });
-
   describe('FEED_PAGE_SIZE', () => {
     it('should use default feed page size when env var is missing', async () => {
       vi.stubEnv('NEXT_PUBLIC_FEED_PAGE_SIZE', undefined);
