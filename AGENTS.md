@@ -8,6 +8,7 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 ## Code Style
 
+- Prefer correctness and maintainability over implementation speed.
 - Prefer explicit, strict typing. Keep types narrow and avoid widening to `string | number | ...` when the domain is known.
 - Comments must be in English using the Latin alphabet only. Do not write comments in Cyrillic.
 - For numeric constants in seconds or milliseconds (for example `604_800`, `86_400`), add a short comment with human-readable equivalents (at least days or hours, and minutes when useful).
@@ -58,7 +59,8 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - If a function returns a `Promise` without using `await`, declare the `Promise` return type explicitly in the signature instead of marking the function as `async`.
 - Do not use `.then(...)` when the same logic can be written with `await`.
 
-- Avoid type assertions with `as` as much as possible.
+- Do not use type assertions (`as ...`) when the same result can be achieved with proper types, `satisfies`, narrower return types, or refactoring.
+- Treat `as` as a last resort and justify it locally with a short comment when unavoidable.
 - Prefer type guards, narrowing, and better source types instead of `as`.
 - Prefer `satisfies` for validating object shapes without changing inferred types.
 - Prefer parsing and validation at boundaries such as HTTP, env, storage, and third-party SDKs so the rest of the code stays strongly typed.
