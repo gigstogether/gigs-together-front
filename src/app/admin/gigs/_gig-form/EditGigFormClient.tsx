@@ -17,7 +17,7 @@ import type { GigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 import { useEditGigFormData } from '@/app/admin/gigs/_gig-form/useEditGigFormData';
 import { useGigLookup } from '@/app/admin/gigs/_gig-form/useGigLookup';
 import { useGigSubmit } from '@/app/admin/gigs/_gig-form/useGigSubmit';
-import { buildAdminGigPublicIdPath, ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
+import { buildAdminGigPublicIdRoute } from '@/app/admin/gigs/admin-gig-paths';
 
 interface EditGigFormClientProps {
   readonly countries: Country[];
@@ -48,8 +48,7 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
         title: 'Updated!',
         description: 'Gig was updated.',
       });
-      const returnHref =
-        result.publicId && buildAdminGigPublicIdPath(ADMIN_GIGS_BASE_PATH, result.publicId);
+      const returnHref = result.publicId && buildAdminGigPublicIdRoute(result.publicId);
       if (returnHref) {
         router.push(returnHref);
       } else {

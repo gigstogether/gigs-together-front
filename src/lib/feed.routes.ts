@@ -7,19 +7,22 @@ export interface FeedLocation {
 // We centralize the minimal type assertion here to avoid sprinkling `as Route` across pages.
 import type { Route } from 'next';
 
+export type FeedPath = `/feed/${string}` | `/feed/${string}/${string}`;
+const DEFAULT_FEED_COUNTRY = 'es';
+const DEFAULT_FEED_CITY = 'barcelona';
+
 export const SUPPORTED_FEED_LOCATIONS: readonly FeedLocation[] = [
   // Currently, we only support one location.
-  { country: 'es', city: 'barcelona' },
+  { country: DEFAULT_FEED_COUNTRY, city: DEFAULT_FEED_CITY },
 ];
 
 const normalizeSegment = (value: string): string => decodeURIComponent(value).trim().toLowerCase();
 
-export const buildFeedPath = (loc: FeedLocation): string => {
+export const buildFeedPath = (loc: FeedLocation): FeedPath => {
   const country = normalizeSegment(loc.country);
   const city = normalizeSegment(loc.city);
   return `/feed/${encodeURIComponent(country)}/${encodeURIComponent(city)}`;
 };
 
-export const DEFAULT_FEED_LOCATION: FeedLocation = SUPPORTED_FEED_LOCATIONS[0];
-export const DEFAULT_FEED_PATH = buildFeedPath(DEFAULT_FEED_LOCATION);
-export const DEFAULT_FEED_ROUTE = DEFAULT_FEED_PATH as Route;
+export const DEFAULT_FEED_PATH = `/feed/${DEFAULT_FEED_COUNTRY}/${DEFAULT_FEED_CITY}`;
+export const DEFAULT_FEED_ROUTE: Route<'/feed/es/barcelona'> = DEFAULT_FEED_PATH;

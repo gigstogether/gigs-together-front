@@ -12,9 +12,8 @@ import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreview
 import AdminGigPreviewPoster from '@/app/admin/gigs/_components/AdminGigPreviewPoster';
 import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPreviewTitleRow';
 import {
-  buildAdminGigEditPath,
+  buildAdminGigEditRoute,
   buildAdminGigPublicIdPath,
-  ADMIN_GIGS_BASE_PATH,
 } from '@/app/admin/gigs/admin-gig-paths';
 
 interface MetaRowProps {
@@ -40,8 +39,8 @@ interface AdminGigCardProps {
 export default function AdminGigCard(props: AdminGigCardProps) {
   const { gig, listFilter } = props;
 
-  const editHref = buildAdminGigEditPath(ADMIN_GIGS_BASE_PATH, gig.publicId);
-  const shareHref = buildAdminGigPublicIdPath(ADMIN_GIGS_BASE_PATH, gig.publicId);
+  const editHref = buildAdminGigEditRoute(gig.publicId);
+  const shareHref = buildAdminGigPublicIdPath(gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
 
   return (

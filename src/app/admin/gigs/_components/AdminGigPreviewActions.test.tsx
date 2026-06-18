@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
+import { buildAdminGigEditRoute } from '@/app/admin/gigs/admin-gig-paths';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
 import type { AdminGigDetail } from '@/app/admin/gigs/types';
 import { GigStatus, GigStatusAPI } from '@/app/admin/gigs/types';
@@ -41,7 +42,7 @@ function renderActions(listFilter: GigStatus) {
       <AdminGigPreviewActions
         gig={gig}
         listFilter={listFilter}
-        editHref="/admin/gigs/radiohead-barcelona/edit"
+        editHref={buildAdminGigEditRoute('radiohead-barcelona')}
       />
     </QueryClientProvider>,
   );

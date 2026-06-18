@@ -1,16 +1,17 @@
+import type { Route } from 'next';
 import Link from 'next/link';
 
-import { ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
+import { ADMIN_GIGS_ROUTE } from '@/app/admin/gigs/admin-gig-paths';
 
 interface AdminGigDetailBackLinkProps {
-  readonly returnHref?: string | null;
-  readonly fallbackHref?: string;
+  readonly returnHref?: Route | null;
+  readonly fallbackHref?: Route;
 }
 
 export default function AdminGigDetailBackLink(props: AdminGigDetailBackLinkProps) {
-  const { returnHref, fallbackHref = ADMIN_GIGS_BASE_PATH } = props;
+  const { returnHref, fallbackHref = ADMIN_GIGS_ROUTE } = props;
 
-  const href = returnHref?.trim() || fallbackHref;
+  const href = returnHref ?? fallbackHref;
 
   return (
     <Link

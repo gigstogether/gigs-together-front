@@ -1,5 +1,6 @@
 'use client';
 
+import type { Route } from 'next';
 import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
 import { GigStatus } from '@/app/admin/gigs/types';
 import Link from 'next/link';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 interface AdminGigPreviewActionsProps {
   readonly gig: AdminGigDetail | AdminGigFormData;
   readonly listFilter: GigStatus;
-  readonly editHref: string;
+  readonly editHref: Route;
 }
 
 export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProps) {

@@ -6,6 +6,9 @@ import Link from 'next/link';
 import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 import { adminNavItems } from '@/app/admin/admin-nav-config';
 import { adminKeys } from '@/app/admin/adminKeys';
+import { ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
+import { ADMIN_GIGS_QUERY_STATUS } from '@/app/admin/gigs/admin-gigs-query';
+import { GigStatus } from '@/app/admin/gigs/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { fetchAdminDashboard } from '@/lib/admin-api';
 
@@ -25,7 +28,12 @@ export default function AdminPageClient() {
         description="Overview of moderation work and quick links to admin tools."
       />
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
-        <Link href="admin/gigs?status=pending">
+        <Link
+          href={{
+            pathname: ADMIN_GIGS_BASE_PATH,
+            query: { [ADMIN_GIGS_QUERY_STATUS]: GigStatus.Pending },
+          }}
+        >
           <Card className="border shadow-sm">
             <CardHeader className="min-h-24 justify-center">
               <CardDescription>Pending gigs</CardDescription>
@@ -35,7 +43,12 @@ export default function AdminPageClient() {
             </CardHeader>
           </Card>
         </Link>
-        <Link href="admin/gigs?status=approved">
+        <Link
+          href={{
+            pathname: ADMIN_GIGS_BASE_PATH,
+            query: { [ADMIN_GIGS_QUERY_STATUS]: GigStatus.Approved },
+          }}
+        >
           <Card className="border shadow-sm">
             <CardHeader className="min-h-24 justify-center">
               <CardDescription>Approved gigs</CardDescription>
