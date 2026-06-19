@@ -54,4 +54,15 @@ describe('AppHeader', () => {
 
     expect(screen.queryByTestId('admin-header-nav-menu')).not.toBeInTheDocument();
   });
+
+  it('should render environment badge when badge props are provided', () => {
+    render(
+      <AppHeader
+        badgeAlt="DEV environment badge"
+        badgeSrc="/badge-dev.svg"
+      />,
+    );
+
+    expect(screen.getByAltText('DEV environment badge')).toHaveAttribute('src', '/badge-dev.svg');
+  });
 });
