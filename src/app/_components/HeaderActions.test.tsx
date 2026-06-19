@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import HeaderActions from '@/app/_components/HeaderActions';
 
 const { mockClientEnv } = vi.hoisted(() => ({
@@ -13,6 +14,25 @@ const { mockClientEnv } = vi.hoisted(() => ({
 
 vi.mock('@/app/_components/HeaderSignInModal', () => ({
   default: () => null,
+}));
+
+vi.mock('next/link', () => ({
+  default: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: ReactNode;
+  } & Omit<ComponentPropsWithoutRef<'a'>, 'children' | 'href'>) => (
+    <a
+      data-next-link="true"
+      href={href}
+      {...props}
+    >
+      {children}
+    </a>
+  ),
 }));
 
 vi.mock('@/env/client-env', () => ({
@@ -63,7 +83,11 @@ describe('HeaderActions', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('link', { name: 'Admin panel' })).toHaveAttribute('href', '/admin');
-      expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Admin panel' })).toHaveAttribute(
+        'data-next-link',
+        'true',
+      );
+      expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute('data-next-link', 'true');
     });
   });
 

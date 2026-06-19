@@ -1,5 +1,7 @@
 'use client';
 
+import type { Route } from 'next';
+import Link from 'next/link';
 import { useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
@@ -48,6 +50,8 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const isSignInShownInMenu =
     isAuthEnabled && Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
   const hasVisibleAuthState = Boolean(authState);
+  const adminHref: Route = '/admin';
+  const aboutHref: Route = '/about';
 
   /** Profile / Sign in row is visible — same predicates as HeaderAuthActions non-empty UX. */
   const hasAuthPrimaryRow = hasVisibleAuthState || isSignInShownInMenu;
@@ -147,8 +151,8 @@ export default function HeaderActions(props: HeaderActionsProps) {
               <HeaderAuthActions />
               {showDividerAfterAuthDesktop ? <HeaderMenuDivider /> : null}
               {authState?.isAdmin ? (
-                <a
-                  href="/admin"
+                <Link
+                  href={adminHref}
                   className={headerMenuNavItemClass}
                   onClick={() => setDesktopMenuOpen(false)}
                 >
@@ -157,16 +161,16 @@ export default function HeaderActions(props: HeaderActionsProps) {
                     aria-hidden
                   />
                   Admin panel
-                </a>
+                </Link>
               ) : null}
               {showDividerBeforeAboutDesktop ? <HeaderMenuDivider /> : null}
-              <a
-                href="/about"
+              <Link
+                href={aboutHref}
                 className={headerMenuNavItemClass}
                 onClick={() => setDesktopMenuOpen(false)}
               >
                 About
-              </a>
+              </Link>
             </div>
           </PopoverContent>
         </Popover>
@@ -254,8 +258,8 @@ export default function HeaderActions(props: HeaderActionsProps) {
               )}
 
               {authState?.isAdmin ? (
-                <a
-                  href="/admin"
+                <Link
+                  href={adminHref}
                   className={headerMenuNavItemClass}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -264,18 +268,18 @@ export default function HeaderActions(props: HeaderActionsProps) {
                     aria-hidden
                   />
                   Admin panel
-                </a>
+                </Link>
               ) : null}
 
               <HeaderMenuDivider />
-              <a
-                href="/about"
+              <Link
+                href={aboutHref}
                 className={headerMenuNavItemClass}
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="About"
               >
                 About
-              </a>
+              </Link>
             </div>
           </PopoverContent>
         </Popover>
