@@ -7,13 +7,20 @@ function jsonResponse(body: unknown, status: number): Response {
   });
 }
 
+const { postAuthRefreshMock } = vi.hoisted(() => ({
+  postAuthRefreshMock: vi.fn<() => Promise<boolean>>(),
+}));
+
+vi.mock('@/lib/auth-refresh', () => ({
+  postAuthRefresh: postAuthRefreshMock,
+}));
+
 describe('fetchApiJson', () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_APP_API_BASE_URL = 'https://api.example.com';
     vi.resetModules();
-    vi.doMock('@/lib/auth-refresh', () => ({
-      postAuthRefresh: vi.fn(async (): Promise<boolean> => false),
-    }));
+    postAuthRefreshMock.mockReset();
+    postAuthRefreshMock.mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -22,8 +29,7 @@ describe('fetchApiJson', () => {
   });
 
   it('should retry request once when refresh succeeds after 401', async () => {
-    const postAuthRefresh = vi.fn(async (): Promise<boolean> => true);
-    vi.doMock('@/lib/auth-refresh', () => ({ postAuthRefresh }));
+    postAuthRefreshMock.mockResolvedValue(true);
 
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -36,13 +42,12 @@ describe('fetchApiJson', () => {
     const result = await fetchApiJson<{ gigs: unknown[] }>('v1/gig?limit=10', 'GET');
 
     expect(result).toEqual({ gigs: [] });
-    expect(postAuthRefresh).toHaveBeenCalledTimes(1);
+    expect(postAuthRefreshMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it('should throw ApiError with 401 status when request is still unauthorized after refresh retry', async () => {
-    const postAuthRefresh = vi.fn(async (): Promise<boolean> => true);
-    vi.doMock('@/lib/auth-refresh', () => ({ postAuthRefresh }));
+    postAuthRefreshMock.mockResolvedValue(true);
 
     const onUnauthorized = vi.fn();
     const fetchMock = vi
@@ -60,13 +65,12 @@ describe('fetchApiJson', () => {
       name: 'ApiError',
       statusCode: 401,
     });
-    expect(postAuthRefresh).toHaveBeenCalledTimes(1);
+    expect(postAuthRefreshMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it('should call onUnauthorized once when second request is still unauthorized', async () => {
-    const postAuthRefresh = vi.fn(async (): Promise<boolean> => true);
-    vi.doMock('@/lib/auth-refresh', () => ({ postAuthRefresh }));
+    postAuthRefreshMock.mockResolvedValue(true);
 
     const onUnauthorized = vi.fn();
     const fetchMock = vi
@@ -84,8 +88,7 @@ describe('fetchApiJson', () => {
   });
 
   it('should not trigger refresh flow when endpoint is auth refresh itself', async () => {
-    const postAuthRefresh = vi.fn(async (): Promise<boolean> => true);
-    vi.doMock('@/lib/auth-refresh', () => ({ postAuthRefresh }));
+    postAuthRefreshMock.mockResolvedValue(true);
 
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -97,7 +100,7 @@ describe('fetchApiJson', () => {
     const action = fetchApiJson('v1/auth/refresh', 'POST', undefined, { onUnauthorized: vi.fn() });
 
     await expect(action).rejects.toThrow();
-    expect(postAuthRefresh).not.toHaveBeenCalled();
+    expect(postAuthRefreshMock).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
