@@ -5,6 +5,7 @@ import {
   createOptionalPositiveIntegerFromEnvSchema,
   optionalTrimmedStringFromEnvSchema,
 } from '@/env/shared-env';
+import { logger } from '@/lib/logger';
 
 const DEFAULT_TRANSLATIONS_REVALIDATE_SECONDS = 3_600; // 1 hour (60 minutes)
 const DEFAULT_BRAND_NAME = 'Gigs Together';
@@ -42,7 +43,10 @@ function isStagingAppBaseUrl(appBaseUrl: string | undefined): boolean {
 
   const hostnameLabels = new URL(appBaseUrl).hostname.split('.');
 
-  return hostnameLabels.some((label) => label === 'stg' || label === 'staging');
+  const t = hostnameLabels.some((label) => label === 'stg' || label === 'staging');
+  logger.info(`isStagingAppBaseUrl: ${t}`);
+  logger.info(`hostnameLabels: ${hostnameLabels}`);
+  return t;
 }
 
 export const serverEnv = {
