@@ -41,8 +41,6 @@ function isAdminRoute(pathname: string): boolean {
 export default function AppHeader(props: AppHeaderProps) {
   const { badgeSrc, badgeAlt } = props;
 
-  console.log('badge:', badgeSrc, badgeAlt);
-
   const pathname = usePathname() ?? '/';
   const { config } = useHeaderConfig();
   const { authState } = useTelegramAuth();
