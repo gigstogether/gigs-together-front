@@ -10,6 +10,11 @@ import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 const DEFAULT_COUNTRY = 'es';
 const DEFAULT_CITY = 'barcelona';
 
+interface AppHeaderProps {
+  badgeSrc?: string;
+  badgeAlt?: string;
+}
+
 function getLocationFromPath(pathname: string): { country: string; city: string } {
   // Expected: /feed/[country]/[city]
   // Also accept: /feed/[country]
@@ -33,7 +38,9 @@ function isAdminRoute(pathname: string): boolean {
 }
 
 // TODO: merge with Header.tsx ?
-export default function AppHeader() {
+export default function AppHeader(props: AppHeaderProps) {
+  const { badgeSrc, badgeAlt } = props;
+
   const pathname = usePathname() ?? '/';
   const { config } = useHeaderConfig();
   const { authState } = useTelegramAuth();
@@ -44,6 +51,8 @@ export default function AppHeader() {
   // TODO: showCalendar -> centerContent
   return (
     <Header
+      badgeAlt={badgeAlt}
+      badgeSrc={badgeSrc}
       country={country}
       city={city}
       showCalendar={isFeed}
