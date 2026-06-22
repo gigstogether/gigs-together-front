@@ -12,7 +12,8 @@ import { clientEnv } from '@/env/client-env';
 export default function HeaderSignInModal() {
   const { signIn } = useTelegramAuth();
   const [signInModalOpen, setSignInModalOpen] = useState(false);
-  const telegramBotUsername = clientEnv.isAuthEnabled ? clientEnv.telegramBotUsername : undefined;
+
+  const telegramBotUsername = clientEnv.telegramBotUsername;
 
   const handleAuthenticated = useCallback(
     async (user: TelegramWidgetUser) => {

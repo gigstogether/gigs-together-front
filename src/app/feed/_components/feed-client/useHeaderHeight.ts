@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-export function useHeaderHeight(selector = '[data-app-header]', fallback = 44) {
+// TODO: do we still need this?
+export function useHeaderHeight(selector = '[data-app-header]', fallback = 45) {
   const [h, setH] = useState(fallback);
 
   useEffect(() => {

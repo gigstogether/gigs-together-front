@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
 import { HeaderConfigProvider } from '@/app/_components/HeaderConfigProvider';
 import AppHeader from '@/app/_components/AppHeader';
-import TelegramWebAppScript from '@/app/gig-form/_components/TelegramWebAppScript';
+import TelegramWebAppScript from '@/app/_components/TelegramWebAppScript';
 import { QueryProvider } from '@/app/_providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
 
@@ -29,9 +29,22 @@ const DESCRIPTION = serverEnv.sitePreviewDescription;
 const IMAGE_WIDTH = 1200;
 const IMAGE_HEIGHT = 630;
 const PREVIEW_IMAGE = `/logo-${IMAGE_WIDTH}x${IMAGE_HEIGHT}.png`;
+const HEADER_BADGE = serverEnv.isDevelopment
+  ? {
+      src: '/badge-dev.svg',
+      alt: 'DEV environment badge',
+    }
+  : serverEnv.isStaging
+    ? {
+        src: '/badge-stg.svg',
+        alt: 'STG environment badge',
+      }
+    : null;
 const FAVICON_URL = serverEnv.isDevelopment
   ? '/logo-dev-circle-96x96.png'
-  : '/logo-circle-96x96.png';
+  : serverEnv.isStaging
+    ? '/logo-stg-circle-96x96.png'
+    : '/logo-circle-96x96.png';
 
 const metadataBase = SITE_BASE_URL ? new URL(SITE_BASE_URL) : undefined;
 const previewImage = new URL(PREVIEW_IMAGE, metadataBase).toString();
@@ -82,6 +95,7 @@ const jsonLd = {
   url: SITE_BASE_URL,
 };
 
+// TODO: refactor
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
@@ -95,8 +109,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             }}
           />
           <HeaderConfigProvider>
-            <AppHeader />
-            <div className="pt-[45px]">{children}</div>
+            <AppHeader
+              badgeAlt={HEADER_BADGE?.alt}
+              badgeSrc={HEADER_BADGE?.src}
+            />
+            <div className="pt-[var(--header-h)]">{children}</div>
             <Toaster />
           </HeaderConfigProvider>
         </QueryProvider>

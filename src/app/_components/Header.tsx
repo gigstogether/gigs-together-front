@@ -1,6 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import type { ReactNode } from 'react';
 import type { Route } from 'next';
 import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
 
@@ -8,6 +10,8 @@ const HeaderCalendar = dynamic(() => import('@/app/_components/HeaderCalendar'),
 const HeaderActions = dynamic(() => import('@/app/_components/HeaderActions'), { ssr: false });
 
 interface HeaderProps {
+  badgeSrc?: string;
+  badgeAlt?: string;
   earliestEventDate?: string;
   visibleEventDateRange?: VisibleEventDateRange;
   onDayClick?: (day: Date) => void;
@@ -17,12 +21,15 @@ interface HeaderProps {
   calendarDatesError?: string;
   showCalendar?: boolean;
   showSuggestGig?: boolean;
+  centerContent?: ReactNode;
   country: string;
   city: string;
 }
 
 export default function Header(props: HeaderProps) {
   const {
+    badgeSrc,
+    badgeAlt,
     earliestEventDate,
     visibleEventDateRange,
     onDayClick,
@@ -32,6 +39,7 @@ export default function Header(props: HeaderProps) {
     calendarDatesError,
     showCalendar = true,
     showSuggestGig = true,
+    centerContent,
     country,
     city,
   } = props;
@@ -48,16 +56,29 @@ export default function Header(props: HeaderProps) {
             <h1 className="text-xl font-semibold whitespace-nowrap">
               <a
                 href={homeHref}
-                className="cursor-pointer select-none"
+                className="inline-flex items-center gap-1.5 cursor-pointer select-none"
                 aria-label="Go to home"
                 title="Go to home"
               >
-                Gigs<span className="hidden sm:inline"> Together</span>!
+                <span className="leading-none">
+                  Gigs<span className="hidden sm:inline"> Together</span>!
+                </span>
+                {badgeSrc && badgeAlt ? (
+                  <Image
+                    src={badgeSrc}
+                    alt={badgeAlt}
+                    width={48}
+                    height={22}
+                    className="h-4 w-auto shrink-0 sm:h-[18px]"
+                  />
+                ) : null}
               </a>
             </h1>
           </div>
           <div className="min-w-0 justify-self-center">
-            {showCalendar ? (
+            {centerContent ? (
+              centerContent
+            ) : showCalendar ? (
               <HeaderCalendar
                 visibleEventDate={earliestEventDate}
                 visibleEventDateRange={visibleEventDateRange}
