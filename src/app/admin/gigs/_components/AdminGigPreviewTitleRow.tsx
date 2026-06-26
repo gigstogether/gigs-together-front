@@ -1,6 +1,7 @@
 'use client';
 
-import CopyableTextRow from '@/components/CopyableTextRow';
+import { Link as LinkIcon } from 'lucide-react';
+import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/admin-gigs-filter';
 import type { GigStatusAPI } from '@/app/admin/gigs/types';
 import { cn } from '@/lib/utils';
@@ -25,20 +26,8 @@ export default function AdminGigPreviewTitleRow(props: AdminGigPreviewTitleRowPr
   const copyText = new URL(sharePath, window.location.origin).href;
 
   return (
-    <CopyableTextRow
-      copyText={copyText}
-      copyAriaLabel="Copy link"
-      copyTitle="Copy link"
-      copiedToast={{
-        title: 'Link copied',
-        description: 'Gig link copied to clipboard.',
-      }}
-      failedToast={{
-        title: 'Could not copy link',
-        description: 'Clipboard access is not available.',
-      }}
-    >
-      <h2 className="flex items-center gap-2 text-base font-semibold leading-snug">
+    <div className="flex min-w-0 items-center gap-2">
+      <h2 className="flex min-w-0 flex-1 items-center gap-2 text-base font-semibold leading-snug">
         <span
           className={cn(
             'inline-block h-1.5 w-1.5 shrink-0 self-center rounded-full',
@@ -47,8 +36,23 @@ export default function AdminGigPreviewTitleRow(props: AdminGigPreviewTitleRowPr
           title={status}
           aria-label={status}
         />
-        <span>{title}</span>
+        <span className="min-w-0 truncate">{title}</span>
       </h2>
-    </CopyableTextRow>
+      <CopyToClipboardButton
+        copyText={copyText}
+        icon={LinkIcon}
+        ariaLabel="Copy link"
+        title="Copy link"
+        copiedToast={{
+          title: 'Link copied',
+          description: 'Gig link copied to clipboard.',
+        }}
+        failedToast={{
+          title: 'Could not copy link',
+          description: 'Clipboard access is not available.',
+        }}
+        className="h-7 w-7"
+      />
+    </div>
   );
 }

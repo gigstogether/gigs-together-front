@@ -7,6 +7,12 @@ vi.mock('@/app/_components/GigPoster', () => ({
   GigPoster: ({ title }: { title: string }) => <div>{title}</div>,
 }));
 
+vi.mock('@/components/CopyToClipboardButton', () => ({
+  default: ({ ariaLabel, title }: { ariaLabel?: string; title?: string }) => (
+    <button title={title}>{ariaLabel}</button>
+  ),
+}));
+
 vi.mock('@/env/client-env', () => ({
   clientEnv: {
     telegramUrl: undefined,
@@ -14,7 +20,7 @@ vi.mock('@/env/client-env', () => ({
 }));
 
 describe('GigCard', () => {
-  it('should render the title as plain text', () => {
+  it('should render the title as plain text and show the copy link button', () => {
     const gig: Event = {
       id: 'radiohead barcelona',
       title: 'Radiohead',
@@ -31,5 +37,6 @@ describe('GigCard', () => {
 
     expect(screen.getByText('Radiohead')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Radiohead' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
   });
 });

@@ -1,5 +1,6 @@
 'use client';
 
+import type { ComponentType } from 'react';
 import { Copy } from 'lucide-react';
 import { useCallback } from 'react';
 
@@ -12,8 +13,14 @@ export interface CopyToastContent {
   readonly description?: string;
 }
 
+export type CopyToClipboardButtonIcon = ComponentType<{
+  className?: string;
+  'aria-hidden'?: boolean;
+}>;
+
 interface CopyToClipboardButtonProps {
   readonly copyText: string;
+  readonly icon?: CopyToClipboardButtonIcon;
   readonly ariaLabel?: string;
   readonly title?: string;
   readonly copiedToast?: CopyToastContent;
@@ -33,6 +40,7 @@ const DEFAULT_FAILED_TOAST: CopyToastContent = {
 export default function CopyToClipboardButton(props: CopyToClipboardButtonProps) {
   const {
     copyText,
+    icon: Icon = Copy,
     ariaLabel = 'Copy',
     title = 'Copy',
     copiedToast = DEFAULT_COPIED_TOAST,
@@ -59,7 +67,7 @@ export default function CopyToClipboardButton(props: CopyToClipboardButtonProps)
       title={title}
       aria-label={ariaLabel}
     >
-      <Copy
+      <Icon
         className="h-4 w-4"
         aria-hidden
       />

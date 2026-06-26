@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import CopyToClipboardButton from '@/components/CopyToClipboardButton';
@@ -6,6 +7,13 @@ import { toast } from '@/hooks/use-toast';
 vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
 }));
+
+const TestIcon: ComponentType<{ className?: string; 'aria-hidden'?: boolean }> = (props) => (
+  <svg
+    data-testid="custom-copy-icon"
+    {...props}
+  />
+);
 
 describe('CopyToClipboardButton', () => {
   beforeEach(() => {
@@ -35,5 +43,16 @@ describe('CopyToClipboardButton', () => {
       title: 'Link copied',
       description: 'Copied to clipboard.',
     });
+  });
+
+  it('should render a custom icon when provided', () => {
+    render(
+      <CopyToClipboardButton
+        copyText="https://gigs.example/admin/gigs/abc"
+        icon={TestIcon}
+      />,
+    );
+
+    expect(screen.getByTestId('custom-copy-icon')).toBeInTheDocument();
   });
 });
