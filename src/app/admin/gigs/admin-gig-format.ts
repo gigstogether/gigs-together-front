@@ -3,7 +3,6 @@ import type {
   AdminGigQueueItem,
   AdminGigSuggestedBy,
 } from '@/app/admin/gigs/types';
-import { buildFeedPath } from '@/lib/feed.routes';
 import { formatGigDate } from '@/lib/gig-date-format';
 
 export function formatAdminGigEventDate(date: string, endDate?: string): string {
@@ -17,14 +16,8 @@ export function formatAdminGigListMeta(gig: AdminGigQueueItem): string {
   return formatAdminGigEventDate(gig.date, gig.endDate);
 }
 
-export function buildAdminGigFeedHref(
-  gig: Pick<AdminGigDetail, 'publicId' | 'country' | 'city'>,
-): string {
-  const feedPath = buildFeedPath({
-    country: gig.country,
-    city: gig.city,
-  });
-  return `${feedPath}#${gig.publicId}`;
+export function buildAdminGigPublicHref(gig: Pick<AdminGigDetail, 'publicId'>): string {
+  return `/gigs/${encodeURIComponent(gig.publicId)}`;
 }
 
 export function formatAdminGigSuggestedBy(suggestedBy: AdminGigSuggestedBy): string {

@@ -85,4 +85,13 @@ describe('AdminGigPreviewActions', () => {
     expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
   });
+
+  it('should link approved gigs to the public gig route', () => {
+    renderActions(GigStatus.Approved);
+
+    expect(screen.getByRole('link', { name: 'Feed' })).toHaveAttribute(
+      'href',
+      '/gigs/radiohead-barcelona',
+    );
+  });
 });

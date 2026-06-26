@@ -5,7 +5,7 @@ import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
 import { GigStatus } from '@/app/admin/gigs/types';
 import Link from 'next/link';
 import { Check, ExternalLink, Link2, Loader2, Pencil, Rss, X } from 'lucide-react';
-import { buildAdminGigFeedHref } from '@/app/admin/gigs/admin-gig-format';
+import { buildAdminGigPublicHref } from '@/app/admin/gigs/admin-gig-format';
 import { useAdminGigModerationActions } from '@/app/admin/gigs/use-admin-gig-moderation-actions';
 import ActionButtonLink from '@/app/admin/gigs/_components/ActionButtonLink';
 import { Button } from '@/components/ui/button';
@@ -109,7 +109,7 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
           isDisabled={!gig.publishPostUrl}
         />
         <ActionButtonLink
-          href={buildAdminGigFeedHref(gig)}
+          href={buildAdminGigPublicHref(gig)}
           label="Feed"
           icon={
             <Rss

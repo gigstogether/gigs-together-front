@@ -107,14 +107,7 @@ export function GigCard({ gig }: GigCardProps) {
       <div className="p-2">
         <div className="flex min-w-0 flex-row gap-4 items-center">
           <div className="flex min-w-0 flex-1 flex-col">
-            <a
-              href={`#${gig.id}`}
-              className="tracking-tight dark:text-white font-bold hover:underline underline-offset-2"
-              title="Link to this event"
-              aria-label={`Link to event: ${gig.title}`}
-            >
-              {gig.title}
-            </a>
+            <p className="tracking-tight dark:text-white font-bold">{gig.title}</p>
             <GigDates
               date={gig.date}
               endDate={gig.endDate}

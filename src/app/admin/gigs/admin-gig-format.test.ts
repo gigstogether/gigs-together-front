@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  buildAdminGigFeedHref,
+  buildAdminGigPublicHref,
   formatAdminGigEventDate,
   formatAdminGigListMeta,
 } from '@/app/admin/gigs/admin-gig-format';
@@ -21,15 +21,13 @@ describe('formatAdminGigEventDate', () => {
   });
 });
 
-describe('buildAdminGigFeedHref', () => {
-  it('should build feed path with publicId hash', () => {
+describe('buildAdminGigPublicHref', () => {
+  it('should build public gig path with encoded publicId', () => {
     expect(
-      buildAdminGigFeedHref({
-        publicId: 'radiohead-barcelona-2026-06-12',
-        country: 'ES',
-        city: 'barcelona',
+      buildAdminGigPublicHref({
+        publicId: 'radiohead barcelona 2026-06-12',
       }),
-    ).toBe('/feed/es/barcelona#radiohead-barcelona-2026-06-12');
+    ).toBe('/gigs/radiohead%20barcelona%202026-06-12');
   });
 });
 
