@@ -7,6 +7,8 @@ import { SlidersHorizontal } from 'lucide-react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
 import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
 import HeaderSignInModal from '@/app/_components/HeaderSignInModal';
+import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/admin-gig-paths';
+import { SUGGEST_ROUTE } from '@/app/suggest/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationIcon } from '@/components/ui/location-icon';
 import { clientEnv } from '@/env/client-env';
@@ -29,29 +31,36 @@ const headerMenuNavItemClass =
 export interface HeaderActionsProps {
   readonly country: string;
   readonly city: string;
-  readonly showSuggestGig?: boolean;
 }
 
+const adminHref: Route = '/admin';
+const aboutHref: Route = '/about';
+
 export default function HeaderActions(props: HeaderActionsProps) {
-  const { country, city, showSuggestGig = true } = props;
+  const { country, city } = props;
 
   const locationLabel = city ? normalizeLocationTitle(city) : country.toUpperCase();
   const telegramUrl = clientEnv.telegramUrl;
   const githubUrl = clientEnv.githubUrl;
-  const suggestGigUrl = showSuggestGig ? clientEnv.suggestGigLink : undefined;
   const isAuthEnabled = clientEnv.isAuthEnabled;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const [locationTipOpen, setLocationTipOpen] = useState(false);
+
   const { authState } = useTelegramAuth();
   const miniAppEnv = useTelegramMiniAppEnv();
+
   const telegramBotUsername = clientEnv.telegramBotUsername;
+  const isAdmin = authState?.isAdmin === true;
+  const suggestGigHref = isAdmin
+    ? ADMIN_GIGS_NEW_ROUTE
+    : clientEnv.isPublicSuggestGigEnabled
+      ? SUGGEST_ROUTE
+      : undefined;
   const isSignInShownInMenu =
     isAuthEnabled && Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
   const hasVisibleAuthState = Boolean(authState);
-  const adminHref: Route = '/admin';
-  const aboutHref: Route = '/about';
 
   /** Profile / Sign in row is visible — same predicates as HeaderAuthActions non-empty UX. */
   const hasAuthPrimaryRow = hasVisibleAuthState || isSignInShownInMenu;
@@ -92,11 +101,9 @@ export default function HeaderActions(props: HeaderActionsProps) {
           </PopoverContent>
         </Popover>
 
-        {!!suggestGigUrl && (
-          <a
-            href={suggestGigUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+        {!!suggestGigHref && (
+          <Link
+            href={suggestGigHref}
             className="inline-flex items-center justify-center rounded-md bg-black px-2 py-1.5 text-sm font-medium text-white hover:bg-black/90 whitespace-nowrap lg:px-3"
             aria-label="Suggest a gig"
             title="Suggest a gig"
@@ -106,7 +113,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
               className="text-[1.05em] lg:hidden"
               aria-hidden
             />
-          </a>
+          </Link>
         )}
 
         {!!telegramUrl && (
@@ -197,20 +204,16 @@ export default function HeaderActions(props: HeaderActionsProps) {
               <HeaderAuthActions />
               {showDividerAfterAuthMobile ? <HeaderMenuDivider /> : null}
 
-              {!!suggestGigUrl && (
-                <>
-                  <a
-                    href={suggestGigUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={headerMenuNavItemClass}
-                    onClick={() => setMobileMenuOpen(false)}
-                    aria-label="Suggest a gig"
-                  >
-                    <FaRegLightbulb className="h-4 w-4" />
-                    Suggest a gig
-                  </a>
-                </>
+              {!!suggestGigHref && (
+                <Link
+                  href={suggestGigHref}
+                  className={headerMenuNavItemClass}
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Suggest a gig"
+                >
+                  <FaRegLightbulb className="h-4 w-4" />
+                  Suggest a gig
+                </Link>
               )}
 
               <Popover>

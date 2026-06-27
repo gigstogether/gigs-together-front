@@ -56,7 +56,6 @@ export default function AppHeader(props: AppHeaderProps) {
       country={country}
       city={city}
       showCalendar={isFeed}
-      showSuggestGig={false}
       centerContent={showAdminHeaderNav ? <AdminHeaderNavMenu /> : undefined}
       earliestEventDate={config.earliestEventDate}
       visibleEventDateRange={config.visibleEventDateRange}

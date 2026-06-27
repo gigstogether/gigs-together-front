@@ -20,7 +20,6 @@ interface HeaderProps {
   calendarDatesIsError?: boolean;
   calendarDatesError?: string;
   showCalendar?: boolean;
-  showSuggestGig?: boolean;
   centerContent?: ReactNode;
   country: string;
   city: string;
@@ -38,7 +37,6 @@ export default function Header(props: HeaderProps) {
     calendarDatesIsError = false,
     calendarDatesError,
     showCalendar = true,
-    showSuggestGig = true,
     centerContent,
     country,
     city,
@@ -93,7 +91,6 @@ export default function Header(props: HeaderProps) {
           <HeaderActions
             country={country}
             city={city}
-            showSuggestGig={showSuggestGig}
           />
         </div>
       </div>

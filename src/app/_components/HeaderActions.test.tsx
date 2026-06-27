@@ -6,7 +6,7 @@ const { mockClientEnv } = vi.hoisted(() => ({
   mockClientEnv: {
     telegramUrl: undefined,
     githubUrl: undefined,
-    suggestGigLink: undefined,
+    isPublicSuggestGigEnabled: false,
     telegramBotUsername: 'bot',
     isAuthEnabled: true,
   },
@@ -52,6 +52,7 @@ import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 describe('HeaderActions', () => {
   beforeEach(() => {
     mockClientEnv.isAuthEnabled = true;
+    mockClientEnv.isPublicSuggestGigEnabled = false;
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: null,
       isLoadingAuthState: false,
@@ -130,5 +131,50 @@ describe('HeaderActions', () => {
       expect(screen.queryByRole('button', { name: 'Sign in' })).toBeNull();
       expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument();
     });
+  });
+
+  it('should show suggest gig for admins when public suggest gig is disabled', () => {
+    vi.mocked(useTelegramAuth).mockReturnValue({
+      authState: { displayLabel: '@admin', isAdmin: true },
+      isLoadingAuthState: false,
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+    });
+
+    render(
+      <HeaderActions
+        country="es"
+        city="barcelona"
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: 'Suggest a gig' })).toHaveAttribute(
+      'href',
+      '/admin/gigs/new',
+    );
+  });
+
+  it('should hide suggest gig for guests when public suggest gig is disabled', () => {
+    render(
+      <HeaderActions
+        country="es"
+        city="barcelona"
+      />,
+    );
+
+    expect(screen.queryByRole('link', { name: 'Suggest a gig' })).toBeNull();
+  });
+
+  it('should show suggest route for guests when public suggest gig is enabled', () => {
+    mockClientEnv.isPublicSuggestGigEnabled = true;
+
+    render(
+      <HeaderActions
+        country="es"
+        city="barcelona"
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: 'Suggest a gig' })).toHaveAttribute('href', '/suggest');
   });
 });
