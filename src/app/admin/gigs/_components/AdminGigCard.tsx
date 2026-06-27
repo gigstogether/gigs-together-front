@@ -48,6 +48,8 @@ export default function AdminGigCard(props: AdminGigCardProps) {
   const shareHref = buildAdminGigPublicIdPath(gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
   const feedHref = buildAdminGigPublicHref(gig);
+  const hasPublicLinks =
+    moderationStatus === GigStatus.Approved && !!(feedHref || gig.publishPostUrl);
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -99,8 +101,8 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             </MetaRow>
           ) : null}
 
-          {moderationStatus === GigStatus.Approved ? (
-            <div className="border-t border-border pt-2">
+          <div className="border-t border-border pt-2 pb-1 space-y-2">
+            {hasPublicLinks && (
               <div className="flex min-w-0 flex-wrap items-center gap-x-2 text-sm leading-snug">
                 <Link
                   href={feedHref}
@@ -112,7 +114,8 @@ export default function AdminGigCard(props: AdminGigCardProps) {
                   />
                   Public view
                 </Link>
-                {gig.publishPostUrl ? (
+
+                {!!gig.publishPostUrl && (
                   <>
                     <span
                       className="text-muted-foreground"
@@ -133,14 +136,14 @@ export default function AdminGigCard(props: AdminGigCardProps) {
                       Post
                     </a>
                   </>
-                ) : null}
+                )}
               </div>
-            </div>
-          ) : null}
+            )}
 
-          <p className="text-xs text-muted-foreground">
-            {formatAdminGigSuggestedBy(gig.suggestedBy)}
-          </p>
+            <p className="text-xs text-muted-foreground">
+              {formatAdminGigSuggestedBy(gig.suggestedBy)}
+            </p>
+          </div>
 
           {gig.moderationPostDate === undefined ? (
             <div

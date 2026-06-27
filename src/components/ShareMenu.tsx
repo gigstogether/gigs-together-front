@@ -55,7 +55,7 @@ export function ShareMenu(props: ShareMenuProps) {
           type="button"
           variant="ghost"
           size="icon"
-          className={cn('h-7 w-7 shrink-0', className)}
+          className={cn('h-7 w-7 shrink-0 text-gray-500', className)}
           title="Share"
           aria-label="Share"
         >
