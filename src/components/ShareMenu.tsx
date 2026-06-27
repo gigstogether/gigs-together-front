@@ -43,7 +43,12 @@ export function ShareMenu(props: ShareMenuProps) {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const shareUrl = useMemo(() => new URL(sharePath, window.location.origin).href, [sharePath]);
+  const shareUrl = useMemo(() => {
+    if (typeof window == 'undefined') {
+      return '';
+    }
+    return new URL(sharePath, window.location.origin).href;
+  }, [sharePath]);
 
   return (
     <Popover
