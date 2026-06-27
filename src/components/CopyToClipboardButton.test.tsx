@@ -45,6 +45,40 @@ describe('CopyToClipboardButton', () => {
     });
   });
 
+  it('should call onCopied when clipboard write succeeds', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const onCopied = vi.fn();
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    render(
+      <CopyToClipboardButton
+        copyText="https://gigs.example/gigs/abc"
+        onCopied={onCopied}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
+
+    await waitFor(() => {
+      expect(onCopied).toHaveBeenCalledOnce();
+    });
+  });
+
+  it('should render a label when provided', () => {
+    render(
+      <CopyToClipboardButton
+        copyText="https://gigs.example/gigs/abc"
+        label="Copy link"
+        ariaLabel="Copy link"
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Copy link' })).toHaveTextContent('Copy link');
+  });
+
   it('should render a custom icon when provided', () => {
     render(
       <CopyToClipboardButton

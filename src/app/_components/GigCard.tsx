@@ -1,7 +1,7 @@
 import type { Event } from '@/lib/types';
-import CopyToClipboardButton from '@/components/CopyToClipboardButton';
+import { ShareMenu } from '@/components/ShareMenu';
 import { LocationIcon } from '@/components/ui/location-icon';
-import { Calendar, Link as LinkIcon, Ticket } from 'lucide-react';
+import { Calendar, Ticket } from 'lucide-react';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { GigPoster } from '@/app/_components/GigPoster';
 import { clientEnv } from '@/env/client-env';
@@ -90,7 +90,7 @@ export function GigCard({ gig }: GigCardProps) {
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
     : undefined;
   const telegramUrl = gig.postUrl ?? clientEnv.telegramUrl;
-  const shareUrl = `/gigs/${encodeURIComponent(gig.id)}`;
+  const sharePath = `/gigs/${encodeURIComponent(gig.id)}`;
 
   return (
     <div className="flex w-full flex-col bg-white rounded-lg dark:bg-gray-800 dark:border-gray-700">
@@ -111,20 +111,9 @@ export function GigCard({ gig }: GigCardProps) {
           <div className="flex min-w-0 flex-1 flex-col">
             <div className="flex min-w-0 items-center gap-2">
               <p className="min-w-0 flex-1 tracking-tight font-bold dark:text-white">{gig.title}</p>
-              <CopyToClipboardButton
-                copyText={new URL(shareUrl, window.location.origin).href}
-                icon={LinkIcon}
-                ariaLabel="Copy link"
-                title="Copy link"
-                copiedToast={{
-                  title: 'Link copied',
-                  description: 'Gig link copied to clipboard.',
-                }}
-                failedToast={{
-                  title: 'Could not copy link',
-                  description: 'Clipboard access is not available.',
-                }}
-                className="h-7 w-7"
+              <ShareMenu
+                sharePath={sharePath}
+                side="top"
               />
             </div>
             <GigDates
