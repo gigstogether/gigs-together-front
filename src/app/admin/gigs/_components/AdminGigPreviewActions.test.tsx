@@ -4,10 +4,11 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { buildAdminGigEditRoute } from '@/app/admin/gigs/admin-gig-paths';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
 import type { AdminGigDetail } from '@/app/admin/gigs/types';
-import { GigStatus, GigStatusAPI } from '@/app/admin/gigs/types';
+import { GigStatusAPI } from '@/app/admin/gigs/types';
 
 const mockPostAdminGigApprove = vi.fn();
 const mockPostAdminGigReject = vi.fn();
+const mockPostAdminGigPost = vi.fn();
 
 vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
@@ -16,9 +17,10 @@ vi.mock('@/hooks/use-toast', () => ({
 vi.mock('@/lib/admin-api', () => ({
   postAdminGigApprove: (publicId: string) => mockPostAdminGigApprove(publicId),
   postAdminGigReject: (publicId: string) => mockPostAdminGigReject(publicId),
+  postAdminGigPost: (publicId: string) => mockPostAdminGigPost(publicId),
 }));
 
-const gig: AdminGigDetail = {
+const baseGig: AdminGigDetail = {
   publicId: 'radiohead-barcelona',
   title: 'Radiohead',
   date: '2026-06-12',
@@ -29,7 +31,7 @@ const gig: AdminGigDetail = {
   suggestedBy: { userId: '42' },
 };
 
-function renderActions(listFilter: GigStatus) {
+function renderActions(gig: AdminGigDetail = baseGig) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -41,7 +43,6 @@ function renderActions(listFilter: GigStatus) {
     <QueryClientProvider client={queryClient}>
       <AdminGigPreviewActions
         gig={gig}
-        listFilter={listFilter}
         editHref={buildAdminGigEditRoute('radiohead-barcelona')}
       />
     </QueryClientProvider>,
@@ -52,12 +53,22 @@ describe('AdminGigPreviewActions', () => {
   beforeEach(() => {
     mockPostAdminGigApprove.mockReset();
     mockPostAdminGigReject.mockReset();
+    mockPostAdminGigPost.mockReset();
     mockPostAdminGigApprove.mockResolvedValue(undefined);
     mockPostAdminGigReject.mockResolvedValue(undefined);
+    mockPostAdminGigPost.mockResolvedValue(undefined);
+  });
+
+  it('should render Approve, Edit, and Reject on pending gig', () => {
+    renderActions();
+
+    expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
   });
 
   it('should call approve endpoint when Approve is clicked on pending gig', async () => {
-    renderActions(GigStatus.Pending);
+    renderActions();
 
     fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
 
@@ -68,7 +79,7 @@ describe('AdminGigPreviewActions', () => {
   });
 
   it('should call reject endpoint when Reject is clicked on pending gig', async () => {
-    renderActions(GigStatus.Pending);
+    renderActions();
 
     fireEvent.click(screen.getByRole('button', { name: 'Reject' }));
 
@@ -79,19 +90,40 @@ describe('AdminGigPreviewActions', () => {
   });
 
   it('should show only edit action when gig is rejected', () => {
-    renderActions(GigStatus.Rejected);
+    renderActions({ ...baseGig, status: GigStatusAPI.Rejected });
 
     expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
   });
 
-  it('should link approved gigs to the public gig route', () => {
-    renderActions(GigStatus.Approved);
+  it('should render Post and Edit when approved gig has no publish post', () => {
+    renderActions({ ...baseGig, status: GigStatusAPI.Published });
 
-    expect(screen.getByRole('link', { name: 'Feed' })).toHaveAttribute(
-      'href',
-      '/gigs/radiohead-barcelona',
-    );
+    expect(screen.getByRole('button', { name: 'Post' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Public view' })).not.toBeInTheDocument();
+  });
+
+  it('should call post endpoint when Post is clicked on approved gig without publish post', async () => {
+    renderActions({ ...baseGig, status: GigStatusAPI.Published });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Post' }));
+
+    await waitFor(() => {
+      expect(mockPostAdminGigPost).toHaveBeenCalledWith('radiohead-barcelona');
+    });
+  });
+
+  it('should render only Edit when approved gig already has publishPostUrl', () => {
+    renderActions({
+      ...baseGig,
+      status: GigStatusAPI.Published,
+      publishPostUrl: 'https://t.me/gigschannel/99',
+    });
+
+    expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Post' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Post' })).not.toBeInTheDocument();
   });
 });

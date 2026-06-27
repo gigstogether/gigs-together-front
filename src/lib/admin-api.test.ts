@@ -6,6 +6,7 @@ import {
   patchAdminLanguage,
   patchAdminLanguagesOrder,
   postAdminGigApprove,
+  postAdminGigPost,
   postAdminGigReject,
 } from '@/lib/admin-api';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
@@ -315,6 +316,22 @@ describe('postAdminGigReject', () => {
     await expect(postAdminGigReject('radiohead-barcelona-2026-06-12')).resolves.toBeUndefined();
     expect(mockApiRequest).toHaveBeenCalledWith(
       'v1/admin/gig/radiohead-barcelona-2026-06-12/reject',
+      'POST',
+    );
+  });
+});
+
+describe('postAdminGigPost', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should post publish request when response succeeds', async () => {
+    mockApiRequest.mockResolvedValue(undefined);
+
+    await expect(postAdminGigPost('radiohead-barcelona-2026-06-12')).resolves.toBeUndefined();
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig/radiohead-barcelona-2026-06-12/post',
       'POST',
     );
   });

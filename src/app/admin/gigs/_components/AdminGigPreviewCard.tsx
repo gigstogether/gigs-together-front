@@ -1,14 +1,12 @@
 import type { AdminGigDetail } from '@/app/admin/gigs/types';
-import type { GigStatus } from '@/app/admin/gigs/types';
 import AdminGigCard from '@/app/admin/gigs/_components/AdminGigCard';
 
 interface AdminGigPreviewCardProps {
   readonly gig: AdminGigDetail | null;
-  readonly listFilter: GigStatus;
 }
 
 export default function AdminGigPreviewCard(props: AdminGigPreviewCardProps) {
-  const { gig, listFilter } = props;
+  const { gig } = props;
 
   if (!gig) {
     return (
@@ -18,10 +16,5 @@ export default function AdminGigPreviewCard(props: AdminGigPreviewCardProps) {
     );
   }
 
-  return (
-    <AdminGigCard
-      gig={gig}
-      listFilter={listFilter}
-    />
-  );
+  return <AdminGigCard gig={gig} />;
 }

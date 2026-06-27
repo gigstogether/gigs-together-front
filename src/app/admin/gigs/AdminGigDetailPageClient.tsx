@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 
 import { adminKeys } from '@/app/admin/adminKeys';
 import AdminGigCard from '@/app/admin/gigs/_components/AdminGigCard';
-import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/admin-gigs-filter';
 import { fetchAdminGigByPublicId } from '@/lib/admin-api';
 
 interface AdminGigDetailPageClientProps {
@@ -32,10 +31,5 @@ export default function AdminGigDetailPageClient(props: AdminGigDetailPageClient
     return <p className="text-sm text-destructive">Could not load gig.</p>;
   }
 
-  return (
-    <AdminGigCard
-      gig={gigQuery.data}
-      listFilter={getGigStatusFromAdminGigStatusAPI(gigQuery.data.status)}
-    />
-  );
+  return <AdminGigCard gig={gigQuery.data} />;
 }

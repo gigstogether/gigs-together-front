@@ -1,12 +1,17 @@
+'use client';
+
 import type { ReactNode } from 'react';
-import { AlertTriangle, Calendar, Ticket } from 'lucide-react';
+import { AlertTriangle, Calendar, ExternalLink, Rss, Ticket } from 'lucide-react';
+import Link from 'next/link';
 import { LocationIcon } from '@/components/ui/location-icon';
 import {
+  buildAdminGigPublicHref,
   formatAdminGigEventDate,
   formatAdminGigSuggestedBy,
 } from '@/app/admin/gigs/admin-gig-format';
+import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/admin-gigs-filter';
 import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
-import type { GigStatus } from '@/app/admin/gigs/types';
+import { GigStatus } from '@/app/admin/gigs/types';
 import { cn } from '@/lib/utils';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
 import AdminGigPreviewPoster from '@/app/admin/gigs/_components/AdminGigPreviewPoster';
@@ -33,15 +38,16 @@ function MetaRow(props: MetaRowProps) {
 
 interface AdminGigCardProps {
   readonly gig: AdminGigDetail | AdminGigFormData;
-  readonly listFilter: GigStatus;
 }
 
 export default function AdminGigCard(props: AdminGigCardProps) {
-  const { gig, listFilter } = props;
+  const { gig } = props;
+  const moderationStatus = getGigStatusFromAdminGigStatusAPI(gig.status);
 
   const editHref = buildAdminGigEditRoute(gig.publicId);
   const shareHref = buildAdminGigPublicIdPath(gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
+  const feedHref = buildAdminGigPublicHref(gig);
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -93,6 +99,45 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             </MetaRow>
           ) : null}
 
+          {moderationStatus === GigStatus.Approved ? (
+            <div className="border-t border-border pt-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-x-2 text-sm leading-snug">
+                <Link
+                  href={feedHref}
+                  className="inline-flex min-w-0 items-center gap-1.5 text-primary underline-offset-4 hover:underline"
+                >
+                  <Rss
+                    className="h-4 w-4 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                  Public view
+                </Link>
+                {gig.publishPostUrl ? (
+                  <>
+                    <span
+                      className="text-muted-foreground"
+                      aria-hidden
+                    >
+                      |
+                    </span>
+                    <a
+                      href={gig.publishPostUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-w-0 items-center gap-1.5 text-primary underline-offset-4 hover:underline"
+                    >
+                      <ExternalLink
+                        className="h-4 w-4 shrink-0 text-muted-foreground"
+                        aria-hidden
+                      />
+                      Post
+                    </a>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
           <p className="text-xs text-muted-foreground">
             {formatAdminGigSuggestedBy(gig.suggestedBy)}
           </p>
@@ -122,7 +167,6 @@ export default function AdminGigCard(props: AdminGigCardProps) {
       <div className="shrink-0 bg-card">
         <AdminGigPreviewActions
           gig={gig}
-          listFilter={listFilter}
           editHref={editHref}
         />
       </div>

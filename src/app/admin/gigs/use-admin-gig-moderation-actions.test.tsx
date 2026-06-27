@@ -7,6 +7,7 @@ import { useAdminGigModerationActions } from '@/app/admin/gigs/use-admin-gig-mod
 
 const mockPostAdminGigApprove = vi.fn();
 const mockPostAdminGigReject = vi.fn();
+const mockPostAdminGigPost = vi.fn();
 
 vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
@@ -15,6 +16,7 @@ vi.mock('@/hooks/use-toast', () => ({
 vi.mock('@/lib/admin-api', () => ({
   postAdminGigApprove: (publicId: string) => mockPostAdminGigApprove(publicId),
   postAdminGigReject: (publicId: string) => mockPostAdminGigReject(publicId),
+  postAdminGigPost: (publicId: string) => mockPostAdminGigPost(publicId),
 }));
 
 function createWrapper() {
@@ -34,8 +36,10 @@ describe('useAdminGigModerationActions', () => {
   beforeEach(() => {
     mockPostAdminGigApprove.mockReset();
     mockPostAdminGigReject.mockReset();
+    mockPostAdminGigPost.mockReset();
     mockPostAdminGigApprove.mockResolvedValue(undefined);
     mockPostAdminGigReject.mockResolvedValue(undefined);
+    mockPostAdminGigPost.mockResolvedValue(undefined);
   });
 
   it('should call approve endpoint when approve is invoked', async () => {
@@ -65,6 +69,21 @@ describe('useAdminGigModerationActions', () => {
 
     await waitFor(() => {
       expect(mockPostAdminGigReject).toHaveBeenCalledWith('radiohead-barcelona');
+    });
+  });
+
+  it('should call post endpoint when post is invoked', async () => {
+    const { result } = renderHook(
+      () => useAdminGigModerationActions({ publicId: 'radiohead-barcelona' }),
+      { wrapper: createWrapper() },
+    );
+
+    act(() => {
+      result.current.post();
+    });
+
+    await waitFor(() => {
+      expect(mockPostAdminGigPost).toHaveBeenCalledWith('radiohead-barcelona');
     });
   });
 });

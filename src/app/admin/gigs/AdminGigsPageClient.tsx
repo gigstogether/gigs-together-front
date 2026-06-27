@@ -132,10 +132,7 @@ export default function AdminGigsPageClient() {
       </div>
 
       <div className="mx-auto flex w-full max-w-sm sm:h-full sm:min-h-0 sm:mx-0 sm:max-w-md">
-        <AdminGigPreviewCard
-          gig={selectedGig}
-          listFilter={filter}
-        />
+        <AdminGigPreviewCard gig={selectedGig} />
       </div>
     </div>
   );

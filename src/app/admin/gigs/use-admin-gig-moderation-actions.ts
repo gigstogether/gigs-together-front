@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { adminKeys } from '@/app/admin/adminKeys';
 import { toast } from '@/hooks/use-toast';
-import { postAdminGigApprove, postAdminGigReject } from '@/lib/admin-api';
+import { postAdminGigApprove, postAdminGigPost, postAdminGigReject } from '@/lib/admin-api';
 
 interface UseAdminGigModerationActionsParams {
   readonly publicId: string;
@@ -12,8 +12,10 @@ interface UseAdminGigModerationActionsParams {
 interface AdminGigModerationActions {
   readonly isApproving: boolean;
   readonly isRejecting: boolean;
+  readonly isPosting: boolean;
   readonly approve: () => void;
   readonly reject: () => void;
+  readonly post: () => void;
 }
 
 async function invalidateAdminGigQueries(
@@ -61,10 +63,26 @@ export function useAdminGigModerationActions(
     },
   });
 
+  const postMutation = useMutation({
+    mutationFn: () => postAdminGigPost(publicId),
+    onSuccess: async () => {
+      await invalidateAdminGigQueries(queryClient, publicId);
+      toast({ title: `Gig ${publicId} posted` });
+    },
+    onError: () => {
+      toast({
+        title: `Could not post ${publicId} gig`,
+        variant: 'destructive',
+      });
+    },
+  });
+
   return {
     isApproving: approveMutation.isPending,
     isRejecting: rejectMutation.isPending,
+    isPosting: postMutation.isPending,
     approve: () => approveMutation.mutate(),
     reject: () => rejectMutation.mutate(),
+    post: () => postMutation.mutate(),
   };
 }

@@ -226,3 +226,8 @@ export function postAdminGigReject(publicId: string): Promise<void> {
   const encodedPublicId = encodeURIComponent(publicId.trim());
   return apiRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/reject`, 'POST');
 }
+
+export function postAdminGigPost(publicId: string): Promise<void> {
+  const encodedPublicId = encodeURIComponent(publicId.trim());
+  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/post`, 'POST');
+}
