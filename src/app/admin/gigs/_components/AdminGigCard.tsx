@@ -140,12 +140,28 @@ export default function AdminGigCard(props: AdminGigCardProps) {
               </div>
             )}
 
-            <p className="text-xs text-muted-foreground">
-              {formatAdminGigSuggestedBy(gig.suggestedBy)}
-            </p>
+            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <p>{formatAdminGigSuggestedBy(gig.suggestedBy)}</p>
+
+              {!!gig.moderationPostUrl && (
+                <a
+                  href={gig.moderationPostUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-w-0 items-center gap-1 text-primary underline-offset-4 hover:underline"
+                  title="Moderation post"
+                  aria-label="Moderation post"
+                >
+                  <ExternalLink
+                    className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                </a>
+              )}
+            </div>
           </div>
 
-          {gig.moderationPostDate === undefined ? (
+          {gig.moderationPostUrl === undefined ? (
             <div
               role="alert"
               className="flex items-start gap-2 rounded-md border border-amber-500/50 bg-amber-500/10 px-2.5 py-2 text-xs text-amber-950 dark:text-amber-200"

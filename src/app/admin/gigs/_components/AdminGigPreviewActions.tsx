@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
 import { GigStatus } from '@/app/admin/gigs/types';
 import Link from 'next/link';
-import { Check, ExternalLink, Loader2, Megaphone, Pencil, X } from 'lucide-react';
+import { Check, SquareArrowOutUpRight, Loader2, Megaphone, Pencil, X } from 'lucide-react';
 import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/admin-gigs-filter';
 import { useAdminGigModerationActions } from '@/app/admin/gigs/use-admin-gig-moderation-actions';
 import { Button } from '@/components/ui/button';
@@ -50,7 +50,7 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
           aria-hidden
         />
         Edit
-        <ExternalLink
+        <SquareArrowOutUpRight
           className="ml-auto h-3 w-3 opacity-60"
           aria-hidden
         />

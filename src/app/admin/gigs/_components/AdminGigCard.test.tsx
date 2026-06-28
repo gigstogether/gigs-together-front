@@ -77,4 +77,18 @@ describe('AdminGigCard', () => {
       'https://t.me/gigschannel/99',
     );
   });
+
+  it('should show moderation post link when moderationPostUrl is present', () => {
+    renderCard({
+      ...baseGig,
+      moderationPostUrl: 'https://t.me/gigschannel/77',
+    });
+
+    expect(screen.getByText('Suggested by 42')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Moderation post' })).toHaveAttribute(
+      'href',
+      'https://t.me/gigschannel/77',
+    );
+    expect(screen.queryByText('No moderation post linked.')).not.toBeInTheDocument();
+  });
 });

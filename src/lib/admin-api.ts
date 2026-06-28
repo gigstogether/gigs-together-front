@@ -71,6 +71,7 @@ const v1AdminGigListItemSchema = z
     ticketsUrl: z.string().optional(),
     publishPostUrl: z.string().optional(),
     publishPostDate: z.number().optional(),
+    moderationPostUrl: z.string().optional(),
     moderationPostDate: z.number().optional(),
   })
   .strict();
@@ -96,6 +97,7 @@ const v1AdminGigFormDataSchema = z
     suggestedBy: v1AdminGigSuggestedBySchema,
     publishPostUrl: z.string().optional(),
     publishPostDate: z.number().optional(),
+    moderationPostUrl: z.string().optional(),
     moderationPostDate: z.number().optional(),
   })
   .strict();

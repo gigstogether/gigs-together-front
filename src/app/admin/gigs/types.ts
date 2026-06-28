@@ -38,6 +38,7 @@ export interface AdminGigDetail extends AdminGigQueueItem {
   readonly publishPostUrl?: string;
   readonly publishPostDate?: number;
   readonly moderationPostDate?: number;
+  readonly moderationPostUrl?: string;
 }
 
 /** Mirrors API `GigFormDataByPublicId` — GET v1/admin/gig/:publicId. */
@@ -56,4 +57,5 @@ export interface AdminGigFormData {
   readonly publishPostUrl?: string;
   readonly publishPostDate?: number;
   readonly moderationPostDate?: number;
+  readonly moderationPostUrl?: string;
 }
