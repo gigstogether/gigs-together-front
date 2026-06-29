@@ -1,5 +1,5 @@
 import type { Event } from '@/lib/types';
-import { ShareMenu } from '@/components/ShareMenu';
+import { ShareButton } from '@/components/ShareButton';
 import { LocationIcon } from '@/components/ui/location-icon';
 import { Calendar, Ticket } from 'lucide-react';
 import { FaTelegramPlane } from 'react-icons/fa';
@@ -111,10 +111,7 @@ export function GigCard({ gig }: GigCardProps) {
           <div className="flex min-w-0 flex-1 flex-col">
             <div className="flex min-w-0 items-center gap-2">
               <p className="min-w-0 flex-1 tracking-tight font-bold dark:text-white">{gig.title}</p>
-              <ShareMenu
-                sharePath={sharePath}
-                side="top"
-              />
+              <ShareButton sharePath={sharePath} />
             </div>
             <GigDates
               date={gig.date}

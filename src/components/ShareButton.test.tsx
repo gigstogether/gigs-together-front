@@ -1,24 +1,21 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { ShareMenu } from '@/components/ShareMenu';
+import { ShareButton } from '@/components/ShareButton';
 
 vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
 }));
 
-describe('ShareMenu', () => {
+describe('ShareButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should open the share menu with a copy link option when the share button is clicked', () => {
-    render(<ShareMenu sharePath="/gigs/radiohead-barcelona" />);
-
-    expect(screen.queryByRole('button', { name: 'Copy link' })).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Share' }));
+  it('should render the copy link icon button without a visible menu option', () => {
+    render(<ShareButton sharePath="/gigs/radiohead-barcelona" />);
 
     expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
+    expect(screen.queryByText('Copy link')).not.toBeInTheDocument();
   });
 
   it('should copy the share link to the clipboard when copy link is clicked', async () => {
@@ -28,9 +25,8 @@ describe('ShareMenu', () => {
       value: { writeText },
     });
 
-    render(<ShareMenu sharePath="/gigs/radiohead-barcelona" />);
+    render(<ShareButton sharePath="/gigs/radiohead-barcelona" />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Share' }));
     fireEvent.click(screen.getByRole('button', { name: 'Copy link' }));
 
     await waitFor(() => {

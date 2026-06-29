@@ -1,6 +1,6 @@
 'use client';
 
-import { ShareMenu } from '@/components/ShareMenu';
+import { ShareButton } from '@/components/ShareButton';
 import { cn } from '@/lib/utils';
 import type { GigStatus } from '@/app/admin/gigs/types';
 import { GIG_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gigs/admin-gig-status';
@@ -27,7 +27,7 @@ export default function AdminGigPreviewTitleRow(props: AdminGigPreviewTitleRowPr
         />
         <span className="min-w-0 truncate">{title}</span>
       </h2>
-      <ShareMenu sharePath={sharePath} />
+      <ShareButton sharePath={sharePath} />
     </div>
   );
 }

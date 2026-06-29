@@ -7,8 +7,8 @@ vi.mock('@/app/_components/GigPoster', () => ({
   GigPoster: ({ title }: { title: string }) => <div>{title}</div>,
 }));
 
-vi.mock('@/components/ShareMenu', () => ({
-  ShareMenu: () => <button aria-label="Share">Share</button>,
+vi.mock('@/components/ShareButton', () => ({
+  ShareButton: () => <button aria-label="Copy link">Copy link</button>,
 }));
 
 vi.mock('@/env/client-env', () => ({
@@ -35,6 +35,6 @@ describe('GigCard', () => {
 
     expect(screen.getByText('Radiohead')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Radiohead' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
   });
 });
