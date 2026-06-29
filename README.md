@@ -4,8 +4,9 @@ Frontend for the Gigs Together platform. This repository contains a Next.js app 
 
 - redirects the root route to the public gigs feed
 - renders the public feed for supported locations
+- exposes stable public gig permalink redirects via `/gigs/[publicId]`
 - exposes a public `/suggest` placeholder and a Telegram-aware `/suggest/launch` entry
-- exposes a moderator-only `/admin` area with gig moderation, create/edit flows, and language management
+- exposes a moderator-only `/admin` area with gig moderation, posting/create/edit flows, and language management
 - exposes revalidation endpoints for cached content
 
 At the moment, the default public feed points to `es/barcelona`.
@@ -85,6 +86,7 @@ Useful routes:
 - `/` -> redirects to the default feed route
 - `/feed` -> redirects to the default feed route
 - `/feed/es/barcelona` -> current supported public feed
+- `/gigs/:publicId` -> redirects to the default feed route anchored to the target gig
 - `/suggest` -> public placeholder for the future suggestion flow
 - `/suggest/launch` -> Telegram-aware redirect into `/suggest` or the moderator gig flow
 - `/admin` -> moderator dashboard
@@ -175,6 +177,7 @@ src/
 Key areas:
 
 - `src/app/feed` contains the public feed pages and feed client logic
+- `src/app/gigs/[publicId]` contains stable public gig permalink redirects used by share actions
 - `src/app/suggest` contains the public suggest placeholder and Telegram launch routing
 - `src/app/admin` contains the moderator-only admin shell and moderation tools
 - `src/app/api/revalidate` contains manual cache revalidation endpoints
