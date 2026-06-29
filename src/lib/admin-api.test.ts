@@ -6,10 +6,11 @@ import {
   patchAdminLanguage,
   patchAdminLanguagesOrder,
   postAdminGigApprove,
+  postAdminGigPost,
   postAdminGigReject,
 } from '@/lib/admin-api';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
-import { GigStatus, GigStatusAPI } from '@/app/admin/gigs/types';
+import { GigStatusAPI, GigStatusFilter } from '@/app/admin/gigs/types';
 
 const mockApiRequest = vi.fn();
 
@@ -67,7 +68,7 @@ describe('fetchAdminGigs', () => {
       ],
     });
 
-    const result = await fetchAdminGigs({ status: GigStatus.Pending });
+    const result = await fetchAdminGigs({ status: GigStatusFilter.Pending });
 
     expect(result).toEqual({
       gigs: [
@@ -107,7 +108,7 @@ describe('fetchAdminGigs', () => {
 
     await expect(
       fetchAdminGigs({
-        status: GigStatus.Approved,
+        status: GigStatusFilter.Approved,
         sortBy: AdminGigsSortBy.CreatedAt,
         sortOrder: AdminGigsSortOrder.Desc,
       }),
@@ -126,7 +127,7 @@ describe('fetchAdminGigs', () => {
     mockApiRequest.mockResolvedValue({ gigs: [] });
 
     await fetchAdminGigs({
-      status: GigStatus.Approved,
+      status: GigStatusFilter.Approved,
       sortBy: AdminGigsSortBy.EventDate,
       sortOrder: AdminGigsSortOrder.Desc,
     });
@@ -140,7 +141,7 @@ describe('fetchAdminGigs', () => {
   it('should throw when admin gigs response is invalid', async () => {
     mockApiRequest.mockResolvedValue({ gigs: [{}] });
 
-    await expect(fetchAdminGigs({ status: GigStatus.Approved })).rejects.toThrow(
+    await expect(fetchAdminGigs({ status: GigStatusFilter.Approved })).rejects.toThrow(
       'Invalid admin gigs response',
     );
   });
@@ -315,6 +316,22 @@ describe('postAdminGigReject', () => {
     await expect(postAdminGigReject('radiohead-barcelona-2026-06-12')).resolves.toBeUndefined();
     expect(mockApiRequest).toHaveBeenCalledWith(
       'v1/admin/gig/radiohead-barcelona-2026-06-12/reject',
+      'POST',
+    );
+  });
+});
+
+describe('postAdminGigPost', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should post publish request when response succeeds', async () => {
+    mockApiRequest.mockResolvedValue(undefined);
+
+    await expect(postAdminGigPost('radiohead-barcelona-2026-06-12')).resolves.toBeUndefined();
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig/radiohead-barcelona-2026-06-12/post',
       'POST',
     );
   });

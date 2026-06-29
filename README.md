@@ -4,8 +4,9 @@ Frontend for the Gigs Together platform. This repository contains a Next.js app 
 
 - redirects the root route to the public gigs feed
 - renders the public feed for supported locations
+- exposes stable public gig permalink redirects via `/gigs/[publicId]`
 - exposes a public `/suggest` placeholder and a Telegram-aware `/suggest/launch` entry
-- exposes a moderator-only `/admin` area with gig moderation, create/edit flows, and language management
+- exposes a moderator-only `/admin` area with gig moderation, posting/create/edit flows, and language management
 - exposes revalidation endpoints for cached content
 
 At the moment, the default public feed points to `es/barcelona`.
@@ -58,7 +59,7 @@ What they are used for:
 | `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` | Optional                         | localStorage key for the cached Telegram display profile. Default: `gt_tg_client_profile`.                                                       |
 | `NEXT_PUBLIC_FEED_PAGE_SIZE`                      | Optional                         | Feed page size. Must be a positive integer. Default is `10`.                                                                                     |
 | `NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS`   | Optional                         | Calendar dates query stale time in milliseconds. Must be a positive integer. Default is `600000` (10 minutes).                                   |
-| `NEXT_PUBLIC_SUGGEST_GIG_LINK`                    | Optional                         | Link for the "suggest gig" action in the header.                                                                                                 |
+| `NEXT_PUBLIC_SUGGEST_GIG_ENABLED`                 | Optional                         | Shows/hides the public "Suggest a gig" header action. Parsed as boolean. Default: `false`. Admins always see the button when signed in.          |
 | `SITE_PREVIEW_TITLE`                              | Optional                         | SEO/social preview title. Defaults to `Gigs Together!`.                                                                                          |
 | `SITE_PREVIEW_DESCRIPTION`                        | Optional                         | SEO/social preview description. Defaults to a short product blurb.                                                                               |
 | `BRAND_NAME`                                      | Optional                         | Brand name used in metadata. Defaults to `Gigs Together`.                                                                                        |
@@ -85,6 +86,7 @@ Useful routes:
 - `/` -> redirects to the default feed route
 - `/feed` -> redirects to the default feed route
 - `/feed/es/barcelona` -> current supported public feed
+- `/gigs/:publicId` -> redirects to the default feed route anchored to the target gig
 - `/suggest` -> public placeholder for the future suggestion flow
 - `/suggest/launch` -> Telegram-aware redirect into `/suggest` or the moderator gig flow
 - `/admin` -> moderator dashboard
@@ -175,6 +177,7 @@ src/
 Key areas:
 
 - `src/app/feed` contains the public feed pages and feed client logic
+- `src/app/gigs/[publicId]` contains stable public gig permalink redirects used by share actions
 - `src/app/suggest` contains the public suggest placeholder and Telegram launch routing
 - `src/app/admin` contains the moderator-only admin shell and moderation tools
 - `src/app/api/revalidate` contains manual cache revalidation endpoints

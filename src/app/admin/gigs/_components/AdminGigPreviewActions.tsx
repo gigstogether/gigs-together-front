@@ -1,35 +1,49 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import type { Route } from 'next';
 import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
 import { GigStatus } from '@/app/admin/gigs/types';
 import Link from 'next/link';
-import { Check, ExternalLink, Link2, Loader2, Pencil, Rss, X } from 'lucide-react';
-import { buildAdminGigFeedHref } from '@/app/admin/gigs/admin-gig-format';
+import { Check, SquareArrowOutUpRight, Loader2, Megaphone, Pencil, X } from 'lucide-react';
+import { mapGigStatusFromAPI } from '@/app/admin/gigs/admin-gig-status';
 import { useAdminGigModerationActions } from '@/app/admin/gigs/use-admin-gig-moderation-actions';
-import ActionButtonLink from '@/app/admin/gigs/_components/ActionButtonLink';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface AdminGigPreviewActionsProps {
   readonly gig: AdminGigDetail | AdminGigFormData;
-  readonly listFilter: GigStatus;
   readonly editHref: Route;
 }
 
+const actionButtonClassName = 'h-9 min-w-0 flex-1 gap-1 px-2';
+
+interface ModerationActionRowProps {
+  readonly children: ReactNode;
+}
+
+function ModerationActionRow(props: ModerationActionRowProps) {
+  return <div className="flex gap-2 border-t p-2">{props.children}</div>;
+}
+
 export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProps) {
-  const { gig, listFilter, editHref } = props;
+  const { gig, editHref } = props;
 
-  const { isApproving, isRejecting, approve, reject } = useAdminGigModerationActions({
-    publicId: gig.publicId,
-  });
+  const status = mapGigStatusFromAPI(gig.status);
+  const isPublishableStatus = status === GigStatus.Approved || status === GigStatus.Published;
 
-  const isModerating = isApproving || isRejecting;
+  const { isApproving, isRejecting, isPosting, approve, reject, post } =
+    useAdminGigModerationActions({
+      publicId: gig.publicId,
+    });
+
+  const isModerating = isApproving || isRejecting || isPosting;
 
   const editButton = (
     <Button
       variant="outline"
       size="sm"
-      className="h-9 w-full gap-1 px-2"
+      className={actionButtonClassName}
       asChild
     >
       <Link href={editHref}>
@@ -38,7 +52,7 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
           aria-hidden
         />
         Edit
-        <ExternalLink
+        <SquareArrowOutUpRight
           className="ml-auto h-3 w-3 opacity-60"
           aria-hidden
         />
@@ -51,18 +65,18 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
       type="button"
       variant="outline"
       size="sm"
-      className="h-9 gap-1 px-2"
+      className={cn(actionButtonClassName, 'text-emerald-700 dark:text-emerald-400')}
       disabled={isModerating}
       onClick={approve}
     >
       {isApproving ? (
         <Loader2
-          className="h-4 w-4 animate-spin text-emerald-600"
+          className="h-4 w-4 animate-spin"
           aria-hidden
         />
       ) : (
         <Check
-          className="h-4 w-4 text-emerald-600"
+          className="h-4 w-4 shrink-0"
           aria-hidden
         />
       )}
@@ -75,18 +89,18 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
       type="button"
       variant="outline"
       size="sm"
-      className="h-9 gap-1 px-2"
+      className={cn(actionButtonClassName, 'text-destructive')}
       disabled={isModerating}
       onClick={reject}
     >
       {isRejecting ? (
         <Loader2
-          className="h-4 w-4 animate-spin text-destructive"
+          className="h-4 w-4 animate-spin"
           aria-hidden
         />
       ) : (
         <X
-          className="h-4 w-4 text-destructive"
+          className="h-4 w-4 shrink-0"
           aria-hidden
         />
       )}
@@ -94,44 +108,52 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
     </Button>
   );
 
-  if (listFilter === GigStatus.Approved) {
+  const postButton = (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className={actionButtonClassName}
+      disabled={isModerating}
+      onClick={post}
+    >
+      {isPosting ? (
+        <Loader2
+          className="h-4 w-4 animate-spin"
+          aria-hidden
+        />
+      ) : (
+        <Megaphone
+          className="h-4 w-4 shrink-0"
+          aria-hidden
+        />
+      )}
+      Post
+    </Button>
+  );
+
+  if (isPublishableStatus) {
+    if (gig.publishPostUrl) {
+      return <ModerationActionRow>{editButton}</ModerationActionRow>;
+    }
+
     return (
-      <div className="grid grid-cols-3 gap-2 border-t p-2">
-        <ActionButtonLink
-          href={gig.publishPostUrl ?? ''}
-          label="Post"
-          icon={
-            <Link2
-              className="h-4 w-4 shrink-0"
-              aria-hidden
-            />
-          }
-          isDisabled={!gig.publishPostUrl}
-        />
-        <ActionButtonLink
-          href={buildAdminGigFeedHref(gig)}
-          label="Feed"
-          icon={
-            <Rss
-              className="h-4 w-4 shrink-0"
-              aria-hidden
-            />
-          }
-        />
+      <ModerationActionRow>
+        {postButton}
         {editButton}
-      </div>
+      </ModerationActionRow>
     );
   }
 
-  if (listFilter === GigStatus.Rejected) {
-    return <div className="grid grid-cols-1 gap-2 border-t p-2">{editButton}</div>;
+  if (status === GigStatus.Rejected) {
+    return <ModerationActionRow>{editButton}</ModerationActionRow>;
   }
 
   return (
-    <div className="grid grid-cols-3 gap-2 border-t p-2">
+    <ModerationActionRow>
       {approveButton}
       {editButton}
       {rejectButton}
-    </div>
+    </ModerationActionRow>
   );
 }

@@ -5,24 +5,24 @@ import {
   getAdminGigsQueryStateOrDefaults,
 } from '@/app/admin/gigs/admin-gigs-query';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
-import { GigStatus } from '@/app/admin/gigs/types';
-import { parseGigStatusFromQuery } from '@/app/admin/gigs/admin-gigs-filter';
+import { GigStatusFilter } from '@/app/admin/gigs/types';
+import { parseGigStatusFilterFromQuery } from '@/app/admin/gigs/admin-gig-status';
 
-describe('parseGigStatusFromQuery', () => {
+describe('parseGigStatusFilterFromQuery', () => {
   it('should return pending when query value is missing', () => {
-    expect(parseGigStatusFromQuery(null)).toBe(GigStatus.Pending);
+    expect(parseGigStatusFilterFromQuery(null)).toBe(GigStatusFilter.Pending);
   });
 
   it('should return pending when query value is invalid', () => {
-    expect(parseGigStatusFromQuery('unknown')).toBe(GigStatus.Pending);
+    expect(parseGigStatusFilterFromQuery('unknown')).toBe(GigStatusFilter.Pending);
   });
 
   it('should return approved when query value is approved', () => {
-    expect(parseGigStatusFromQuery('approved')).toBe(GigStatus.Approved);
+    expect(parseGigStatusFilterFromQuery('approved')).toBe(GigStatusFilter.Approved);
   });
 
   it('should return pending when query value is published', () => {
-    expect(parseGigStatusFromQuery('published')).toBe(GigStatus.Pending);
+    expect(parseGigStatusFilterFromQuery('published')).toBe(GigStatusFilter.Pending);
   });
 });
 
@@ -30,7 +30,7 @@ describe('readAdminGigsQueryState', () => {
   it('should default to createdAt sort for rejected when sortBy is missing', () => {
     const params = new URLSearchParams('status=rejected&gig=gig-42');
     expect(getAdminGigsQueryStateOrDefaults(params)).toEqual({
-      filter: GigStatus.Rejected,
+      filter: GigStatusFilter.Rejected,
       selectedGigPublicId: 'gig-42',
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
@@ -40,7 +40,7 @@ describe('readAdminGigsQueryState', () => {
   it('should default to createdAt sort for pending when sortBy is missing', () => {
     const params = new URLSearchParams('status=pending');
     expect(getAdminGigsQueryStateOrDefaults(params)).toEqual({
-      filter: GigStatus.Pending,
+      filter: GigStatusFilter.Pending,
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
@@ -50,7 +50,7 @@ describe('readAdminGigsQueryState', () => {
   it('should default to createdAt sort for approved when sortBy is missing', () => {
     const params = new URLSearchParams('status=approved');
     expect(getAdminGigsQueryStateOrDefaults(params)).toEqual({
-      filter: GigStatus.Approved,
+      filter: GigStatusFilter.Approved,
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
@@ -60,7 +60,7 @@ describe('readAdminGigsQueryState', () => {
   it('should read explicit sort params from search params', () => {
     const params = new URLSearchParams('status=approved&sortBy=eventDate&sortOrder=asc');
     expect(getAdminGigsQueryStateOrDefaults(params)).toEqual({
-      filter: GigStatus.Approved,
+      filter: GigStatusFilter.Approved,
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.EventDate,
       sortOrder: AdminGigsSortOrder.Asc,
@@ -70,7 +70,7 @@ describe('readAdminGigsQueryState', () => {
   it('should fall back to createdAt when sortBy is postDate', () => {
     const params = new URLSearchParams('status=approved&sortBy=postDate&sortOrder=asc');
     expect(getAdminGigsQueryStateOrDefaults(params)).toEqual({
-      filter: GigStatus.Approved,
+      filter: GigStatusFilter.Approved,
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Asc,
@@ -81,7 +81,7 @@ describe('readAdminGigsQueryState', () => {
 describe('buildAdminGigsSearchParams', () => {
   it('should omit gig param when selection is cleared', () => {
     const params = buildAdminGigsSearchParams({
-      filter: GigStatus.Pending,
+      filter: GigStatusFilter.Pending,
       selectedGigPublicId: null,
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,
@@ -91,7 +91,7 @@ describe('buildAdminGigsSearchParams', () => {
 
   it('should include gig param when gig is selected', () => {
     const params = buildAdminGigsSearchParams({
-      filter: GigStatus.Pending,
+      filter: GigStatusFilter.Pending,
       selectedGigPublicId: 'radiohead-barcelona-2026-06-12',
       sortBy: AdminGigsSortBy.CreatedAt,
       sortOrder: AdminGigsSortOrder.Desc,

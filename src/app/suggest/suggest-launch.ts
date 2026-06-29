@@ -1,9 +1,9 @@
 import type { Route } from 'next';
 
 import { ADMIN_GIGS_NEW_ROUTE, buildAdminGigEditRoute } from '@/app/admin/gigs/admin-gig-paths';
+import { SUGGEST_ROUTE } from '@/app/suggest/suggest-paths';
 
 const GIG_FORM_START_PARAM_PATTERN = /^[a-z0-9-]{1,64}$/i;
-const SUGGEST_ROUTE: Route = '/suggest';
 
 export function resolveAdminGigLaunchPath(startParam: string | undefined): Route {
   const trimmedStartParam = startParam?.trim();

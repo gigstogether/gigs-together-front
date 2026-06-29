@@ -47,6 +47,24 @@ describe('env/client', () => {
     });
   });
 
+  describe('NEXT_PUBLIC_SUGGEST_GIG_ENABLED', () => {
+    it('should set isPublicSuggestGigEnabled to false when env var is missing', async () => {
+      vi.stubEnv('NEXT_PUBLIC_SUGGEST_GIG_ENABLED', undefined);
+
+      const clientEnvModule = await importClientEnv();
+
+      expect(clientEnvModule.clientEnv.isPublicSuggestGigEnabled).toBe(false);
+    });
+
+    it('should set isPublicSuggestGigEnabled to true when env var is true', async () => {
+      vi.stubEnv('NEXT_PUBLIC_SUGGEST_GIG_ENABLED', 'true');
+
+      const clientEnvModule = await importClientEnv();
+
+      expect(clientEnvModule.clientEnv.isPublicSuggestGigEnabled).toBe(true);
+    });
+  });
+
   describe('FEED_PAGE_SIZE', () => {
     it('should use default feed page size when env var is missing', async () => {
       vi.stubEnv('NEXT_PUBLIC_FEED_PAGE_SIZE', undefined);

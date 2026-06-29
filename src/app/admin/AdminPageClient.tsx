@@ -8,7 +8,7 @@ import { adminNavItems } from '@/app/admin/admin-nav-config';
 import { adminKeys } from '@/app/admin/adminKeys';
 import { ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/admin-gig-paths';
 import { ADMIN_GIGS_QUERY_STATUS } from '@/app/admin/gigs/admin-gigs-query';
-import { GigStatus } from '@/app/admin/gigs/types';
+import { GigStatusFilter } from '@/app/admin/gigs/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { fetchAdminDashboard } from '@/lib/admin-api';
 
@@ -31,7 +31,7 @@ export default function AdminPageClient() {
         <Link
           href={{
             pathname: ADMIN_GIGS_BASE_PATH,
-            query: { [ADMIN_GIGS_QUERY_STATUS]: GigStatus.Pending },
+            query: { [ADMIN_GIGS_QUERY_STATUS]: GigStatusFilter.Pending },
           }}
         >
           <Card className="border shadow-sm">
@@ -46,7 +46,7 @@ export default function AdminPageClient() {
         <Link
           href={{
             pathname: ADMIN_GIGS_BASE_PATH,
-            query: { [ADMIN_GIGS_QUERY_STATUS]: GigStatus.Approved },
+            query: { [ADMIN_GIGS_QUERY_STATUS]: GigStatusFilter.Approved },
           }}
         >
           <Card className="border shadow-sm">

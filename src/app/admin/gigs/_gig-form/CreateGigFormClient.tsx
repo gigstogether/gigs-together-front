@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/admin/gigs/_gig-form/_components/GigFormFields';
@@ -67,7 +67,6 @@ export default function CreateGigFormClient(props: CreateGigFormClientProps) {
     <Card className="w-full max-w-md m-auto border-0">
       <CardHeader>
         <CardTitle>Suggest a gig</CardTitle>
-        <CardDescription>Create a gig entry in the system.</CardDescription>
       </CardHeader>
       <CardContent>
         <form

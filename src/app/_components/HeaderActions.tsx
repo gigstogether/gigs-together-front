@@ -7,6 +7,8 @@ import { SlidersHorizontal } from 'lucide-react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
 import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
 import HeaderSignInModal from '@/app/_components/HeaderSignInModal';
+import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/admin-gig-paths';
+import { SUGGEST_ROUTE } from '@/app/suggest/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationIcon } from '@/components/ui/location-icon';
 import { clientEnv } from '@/env/client-env';
@@ -29,29 +31,36 @@ const headerMenuNavItemClass =
 export interface HeaderActionsProps {
   readonly country: string;
   readonly city: string;
-  readonly showSuggestGig?: boolean;
 }
 
+const adminHref: Route = '/admin';
+const aboutHref: Route = '/about';
+
 export default function HeaderActions(props: HeaderActionsProps) {
-  const { country, city, showSuggestGig = true } = props;
+  const { country, city } = props;
 
   const locationLabel = city ? normalizeLocationTitle(city) : country.toUpperCase();
   const telegramUrl = clientEnv.telegramUrl;
   const githubUrl = clientEnv.githubUrl;
-  const suggestGigUrl = showSuggestGig ? clientEnv.suggestGigLink : undefined;
   const isAuthEnabled = clientEnv.isAuthEnabled;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const [locationTipOpen, setLocationTipOpen] = useState(false);
+
   const { authState } = useTelegramAuth();
   const miniAppEnv = useTelegramMiniAppEnv();
+
   const telegramBotUsername = clientEnv.telegramBotUsername;
+  const isAdmin = authState?.isAdmin === true;
+  const suggestGigHref = isAdmin
+    ? ADMIN_GIGS_NEW_ROUTE
+    : clientEnv.isPublicSuggestGigEnabled
+      ? SUGGEST_ROUTE
+      : undefined;
   const isSignInShownInMenu =
     isAuthEnabled && Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
   const hasVisibleAuthState = Boolean(authState);
-  const adminHref: Route = '/admin';
-  const aboutHref: Route = '/about';
 
   /** Profile / Sign in row is visible — same predicates as HeaderAuthActions non-empty UX. */
   const hasAuthPrimaryRow = hasVisibleAuthState || isSignInShownInMenu;
@@ -68,8 +77,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
 
   return (
     <div className="min-w-0 justify-self-end flex items-center space-x-4">
-      {/* Desktop actions */}
-      <div className="hidden sm:flex items-center space-x-4">
+      <div className="hidden sm:block">
         <Popover
           open={locationTipOpen}
           onOpenChange={setLocationTipOpen}
@@ -91,24 +99,25 @@ export default function HeaderActions(props: HeaderActionsProps) {
             Currently, we only support one location: Barcelona.
           </PopoverContent>
         </Popover>
+      </div>
 
-        {!!suggestGigUrl && (
-          <a
-            href={suggestGigUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-md bg-black px-2 py-1.5 text-sm font-medium text-white hover:bg-black/90 whitespace-nowrap lg:px-3"
-            aria-label="Suggest a gig"
-            title="Suggest a gig"
-          >
-            <span className="hidden lg:inline">Suggest a gig</span>
-            <FaRegLightbulb
-              className="text-[1.05em] lg:hidden"
-              aria-hidden
-            />
-          </a>
-        )}
+      {!!suggestGigHref && (
+        <Link
+          href={suggestGigHref}
+          className="inline-flex items-center justify-center rounded-md bg-black px-2 py-1.5 text-sm font-medium text-white hover:bg-black/90 whitespace-nowrap lg:px-3"
+          aria-label="Suggest a gig"
+          title="Suggest a gig"
+        >
+          <span className="hidden lg:inline">Suggest a gig</span>
+          <FaRegLightbulb
+            className="text-[1.05em] lg:hidden"
+            aria-hidden
+          />
+        </Link>
+      )}
 
+      {/* Desktop actions */}
+      <div className="hidden sm:flex items-center space-x-4">
         {!!telegramUrl && (
           <a
             href={telegramUrl}
@@ -196,22 +205,6 @@ export default function HeaderActions(props: HeaderActionsProps) {
             <div className="flex flex-col gap-1">
               <HeaderAuthActions />
               {showDividerAfterAuthMobile ? <HeaderMenuDivider /> : null}
-
-              {!!suggestGigUrl && (
-                <>
-                  <a
-                    href={suggestGigUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={headerMenuNavItemClass}
-                    onClick={() => setMobileMenuOpen(false)}
-                    aria-label="Suggest a gig"
-                  >
-                    <FaRegLightbulb className="h-4 w-4" />
-                    Suggest a gig
-                  </a>
-                </>
-              )}
 
               <Popover>
                 <PopoverTrigger

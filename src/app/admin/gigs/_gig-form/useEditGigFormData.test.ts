@@ -111,6 +111,7 @@ describe('useEditGigFormData', () => {
       signal: expect.any(AbortSignal),
     });
     expect(result.current.editGigData.existingPosterUrl).toBe('https://images.example/poster.png');
+    expect(result.current.editGigData.gigStatus).toBe(GigStatusAPI.Pending);
     expect(result.current.form.getValues()).toEqual({
       title: 'Arctic Monkeys',
       date: '2026-07-01',
@@ -132,6 +133,7 @@ describe('useEditGigFormData', () => {
     });
 
     expect(result.current.editGigData.isPrefilled).toBe(false);
+    expect(result.current.editGigData.gigStatus).toBe(null);
     expect(toastMock).toHaveBeenCalledWith({
       title: "Couldn't load gig",
       description: 'Request failed',
@@ -160,6 +162,7 @@ describe('useEditGigFormData', () => {
     });
 
     expect(vi.mocked(fetchAdminGigByPublicId)).toHaveBeenCalledTimes(2);
+    expect(result.current.editGigData.gigStatus).toBe(GigStatusAPI.Pending);
     expect(result.current.form.getValues()).toEqual({
       title: 'Arctic Monkeys',
       date: '2026-07-01',

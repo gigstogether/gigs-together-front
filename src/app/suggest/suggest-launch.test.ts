@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
+import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/admin-gig-paths';
 import { resolveAdminGigLaunchPath, resolveSuggestLaunchPath } from '@/app/suggest/suggest-launch';
+import { SUGGEST_ROUTE } from '@/app/suggest/suggest-paths';
 
 describe('resolveAdminGigLaunchPath', () => {
   it('should route to create page when start param is missing', () => {
-    expect(resolveAdminGigLaunchPath(undefined)).toBe('/admin/gigs/new');
+    expect(resolveAdminGigLaunchPath(undefined)).toBe(ADMIN_GIGS_NEW_ROUTE);
   });
 
   it('should route to edit page when start param is valid', () => {
@@ -14,13 +16,13 @@ describe('resolveAdminGigLaunchPath', () => {
   });
 
   it('should route to create page when start param is invalid', () => {
-    expect(resolveAdminGigLaunchPath('bad/value')).toBe('/admin/gigs/new');
+    expect(resolveAdminGigLaunchPath('bad/value')).toBe(ADMIN_GIGS_NEW_ROUTE);
   });
 });
 
 describe('resolveSuggestLaunchPath', () => {
   it('should route admin users to the create gig form when start param is missing', () => {
-    expect(resolveSuggestLaunchPath(true, undefined)).toBe('/admin/gigs/new');
+    expect(resolveSuggestLaunchPath(true, undefined)).toBe(ADMIN_GIGS_NEW_ROUTE);
   });
 
   it('should route admin users to the edit gig form when start param is valid', () => {
@@ -30,6 +32,6 @@ describe('resolveSuggestLaunchPath', () => {
   });
 
   it('should route non-admin users to the public suggest page', () => {
-    expect(resolveSuggestLaunchPath(false, 'dev-stub-qwe-new-2026-06-29')).toBe('/suggest');
+    expect(resolveSuggestLaunchPath(false, 'dev-stub-qwe-new-2026-06-29')).toBe(SUGGEST_ROUTE);
   });
 });

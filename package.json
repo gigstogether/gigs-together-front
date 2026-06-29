@@ -1,6 +1,6 @@
 {
   "name": "gigs-together-front",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Next.js frontend for browsing gigs, submitting events, and managing content.",
   "private": false,
   "author": "Arina M",
@@ -33,7 +33,7 @@
     "@tanstack/react-query-devtools": "^5.99.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.453.0",
+    "lucide-react": "^1.21.0",
     "next": "^16.1.4",
     "react": "^19.2.3",
     "react-day-picker": "^9.13.0",

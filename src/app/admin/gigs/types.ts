@@ -8,6 +8,14 @@ export enum GigStatusAPI {
 }
 
 export enum GigStatus {
+  New = 'New',
+  Pending = 'Pending',
+  Approved = 'Approved',
+  Published = 'Published',
+  Rejected = 'Rejected',
+}
+
+export enum GigStatusFilter {
   Pending = 'pending',
   Approved = 'approved',
   Rejected = 'rejected',
@@ -38,6 +46,7 @@ export interface AdminGigDetail extends AdminGigQueueItem {
   readonly publishPostUrl?: string;
   readonly publishPostDate?: number;
   readonly moderationPostDate?: number;
+  readonly moderationPostUrl?: string;
 }
 
 /** Mirrors API `GigFormDataByPublicId` — GET v1/admin/gig/:publicId. */
@@ -56,4 +65,5 @@ export interface AdminGigFormData {
   readonly publishPostUrl?: string;
   readonly publishPostDate?: number;
   readonly moderationPostDate?: number;
+  readonly moderationPostUrl?: string;
 }

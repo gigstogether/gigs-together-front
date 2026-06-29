@@ -17,10 +17,10 @@ import type { AdminGigsQueryState } from '@/app/admin/gigs/admin-gigs-query';
 import type { AdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
 import { ADMIN_GIGS_DEFAULT_SORT_BY } from '@/app/admin/gigs/admin-gigs-sort';
 import { AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
-import type { GigStatus } from '@/app/admin/gigs/types';
+import type { GigStatusFilter } from '@/app/admin/gigs/types';
 import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/admin-gig-paths';
 import { fetchAdminGigs } from '@/lib/admin-api';
-import { getGigStatusEmptyMessage } from '@/app/admin/gigs/admin-gigs-filter';
+import { getGigStatusEmptyMessage } from '@/app/admin/gigs/admin-gig-status';
 
 export default function AdminGigsPageClient() {
   const router = useRouter();
@@ -64,7 +64,7 @@ export default function AdminGigsPageClient() {
 
   const selectedGig = gigs.find((g) => g.publicId === effectiveSelectedPublicId) ?? null;
 
-  const handleFilterChange = (next: GigStatus) => {
+  const handleFilterChange = (next: GigStatusFilter) => {
     replaceQuery({
       filter: next,
       selectedGigPublicId: null,
@@ -132,10 +132,7 @@ export default function AdminGigsPageClient() {
       </div>
 
       <div className="mx-auto flex w-full max-w-sm sm:h-full sm:min-h-0 sm:mx-0 sm:max-w-md">
-        <AdminGigPreviewCard
-          gig={selectedGig}
-          listFilter={filter}
-        />
+        <AdminGigPreviewCard gig={selectedGig} />
       </div>
     </div>
   );

@@ -2,14 +2,14 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 
-import { GIG_FILTER_STATUSES, getGigStatusLabel } from '@/app/admin/gigs/admin-gigs-filter';
-import type { GigStatus } from '@/app/admin/gigs/types';
+import { GIG_FILTER_STATUSES, getGigStatusLabel } from '@/app/admin/gigs/admin-gig-status';
+import type { GigStatusFilter } from '@/app/admin/gigs/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface AdminGigsFilterControlsProps {
-  readonly filter: GigStatus;
-  readonly onFilterChange: (status: GigStatus) => void;
+  readonly filter: GigStatusFilter;
+  readonly onFilterChange: (status: GigStatusFilter) => void;
   readonly newGigHref: Route;
 }
 

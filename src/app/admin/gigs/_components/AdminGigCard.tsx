@@ -1,12 +1,17 @@
+'use client';
+
 import type { ReactNode } from 'react';
-import { AlertTriangle, Calendar, Ticket } from 'lucide-react';
+import { AlertTriangle, Calendar, ExternalLink, Rss, Ticket } from 'lucide-react';
+import Link from 'next/link';
 import { LocationIcon } from '@/components/ui/location-icon';
 import {
+  buildAdminGigPublicHref,
   formatAdminGigEventDate,
   formatAdminGigSuggestedBy,
 } from '@/app/admin/gigs/admin-gig-format';
+import { mapGigStatusFromAPI } from '@/app/admin/gigs/admin-gig-status';
 import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
-import type { GigStatus } from '@/app/admin/gigs/types';
+import { GigStatus } from '@/app/admin/gigs/types';
 import { cn } from '@/lib/utils';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
 import AdminGigPreviewPoster from '@/app/admin/gigs/_components/AdminGigPreviewPoster';
@@ -33,15 +38,20 @@ function MetaRow(props: MetaRowProps) {
 
 interface AdminGigCardProps {
   readonly gig: AdminGigDetail | AdminGigFormData;
-  readonly listFilter: GigStatus;
 }
 
 export default function AdminGigCard(props: AdminGigCardProps) {
-  const { gig, listFilter } = props;
+  const { gig } = props;
+
+  const status = mapGigStatusFromAPI(gig.status);
 
   const editHref = buildAdminGigEditRoute(gig.publicId);
   const shareHref = buildAdminGigPublicIdPath(gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
+  const feedHref = buildAdminGigPublicHref(gig);
+  const hasPublicLinks =
+    (status === GigStatus.Approved || status === GigStatus.Published) &&
+    !!(feedHref || gig.publishPostUrl);
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -50,7 +60,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
           <AdminGigPreviewTitleRow
             title={gig.title}
             sharePath={shareHref}
-            status={gig.status}
+            status={status}
           />
 
           <MetaRow
@@ -93,11 +103,67 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             </MetaRow>
           ) : null}
 
-          <p className="text-xs text-muted-foreground">
-            {formatAdminGigSuggestedBy(gig.suggestedBy)}
-          </p>
+          <div className="border-t border-border pt-2 pb-1 space-y-2">
+            {hasPublicLinks && (
+              <div className="flex min-w-0 flex-wrap items-center gap-x-2 text-sm leading-snug">
+                <Link
+                  href={feedHref}
+                  className="inline-flex min-w-0 items-center gap-1.5 text-primary underline-offset-4 hover:underline"
+                >
+                  <Rss
+                    className="h-4 w-4 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                  Public view
+                </Link>
 
-          {gig.moderationPostDate === undefined ? (
+                {!!gig.publishPostUrl && (
+                  <>
+                    <span
+                      className="text-muted-foreground"
+                      aria-hidden
+                    >
+                      |
+                    </span>
+                    <a
+                      href={gig.publishPostUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-w-0 items-center gap-1.5 text-primary underline-offset-4 hover:underline"
+                    >
+                      <ExternalLink
+                        className="h-4 w-4 shrink-0 text-muted-foreground"
+                        aria-hidden
+                      />
+                      Post
+                    </a>
+                  </>
+                )}
+              </div>
+            )}
+
+            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <p>{formatAdminGigSuggestedBy(gig.suggestedBy)}</p>
+
+              {!!gig.moderationPostUrl && (
+                <a
+                  href={gig.moderationPostUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-w-0 items-center gap-1 text-primary underline-offset-4 hover:underline"
+                  title="Moderation post"
+                  aria-label="Moderation post"
+                >
+                  <ExternalLink
+                    className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                </a>
+              )}
+            </div>
+          </div>
+
+          {gig.moderationPostUrl === undefined ? (
             <div
               role="alert"
               className="flex items-start gap-2 rounded-md border border-amber-500/50 bg-amber-500/10 px-2.5 py-2 text-xs text-amber-950 dark:text-amber-200"
@@ -122,7 +188,6 @@ export default function AdminGigCard(props: AdminGigCardProps) {
       <div className="shrink-0 bg-card">
         <AdminGigPreviewActions
           gig={gig}
-          listFilter={listFilter}
           editHref={editHref}
         />
       </div>

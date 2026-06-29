@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { GigStatusAPI } from '@/app/admin/gigs/types';
-import type { AdminGigDetail, AdminGigFormData, GigStatus } from '@/app/admin/gigs/types';
+import type { AdminGigDetail, AdminGigFormData, GigStatusFilter } from '@/app/admin/gigs/types';
 import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 import { apiRequest } from '@/lib/api';
 
@@ -71,6 +71,7 @@ const v1AdminGigListItemSchema = z
     ticketsUrl: z.string().optional(),
     publishPostUrl: z.string().optional(),
     publishPostDate: z.number().optional(),
+    moderationPostUrl: z.string().optional(),
     moderationPostDate: z.number().optional(),
   })
   .strict();
@@ -96,6 +97,7 @@ const v1AdminGigFormDataSchema = z
     suggestedBy: v1AdminGigSuggestedBySchema,
     publishPostUrl: z.string().optional(),
     publishPostDate: z.number().optional(),
+    moderationPostUrl: z.string().optional(),
     moderationPostDate: z.number().optional(),
   })
   .strict();
@@ -105,7 +107,7 @@ export interface AdminGigsList {
 }
 
 export interface FetchAdminGigsParams {
-  readonly status: GigStatus;
+  readonly status: GigStatusFilter;
   readonly limit?: number;
   readonly sortBy?: AdminGigsSortBy;
   readonly sortOrder?: AdminGigsSortOrder;
@@ -225,4 +227,9 @@ export function postAdminGigApprove(publicId: string): Promise<void> {
 export function postAdminGigReject(publicId: string): Promise<void> {
   const encodedPublicId = encodeURIComponent(publicId.trim());
   return apiRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/reject`, 'POST');
+}
+
+export function postAdminGigPost(publicId: string): Promise<void> {
+  const encodedPublicId = encodeURIComponent(publicId.trim());
+  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/post`, 'POST');
 }

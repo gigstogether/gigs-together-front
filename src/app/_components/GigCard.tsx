@@ -1,4 +1,5 @@
 import type { Event } from '@/lib/types';
+import { ShareButton } from '@/components/ShareButton';
 import { LocationIcon } from '@/components/ui/location-icon';
 import { Calendar, Ticket } from 'lucide-react';
 import { FaTelegramPlane } from 'react-icons/fa';
@@ -89,6 +90,7 @@ export function GigCard({ gig }: GigCardProps) {
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
     : undefined;
   const telegramUrl = gig.postUrl ?? clientEnv.telegramUrl;
+  const sharePath = `/gigs/${encodeURIComponent(gig.id)}`;
 
   return (
     <div className="flex w-full flex-col bg-white rounded-lg dark:bg-gray-800 dark:border-gray-700">
@@ -104,17 +106,13 @@ export function GigCard({ gig }: GigCardProps) {
           aria-hidden
         />
       )}
-      <div className="p-2">
+      <div className="py-2 pl-1">
         <div className="flex min-w-0 flex-row gap-4 items-center">
           <div className="flex min-w-0 flex-1 flex-col">
-            <a
-              href={`#${gig.id}`}
-              className="tracking-tight dark:text-white font-bold hover:underline underline-offset-2"
-              title="Link to this event"
-              aria-label={`Link to event: ${gig.title}`}
-            >
-              {gig.title}
-            </a>
+            <div className="flex min-w-0 items-center gap-2">
+              <p className="min-w-0 flex-1 tracking-tight font-bold dark:text-white">{gig.title}</p>
+              <ShareButton sharePath={sharePath} />
+            </div>
             <GigDates
               date={gig.date}
               endDate={gig.endDate}
