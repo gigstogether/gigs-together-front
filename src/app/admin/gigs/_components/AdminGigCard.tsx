@@ -9,7 +9,7 @@ import {
   formatAdminGigEventDate,
   formatAdminGigSuggestedBy,
 } from '@/app/admin/gigs/admin-gig-format';
-import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/admin-gigs-filter';
+import { mapGigStatusFromAPI } from '@/app/admin/gigs/admin-gig-status';
 import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
 import { GigStatus } from '@/app/admin/gigs/types';
 import { cn } from '@/lib/utils';
@@ -42,14 +42,14 @@ interface AdminGigCardProps {
 
 export default function AdminGigCard(props: AdminGigCardProps) {
   const { gig } = props;
-  const moderationStatus = getGigStatusFromAdminGigStatusAPI(gig.status);
+
+  const status = mapGigStatusFromAPI(gig.status);
 
   const editHref = buildAdminGigEditRoute(gig.publicId);
   const shareHref = buildAdminGigPublicIdPath(gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
   const feedHref = buildAdminGigPublicHref(gig);
-  const hasPublicLinks =
-    moderationStatus === GigStatus.Approved && !!(feedHref || gig.publishPostUrl);
+  const hasPublicLinks = status === GigStatus.Approved && !!(feedHref || gig.publishPostUrl);
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -58,7 +58,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
           <AdminGigPreviewTitleRow
             title={gig.title}
             sharePath={shareHref}
-            status={gig.status}
+            status={status}
           />
 
           <MetaRow

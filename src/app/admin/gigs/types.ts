@@ -8,6 +8,14 @@ export enum GigStatusAPI {
 }
 
 export enum GigStatus {
+  New = 'New',
+  Pending = 'Pending',
+  Approved = 'Approved',
+  Published = 'Published',
+  Rejected = 'Rejected',
+}
+
+export enum GigStatusFilter {
   Pending = 'pending',
   Approved = 'approved',
   Rejected = 'rejected',

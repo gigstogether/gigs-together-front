@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { GigStatusAPI } from '@/app/admin/gigs/types';
-import type { AdminGigDetail, AdminGigFormData, GigStatus } from '@/app/admin/gigs/types';
+import type { AdminGigDetail, AdminGigFormData, GigStatusFilter } from '@/app/admin/gigs/types';
 import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 import { apiRequest } from '@/lib/api';
 
@@ -107,7 +107,7 @@ export interface AdminGigsList {
 }
 
 export interface FetchAdminGigsParams {
-  readonly status: GigStatus;
+  readonly status: GigStatusFilter;
   readonly limit?: number;
   readonly sortBy?: AdminGigsSortBy;
   readonly sortOrder?: AdminGigsSortOrder;

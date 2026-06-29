@@ -1,10 +1,10 @@
-import type { GigStatus } from '@/app/admin/gigs/types';
+import type { GigStatusFilter } from '@/app/admin/gigs/types';
 import {
   parseAdminGigsSortByFromQuery,
   parseAdminGigsSortOrderFromQuery,
 } from '@/app/admin/gigs/admin-gigs-sort';
 import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
-import { parseGigStatusFromQuery } from '@/app/admin/gigs/admin-gigs-filter';
+import { parseGigStatusFilterFromQuery } from '@/app/admin/gigs/admin-gig-status';
 
 export const ADMIN_GIGS_QUERY_STATUS = 'status';
 export const ADMIN_GIGS_QUERY_GIG = 'gig';
@@ -12,7 +12,7 @@ export const ADMIN_GIGS_QUERY_SORT_BY = 'sortBy';
 export const ADMIN_GIGS_QUERY_SORT_ORDER = 'sortOrder';
 
 export interface AdminGigsQueryState {
-  readonly filter: GigStatus;
+  readonly filter: GigStatusFilter;
   readonly selectedGigPublicId: string | null;
   readonly sortBy: AdminGigsSortBy;
   readonly sortOrder: AdminGigsSortOrder;
@@ -21,7 +21,7 @@ export interface AdminGigsQueryState {
 export function getAdminGigsQueryStateOrDefaults(
   searchParams: Pick<URLSearchParams, 'get'>,
 ): AdminGigsQueryState {
-  const filter = parseGigStatusFromQuery(searchParams.get(ADMIN_GIGS_QUERY_STATUS));
+  const filter = parseGigStatusFilterFromQuery(searchParams.get(ADMIN_GIGS_QUERY_STATUS));
   const sortBy = parseAdminGigsSortByFromQuery(searchParams.get(ADMIN_GIGS_QUERY_SORT_BY));
   const sortOrder = parseAdminGigsSortOrderFromQuery(searchParams.get(ADMIN_GIGS_QUERY_SORT_ORDER));
   const selectedGigPublicId = searchParams.get(ADMIN_GIGS_QUERY_GIG)?.trim() || null;

@@ -6,7 +6,7 @@ import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
 import { GigStatus } from '@/app/admin/gigs/types';
 import Link from 'next/link';
 import { Check, SquareArrowOutUpRight, Loader2, Megaphone, Pencil, X } from 'lucide-react';
-import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/admin-gigs-filter';
+import { mapGigStatusFromAPI } from '@/app/admin/gigs/admin-gig-status';
 import { useAdminGigModerationActions } from '@/app/admin/gigs/use-admin-gig-moderation-actions';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -28,7 +28,8 @@ function ModerationActionRow(props: ModerationActionRowProps) {
 
 export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProps) {
   const { gig, editHref } = props;
-  const moderationStatus = getGigStatusFromAdminGigStatusAPI(gig.status);
+
+  const status = mapGigStatusFromAPI(gig.status);
 
   const { isApproving, isRejecting, isPosting, approve, reject, post } =
     useAdminGigModerationActions({
@@ -130,7 +131,7 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
     </Button>
   );
 
-  if (moderationStatus === GigStatus.Approved) {
+  if (status === GigStatus.Approved) {
     if (gig.publishPostUrl) {
       return <ModerationActionRow>{editButton}</ModerationActionRow>;
     }
@@ -143,7 +144,7 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
     );
   }
 
-  if (moderationStatus === GigStatus.Rejected) {
+  if (status === GigStatus.Rejected) {
     return <ModerationActionRow>{editButton}</ModerationActionRow>;
   }
 

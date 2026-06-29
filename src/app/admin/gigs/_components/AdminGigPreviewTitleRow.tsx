@@ -1,26 +1,18 @@
 'use client';
 
-import { getGigStatusFromAdminGigStatusAPI } from '@/app/admin/gigs/admin-gigs-filter';
-import type { GigStatusAPI } from '@/app/admin/gigs/types';
 import { ShareMenu } from '@/components/ShareMenu';
 import { cn } from '@/lib/utils';
+import type { GigStatus } from '@/app/admin/gigs/types';
+import { GIG_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gigs/admin-gig-status';
 
 interface AdminGigPreviewTitleRowProps {
   readonly title: string;
   readonly sharePath: string;
-  readonly status: GigStatusAPI;
+  readonly status: GigStatus;
 }
-
-const GIG_STATUS_DOT_CLASS_NAMES = {
-  pending: 'bg-yellow-500',
-  approved: 'bg-emerald-500',
-  rejected: 'bg-rose-500',
-} as const;
 
 export default function AdminGigPreviewTitleRow(props: AdminGigPreviewTitleRowProps) {
   const { title, sharePath, status } = props;
-
-  const normalizedStatus = getGigStatusFromAdminGigStatusAPI(status);
 
   return (
     <div className="flex min-w-0 items-center gap-2">
@@ -28,7 +20,7 @@ export default function AdminGigPreviewTitleRow(props: AdminGigPreviewTitleRowPr
         <span
           className={cn(
             'inline-block h-1.5 w-1.5 shrink-0 self-center rounded-full',
-            GIG_STATUS_DOT_CLASS_NAMES[normalizedStatus],
+            GIG_STATUS_DOT_CLASS_NAMES[status],
           )}
           title={status}
           aria-label={status}
