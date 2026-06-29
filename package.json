@@ -1,6 +1,6 @@
 {
   "name": "gigs-together-front",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Next.js frontend for browsing gigs, submitting events, and managing content.",
   "private": false,
   "author": "Arina M",
