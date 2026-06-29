@@ -10,7 +10,7 @@ import {
   postAdminGigReject,
 } from '@/lib/admin-api';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
-import { GigStatus, GigStatusAPI } from '@/app/admin/gigs/types';
+import { GigStatusAPI, GigStatusFilter } from '@/app/admin/gigs/types';
 
 const mockApiRequest = vi.fn();
 
@@ -68,7 +68,7 @@ describe('fetchAdminGigs', () => {
       ],
     });
 
-    const result = await fetchAdminGigs({ status: GigStatus.Pending });
+    const result = await fetchAdminGigs({ status: GigStatusFilter.Pending });
 
     expect(result).toEqual({
       gigs: [
@@ -108,7 +108,7 @@ describe('fetchAdminGigs', () => {
 
     await expect(
       fetchAdminGigs({
-        status: GigStatus.Approved,
+        status: GigStatusFilter.Approved,
         sortBy: AdminGigsSortBy.CreatedAt,
         sortOrder: AdminGigsSortOrder.Desc,
       }),
@@ -127,7 +127,7 @@ describe('fetchAdminGigs', () => {
     mockApiRequest.mockResolvedValue({ gigs: [] });
 
     await fetchAdminGigs({
-      status: GigStatus.Approved,
+      status: GigStatusFilter.Approved,
       sortBy: AdminGigsSortBy.EventDate,
       sortOrder: AdminGigsSortOrder.Desc,
     });
@@ -141,7 +141,7 @@ describe('fetchAdminGigs', () => {
   it('should throw when admin gigs response is invalid', async () => {
     mockApiRequest.mockResolvedValue({ gigs: [{}] });
 
-    await expect(fetchAdminGigs({ status: GigStatus.Approved })).rejects.toThrow(
+    await expect(fetchAdminGigs({ status: GigStatusFilter.Approved })).rejects.toThrow(
       'Invalid admin gigs response',
     );
   });

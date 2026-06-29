@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from 'react';
 import { useMemo, useState } from 'react';
-import { Share } from 'lucide-react';
+import { Share, Link } from 'lucide-react';
 
 import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 import type { CopyToastContent } from '@/components/CopyToClipboardButton';
@@ -76,6 +76,7 @@ export function ShareMenu(props: ShareMenuProps) {
         side={side}
       >
         <CopyToClipboardButton
+          icon={Link}
           copyText={shareUrl}
           label={copyLinkLabel}
           ariaLabel={copyLinkLabel}
