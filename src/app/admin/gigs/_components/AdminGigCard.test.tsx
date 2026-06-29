@@ -28,6 +28,8 @@ const baseGig: AdminGigDetail = {
   suggestedBy: { userId: '42' },
 };
 
+const publishableGigStatuses = [GigStatusAPI.Approved, GigStatusAPI.Published] as const;
+
 function renderCard(gig: AdminGigDetail = baseGig) {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -56,27 +58,33 @@ describe('AdminGigCard', () => {
     expect(screen.queryByRole('link', { name: 'Post' })).not.toBeInTheDocument();
   });
 
-  it('should show public view link for approved gig', () => {
-    renderCard({ ...baseGig, status: GigStatusAPI.Published });
+  it.each(publishableGigStatuses)(
+    'should show public view link when gig status is %s',
+    (status) => {
+      renderCard({ ...baseGig, status });
 
-    expect(screen.getByRole('link', { name: 'Public view' })).toHaveAttribute(
-      'href',
-      '/gigs/radiohead-barcelona',
-    );
-  });
+      expect(screen.getByRole('link', { name: 'Public view' })).toHaveAttribute(
+        'href',
+        '/gigs/radiohead-barcelona',
+      );
+    },
+  );
 
-  it('should show telegram post link when approved gig has publishPostUrl', () => {
-    renderCard({
-      ...baseGig,
-      status: GigStatusAPI.Published,
-      publishPostUrl: 'https://t.me/gigschannel/99',
-    });
+  it.each(publishableGigStatuses)(
+    'should show telegram post link when gig status is %s and publishPostUrl is present',
+    (status) => {
+      renderCard({
+        ...baseGig,
+        status,
+        publishPostUrl: 'https://t.me/gigschannel/99',
+      });
 
-    expect(screen.getByRole('link', { name: 'Post' })).toHaveAttribute(
-      'href',
-      'https://t.me/gigschannel/99',
-    );
-  });
+      expect(screen.getByRole('link', { name: 'Post' })).toHaveAttribute(
+        'href',
+        'https://t.me/gigschannel/99',
+      );
+    },
+  );
 
   it('should show moderation post link when moderationPostUrl is present', () => {
     renderCard({

@@ -49,7 +49,9 @@ export default function AdminGigCard(props: AdminGigCardProps) {
   const shareHref = buildAdminGigPublicIdPath(gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
   const feedHref = buildAdminGigPublicHref(gig);
-  const hasPublicLinks = status === GigStatus.Approved && !!(feedHref || gig.publishPostUrl);
+  const hasPublicLinks =
+    (status === GigStatus.Approved || status === GigStatus.Published) &&
+    !!(feedHref || gig.publishPostUrl);
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">

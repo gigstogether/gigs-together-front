@@ -30,6 +30,7 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
   const { gig, editHref } = props;
 
   const status = mapGigStatusFromAPI(gig.status);
+  const isPublishableStatus = status === GigStatus.Approved || status === GigStatus.Published;
 
   const { isApproving, isRejecting, isPosting, approve, reject, post } =
     useAdminGigModerationActions({
@@ -131,7 +132,7 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
     </Button>
   );
 
-  if (status === GigStatus.Approved) {
+  if (isPublishableStatus) {
     if (gig.publishPostUrl) {
       return <ModerationActionRow>{editButton}</ModerationActionRow>;
     }

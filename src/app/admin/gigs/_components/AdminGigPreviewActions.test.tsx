@@ -31,6 +31,8 @@ const baseGig: AdminGigDetail = {
   suggestedBy: { userId: '42' },
 };
 
+const publishableGigStatuses = [GigStatusAPI.Approved, GigStatusAPI.Published] as const;
+
 function renderActions(gig: AdminGigDetail = baseGig) {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -97,33 +99,44 @@ describe('AdminGigPreviewActions', () => {
     expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
   });
 
-  it('should render Post and Edit when approved gig has no publish post', () => {
-    renderActions({ ...baseGig, status: GigStatusAPI.Published });
+  it.each(publishableGigStatuses)(
+    'should render Post and Edit when gig status is %s and no publish post',
+    (status) => {
+      renderActions({ ...baseGig, status });
 
-    expect(screen.getByRole('button', { name: 'Post' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Public view' })).not.toBeInTheDocument();
-  });
+      expect(screen.getByRole('button', { name: 'Post' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
+    },
+  );
 
-  it('should call post endpoint when Post is clicked on approved gig without publish post', async () => {
-    renderActions({ ...baseGig, status: GigStatusAPI.Published });
+  it.each(publishableGigStatuses)(
+    'should call post endpoint when Post is clicked and gig status is %s without publish post',
+    async (status) => {
+      renderActions({ ...baseGig, status });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Post' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Post' }));
 
-    await waitFor(() => {
-      expect(mockPostAdminGigPost).toHaveBeenCalledWith('radiohead-barcelona');
-    });
-  });
+      await waitFor(() => {
+        expect(mockPostAdminGigPost).toHaveBeenCalledWith('radiohead-barcelona');
+      });
+    },
+  );
 
-  it('should render only Edit when approved gig already has publishPostUrl', () => {
-    renderActions({
-      ...baseGig,
-      status: GigStatusAPI.Published,
-      publishPostUrl: 'https://t.me/gigschannel/99',
-    });
+  it.each(publishableGigStatuses)(
+    'should render only Edit when gig status is %s and publishPostUrl is present',
+    (status) => {
+      renderActions({
+        ...baseGig,
+        status,
+        publishPostUrl: 'https://t.me/gigschannel/99',
+      });
 
-    expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Post' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Post' })).not.toBeInTheDocument();
-  });
+      expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Post' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
+    },
+  );
 });
