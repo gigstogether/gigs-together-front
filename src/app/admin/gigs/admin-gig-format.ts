@@ -1,3 +1,5 @@
+import type { Route } from 'next';
+
 import type {
   AdminGigDetail,
   AdminGigQueueItem,
@@ -16,8 +18,9 @@ export function formatAdminGigListMeta(gig: AdminGigQueueItem): string {
   return formatAdminGigEventDate(gig.date, gig.endDate);
 }
 
-export function buildAdminGigPublicHref(gig: Pick<AdminGigDetail, 'publicId'>): string {
-  return `/gigs/${encodeURIComponent(gig.publicId)}`;
+export function buildAdminGigPublicHref(gig: Pick<AdminGigDetail, 'publicId'>): Route {
+  // Next Route does not accept encoded dynamic route strings without a localized assertion.
+  return `/gigs/${encodeURIComponent(gig.publicId)}` as Route;
 }
 
 export function formatAdminGigSuggestedBy(suggestedBy: AdminGigSuggestedBy): string {
