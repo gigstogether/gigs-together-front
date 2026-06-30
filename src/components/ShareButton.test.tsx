@@ -6,6 +6,12 @@ vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
 }));
 
+vi.mock('@/env/client-env', () => ({
+  clientEnv: {
+    appBaseUrl: 'https://gigs.example.com',
+  },
+}));
+
 describe('ShareButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -30,9 +36,7 @@ describe('ShareButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Copy link' }));
 
     await waitFor(() => {
-      expect(writeText).toHaveBeenCalledWith(
-        new URL('/gigs/radiohead-barcelona', window.location.origin).href,
-      );
+      expect(writeText).toHaveBeenCalledWith('https://gigs.example.com/gigs/radiohead-barcelona');
     });
   });
 });

@@ -13,6 +13,7 @@ const DEFAULT_FEED_CALENDAR_DATES_STALE_TIME_MS = 600_000; // 10 minutes
 const clientEnvSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).optional(),
+    NEXT_PUBLIC_APP_BASE_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_APP_API_BASE_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_TELEGRAM_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_GITHUB_URL: optionalTrimmedStringFromEnvSchema,
@@ -43,6 +44,7 @@ const clientEnvSchema = z
 
 const parsedClientEnv = clientEnvSchema.parse({
   NODE_ENV: process.env.NODE_ENV,
+  NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
   NEXT_PUBLIC_APP_API_BASE_URL: process.env.NEXT_PUBLIC_APP_API_BASE_URL,
   NEXT_PUBLIC_TELEGRAM_URL: process.env.NEXT_PUBLIC_TELEGRAM_URL,
   NEXT_PUBLIC_GITHUB_URL: process.env.NEXT_PUBLIC_GITHUB_URL,
@@ -61,6 +63,7 @@ const parsedClientEnv = clientEnvSchema.parse({
 export const clientEnv = {
   nodeEnv: parsedClientEnv.NODE_ENV,
   isDevelopment: parsedClientEnv.NODE_ENV === 'development',
+  appBaseUrl: parsedClientEnv.NEXT_PUBLIC_APP_BASE_URL,
   appApiBaseUrl: parsedClientEnv.NEXT_PUBLIC_APP_API_BASE_URL,
   telegramUrl: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_URL,
   githubUrl: parsedClientEnv.NEXT_PUBLIC_GITHUB_URL,
