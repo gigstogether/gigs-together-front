@@ -13,7 +13,7 @@ const DEFAULT_SITE_PREVIEW_DESCRIPTION = 'Find gigs and company in your city.';
 
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).optional(),
-  APP_BASE_URL: optionalTrimmedStringFromEnvSchema,
+  NEXT_PUBLIC_APP_BASE_URL: optionalTrimmedStringFromEnvSchema,
   BRAND_NAME: optionalTrimmedStringFromEnvSchema.default(DEFAULT_BRAND_NAME),
   SITE_PREVIEW_TITLE: optionalTrimmedStringFromEnvSchema.default(DEFAULT_SITE_PREVIEW_TITLE),
   SITE_PREVIEW_DESCRIPTION: optionalTrimmedStringFromEnvSchema.default(
@@ -27,7 +27,7 @@ const serverEnvSchema = z.object({
 
 const parsedServerEnv = serverEnvSchema.parse({
   NODE_ENV: process.env.NODE_ENV,
-  APP_BASE_URL: process.env.APP_BASE_URL,
+  NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
   BRAND_NAME: process.env.BRAND_NAME,
   SITE_PREVIEW_TITLE: process.env.SITE_PREVIEW_TITLE,
   SITE_PREVIEW_DESCRIPTION: process.env.SITE_PREVIEW_DESCRIPTION,
@@ -48,8 +48,8 @@ function isStagingAppBaseUrl(appBaseUrl: string | undefined): boolean {
 export const serverEnv = {
   nodeEnv: parsedServerEnv.NODE_ENV,
   isDevelopment: parsedServerEnv.NODE_ENV === 'development',
-  isStaging: isStagingAppBaseUrl(parsedServerEnv.APP_BASE_URL),
-  appBaseUrl: parsedServerEnv.APP_BASE_URL,
+  isStaging: isStagingAppBaseUrl(parsedServerEnv.NEXT_PUBLIC_APP_BASE_URL),
+  appBaseUrl: parsedServerEnv.NEXT_PUBLIC_APP_BASE_URL,
   brandName: parsedServerEnv.BRAND_NAME,
   sitePreviewTitle: parsedServerEnv.SITE_PREVIEW_TITLE,
   sitePreviewDescription: parsedServerEnv.SITE_PREVIEW_DESCRIPTION,
@@ -70,7 +70,7 @@ export function getFeedRevalidateSecretOrThrow(): string {
 export function getAppBaseUrlOrThrow(): string {
   const baseUrl = serverEnv.appBaseUrl;
   if (!baseUrl) {
-    throw new Error('Missing APP_BASE_URL');
+    throw new Error('Missing NEXT_PUBLIC_APP_BASE_URL');
   }
 
   return baseUrl.replace(/\/$/, '');

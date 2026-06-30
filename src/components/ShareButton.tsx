@@ -5,6 +5,7 @@ import { Share } from 'lucide-react';
 
 import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 import type { CopyToastContent } from '@/components/CopyToClipboardButton';
+import { clientEnv } from '@/env/client-env';
 import { cn } from '@/lib/utils';
 
 interface ShareButtonProps {
@@ -31,12 +32,18 @@ export function ShareButton(props: ShareButtonProps) {
     failedToast = DEFAULT_FAILED_TOAST,
   } = props;
 
+  const appBaseUrl = clientEnv.appBaseUrl;
+
   const shareUrl = useMemo(() => {
-    if (typeof window == 'undefined') {
-      return '';
+    if (!appBaseUrl) {
+      throw new Error('Missing NEXT_PUBLIC_APP_BASE_URL for share links');
     }
-    return new URL(sharePath, window.location.origin).href;
-  }, [sharePath]);
+    return new URL(sharePath, appBaseUrl).href;
+  }, [appBaseUrl, sharePath]);
+
+  if (!shareUrl) {
+    return null;
+  }
 
   return (
     <CopyToClipboardButton

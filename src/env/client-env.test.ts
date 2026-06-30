@@ -65,6 +65,16 @@ describe('env/client', () => {
     });
   });
 
+  describe('NEXT_PUBLIC_APP_BASE_URL', () => {
+    it('should return trimmed app base url when env var is set', async () => {
+      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', '  https://example.com  ');
+
+      const clientEnvModule = await importClientEnv();
+
+      expect(clientEnvModule.clientEnv.appBaseUrl).toBe('https://example.com');
+    });
+  });
+
   describe('FEED_PAGE_SIZE', () => {
     it('should use default feed page size when env var is missing', async () => {
       vi.stubEnv('NEXT_PUBLIC_FEED_PAGE_SIZE', undefined);
