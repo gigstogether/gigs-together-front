@@ -56,7 +56,7 @@ describe('env/server', () => {
   describe('isStaging', () => {
     it('should be true when app base url hostname contains stg label', async () => {
       vi.stubEnv('NODE_ENV', 'test');
-      vi.stubEnv('APP_BASE_URL', 'https://stg.example.com');
+      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', 'https://stg.example.com');
 
       const serverEnvModule = await importServerEnv();
 
@@ -65,7 +65,7 @@ describe('env/server', () => {
 
     it('should be true when app base url hostname contains staging label', async () => {
       vi.stubEnv('NODE_ENV', 'test');
-      vi.stubEnv('APP_BASE_URL', 'https://api.staging.example.com');
+      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', 'https://api.staging.example.com');
 
       const serverEnvModule = await importServerEnv();
 
@@ -74,7 +74,7 @@ describe('env/server', () => {
 
     it('should be false when app base url hostname does not contain staging labels', async () => {
       vi.stubEnv('NODE_ENV', 'test');
-      vi.stubEnv('APP_BASE_URL', 'https://example.com');
+      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', 'https://example.com');
 
       const serverEnvModule = await importServerEnv();
 
@@ -108,7 +108,7 @@ describe('env/server', () => {
   describe('getAppBaseUrlOrThrow', () => {
     it('should return normalized app base url when env var has trailing slash', async () => {
       vi.stubEnv('NODE_ENV', 'test');
-      vi.stubEnv('APP_BASE_URL', 'https://example.com/');
+      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', 'https://example.com/');
 
       const serverEnvModule = await importServerEnv();
 
@@ -117,12 +117,12 @@ describe('env/server', () => {
 
     it('should throw when app base url env var is missing', async () => {
       vi.stubEnv('NODE_ENV', 'test');
-      vi.stubEnv('APP_BASE_URL', undefined);
+      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', undefined);
 
       const serverEnvModule = await importServerEnv();
       const error = captureThrownErrorInstance(() => serverEnvModule.getAppBaseUrlOrThrow());
 
-      expect(error.message).toBe('Missing APP_BASE_URL');
+      expect(error.message).toBe('Missing NEXT_PUBLIC_APP_BASE_URL');
     });
   });
 });
