@@ -1,6 +1,6 @@
 import {
   parseCountries,
-  parseLanguageGetTranslationsResponseBody,
+  parseLocaleGetTranslationsResponseBody,
   parseV1GigAroundGetResponseBody,
   parseV1GigByPublicIdGetResponseBody,
   parseV1GigDatesGetResponseBody,
@@ -20,7 +20,7 @@ describe('parseCountries', () => {
   });
 });
 
-describe('parseLanguageGetTranslationsResponseBody', () => {
+describe('parseLocaleGetTranslationsResponseBody', () => {
   it('should return translations response when payload is valid', () => {
     const payload = {
       locale: 'en',
@@ -33,7 +33,7 @@ describe('parseLanguageGetTranslationsResponseBody', () => {
         },
       },
     };
-    const parsed = parseLanguageGetTranslationsResponseBody(payload);
+    const parsed = parseLocaleGetTranslationsResponseBody(payload);
     expect(parsed).toEqual(payload);
   });
 
@@ -49,7 +49,7 @@ describe('parseLanguageGetTranslationsResponseBody', () => {
         },
       },
     };
-    expect(() => parseLanguageGetTranslationsResponseBody(payload)).toThrow();
+    expect(() => parseLocaleGetTranslationsResponseBody(payload)).toThrow();
   });
 
   it('should throw when locale is empty', () => {
@@ -57,7 +57,7 @@ describe('parseLanguageGetTranslationsResponseBody', () => {
       locale: '',
       translations: {},
     };
-    expect(() => parseLanguageGetTranslationsResponseBody(payload)).toThrow();
+    expect(() => parseLocaleGetTranslationsResponseBody(payload)).toThrow();
   });
 });
 

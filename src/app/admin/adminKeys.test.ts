@@ -11,8 +11,8 @@ describe('adminKeys', () => {
     expect(adminKeys.dashboard()).toEqual(['admin', 'dashboard']);
   });
 
-  it('should build languages key', () => {
-    expect(adminKeys.languages()).toEqual(['admin', 'languages']);
+  it('should build locales key', () => {
+    expect(adminKeys.locales()).toEqual(['admin', 'locales']);
   });
 
   it('should build gigs key with filter status and sort options', () => {

@@ -2,9 +2,9 @@ import {
   fetchAdminDashboard,
   fetchAdminGigByPublicId,
   fetchAdminGigs,
-  fetchAdminLanguages,
-  patchAdminLanguage,
-  patchAdminLanguagesOrder,
+  fetchAdminLocales,
+  patchAdminLocale,
+  patchAdminLocalesOrder,
   postAdminGigApprove,
   postAdminGigPost,
   postAdminGigReject,
@@ -200,88 +200,96 @@ describe('fetchAdminGigByPublicId', () => {
   });
 });
 
-describe('fetchAdminLanguages', () => {
+describe('fetchAdminLocales', () => {
   beforeEach(() => {
     mockApiRequest.mockReset();
   });
 
-  it('should parse admin languages response when payload is valid', async () => {
-    mockApiRequest.mockResolvedValue([{ iso: 'en', name: 'English', isActive: true, order: 0 }]);
-
-    await expect(fetchAdminLanguages()).resolves.toEqual([
-      { iso: 'en', name: 'English', isActive: true, order: 0 },
+  it('should parse admin locales response when payload is valid', async () => {
+    mockApiRequest.mockResolvedValue([
+      { iso: 'en', nativeName: 'English', isActive: true, order: 0 },
     ]);
-    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/languages', 'GET');
+
+    await expect(fetchAdminLocales()).resolves.toEqual([
+      { iso: 'en', nativeName: 'English', isActive: true, order: 0 },
+    ]);
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/locales', 'GET');
   });
 
-  it('should throw when admin languages response is invalid', async () => {
+  it('should throw when admin locales response uses legacy name field', async () => {
+    mockApiRequest.mockResolvedValue([{ iso: 'en', name: 'English', isActive: true, order: 0 }]);
+
+    await expect(fetchAdminLocales()).rejects.toThrow('Invalid admin locales response');
+  });
+
+  it('should throw when admin locales response is invalid', async () => {
     mockApiRequest.mockResolvedValue([{ iso: 'en' }]);
 
-    await expect(fetchAdminLanguages()).rejects.toThrow('Invalid admin languages response');
+    await expect(fetchAdminLocales()).rejects.toThrow('Invalid admin locales response');
   });
 });
 
-describe('patchAdminLanguage', () => {
+describe('patchAdminLocale', () => {
   beforeEach(() => {
     mockApiRequest.mockReset();
   });
 
-  it('should parse admin language patch response when payload is valid', async () => {
+  it('should parse admin locale patch response when payload is valid', async () => {
     mockApiRequest.mockResolvedValue({
       iso: 'en',
-      name: 'English',
+      nativeName: 'English',
       isActive: false,
       order: 0,
     });
 
-    await expect(patchAdminLanguage('en', { isActive: false })).resolves.toEqual({
+    await expect(patchAdminLocale('en', { isActive: false })).resolves.toEqual({
       iso: 'en',
-      name: 'English',
+      nativeName: 'English',
       isActive: false,
       order: 0,
     });
-    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/languages/en', 'PATCH', {
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/locales/en', 'PATCH', {
       isActive: false,
     });
   });
 
-  it('should throw when admin language patch response includes unknown fields', async () => {
+  it('should throw when admin locale patch response includes unknown fields', async () => {
     mockApiRequest.mockResolvedValue({
       _id: '507f1f77bcf86cd799439011',
       iso: 'en',
-      name: 'English',
+      nativeName: 'English',
       isActive: false,
       order: 0,
     });
 
-    await expect(patchAdminLanguage('en', { isActive: false })).rejects.toThrow(
-      'Invalid admin language response',
+    await expect(patchAdminLocale('en', { isActive: false })).rejects.toThrow(
+      'Invalid admin locale response',
     );
   });
 });
 
-describe('patchAdminLanguagesOrder', () => {
+describe('patchAdminLocalesOrder', () => {
   beforeEach(() => {
     mockApiRequest.mockReset();
   });
 
-  it('should parse admin languages order patch response when payload is valid', async () => {
+  it('should parse admin locales order patch response when payload is valid', async () => {
     mockApiRequest.mockResolvedValue([
-      { iso: 'es', name: 'Español', isActive: true, order: 0 },
-      { iso: 'en', name: 'English', isActive: true, order: 1 },
+      { iso: 'es', nativeName: 'Español', isActive: true, order: 0 },
+      { iso: 'en', nativeName: 'English', isActive: true, order: 1 },
     ]);
 
     await expect(
-      patchAdminLanguagesOrder([
+      patchAdminLocalesOrder([
         { iso: 'es', order: 0 },
         { iso: 'en', order: 1 },
       ]),
     ).resolves.toEqual([
-      { iso: 'es', name: 'Español', isActive: true, order: 0 },
-      { iso: 'en', name: 'English', isActive: true, order: 1 },
+      { iso: 'es', nativeName: 'Español', isActive: true, order: 0 },
+      { iso: 'en', nativeName: 'English', isActive: true, order: 1 },
     ]);
-    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/languages/order', 'PATCH', {
-      languages: [
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/locales/order', 'PATCH', {
+      locales: [
         { iso: 'es', order: 0 },
         { iso: 'en', order: 1 },
       ],

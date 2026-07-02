@@ -16,7 +16,7 @@ const translationsByNamespaceSchema = z.record(
   z.record(z.string(), translationValueSchema),
 );
 
-const languageGetTranslationsResponseBodySchema = z.object({
+const localeGetTranslationsResponseBodySchema = z.object({
   locale: z.string().min(1),
   translations: translationsByNamespaceSchema,
 });
@@ -74,8 +74,8 @@ const v1GigByPublicIdGetResponseBodySchema = z
   })
   .strict();
 
-export function parseLanguageGetTranslationsResponseBody(raw: unknown) {
-  return languageGetTranslationsResponseBodySchema.parse(raw);
+export function parseLocaleGetTranslationsResponseBody(raw: unknown) {
+  return localeGetTranslationsResponseBodySchema.parse(raw);
 }
 
 export function parseCountries(raw: unknown) {

@@ -1,16 +1,16 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import AdminLanguagesPageClient from '@/app/admin/languages/AdminLanguagesPageClient';
+import AdminLocalesPageClient from '@/app/admin/locales/AdminLocalesPageClient';
 
-const mockFetchAdminLanguages = vi.fn();
-const mockPatchAdminLanguage = vi.fn();
-const mockPatchAdminLanguagesOrder = vi.fn();
+const mockFetchAdminLocales = vi.fn();
+const mockPatchAdminLocale = vi.fn();
+const mockPatchAdminLocalesOrder = vi.fn();
 
 vi.mock('@/lib/admin-api', () => ({
-  fetchAdminLanguages: () => mockFetchAdminLanguages(),
-  patchAdminLanguage: (...args: unknown[]) => mockPatchAdminLanguage(...args),
-  patchAdminLanguagesOrder: (...args: unknown[]) => mockPatchAdminLanguagesOrder(...args),
+  fetchAdminLocales: () => mockFetchAdminLocales(),
+  patchAdminLocale: (...args: unknown[]) => mockPatchAdminLocale(...args),
+  patchAdminLocalesOrder: (...args: unknown[]) => mockPatchAdminLocalesOrder(...args),
 }));
 
 function mockPointerCapture(element: HTMLElement) {
@@ -33,36 +33,36 @@ function renderWithQueryClient() {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <AdminLanguagesPageClient />
+      <AdminLocalesPageClient />
     </QueryClientProvider>,
   );
 }
 
-describe('AdminLanguagesPageClient', () => {
+describe('AdminLocalesPageClient', () => {
   beforeEach(() => {
-    mockFetchAdminLanguages.mockReset();
-    mockPatchAdminLanguage.mockReset();
-    mockPatchAdminLanguagesOrder.mockReset();
-    mockFetchAdminLanguages.mockResolvedValue([
-      { iso: 'en', name: 'English', isActive: true, order: 0 },
-      { iso: 'es', name: 'Español', isActive: true, order: 1 },
+    mockFetchAdminLocales.mockReset();
+    mockPatchAdminLocale.mockReset();
+    mockPatchAdminLocalesOrder.mockReset();
+    mockFetchAdminLocales.mockResolvedValue([
+      { iso: 'en', nativeName: 'English', isActive: true, order: 0 },
+      { iso: 'es', nativeName: 'Español', isActive: true, order: 1 },
     ]);
-    mockPatchAdminLanguage.mockResolvedValue({
+    mockPatchAdminLocale.mockResolvedValue({
       iso: 'es',
-      name: 'Español',
+      nativeName: 'Español',
       isActive: false,
       order: 1,
     });
-    mockPatchAdminLanguagesOrder.mockResolvedValue([
-      { iso: 'es', name: 'Español', isActive: true, order: 0 },
-      { iso: 'en', name: 'English', isActive: true, order: 1 },
+    mockPatchAdminLocalesOrder.mockResolvedValue([
+      { iso: 'es', nativeName: 'Español', isActive: true, order: 0 },
+      { iso: 'en', nativeName: 'English', isActive: true, order: 1 },
     ]);
   });
 
-  it('should render languages list when data is loaded', async () => {
+  it('should render locales list when data is loaded', async () => {
     renderWithQueryClient();
 
-    expect(screen.getByText('Languages')).toBeInTheDocument();
+    expect(screen.getByText('Locales')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByDisplayValue('English')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Español')).toBeInTheDocument();
@@ -71,7 +71,7 @@ describe('AdminLanguagesPageClient', () => {
     });
   });
 
-  it('should toggle language active status when switch is clicked', async () => {
+  it('should toggle locale active status when switch is clicked', async () => {
     renderWithQueryClient();
 
     await waitFor(() => {
@@ -81,11 +81,11 @@ describe('AdminLanguagesPageClient', () => {
     fireEvent.click(screen.getByRole('switch', { name: 'Active for es' }));
 
     await waitFor(() => {
-      expect(mockPatchAdminLanguage).toHaveBeenCalledWith('es', { isActive: false });
+      expect(mockPatchAdminLocale).toHaveBeenCalledWith('es', { isActive: false });
     });
   });
 
-  it('should reorder languages when an item is dropped onto another item', async () => {
+  it('should reorder locales when an item is dropped onto another item', async () => {
     renderWithQueryClient();
 
     await waitFor(() => {
@@ -93,7 +93,7 @@ describe('AdminLanguagesPageClient', () => {
     });
 
     const reorderHandle = screen.getByLabelText('Reorder es');
-    const targetItem = screen.getByLabelText('Language en');
+    const targetItem = screen.getByLabelText('Locale en');
     mockPointerCapture(reorderHandle);
     document.elementFromPoint = vi.fn().mockReturnValue(targetItem);
 
@@ -102,7 +102,7 @@ describe('AdminLanguagesPageClient', () => {
     fireEvent.pointerUp(reorderHandle, { pointerId: 1, clientX: 10, clientY: 10 });
 
     await waitFor(() => {
-      expect(mockPatchAdminLanguagesOrder).toHaveBeenCalledWith(
+      expect(mockPatchAdminLocalesOrder).toHaveBeenCalledWith(
         [
           { iso: 'es', order: 0 },
           { iso: 'en', order: 1 },

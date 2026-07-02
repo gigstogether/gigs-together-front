@@ -67,6 +67,6 @@ export interface V1GigGetResponseBodyGig {
   postUrl?: string;
 }
 
-export type Language = 'en' | 'ru' | 'es' | string;
+export type LocaleIso = 'en' | 'ru' | 'es' | string;
 
 export {};

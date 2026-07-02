@@ -1,9 +1,9 @@
 import 'server-only';
 
 import { apiRequest } from '@/lib/api';
-import { parseLanguageGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
+import { parseLocaleGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
 import { serverEnv } from '@/env/server-env';
-import type { Language } from '@/lib/types';
+import type { LocaleIso } from '@/lib/types';
 
 export type TranslationFormat = 'plain' | 'icu';
 
@@ -16,12 +16,12 @@ export type V1TranslationsByNamespace = Readonly<
   Record<string, Readonly<Record<string, V1TranslationValue>>>
 >;
 
-export interface V1LanguageGetTranslationsResponseBody {
+export interface V1LocaleGetTranslationsResponseBody {
   readonly locale: string;
   readonly translations: V1TranslationsByNamespace;
 }
 
-const DEFAULT_LANGUAGE: Language = 'en';
+const DEFAULT_LOCALE: LocaleIso = 'en';
 
 // const TRANSLATIONS_TAG_ALL = 'translations';
 // const tagLocale = (locale: string) => `translations:locale:${locale}`;
@@ -30,14 +30,14 @@ const DEFAULT_LANGUAGE: Language = 'en';
 /**
  * Server-side translations loader (cached for 1h).
  *
- * - Uses `accept-language` header by default (primary language tag like "en", "es", "ru")
+ * - Uses `accept-language` header by default (primary locale tag like "en", "es", "ru")
  * - Supports namespaces: `?namespaces=common,feed`
  * - Adds cache tags so you can manually revalidate via `revalidateTag()`
  */
 export async function getTranslations(
-  language: Language = DEFAULT_LANGUAGE,
+  locale: LocaleIso = DEFAULT_LOCALE,
   namespaces: string | readonly string[] = [],
-): Promise<V1LanguageGetTranslationsResponseBody> {
+): Promise<V1LocaleGetTranslationsResponseBody> {
   const namespacesList =
     typeof namespaces === 'string'
       ? namespaces
@@ -48,16 +48,14 @@ export async function getTranslations(
 
   const nsQuery = namespacesList?.join(',');
 
-  const acceptLanguage = language;
-
   const qs = new URLSearchParams();
   if (nsQuery) qs.set('namespaces', nsQuery);
 
-  const url = `/v1/language/translations${qs.size ? `?${qs.toString()}` : ''}`;
+  const url = `/v1/locale/translations${qs.size ? `?${qs.toString()}` : ''}`;
 
   const raw = await apiRequest<unknown>(url, 'GET', undefined, {
     // Explicitly set accept-language; otherwise some runtimes send "*" by default.
-    headers: { 'accept-language': acceptLanguage },
+    headers: { 'accept-language': locale },
     next: {
       revalidate: serverEnv.translationsRevalidateSeconds,
       // tags: [
@@ -68,5 +66,5 @@ export async function getTranslations(
     },
   });
 
-  return parseLanguageGetTranslationsResponseBody(raw);
+  return parseLocaleGetTranslationsResponseBody(raw);
 }

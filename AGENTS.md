@@ -98,6 +98,18 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Do not use `React.*` namespace types such as `React.RefObject<T>`.
 - Import React types directly, for example `import type { RefObject } from 'react'`.
 
+## Translations
+
+- Do not use the word **copy** for UI text, labels, strings, templates, or other translatable content. Prefer **text**, **strings**, **labels**, or **content**. Reserve **copy** for clipboard actions (for example `Copy link`) and file operations (for example `Copy .env.example`).
+- Translation **namespaces** and **keys** use **camelCase** identifiers.
+- Namespace pattern: start with a lowercase letter, then alphanumeric; examples: `common`, `telegram`, `default`.
+- Key pattern: dot-separated camelCase segments; examples: `mainGig.withLink`, `weeklyDigest.gigLine.html`, `button.approve`.
+- Do not use snake_case or kebab-case in namespaces or keys (for example `main_gig_post`, `weekly-digest`).
+- Post template keys name the post type without a redundant `Post` suffix (for example `mainGig`, `weeklyDigest`, not `mainGigPost`); namespace `telegram` already scopes channel post text.
+- **Locale** values stay lowercase ISO 639-1 codes (for example `en`, `es`); locale is not camelCase.
+- Pass namespaces to `t(namespace, key, params)` using the same camelCase spelling returned by the API.
+- UI text uses `kind: text`; Telegram/post layouts with `{placeholders}` use `kind: template` under namespace `telegram`.
+
 ## Notes
 
 - Never add `'use client'` to hooks. Hooks are not server-component entry points and should only be used from client modules that already define the client boundary when needed.

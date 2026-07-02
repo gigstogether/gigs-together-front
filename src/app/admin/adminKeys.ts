@@ -10,8 +10,8 @@ export const adminKeys = {
     return ['admin', 'dashboard'];
   },
 
-  languages(): readonly ['admin', 'languages'] {
-    return ['admin', 'languages'];
+  locales(): readonly ['admin', 'locales'] {
+    return ['admin', 'locales'];
   },
 
   gigs(

@@ -22,26 +22,26 @@ const v1AdminDashboardResponseBodySchema = z
 
 type AdminDashboard = z.infer<typeof v1AdminDashboardResponseBodySchema>;
 
-const v1AdminLanguageItemSchema = z
+const v1AdminLocaleItemSchema = z
   .object({
     iso: z.string(),
-    name: z.string(),
+    nativeName: z.string(),
     isActive: z.boolean(),
     order: z.number().int().nonnegative(),
   })
   .strict();
 
-const v1AdminLanguagesListSchema = z.array(v1AdminLanguageItemSchema);
+const v1AdminLocalesListSchema = z.array(v1AdminLocaleItemSchema);
 
-export type AdminLanguage = z.infer<typeof v1AdminLanguageItemSchema>;
+export type SupportedLocale = z.infer<typeof v1AdminLocaleItemSchema>;
 
-export interface PatchAdminLanguageBody {
-  readonly name?: string;
+export interface PatchAdminLocaleBody {
+  readonly nativeName?: string;
   readonly isActive?: boolean;
   readonly order?: number;
 }
 
-export interface AdminLanguageOrderUpdate {
+export interface LocaleOrderUpdate {
   readonly iso: string;
   readonly order: number;
 }
@@ -126,10 +126,10 @@ function parseAdminDashboard(payload: unknown): AdminDashboard {
   return parsed.data;
 }
 
-function parseAdminLanguagesList(payload: unknown): readonly AdminLanguage[] {
-  const parsed = v1AdminLanguagesListSchema.safeParse(payload);
+function parseAdminLocalesList(payload: unknown): readonly SupportedLocale[] {
+  const parsed = v1AdminLocalesListSchema.safeParse(payload);
   if (!parsed.success) {
-    throw new Error(`Invalid admin languages response: ${JSON.stringify(parsed.error.issues)}`);
+    throw new Error(`Invalid admin locales response: ${JSON.stringify(parsed.error.issues)}`);
   }
   return parsed.data;
 }
@@ -165,10 +165,10 @@ function parseAdminGigFormData(payload: unknown): AdminGigFormData {
   return parsed.data;
 }
 
-function parseAdminLanguageResponse(payload: unknown): AdminLanguage {
-  const parsed = v1AdminLanguageItemSchema.safeParse(payload);
+function parseAdminLocaleResponse(payload: unknown): SupportedLocale {
+  const parsed = v1AdminLocaleItemSchema.safeParse(payload);
   if (!parsed.success) {
-    throw new Error(`Invalid admin language response: ${JSON.stringify(parsed.error.issues)}`);
+    throw new Error(`Invalid admin locale response: ${JSON.stringify(parsed.error.issues)}`);
   }
   return parsed.data;
 }
@@ -178,9 +178,9 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
   return parseAdminDashboard(raw);
 }
 
-export async function fetchAdminLanguages(): Promise<readonly AdminLanguage[]> {
-  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}languages`, 'GET');
-  return parseAdminLanguagesList(raw);
+export async function fetchAdminLocales(): Promise<readonly SupportedLocale[]> {
+  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}locales`, 'GET');
+  return parseAdminLocalesList(raw);
 }
 
 export async function fetchAdminGigs(params: FetchAdminGigsParams): Promise<AdminGigsList> {
@@ -198,25 +198,25 @@ export async function fetchAdminGigByPublicId(
   return parseAdminGigFormData(raw);
 }
 
-export async function patchAdminLanguage(
+export async function patchAdminLocale(
   iso: string,
-  body: PatchAdminLanguageBody,
-): Promise<AdminLanguage> {
+  body: PatchAdminLocaleBody,
+): Promise<SupportedLocale> {
   const raw = await apiRequest<unknown>(
-    `${V1_ADMIN_API_PREFIX}languages/${encodeURIComponent(iso)}`,
+    `${V1_ADMIN_API_PREFIX}locales/${encodeURIComponent(iso)}`,
     'PATCH',
     body,
   );
-  return parseAdminLanguageResponse(raw);
+  return parseAdminLocaleResponse(raw);
 }
 
-export async function patchAdminLanguagesOrder(
-  languages: readonly AdminLanguageOrderUpdate[],
-): Promise<readonly AdminLanguage[]> {
-  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}languages/order`, 'PATCH', {
-    languages,
+export async function patchAdminLocalesOrder(
+  locales: readonly LocaleOrderUpdate[],
+): Promise<readonly SupportedLocale[]> {
+  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}locales/order`, 'PATCH', {
+    locales,
   });
-  return parseAdminLanguagesList(raw);
+  return parseAdminLocalesList(raw);
 }
 
 export function postAdminGigApprove(publicId: string): Promise<void> {

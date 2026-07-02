@@ -11,7 +11,7 @@ export interface AdminNavItem {
 
 const ADMIN_DASHBOARD_ROUTE: Route = '/admin';
 const ADMIN_TRANSLATIONS_ROUTE: Route = '/admin/translations';
-const ADMIN_LANGUAGES_ROUTE: Route = '/admin/languages';
+const ADMIN_LOCALES_ROUTE: Route = '/admin/locales';
 const ADMIN_ADMINS_ROUTE: Route = '/admin/admins';
 
 export const adminNavItems: readonly AdminNavItem[] = [
@@ -30,12 +30,12 @@ export const adminNavItems: readonly AdminNavItem[] = [
   {
     href: ADMIN_TRANSLATIONS_ROUTE,
     label: 'Translations',
-    description: 'UI copy and Telegram post strings',
+    description: 'UI text and Telegram post strings',
     isEnabled: true,
   },
   {
-    href: ADMIN_LANGUAGES_ROUTE,
-    label: 'Languages',
+    href: ADMIN_LOCALES_ROUTE,
+    label: 'Locales',
     description: 'Active locales and ordering',
     isEnabled: true,
   },

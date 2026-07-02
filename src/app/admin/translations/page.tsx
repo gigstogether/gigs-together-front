@@ -4,7 +4,7 @@ export default function AdminTranslationsPage() {
   return (
     <AdminComingSoon
       title="Translations"
-      description="Manage UI copy and Telegram channel post strings."
+      description="Manage static content."
     />
   );
 }
