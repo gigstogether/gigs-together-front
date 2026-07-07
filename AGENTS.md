@@ -93,6 +93,24 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Avoid patterns that hide invalid states, for example `res?.data ?? res ?? {}`, `value || {}`, or `arr ?? []` when the default is not explicitly part of the contract.
 - At boundaries, parse unknown input, validate the expected shape, and throw if it does not match.
 
+## Architecture and Design Decisions
+
+- This is a **production** project with real users, not an MVP playground. Treat new and changed code accordingly.
+- When introducing or changing behavior, **design for the best fit for this codebase first**: established patterns, clear ownership, maintainability, and correctness over speed of delivery or size of diff.
+- Do **not** default to quick-and-dirty, "good enough for now", or compromise solutions when a clearly better alternative exists for this project.
+- Do **not** recommend the smallest refactor, the fastest patch, or the simplest workaround **instead of** the more correct design unless the user explicitly asks for that tradeoff.
+- **Do** research and propose best practices, proven patterns, and the most appropriate architecture for the task before implementation.
+- **Do** propose refactoring when the current structure blocks the correct solution or would accumulate avoidable technical debt.
+- Inferior or shortcut options may be listed **only after** presenting the preferred approach, **or** when the user explicitly requests alternatives. Always label them as not the best/default choice and explain why (tradeoffs, debt, limits).
+- Perfection everywhere is not required, but **initial decisions should aim at the right long-term shape**; shortcuts must be conscious and explicit, not silent defaults.
+
+## Legacy and backward compatibility
+
+- Do not keep legacy code, aliases, fallbacks, or compatibility shims without a clear reason.
+- If code remains **only** for backward compatibility, document that explicitly on the symbol: JSDoc on the function, method, class, type, or exported constant (what it supports, what callers should use instead, and when it can be removed if known).
+- Prefer removing unused legacy paths over leaving them “just in case”. If retention is intentional, the doc must say **legacy** or **backward compatibility** and the reason — not an unexplained special case in implementation.
+- Read-time normalization for old stored data (for example mapping missing fields to a default) belongs at the **I/O boundary** and must be documented as legacy compatibility, with a path toward explicit data or stricter validation.
+
 ## React Typing Style
 
 - Do not use `React.*` namespace types such as `React.RefObject<T>`.
