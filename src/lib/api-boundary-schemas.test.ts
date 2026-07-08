@@ -29,6 +29,7 @@ describe('parseLocaleGetTranslationsResponseBody', () => {
           es: {
             value: 'Spain',
             format: 'plain',
+            kind: 'text',
           },
         },
       },
@@ -45,6 +46,21 @@ describe('parseLocaleGetTranslationsResponseBody', () => {
           es: {
             value: 'Spain',
             format: 'markdown',
+          },
+        },
+      },
+    };
+    expect(() => parseLocaleGetTranslationsResponseBody(payload)).toThrow();
+  });
+
+  it('should throw when translation kind is missing', () => {
+    const payload = {
+      locale: 'en',
+      translations: {
+        country: {
+          es: {
+            value: 'Spain',
+            format: 'plain',
           },
         },
       },

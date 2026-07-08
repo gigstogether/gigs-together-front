@@ -2,9 +2,16 @@
 
 import { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import type { V1TranslationsByNamespace } from '@/lib/translations.server';
+import type { V1TranslationsByNamespace } from '@/lib/api-boundary-schemas';
+import { resolveTranslationValue, TranslationValueResolutionError } from './translation-value';
 import type { I18nContextValue, TFunction } from './i18n-context';
-import { I18nContext, interpolate } from './i18n-context';
+import { I18nContext } from './i18n-context';
+
+const TRANSLATION_NAMESPACE_PATTERN = /^[a-z][a-zA-Z0-9]{0,63}$/;
+
+function isValidTranslationNamespace(namespace: string): boolean {
+  return namespace === 'default' || TRANSLATION_NAMESPACE_PATTERN.test(namespace);
+}
 
 export function I18nProvider(props: {
   locale: string;
@@ -15,12 +22,17 @@ export function I18nProvider(props: {
 
   const t: TFunction = useCallback(
     (namespace, key, params) => {
-      const ns = (namespace || 'default').toString().trim().toLowerCase();
-      const k = key.toString();
-      const entry = translations?.[ns]?.[k];
-      const value = entry?.value;
-      if (typeof value !== 'string') return k;
-      return interpolate(value, params);
+      const ns = namespace.trim();
+      if (!isValidTranslationNamespace(ns)) {
+        throw new TranslationValueResolutionError(`Invalid translation namespace "${namespace}".`);
+      }
+
+      return resolveTranslationValue({
+        entry: translations[ns]?.[key],
+        namespace: ns,
+        key,
+        params,
+      });
     },
     [translations],
   );
