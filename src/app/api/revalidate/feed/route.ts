@@ -57,5 +57,8 @@ export async function POST(req: NextRequest) {
     revalidatePath(path);
   }
 
+  // TODO(translation-plan): align with project HTTP convention — return 204 No Content
+  // when the response body is not needed (same as translations/API internal revalidate).
+  // Verify FeedRevalidateService and any callers do not depend on `{ ok, paths }` first.
   return NextResponse.json({ ok: true, paths });
 }

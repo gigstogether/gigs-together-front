@@ -3,15 +3,10 @@
 import { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { V1TranslationsByNamespace } from '@/lib/api-boundary-schemas';
+import { isValidTranslationNamespace } from '@/lib/translation-identifiers';
 import { resolveTranslationValue, TranslationValueResolutionError } from './translation-value';
 import type { I18nContextValue, TFunction } from './i18n-context';
 import { I18nContext } from './i18n-context';
-
-const TRANSLATION_NAMESPACE_PATTERN = /^[a-z][a-zA-Z0-9]{0,63}$/;
-
-function isValidTranslationNamespace(namespace: string): boolean {
-  return namespace === 'default' || TRANSLATION_NAMESPACE_PATTERN.test(namespace);
-}
 
 export function I18nProvider(props: {
   locale: string;
