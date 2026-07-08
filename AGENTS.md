@@ -104,6 +104,12 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Inferior or shortcut options may be listed **only after** presenting the preferred approach, **or** when the user explicitly requests alternatives. Always label them as not the best/default choice and explain why (tradeoffs, debt, limits).
 - Perfection everywhere is not required, but **initial decisions should aim at the right long-term shape**; shortcuts must be conscious and explicit, not silent defaults.
 
+## File placement
+
+- Do not add a new file when the code has a **single call site** — colocate it in the existing module (component, service, route, or parser) instead.
+- Extract to a shared file only when there are **multiple consumers**, or when the boundary is already established (HTTP parsers, hooks reused across routes, module public API).
+- Prefer extending an existing file in the same feature area over creating parallel one-off helpers.
+
 ## Legacy and backward compatibility
 
 - Do not keep legacy code, aliases, fallbacks, or compatibility shims without a clear reason.
