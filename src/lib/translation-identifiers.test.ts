@@ -1,4 +1,7 @@
-import { isValidTranslationNamespace } from '@/lib/translation-identifiers';
+import {
+  buildTranslationNamespaceCacheTag,
+  isValidTranslationNamespace,
+} from '@/lib/translation-identifiers';
 
 describe('isValidTranslationNamespace', () => {
   it('should accept camelCase namespaces', () => {
@@ -11,5 +14,11 @@ describe('isValidTranslationNamespace', () => {
     expect(isValidTranslationNamespace('Country')).toBe(false);
     expect(isValidTranslationNamespace('feed_filters')).toBe(false);
     expect(isValidTranslationNamespace('feed-filters')).toBe(false);
+  });
+});
+
+describe('buildTranslationNamespaceCacheTag', () => {
+  it('should preserve camelCase namespace in tag', () => {
+    expect(buildTranslationNamespaceCacheTag('feedFilters')).toBe('translations:ns:feedFilters');
   });
 });

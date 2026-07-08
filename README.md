@@ -65,6 +65,7 @@ What they are used for:
 | `BRAND_NAME`                                      | Optional                         | Brand name used in metadata. Defaults to `Gigs Together`.                                                                                        |
 | `ALLOWED_DEV_ORIGINS`                             | Optional                         | Comma-separated list of allowed development origins for Next.js `allowedDevOrigins` (for example `http://localhost:3000,http://127.0.0.1:3000`). |
 | `FEED_REVALIDATE_SECRET`                          | Required for revalidation routes | Secret checked by `/api/revalidate/feed`.                                                                                                        |
+| `TRANSLATIONS_REVALIDATE_SECRET`                  | Required for revalidation routes | Secret checked by `/api/revalidate/translations` (`x-translations-revalidate-secret`).                                                           |
 | `TRANSLATIONS_REVALIDATE_SECONDS`                 | Optional                         | Server-side cache revalidation period for translation fetching. Positive integer in seconds, default `3600`.                                     |
 
 ## Running the app locally

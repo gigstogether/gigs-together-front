@@ -105,6 +105,29 @@ describe('env/server', () => {
     });
   });
 
+  describe('getTranslationsRevalidateSecretOrThrow', () => {
+    it('should return trimmed translations revalidate secret when env var is set', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('TRANSLATIONS_REVALIDATE_SECRET', ' top-secret ');
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.getTranslationsRevalidateSecretOrThrow()).toBe('top-secret');
+    });
+
+    it('should throw when TRANSLATIONS_REVALIDATE_SECRET is missing', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('TRANSLATIONS_REVALIDATE_SECRET', undefined);
+
+      const serverEnvModule = await importServerEnv();
+      const error = captureThrownErrorInstance(() =>
+        serverEnvModule.getTranslationsRevalidateSecretOrThrow(),
+      );
+
+      expect(error.message).toBe('Missing TRANSLATIONS_REVALIDATE_SECRET');
+    });
+  });
+
   describe('getAppBaseUrlOrThrow', () => {
     it('should return normalized app base url when env var has trailing slash', async () => {
       vi.stubEnv('NODE_ENV', 'test');

@@ -7,7 +7,8 @@ import { resolveTranslationValue } from '@/lib/i18n/translation-value';
 const NS = 'about';
 
 export const dynamic = 'force-static';
-export const revalidate = 3600; // ISR: regenerate every hour when translations change
+// Must stay aligned with TRANSLATIONS_REVALIDATE_SECONDS (default 3600). Page ISR is a compile-time literal.
+export const revalidate = 3_600; // 1 hour (60 minutes)
 
 const t = (translations: V1TranslationsByNamespace, key: string): string =>
   resolveTranslationValue({
