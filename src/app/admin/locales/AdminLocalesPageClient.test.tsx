@@ -85,6 +85,18 @@ describe('AdminLocalesPageClient', () => {
     });
   });
 
+  it('should keep the required default locale switch disabled', async () => {
+    renderWithQueryClient();
+
+    await waitFor(() => {
+      expect(screen.getByRole('switch', { name: 'Active for en' })).toBeDisabled();
+    });
+
+    fireEvent.click(screen.getByRole('switch', { name: 'Active for en' }));
+
+    expect(mockPatchAdminLocale).not.toHaveBeenCalled();
+  });
+
   it('should reorder locales when an item is dropped onto another item', async () => {
     renderWithQueryClient();
 

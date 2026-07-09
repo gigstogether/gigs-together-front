@@ -9,6 +9,9 @@ import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import type { PatchAdminLocaleBody, SupportedLocale } from '@/lib/admin-api';
 
+/** Must stay active; matches API translation default locale fallback. */
+const REQUIRED_ACTIVE_LOCALE_ISO = 'en';
+
 interface AdminLocaleItemProps {
   readonly locale: SupportedLocale;
   readonly isSaving: boolean;
@@ -96,7 +99,7 @@ export default function AdminLocaleItem(props: AdminLocaleItemProps) {
         </div>
         <Switch
           checked={locale.isActive}
-          disabled={isSaving}
+          disabled={isSaving || locale.iso === REQUIRED_ACTIVE_LOCALE_ISO}
           aria-label={`Active for ${locale.iso}`}
           className="shrink-0 sm:order-3 sm:ml-auto"
           onCheckedChange={(checked) => onUpdate({ isActive: checked })}
