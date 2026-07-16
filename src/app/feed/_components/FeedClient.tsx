@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useReducer, useRef, useState } from 'react';
 import { toLocalYMD } from '@/lib/utils';
 import type { Event } from '@/lib/types';
-import type { ResolveCountryName } from './feed-client/useFeedInfiniteQuery';
+import type { ResolveCityName, ResolveCountryName } from './feed-client/useFeedInfiniteQuery';
 
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
 import { clientEnv } from '@/env/client-env';
@@ -51,6 +51,7 @@ export default function FeedClient(props: FeedClientProps) {
     (iso) => t('country', countryIsoToTranslationKey(iso)),
     [t],
   );
+  const resolveCityName = useCallback<ResolveCityName>((code) => t('city', code), [t]);
   const queryClient = useQueryClient();
 
   const feedQuery = useFeedInfiniteQuery({
@@ -60,6 +61,7 @@ export default function FeedClient(props: FeedClientProps) {
     initialPrevCursor,
     initialNextCursor,
     resolveCountryName,
+    resolveCityName,
   });
   const {
     events,
@@ -106,10 +108,10 @@ export default function FeedClient(props: FeedClientProps) {
       );
 
       const mappedBefore: Event[] = res.before.map((gig) => {
-        return gigToEvent(gig, { resolveCountryName });
+        return gigToEvent(gig, { resolveCountryName, resolveCityName });
       });
       const mappedAfter: Event[] = res.after.map((gig) => {
-        return gigToEvent(gig, { resolveCountryName });
+        return gigToEvent(gig, { resolveCountryName, resolveCityName });
       });
       const windowEvents = mergeUniqueSorted(mappedBefore, mappedAfter);
       replaceWithWindow({
@@ -119,7 +121,7 @@ export default function FeedClient(props: FeedClientProps) {
       });
       return windowEvents;
     },
-    [city, country, queryClient, replaceWithWindow, resolveCountryName],
+    [city, country, queryClient, replaceWithWindow, resolveCityName, resolveCountryName],
   );
 
   const fetchHashTargetAnchorYmd = useCallback(

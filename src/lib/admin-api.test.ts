@@ -408,31 +408,22 @@ describe('fetchAdminTranslations', () => {
     ]);
   });
 
-  it('should default legacy translation fields when they are missing', async () => {
+  it('should throw when required translation fields are missing', async () => {
     mockApiRequest.mockResolvedValue({
       records: [
         {
-          id: '64f1a2b3c4d5e6f7a8b9c0d1',
-          namespace: 'about',
+          id: '64f1a2b3c4d5e6f7a8b9c0d3',
+          namespace: 'city',
           locale: 'en',
-          key: 'title',
-          value: 'About',
+          key: 'barcelona',
+          value: 'Barcelona',
         },
       ],
     });
 
-    await expect(fetchAdminTranslations({ namespace: 'about' })).resolves.toEqual([
-      {
-        id: '64f1a2b3c4d5e6f7a8b9c0d1',
-        namespace: 'about',
-        locale: 'en',
-        key: 'title',
-        value: 'About',
-        format: 'plain',
-        kind: 'text',
-        isActive: true,
-      },
-    ]);
+    await expect(fetchAdminTranslations({ namespace: 'city' })).rejects.toThrow(
+      'Invalid admin translations response',
+    );
   });
 
   it('should ignore extra translation record fields from the API', async () => {

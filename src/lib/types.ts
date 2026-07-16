@@ -21,7 +21,10 @@ export type Event = {
   poster?: string;
   title: string;
   venue: string;
-  city: string;
+  city: {
+    code: string;
+    name: string;
+  };
   country: {
     iso: string;
     name: string;

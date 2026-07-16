@@ -57,10 +57,10 @@ const v1AdminTranslationRecordSchema = z
     key: z.string(),
     value: z.string(),
     namespace: z.string(),
-    format: v1AdminTranslationFormatSchema.optional(),
-    kind: v1AdminTranslationKindSchema.optional(),
+    format: v1AdminTranslationFormatSchema,
+    kind: v1AdminTranslationKindSchema,
     locale: z.string(),
-    isActive: z.boolean().optional(),
+    isActive: z.boolean(),
   })
   .strip()
   .superRefine((record, ctx) => {
@@ -80,10 +80,10 @@ const v1AdminTranslationRecordSchema = z
     key: record.key,
     value: record.value,
     namespace: record.namespace,
-    format: record.format ?? 'plain',
-    kind: record.kind ?? 'text',
+    format: record.format,
+    kind: record.kind,
     locale: record.locale,
-    isActive: record.isActive ?? true,
+    isActive: record.isActive,
   }));
 
 const v1AdminTranslationsListResponseSchema = z

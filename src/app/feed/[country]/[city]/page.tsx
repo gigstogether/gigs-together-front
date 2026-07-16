@@ -30,7 +30,7 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
   }
 
   const [i18n, feed] = await Promise.all([
-    getTranslations('en', 'country'),
+    getTranslations('en', ['country', 'city']),
     getFeed({ limit: PAGE_SIZE, country, city }),
   ]);
 
@@ -43,8 +43,18 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
     });
   };
 
+  const tCity = (code: string): string =>
+    resolveTranslationValue({
+      entry: i18n.translations.city?.[code],
+      namespace: 'city',
+      key: code,
+    });
+
   const initialEvents: Event[] = feed.gigs.map((gig) =>
-    gigToEvent(gig, { resolveCountryName: (iso) => tCountry(iso) }),
+    gigToEvent(gig, {
+      resolveCountryName: (iso) => tCountry(iso),
+      resolveCityName: (code) => tCity(code),
+    }),
   );
 
   return (

@@ -14,7 +14,7 @@ function makeEvent(id: string): Event {
     date: '2026-05-01',
     title: 't',
     venue: 'v',
-    city: 'c',
+    city: { code: 'c', name: 'City' },
     country: { iso: 'es', name: 'Spain' },
   };
 }

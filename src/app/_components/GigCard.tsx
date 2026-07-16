@@ -85,7 +85,7 @@ function GigLocation(props: GigLocationProps) {
 }
 
 export function GigCard({ gig }: GigCardProps) {
-  const location = [gig.venue, gig.city, gig.country.name].filter((str) => !!str).join(' ');
+  const location = [gig.venue, gig.city.name, gig.country.name].filter((str) => !!str).join(' ');
   const mapsHref = location
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
     : undefined;
