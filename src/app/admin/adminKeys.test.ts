@@ -15,6 +15,23 @@ describe('adminKeys', () => {
     expect(adminKeys.locales()).toEqual(['admin', 'locales']);
   });
 
+  it('should build translationNamespaces key', () => {
+    expect(adminKeys.translationNamespaces()).toEqual(['admin', 'translationNamespaces']);
+  });
+
+  it('should build translations key with namespace and locale', () => {
+    expect(adminKeys.translations('about', 'en')).toEqual(['admin', 'translations', 'about', 'en']);
+  });
+
+  it('should trim namespace in translations key', () => {
+    expect(adminKeys.translations(' about ', 'en')).toEqual([
+      'admin',
+      'translations',
+      'about',
+      'en',
+    ]);
+  });
+
   it('should build gigs key with filter status and sort options', () => {
     expect(
       adminKeys.gigs(GigStatusFilter.Pending, AdminGigsSortBy.CreatedAt, AdminGigsSortOrder.Desc),

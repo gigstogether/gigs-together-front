@@ -1,5 +1,6 @@
 import {
   buildTranslationNamespaceCacheTag,
+  isValidTranslationKey,
   isValidTranslationNamespace,
 } from '@/lib/translation-identifiers';
 
@@ -14,6 +15,20 @@ describe('isValidTranslationNamespace', () => {
     expect(isValidTranslationNamespace('Country')).toBe(false);
     expect(isValidTranslationNamespace('feed_filters')).toBe(false);
     expect(isValidTranslationNamespace('feed-filters')).toBe(false);
+  });
+});
+
+describe('isValidTranslationKey', () => {
+  it('should accept dot-separated camelCase keys', () => {
+    expect(isValidTranslationKey('title')).toBe(true);
+    expect(isValidTranslationKey('mainGig.withLink')).toBe(true);
+    expect(isValidTranslationKey('weeklyDigest.gigLine.html')).toBe(true);
+  });
+
+  it('should reject invalid key casing and separators', () => {
+    expect(isValidTranslationKey('MainGig.withLink')).toBe(false);
+    expect(isValidTranslationKey('main_gig_post.with_link')).toBe(false);
+    expect(isValidTranslationKey('weeklyDigest.gig-line')).toBe(false);
   });
 });
 

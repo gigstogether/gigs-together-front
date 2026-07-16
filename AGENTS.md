@@ -63,8 +63,8 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - When using `any`, localize it at the boundary and add a short comment explaining why it is unavoidable.
 
 - Mark a function as `async` only when it contains `await`.
-- If a function returns a `Promise` without using `await`, declare the `Promise` return type explicitly in the signature instead of marking the function as `async`.
 - Do not use `.then(...)` when the same logic can be written with `await`.
+- If a function returns a `Promise` without using `await`, declare the `Promise` return type explicitly in the signature instead of marking the function as `async`.
 
 - Do not use type assertions (`as ...`) when the same result can be achieved with proper types, `satisfies`, narrower return types, or refactoring.
 - Treat `as` as a last resort and justify it locally with a short comment when unavoidable.
@@ -117,6 +117,11 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - If code remains **only** for backward compatibility, document that explicitly on the symbol: JSDoc on the function, method, class, type, or exported constant (what it supports, what callers should use instead, and when it can be removed if known).
 - Prefer removing unused legacy paths over leaving them “just in case”. If retention is intentional, the doc must say **legacy** or **backward compatibility** and the reason — not an unexplained special case in implementation.
 - Read-time normalization for old stored data (for example mapping missing fields to a default) belongs at the **I/O boundary** and must be documented as legacy compatibility, with a path toward explicit data or stricter validation.
+
+## React component files
+
+- One React component per file.
+- Exception: `src/components/ui/**` shadcn primitives.
 
 ## React Typing Style
 

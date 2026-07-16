@@ -4,6 +4,7 @@ import { GigStatusAPI } from '@/app/admin/gigs/types';
 import type { AdminGigDetail, AdminGigFormData, GigStatusFilter } from '@/app/admin/gigs/types';
 import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 import { apiRequest } from '@/lib/api';
+import { isRecord } from '@/lib/is-record';
 
 const V1_ADMIN_API_PREFIX = 'v1/admin/';
 
@@ -44,6 +45,84 @@ export interface PatchAdminLocaleBody {
 export interface LocaleOrderUpdate {
   readonly iso: string;
   readonly order: number;
+}
+
+const v1AdminTranslationFormatSchema = z.enum(['plain', 'icu']);
+const v1AdminTranslationKindSchema = z.enum(['text', 'template']);
+
+const v1AdminTranslationRecordSchema = z
+  .object({
+    id: z.string().optional(),
+    _id: z.string().optional(),
+    key: z.string(),
+    value: z.string(),
+    namespace: z.string(),
+    format: v1AdminTranslationFormatSchema.optional(),
+    kind: v1AdminTranslationKindSchema.optional(),
+    locale: z.string(),
+    isActive: z.boolean().optional(),
+  })
+  .strip()
+  .superRefine((record, ctx) => {
+    const hasId =
+      (record.id !== undefined && record.id.length > 0) ||
+      (record._id !== undefined && record._id.length > 0);
+
+    if (!hasId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'id is required',
+      });
+    }
+  })
+  .transform((record) => ({
+    id: record.id ?? record._id ?? '',
+    key: record.key,
+    value: record.value,
+    namespace: record.namespace,
+    format: record.format ?? 'plain',
+    kind: record.kind ?? 'text',
+    locale: record.locale,
+    isActive: record.isActive ?? true,
+  }));
+
+const v1AdminTranslationsListResponseSchema = z
+  .object({
+    records: z.array(v1AdminTranslationRecordSchema),
+  })
+  .strip();
+
+export type AdminTranslationFormat = z.infer<typeof v1AdminTranslationFormatSchema>;
+export type AdminTranslationKind = z.infer<typeof v1AdminTranslationKindSchema>;
+export type AdminTranslationRecord = z.infer<typeof v1AdminTranslationRecordSchema>;
+
+export function isAdminTranslationKind(value: string): value is AdminTranslationKind {
+  return value === 'text' || value === 'template';
+}
+
+const v1AdminTranslationNamespacesListResponseSchema = z
+  .object({
+    namespaces: z.array(z.string()),
+  })
+  .strict();
+
+export interface FetchAdminTranslationsParams {
+  readonly namespace?: string;
+  readonly locale?: string;
+}
+
+export interface PutAdminTranslationBody {
+  readonly namespace: string;
+  readonly locale: string;
+  readonly key: string;
+  readonly value: string;
+  readonly format: 'plain';
+  readonly kind: AdminTranslationKind;
+  readonly isActive: boolean;
+}
+
+export interface PatchAdminTranslationActiveBody {
+  readonly isActive: boolean;
 }
 
 const v1AdminGigStatusSchema = z.nativeEnum(GigStatusAPI);
@@ -173,6 +252,54 @@ function parseAdminLocaleResponse(payload: unknown): SupportedLocale {
   return parsed.data;
 }
 
+function parseAdminTranslationNamespacesList(payload: unknown): readonly string[] {
+  const parsed = v1AdminTranslationNamespacesListResponseSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new Error(
+      `Invalid admin translation namespaces response: ${JSON.stringify(parsed.error.issues)}`,
+    );
+  }
+  return parsed.data.namespaces;
+}
+
+function parseAdminTranslationsList(payload: unknown): readonly AdminTranslationRecord[] {
+  if (isRecord(payload) && 'translations' in payload && !('records' in payload)) {
+    throw new Error(
+      'Invalid admin translations response: received locale translations payload ({ locale, translations }). Expected { records } from GET /v1/admin/translations.',
+    );
+  }
+
+  const parsed = v1AdminTranslationsListResponseSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new Error(`Invalid admin translations response: ${JSON.stringify(parsed.error.issues)}`);
+  }
+  return parsed.data.records;
+}
+
+function parseAdminTranslationRecord(payload: unknown): AdminTranslationRecord {
+  const parsed = v1AdminTranslationRecordSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new Error(`Invalid admin translation response: ${JSON.stringify(parsed.error.issues)}`);
+  }
+  return parsed.data;
+}
+
+function buildAdminTranslationsEndpoint(params: FetchAdminTranslationsParams): string {
+  const qs = new URLSearchParams();
+  const namespace = params.namespace?.trim();
+  if (namespace !== undefined && namespace.length > 0) {
+    qs.set('namespace', namespace);
+  }
+  if (params.locale !== undefined && params.locale.trim().length > 0) {
+    qs.set('locale', params.locale.trim().toLowerCase());
+  }
+
+  const query = qs.toString();
+  return query.length > 0
+    ? `${V1_ADMIN_API_PREFIX}translations?${query}`
+    : `${V1_ADMIN_API_PREFIX}translations`;
+}
+
 export async function fetchAdminDashboard(): Promise<AdminDashboard> {
   const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}dashboard`, 'GET');
   return parseAdminDashboard(raw);
@@ -217,6 +344,37 @@ export async function patchAdminLocalesOrder(
     locales,
   });
   return parseAdminLocalesList(raw);
+}
+
+export async function fetchAdminTranslationNamespaces(): Promise<readonly string[]> {
+  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}translations/namespaces`, 'GET');
+  return parseAdminTranslationNamespacesList(raw);
+}
+
+export async function fetchAdminTranslations(
+  params: FetchAdminTranslationsParams,
+): Promise<readonly AdminTranslationRecord[]> {
+  const raw = await apiRequest<unknown>(buildAdminTranslationsEndpoint(params), 'GET');
+  return parseAdminTranslationsList(raw);
+}
+
+export async function putAdminTranslation(
+  body: PutAdminTranslationBody,
+): Promise<AdminTranslationRecord> {
+  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}translations`, 'PUT', body);
+  return parseAdminTranslationRecord(raw);
+}
+
+export async function patchAdminTranslationActive(
+  id: string,
+  body: PatchAdminTranslationActiveBody,
+): Promise<AdminTranslationRecord> {
+  const raw = await apiRequest<unknown>(
+    `${V1_ADMIN_API_PREFIX}translations/${encodeURIComponent(id.trim())}/active`,
+    'PATCH',
+    body,
+  );
+  return parseAdminTranslationRecord(raw);
 }
 
 export function postAdminGigApprove(publicId: string): Promise<void> {

@@ -1,10 +1,5 @@
-import AdminComingSoon from '@/app/admin/_components/AdminComingSoon';
+import AdminTranslationsPageClient from '@/app/admin/translations/AdminTranslationsPageClient';
 
 export default function AdminTranslationsPage() {
-  return (
-    <AdminComingSoon
-      title="Translations"
-      description="Manage static content."
-    />
-  );
+  return <AdminTranslationsPageClient />;
 }

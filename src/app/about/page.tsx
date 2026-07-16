@@ -20,7 +20,7 @@ const t = (translations: V1TranslationsByNamespace, key: string): string =>
 export async function generateMetadata(): Promise<Metadata> {
   const i18n = await getTranslations('en', NS);
   const title = t(i18n.translations, 'title');
-  const description = t(i18n.translations, 'meta_description');
+  const description = t(i18n.translations, 'metaDescription');
   return {
     title,
     description,
