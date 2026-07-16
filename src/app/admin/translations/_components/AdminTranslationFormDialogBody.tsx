@@ -9,17 +9,10 @@ import { Button } from '@/components/ui/button';
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { PutAdminTranslationBody, SupportedLocale } from '@/lib/admin-api';
-import { isAdminTranslationKind } from '@/lib/admin-api';
 import { cn } from '@/lib/utils';
 import { isValidTranslationKey } from '@/lib/translation-identifiers';
 
@@ -103,6 +96,7 @@ export default function AdminTranslationFormDialogBody(props: AdminTranslationFo
                 value={formValues.namespace}
                 disabled
                 placeholder="about"
+                className="h-9"
                 aria-labelledby="translation-form-namespace-label"
               />
             )}
@@ -125,13 +119,19 @@ export default function AdminTranslationFormDialogBody(props: AdminTranslationFo
         </div>
 
         <Field>
-          <FieldLabel htmlFor="translation-form-key">Key</FieldLabel>
+          <FieldLabel
+            id="translation-form-key-label"
+            htmlFor="translation-form-key"
+          >
+            Key
+          </FieldLabel>
           <Input
             id="translation-form-key"
             value={formValues.key}
             disabled={isSaving || !isCreateMode}
             placeholder="welcomeTitle or welcome.title"
             className={cn('font-mono', keyValidationError && 'border-destructive')}
+            aria-labelledby="translation-form-key-label"
             aria-invalid={keyValidationError !== null}
             onChange={(event) =>
               setFormValues((current) => ({ ...current, key: event.target.value }))
@@ -144,12 +144,18 @@ export default function AdminTranslationFormDialogBody(props: AdminTranslationFo
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="translation-form-value">Value</FieldLabel>
+          <FieldLabel
+            id="translation-form-value-label"
+            htmlFor="translation-form-value"
+          >
+            Value
+          </FieldLabel>
           <Textarea
             id="translation-form-value"
             value={formValues.value}
             disabled={isSaving}
-            rows={formValues.kind === 'template' ? 4 : 3}
+            rows={3}
+            aria-labelledby="translation-form-value-label"
             onChange={(event) =>
               setFormValues((current) => ({ ...current, value: event.target.value }))
             }
@@ -158,58 +164,72 @@ export default function AdminTranslationFormDialogBody(props: AdminTranslationFo
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field>
-            <FieldLabel htmlFor="translation-form-format">Format</FieldLabel>
-            <Select
-              value="plain"
-              disabled
+            <FieldLabel
+              id="translation-form-format-label"
+              htmlFor="translation-form-format"
             >
-              <SelectTrigger
-                id="translation-form-format"
-                className="h-10"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="z-[110]">
-                <SelectItem value="plain">Plain</SelectItem>
-              </SelectContent>
-            </Select>
+              Format
+            </FieldLabel>
+            <Input
+              id="translation-form-format"
+              value="Plain"
+              disabled
+              className="h-9"
+              aria-labelledby="translation-form-format-label"
+            />
           </Field>
           <Field>
-            <FieldLabel htmlFor="translation-form-kind">Kind</FieldLabel>
-            <Select
+            <FieldLabel id="translation-form-kind-label">Kind</FieldLabel>
+            <ToggleGroup
+              id="translation-form-kind"
+              type="single"
+              role="radiogroup"
               value={formValues.kind}
               disabled={isSaving}
+              variant="outline"
+              size="default"
+              aria-labelledby="translation-form-kind-label"
+              className="h-9 w-full justify-stretch gap-0 rounded-md border border-input p-0 shadow-sm"
               onValueChange={(nextKind) => {
-                if (isAdminTranslationKind(nextKind)) {
+                if (nextKind === 'text' || nextKind === 'template') {
                   setFormValues((current) => ({ ...current, kind: nextKind }));
                 }
               }}
             >
-              <SelectTrigger
-                id="translation-form-kind"
-                className="h-10"
+              <ToggleGroupItem
+                value="text"
+                className="h-full min-h-0 flex-1 rounded-none rounded-l-md border-0 px-3 shadow-none data-[state=on]:bg-accent"
               >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="z-[110]">
-                <SelectItem value="text">Text</SelectItem>
-                <SelectItem value="template">Template</SelectItem>
-              </SelectContent>
-            </Select>
+                Text
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="template"
+                className="h-full min-h-0 flex-1 rounded-none rounded-r-md border-0 border-l border-input px-3 shadow-none data-[state=on]:bg-accent"
+              >
+                Template
+              </ToggleGroupItem>
+            </ToggleGroup>
           </Field>
         </div>
 
         <div className="flex items-center justify-between gap-3 rounded-md border border-border/70 px-3 py-2">
           <div>
-            <p className="text-sm font-medium">Active</p>
+            <FieldLabel
+              id="translation-form-active-label"
+              htmlFor="translation-form-active"
+              className="text-sm font-medium"
+            >
+              Active
+            </FieldLabel>
             <FieldDescription>
               Inactive strings are hidden from consumers but kept in the catalog.
             </FieldDescription>
           </div>
           <Switch
+            id="translation-form-active"
             checked={formValues.isActive}
             disabled={isSaving}
-            aria-label="Translation active"
+            aria-labelledby="translation-form-active-label"
             onCheckedChange={(checked) =>
               setFormValues((current) => ({ ...current, isActive: checked }))
             }

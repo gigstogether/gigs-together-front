@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { RefObject } from 'react';
+import { useMemo, useState } from 'react';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useDismissOnPointerDownOutside } from '@/hooks/use-dismiss-on-pointer-down-outside';
 import { cn } from '@/lib/utils';
 
 interface AdminTranslationNamespaceComboboxProps {
@@ -14,44 +14,6 @@ interface AdminTranslationNamespaceComboboxProps {
   readonly namespaces: readonly string[];
   readonly isDisabled: boolean;
   readonly onChange: (value: string) => void;
-}
-
-interface UseDismissOnPointerDownOutsideParams {
-  readonly isOpen: boolean;
-  readonly onDismiss: () => void;
-}
-
-function useDismissOnPointerDownOutside(
-  params: UseDismissOnPointerDownOutsideParams,
-): RefObject<HTMLDivElement | null> {
-  const { isOpen, onDismiss } = params;
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) {
-        return;
-      }
-
-      if (containerRef.current?.contains(target)) {
-        return;
-      }
-
-      onDismiss();
-    };
-
-    document.addEventListener('pointerdown', handlePointerDown);
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-    };
-  }, [isOpen, onDismiss]);
-
-  return containerRef;
 }
 
 function filterNamespaces(namespaces: readonly string[], query: string): readonly string[] {
@@ -103,7 +65,7 @@ export default function AdminTranslationNamespaceCombobox(
         aria-autocomplete="list"
         aria-controls="translation-form-namespace-listbox"
         aria-labelledby={labelId}
-        className="pr-9"
+        className="h-9 pr-9"
         onChange={(event) => {
           onChange(event.target.value);
           setIsOpen(true);
@@ -115,14 +77,14 @@ export default function AdminTranslationNamespaceCombobox(
         size="icon"
         disabled={isDisabled}
         aria-label="Show namespace suggestions"
-        className="absolute top-0 right-0 h-10 w-9 rounded-l-none hover:bg-transparent"
+        className="absolute top-0 right-0 h-9 w-9 rounded-l-none hover:bg-transparent"
         onClick={(event) => {
           event.preventDefault();
           setIsOpen((current) => !current);
         }}
       >
         <ChevronIcon
-          className="size-4 opacity-60"
+          className="size-4 shrink-0 opacity-50"
           aria-hidden
         />
       </Button>

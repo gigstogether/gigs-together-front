@@ -31,6 +31,9 @@ export default function AdminTranslationFormDialog(props: AdminTranslationFormDi
       <DialogContent
         className="max-w-lg"
         aria-describedby={undefined}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+        }}
       >
         {open ? (
           <AdminTranslationFormDialogBody

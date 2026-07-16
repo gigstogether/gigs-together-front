@@ -42,7 +42,7 @@ export default function AdminTranslationsTable(props: AdminTranslationsTableProp
         <colgroup>
           {showNamespaceColumn ? <col className="w-[10%]" /> : null}
           <col className="w-[9rem]" />
-          <col className="w-[12%]" />
+          <col className="w-[6rem]" />
           <col />
           <col className={kindColClassName} />
           <col className="w-14" />
