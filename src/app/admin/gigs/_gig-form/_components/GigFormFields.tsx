@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import type { GigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 import { defaultGigFormValues } from '@/app/admin/gigs/_gig-form/gig-form.shared';
 import type { Country } from '@/lib/countries.server';
+import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
 import { useT } from '@/lib/i18n';
 
 interface GigFormFieldsProps {
@@ -64,7 +65,7 @@ export default function GigFormFields(props: GigFormFieldsProps) {
                     key={country.iso}
                     value={country.iso}
                   >
-                    {t('country', country.iso)}
+                    {t('country', countryIsoToTranslationKey(country.iso))}
                   </option>
                 ))}
               </select>

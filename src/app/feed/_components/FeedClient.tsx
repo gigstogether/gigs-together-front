@@ -7,14 +7,15 @@ import { toLocalYMD } from '@/lib/utils';
 import type { Event } from '@/lib/types';
 import type { ResolveCountryName } from './feed-client/useFeedInfiniteQuery';
 
-import { useT } from '@/lib/i18n';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
+import { clientEnv } from '@/env/client-env';
+import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
+import { gigToEvent } from '@/lib/feed.mapper';
+import { useT } from '@/lib/i18n';
 import { FeedMonths } from './feed-client/FeedMonths';
 import { useCalendarAvailableDates } from './feed-client/useCalendarAvailableDates';
 import { useFeedHeaderConfigSync } from './feed-client/useFeedHeaderConfigSync';
 import { useHeaderHeight } from './feed-client/useHeaderHeight';
-import { clientEnv } from '@/env/client-env';
-import { gigToEvent } from '@/lib/feed.mapper';
 import { useHashAutoScroll } from './feed-client/useHashAutoScroll';
 import { useInfiniteScroll } from './feed-client/useInfiniteScroll';
 import { useVisibleEventDateOnScroll } from './feed-client/useVisibleEventDateOnScroll';
@@ -46,7 +47,10 @@ export default function FeedClient(props: FeedClientProps) {
   const t = useT();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 45
-  const resolveCountryName = useCallback<ResolveCountryName>((iso) => t('country', iso), [t]);
+  const resolveCountryName = useCallback<ResolveCountryName>(
+    (iso) => t('country', countryIsoToTranslationKey(iso)),
+    [t],
+  );
   const queryClient = useQueryClient();
 
   const feedQuery = useFeedInfiniteQuery({
