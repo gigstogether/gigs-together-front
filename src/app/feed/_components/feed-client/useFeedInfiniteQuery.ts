@@ -11,6 +11,7 @@ import { fetchFeedPage } from './feedApi';
 import { feedKeys } from './feedKeys';
 
 export type ResolveCountryName = (iso: string) => string;
+export type ResolveCityName = (code: string) => string;
 
 export interface UseFeedInfiniteQueryParams {
   readonly country: string;
@@ -19,6 +20,7 @@ export interface UseFeedInfiniteQueryParams {
   readonly initialPrevCursor?: string;
   readonly initialNextCursor?: string;
   readonly resolveCountryName: ResolveCountryName;
+  readonly resolveCityName: ResolveCityName;
 }
 
 export interface ReplaceFeedWindowParams {
@@ -65,8 +67,9 @@ const INITIAL_FEED_PAGE_PARAM = { direction: 'initial' } satisfies FeedPageParam
 function mapGigsToEvents(
   gigs: readonly V1GigGetResponseBodyGig[],
   resolveCountryName: ResolveCountryName,
+  resolveCityName: ResolveCityName,
 ): Event[] {
-  return gigs.map((gig) => gigToEvent(gig, { resolveCountryName }));
+  return gigs.map((gig) => gigToEvent(gig, { resolveCountryName, resolveCityName }));
 }
 
 function createInitialInfiniteData(
@@ -89,11 +92,16 @@ export function useFeedInfiniteQuery(
 ): UseFeedInfiniteQueryResult {
   const queryClient = useQueryClient();
   const resolveCountryNameRef = useRef(params.resolveCountryName);
+  const resolveCityNameRef = useRef(params.resolveCityName);
   const appliedInitialSnapshotRef = useRef<string | null>(null);
 
   useEffect(() => {
     resolveCountryNameRef.current = params.resolveCountryName;
   }, [params.resolveCountryName]);
+
+  useEffect(() => {
+    resolveCityNameRef.current = params.resolveCityName;
+  }, [params.resolveCityName]);
 
   const queryKey = useMemo(
     () => feedKeys.events({ country: params.country, city: params.city }),
@@ -122,7 +130,11 @@ export function useFeedInfiniteQuery(
       });
 
       return {
-        events: mapGigsToEvents(result.gigs, resolveCountryNameRef.current),
+        events: mapGigsToEvents(
+          result.gigs,
+          resolveCountryNameRef.current,
+          resolveCityNameRef.current,
+        ),
         prevCursor: result.prevCursor,
         nextCursor: result.nextCursor,
         requestedCursor: pageParam.cursor,

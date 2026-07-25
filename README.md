@@ -6,7 +6,7 @@ Frontend for the Gigs Together platform. This repository contains a Next.js app 
 - renders the public feed for supported locations
 - exposes stable public gig permalink redirects via `/gigs/[publicId]`
 - exposes a public `/suggest` placeholder and a Telegram-aware `/suggest/launch` entry
-- exposes a moderator-only `/admin` area with gig moderation, posting/create/edit flows, and language management
+- exposes a moderator-only `/admin` area with gig moderation, posting/create/edit flows, and locale management
 - exposes revalidation endpoints for cached content
 
 At the moment, the default public feed points to `es/barcelona`.
@@ -65,6 +65,7 @@ What they are used for:
 | `BRAND_NAME`                                      | Optional                         | Brand name used in metadata. Defaults to `Gigs Together`.                                                                                        |
 | `ALLOWED_DEV_ORIGINS`                             | Optional                         | Comma-separated list of allowed development origins for Next.js `allowedDevOrigins` (for example `http://localhost:3000,http://127.0.0.1:3000`). |
 | `FEED_REVALIDATE_SECRET`                          | Required for revalidation routes | Secret checked by `/api/revalidate/feed`.                                                                                                        |
+| `TRANSLATIONS_REVALIDATE_SECRET`                  | Required for revalidation routes | Secret checked by `/api/revalidate/translations` (`x-translations-revalidate-secret`).                                                           |
 | `TRANSLATIONS_REVALIDATE_SECONDS`                 | Optional                         | Server-side cache revalidation period for translation fetching. Positive integer in seconds, default `3600`.                                     |
 
 ## Running the app locally
@@ -91,7 +92,7 @@ Useful routes:
 - `/suggest/launch` -> Telegram-aware redirect into `/suggest` or the moderator gig flow
 - `/admin` -> moderator dashboard
 - `/admin/gigs` -> gig moderation queue and create/edit flows
-- `/admin/languages` -> locale activation and ordering
+- `/admin/locales` -> locale activation and ordering
 - `/admin/translations` -> translations placeholder page
 - `/admin/admins` -> moderator access placeholder page
 - `/about` -> about page

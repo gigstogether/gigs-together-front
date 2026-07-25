@@ -3,45 +3,45 @@
 import type { PointerEvent as ReactPointerEvent } from 'react';
 
 import {
-  bindAdminLanguagePointerReorder,
-  getLanguageIsoFromPoint,
-} from '@/app/admin/languages/admin-language-pointer-reorder';
+  bindAdminLocalePointerReorder,
+  getLocaleIsoFromPoint,
+} from '@/app/admin/locales/admin-locale-pointer-reorder';
 
-describe('getLanguageIsoFromPoint', () => {
+describe('getLocaleIsoFromPoint', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('should return iso when pointer is over a language item', () => {
+  it('should return iso when pointer is over a locale item', () => {
     const item = document.createElement('li');
-    item.dataset.languageIso = 'es';
+    item.dataset.localeIso = 'es';
     const child = document.createElement('span');
     item.append(child);
 
     document.elementFromPoint = vi.fn().mockReturnValue(child);
 
-    expect(getLanguageIsoFromPoint(10, 20)).toBe('es');
+    expect(getLocaleIsoFromPoint(10, 20)).toBe('es');
   });
 
-  it('should return null when pointer is not over a language item', () => {
+  it('should return null when pointer is not over a locale item', () => {
     document.elementFromPoint = vi.fn().mockReturnValue(document.createElement('div'));
 
-    expect(getLanguageIsoFromPoint(0, 0)).toBeNull();
+    expect(getLocaleIsoFromPoint(0, 0)).toBeNull();
   });
 
   it('should skip excluded iso when resolving pointer target', () => {
     const dragged = document.createElement('li');
-    dragged.dataset.languageIso = 'es';
+    dragged.dataset.localeIso = 'es';
     const target = document.createElement('li');
-    target.dataset.languageIso = 'en';
+    target.dataset.localeIso = 'en';
 
     document.elementsFromPoint = vi.fn().mockReturnValue([dragged, target]);
 
-    expect(getLanguageIsoFromPoint(10, 20, 'es')).toBe('en');
+    expect(getLocaleIsoFromPoint(10, 20, 'es')).toBe('en');
   });
 });
 
-describe('bindAdminLanguagePointerReorder', () => {
+describe('bindAdminLocalePointerReorder', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -62,7 +62,7 @@ describe('bindAdminLanguagePointerReorder', () => {
     });
     button.hasPointerCapture = vi.fn((pointerId: number) => capturedPointerIds.has(pointerId));
 
-    const { onPointerDown } = bindAdminLanguagePointerReorder({
+    const { onPointerDown } = bindAdminLocalePointerReorder({
       excludedIso: 'es',
       isDisabled: false,
       onStart,
@@ -91,7 +91,7 @@ describe('bindAdminLanguagePointerReorder', () => {
     const onEnd = vi.fn();
 
     const item = document.createElement('li');
-    item.dataset.languageIso = 'en';
+    item.dataset.localeIso = 'en';
     document.elementFromPoint = vi.fn().mockReturnValue(item);
 
     const button = document.createElement('button');
@@ -104,7 +104,7 @@ describe('bindAdminLanguagePointerReorder', () => {
     });
     button.hasPointerCapture = vi.fn((pointerId: number) => capturedPointerIds.has(pointerId));
 
-    const { onPointerDown, onPointerMove, onPointerUp } = bindAdminLanguagePointerReorder({
+    const { onPointerDown, onPointerMove, onPointerUp } = bindAdminLocalePointerReorder({
       excludedIso: 'es',
       isDisabled: false,
       onStart,

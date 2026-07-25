@@ -50,7 +50,10 @@ function createEvent(overrides: Partial<Event> = {}): Event {
     id: 'gig-1',
     title: 'Arctic Monkeys',
     date: '2026-07-01',
-    city: 'Barcelona',
+    city: {
+      code: 'barcelona',
+      name: 'Barcelona',
+    },
     venue: 'Razzmatazz',
     country: {
       iso: 'es',
@@ -77,6 +80,7 @@ describe('useFeedInfiniteQuery', () => {
           initialPrevCursor: 'prev-1',
           initialNextCursor: 'next-1',
           resolveCountryName: () => 'Spain',
+          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -113,6 +117,7 @@ describe('useFeedInfiniteQuery', () => {
           country: 'es',
           city: 'barcelona',
           resolveCountryName: () => 'Spain',
+          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -162,6 +167,7 @@ describe('useFeedInfiniteQuery', () => {
           initialEvents: [createEvent()],
           initialNextCursor: 'next-1',
           resolveCountryName: () => 'Spain',
+          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -212,6 +218,7 @@ describe('useFeedInfiniteQuery', () => {
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
           resolveCountryName: () => 'Spain',
+          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -249,6 +256,7 @@ describe('useFeedInfiniteQuery', () => {
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
           resolveCountryName: () => 'Spain',
+          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),

@@ -9,6 +9,7 @@ import type {
 const translationValueSchema = z.object({
   value: z.string(),
   format: z.enum(['plain', 'icu']),
+  kind: z.enum(['text', 'template']),
 });
 
 const translationsByNamespaceSchema = z.record(
@@ -16,10 +17,18 @@ const translationsByNamespaceSchema = z.record(
   z.record(z.string(), translationValueSchema),
 );
 
-const languageGetTranslationsResponseBodySchema = z.object({
+const localeGetTranslationsResponseBodySchema = z.object({
   locale: z.string().min(1),
   translations: translationsByNamespaceSchema,
 });
+
+export type V1TranslationValue = z.infer<typeof translationValueSchema>;
+export type V1TranslationsByNamespace = z.infer<typeof translationsByNamespaceSchema>;
+export type V1LocaleGetTranslationsResponseBody = z.infer<
+  typeof localeGetTranslationsResponseBodySchema
+>;
+export type TranslationFormat = V1TranslationValue['format'];
+export type TranslationKind = V1TranslationValue['kind'];
 
 const countrySchema = z.object({
   iso: z.string().min(1),
@@ -74,8 +83,8 @@ const v1GigByPublicIdGetResponseBodySchema = z
   })
   .strict();
 
-export function parseLanguageGetTranslationsResponseBody(raw: unknown) {
-  return languageGetTranslationsResponseBodySchema.parse(raw);
+export function parseLocaleGetTranslationsResponseBody(raw: unknown) {
+  return localeGetTranslationsResponseBodySchema.parse(raw);
 }
 
 export function parseCountries(raw: unknown) {

@@ -1,72 +1,79 @@
 import 'server-only';
 
 import { apiRequest } from '@/lib/api';
-import { parseLanguageGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
+import { parseLocaleGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
+import type { V1LocaleGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
+import {
+  buildTranslationNamespaceCacheTag,
+  isValidTranslationNamespace,
+} from '@/lib/translation-identifiers';
 import { serverEnv } from '@/env/server-env';
-import type { Language } from '@/lib/types';
+import type { LocaleIso } from '@/lib/types';
 
-export type TranslationFormat = 'plain' | 'icu';
+export type {
+  TranslationFormat,
+  TranslationKind,
+  V1LocaleGetTranslationsResponseBody,
+  V1TranslationValue,
+  V1TranslationsByNamespace,
+} from '@/lib/api-boundary-schemas';
 
-export type V1TranslationValue = {
-  readonly value: string;
-  readonly format: TranslationFormat;
-};
-
-export type V1TranslationsByNamespace = Readonly<
-  Record<string, Readonly<Record<string, V1TranslationValue>>>
->;
-
-export interface V1LanguageGetTranslationsResponseBody {
-  readonly locale: string;
-  readonly translations: V1TranslationsByNamespace;
+export class GetTranslationsError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'GetTranslationsError';
+  }
 }
 
-const DEFAULT_LANGUAGE: Language = 'en';
+const DEFAULT_LOCALE: LocaleIso = 'en';
 
-// const TRANSLATIONS_TAG_ALL = 'translations';
-// const tagLocale = (locale: string) => `translations:locale:${locale}`;
-// const tagNamespace = (ns: string) => `translations:ns:${ns}`;
+function parseRequestedTranslationNamespaces(
+  namespaces: string | readonly string[],
+): readonly string[] {
+  const rawList =
+    typeof namespaces === 'string'
+      ? namespaces
+          .split(',')
+          .map((segment) => segment.trim())
+          .filter(Boolean)
+      : [...namespaces];
+
+  return [...new Set(rawList)];
+}
 
 /**
  * Server-side translations loader (cached for 1h).
  *
- * - Uses `accept-language` header by default (primary language tag like "en", "es", "ru")
- * - Supports namespaces: `?namespaces=common,feed`
- * - Adds cache tags so you can manually revalidate via `revalidateTag()`
+ * - Requires explicit namespace(s); front never fetches all API namespaces (e.g. telegram).
+ * - Uses `accept-language` header by default (primary locale tag like "en", "es", "ru")
  */
 export async function getTranslations(
-  language: Language = DEFAULT_LANGUAGE,
-  namespaces: string | readonly string[] = [],
-): Promise<V1LanguageGetTranslationsResponseBody> {
-  const namespacesList =
-    typeof namespaces === 'string'
-      ? namespaces
-          .split(',')
-          .map((x) => x.trim())
-          .filter(Boolean)
-      : namespaces;
+  locale: LocaleIso = DEFAULT_LOCALE,
+  namespaces: string | readonly string[],
+): Promise<V1LocaleGetTranslationsResponseBody> {
+  const namespacesList = parseRequestedTranslationNamespaces(namespaces);
 
-  const nsQuery = namespacesList?.join(',');
+  if (namespacesList.length === 0) {
+    throw new GetTranslationsError('getTranslations requires at least one namespace.');
+  }
 
-  const acceptLanguage = language;
+  for (const namespace of namespacesList) {
+    if (!isValidTranslationNamespace(namespace)) {
+      throw new GetTranslationsError(`Invalid translation namespace "${namespace}".`);
+    }
+  }
 
-  const qs = new URLSearchParams();
-  if (nsQuery) qs.set('namespaces', nsQuery);
+  const nsQuery = namespacesList.join(',');
 
-  const url = `/v1/language/translations${qs.size ? `?${qs.toString()}` : ''}`;
+  const url = `/v1/locale/translations?namespaces=${encodeURIComponent(nsQuery)}`;
 
   const raw = await apiRequest<unknown>(url, 'GET', undefined, {
-    // Explicitly set accept-language; otherwise some runtimes send "*" by default.
-    headers: { 'accept-language': acceptLanguage },
+    headers: { 'accept-language': locale },
     next: {
       revalidate: serverEnv.translationsRevalidateSeconds,
-      // tags: [
-      //   TRANSLATIONS_TAG_ALL,
-      //   ...(acceptLanguage ? [tagLocale(acceptLanguage)] : []),
-      //   ...(namespacesList ? namespacesList.map(tagNamespace) : []),
-      // ],
+      tags: namespacesList.map((namespace) => buildTranslationNamespaceCacheTag(namespace)),
     },
   });
 
-  return parseLanguageGetTranslationsResponseBody(raw);
+  return parseLocaleGetTranslationsResponseBody(raw);
 }

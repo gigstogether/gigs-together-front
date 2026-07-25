@@ -2,9 +2,11 @@ import type { Event, V1GigGetResponseBodyGig } from '@/lib/types';
 import { toLocalYMD } from '@/lib/utils';
 
 export type CountryNameResolver = (iso: string) => string;
+export type CityNameResolver = (code: string) => string;
 
 export interface GigToEventOptions {
   readonly resolveCountryName?: CountryNameResolver;
+  readonly resolveCityName?: CityNameResolver;
 }
 
 const YMD_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -86,7 +88,7 @@ export function gigDateToYMD(date: V1GigGetResponseBodyGig['date'] | number): st
 }
 
 export function gigToEvent(gig: V1GigGetResponseBodyGig, options: GigToEventOptions = {}): Event {
-  const { resolveCountryName } = options;
+  const { resolveCountryName, resolveCityName } = options;
 
   const date = gigDateToYMD(gig.date);
   const endDate = gig.endDate ? gigDateToYMD(gig.endDate) : undefined;
@@ -98,7 +100,10 @@ export function gigToEvent(gig: V1GigGetResponseBodyGig, options: GigToEventOpti
     poster: gig.posterUrl,
     title: gig.title,
     venue: gig.venue,
-    city: gig.city,
+    city: {
+      code: gig.city,
+      name: resolveCityName ? resolveCityName(gig.city) : '',
+    },
     country: {
       iso: gig.country,
       name: resolveCountryName ? resolveCountryName(gig.country) : '',

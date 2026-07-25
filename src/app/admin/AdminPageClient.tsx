@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 
+import AdminDashboardActions from '@/app/admin/_components/AdminDashboardActions';
 import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 import { adminNavItems } from '@/app/admin/admin-nav-config';
 import { adminKeys } from '@/app/admin/adminKeys';
@@ -23,10 +24,8 @@ export default function AdminPageClient() {
 
   return (
     <>
-      <AdminPageHeader
-        title="Dashboard"
-        description="Overview of moderation work and quick links to admin tools."
-      />
+      <AdminPageHeader title="Dashboard" />
+      <AdminDashboardActions />
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
         <Link
           href={{
