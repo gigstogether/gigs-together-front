@@ -391,3 +391,15 @@ export function postAdminGigPost(publicId: string): Promise<void> {
   const encodedPublicId = encodeURIComponent(publicId.trim());
   return apiRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/post`, 'POST');
 }
+
+export function postAdminDigestPublish(): Promise<void> {
+  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}digest/publish`, 'POST');
+}
+
+export function postAdminFeedRevalidate(): Promise<void> {
+  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}feed/revalidate`, 'POST');
+}
+
+export function postAdminTranslationsRevalidate(): Promise<void> {
+  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}translations/revalidate`, 'POST');
+}
