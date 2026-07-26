@@ -23,6 +23,7 @@ const serverEnvSchema = z.object({
     'TRANSLATIONS_REVALIDATE_SECONDS',
   ),
   FEED_REVALIDATE_SECRET: optionalTrimmedStringFromEnvSchema,
+  TRANSLATIONS_REVALIDATE_SECRET: optionalTrimmedStringFromEnvSchema,
 });
 
 const parsedServerEnv = serverEnvSchema.parse({
@@ -33,6 +34,7 @@ const parsedServerEnv = serverEnvSchema.parse({
   SITE_PREVIEW_DESCRIPTION: process.env.SITE_PREVIEW_DESCRIPTION,
   TRANSLATIONS_REVALIDATE_SECONDS: process.env.TRANSLATIONS_REVALIDATE_SECONDS,
   FEED_REVALIDATE_SECRET: process.env.FEED_REVALIDATE_SECRET,
+  TRANSLATIONS_REVALIDATE_SECRET: process.env.TRANSLATIONS_REVALIDATE_SECRET,
 });
 
 function isStagingAppBaseUrl(appBaseUrl: string | undefined): boolean {
@@ -56,12 +58,22 @@ export const serverEnv = {
   translationsRevalidateSeconds:
     parsedServerEnv.TRANSLATIONS_REVALIDATE_SECONDS ?? DEFAULT_TRANSLATIONS_REVALIDATE_SECONDS,
   feedRevalidateSecret: parsedServerEnv.FEED_REVALIDATE_SECRET,
+  translationsRevalidateSecret: parsedServerEnv.TRANSLATIONS_REVALIDATE_SECRET,
 } as const;
 
 export function getFeedRevalidateSecretOrThrow(): string {
   const secret = serverEnv.feedRevalidateSecret;
   if (!secret) {
     throw new Error('Missing FEED_REVALIDATE_SECRET');
+  }
+
+  return secret;
+}
+
+export function getTranslationsRevalidateSecretOrThrow(): string {
+  const secret = serverEnv.translationsRevalidateSecret;
+  if (!secret) {
+    throw new Error('Missing TRANSLATIONS_REVALIDATE_SECRET');
   }
 
   return secret;

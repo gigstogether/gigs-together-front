@@ -2,12 +2,17 @@ import {
   fetchAdminDashboard,
   fetchAdminGigByPublicId,
   fetchAdminGigs,
-  fetchAdminLanguages,
-  patchAdminLanguage,
-  patchAdminLanguagesOrder,
+  fetchAdminLocales,
+  fetchAdminTranslationNamespaces,
+  fetchAdminTranslations,
+  patchAdminLocale,
+  patchAdminLocalesOrder,
+  patchAdminTranslationActive,
   postAdminGigApprove,
   postAdminGigPost,
   postAdminGigReject,
+  putAdminTranslation,
+  isAdminTranslationKind,
 } from '@/lib/admin-api';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/admin-gigs-sort';
 import { GigStatusAPI, GigStatusFilter } from '@/app/admin/gigs/types';
@@ -200,92 +205,373 @@ describe('fetchAdminGigByPublicId', () => {
   });
 });
 
-describe('fetchAdminLanguages', () => {
+describe('fetchAdminLocales', () => {
   beforeEach(() => {
     mockApiRequest.mockReset();
   });
 
-  it('should parse admin languages response when payload is valid', async () => {
-    mockApiRequest.mockResolvedValue([{ iso: 'en', name: 'English', isActive: true, order: 0 }]);
-
-    await expect(fetchAdminLanguages()).resolves.toEqual([
-      { iso: 'en', name: 'English', isActive: true, order: 0 },
+  it('should parse admin locales response when payload is valid', async () => {
+    mockApiRequest.mockResolvedValue([
+      { iso: 'en', nativeName: 'English', isActive: true, order: 0 },
     ]);
-    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/languages', 'GET');
+
+    await expect(fetchAdminLocales()).resolves.toEqual([
+      { iso: 'en', nativeName: 'English', isActive: true, order: 0 },
+    ]);
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/locales', 'GET');
   });
 
-  it('should throw when admin languages response is invalid', async () => {
+  it('should throw when admin locales response uses legacy name field', async () => {
+    mockApiRequest.mockResolvedValue([{ iso: 'en', name: 'English', isActive: true, order: 0 }]);
+
+    await expect(fetchAdminLocales()).rejects.toThrow('Invalid admin locales response');
+  });
+
+  it('should throw when admin locales response is invalid', async () => {
     mockApiRequest.mockResolvedValue([{ iso: 'en' }]);
 
-    await expect(fetchAdminLanguages()).rejects.toThrow('Invalid admin languages response');
+    await expect(fetchAdminLocales()).rejects.toThrow('Invalid admin locales response');
   });
 });
 
-describe('patchAdminLanguage', () => {
+describe('patchAdminLocale', () => {
   beforeEach(() => {
     mockApiRequest.mockReset();
   });
 
-  it('should parse admin language patch response when payload is valid', async () => {
+  it('should parse admin locale patch response when payload is valid', async () => {
     mockApiRequest.mockResolvedValue({
       iso: 'en',
-      name: 'English',
+      nativeName: 'English',
       isActive: false,
       order: 0,
     });
 
-    await expect(patchAdminLanguage('en', { isActive: false })).resolves.toEqual({
+    await expect(patchAdminLocale('en', { isActive: false })).resolves.toEqual({
       iso: 'en',
-      name: 'English',
+      nativeName: 'English',
       isActive: false,
       order: 0,
     });
-    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/languages/en', 'PATCH', {
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/locales/en', 'PATCH', {
       isActive: false,
     });
   });
 
-  it('should throw when admin language patch response includes unknown fields', async () => {
+  it('should throw when admin locale patch response includes unknown fields', async () => {
     mockApiRequest.mockResolvedValue({
       _id: '507f1f77bcf86cd799439011',
       iso: 'en',
-      name: 'English',
+      nativeName: 'English',
       isActive: false,
       order: 0,
     });
 
-    await expect(patchAdminLanguage('en', { isActive: false })).rejects.toThrow(
-      'Invalid admin language response',
+    await expect(patchAdminLocale('en', { isActive: false })).rejects.toThrow(
+      'Invalid admin locale response',
     );
   });
 });
 
-describe('patchAdminLanguagesOrder', () => {
+describe('patchAdminLocalesOrder', () => {
   beforeEach(() => {
     mockApiRequest.mockReset();
   });
 
-  it('should parse admin languages order patch response when payload is valid', async () => {
+  it('should parse admin locales order patch response when payload is valid', async () => {
     mockApiRequest.mockResolvedValue([
-      { iso: 'es', name: 'Español', isActive: true, order: 0 },
-      { iso: 'en', name: 'English', isActive: true, order: 1 },
+      { iso: 'es', nativeName: 'Español', isActive: true, order: 0 },
+      { iso: 'en', nativeName: 'English', isActive: true, order: 1 },
     ]);
 
     await expect(
-      patchAdminLanguagesOrder([
+      patchAdminLocalesOrder([
         { iso: 'es', order: 0 },
         { iso: 'en', order: 1 },
       ]),
     ).resolves.toEqual([
-      { iso: 'es', name: 'Español', isActive: true, order: 0 },
-      { iso: 'en', name: 'English', isActive: true, order: 1 },
+      { iso: 'es', nativeName: 'Español', isActive: true, order: 0 },
+      { iso: 'en', nativeName: 'English', isActive: true, order: 1 },
     ]);
-    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/languages/order', 'PATCH', {
-      languages: [
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/locales/order', 'PATCH', {
+      locales: [
         { iso: 'es', order: 0 },
         { iso: 'en', order: 1 },
       ],
     });
+  });
+});
+
+describe('fetchAdminTranslationNamespaces', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should parse admin translation namespaces response when payload is valid', async () => {
+    mockApiRequest.mockResolvedValue({
+      namespaces: ['about', 'country'],
+    });
+
+    await expect(fetchAdminTranslationNamespaces()).resolves.toEqual(['about', 'country']);
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/translations/namespaces', 'GET');
+  });
+});
+
+describe('fetchAdminTranslations', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should parse admin translations response when payload is valid', async () => {
+    mockApiRequest.mockResolvedValue({
+      records: [
+        {
+          id: '64f1a2b3c4d5e6f7a8b9c0d1',
+          namespace: 'about',
+          locale: 'en',
+          key: 'title',
+          value: 'About',
+          format: 'plain',
+          kind: 'text',
+          isActive: true,
+        },
+      ],
+    });
+
+    await expect(fetchAdminTranslations({ namespace: 'about', locale: 'en' })).resolves.toEqual([
+      {
+        id: '64f1a2b3c4d5e6f7a8b9c0d1',
+        namespace: 'about',
+        locale: 'en',
+        key: 'title',
+        value: 'About',
+        format: 'plain',
+        kind: 'text',
+        isActive: true,
+      },
+    ]);
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/translations?namespace=about&locale=en',
+      'GET',
+    );
+  });
+
+  it('should request all locales for namespace when locale is omitted', async () => {
+    mockApiRequest.mockResolvedValue({ records: [] });
+
+    await expect(fetchAdminTranslations({ namespace: 'about' })).resolves.toEqual([]);
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/translations?namespace=about', 'GET');
+  });
+
+  it('should request all namespaces when namespace is omitted', async () => {
+    mockApiRequest.mockResolvedValue({ records: [] });
+
+    await expect(fetchAdminTranslations({})).resolves.toEqual([]);
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/translations', 'GET');
+  });
+
+  it('should throw when admin translations response is invalid', async () => {
+    mockApiRequest.mockResolvedValue({ records: [{}] });
+
+    await expect(fetchAdminTranslations({ namespace: 'about' })).rejects.toThrow(
+      'Invalid admin translations response',
+    );
+  });
+
+  it('should parse country translation records with lowercase iso keys', async () => {
+    mockApiRequest.mockResolvedValue({
+      records: [
+        {
+          id: '64f1a2b3c4d5e6f7a8b9c0d2',
+          namespace: 'country',
+          locale: 'en',
+          key: 'es',
+          value: 'Spain',
+          format: 'plain',
+          kind: 'text',
+          isActive: true,
+        },
+      ],
+    });
+
+    await expect(fetchAdminTranslations({ namespace: 'country' })).resolves.toEqual([
+      {
+        id: '64f1a2b3c4d5e6f7a8b9c0d2',
+        namespace: 'country',
+        locale: 'en',
+        key: 'es',
+        value: 'Spain',
+        format: 'plain',
+        kind: 'text',
+        isActive: true,
+      },
+    ]);
+  });
+
+  it('should throw when required translation fields are missing', async () => {
+    mockApiRequest.mockResolvedValue({
+      records: [
+        {
+          id: '64f1a2b3c4d5e6f7a8b9c0d3',
+          namespace: 'city',
+          locale: 'en',
+          key: 'barcelona',
+          value: 'Barcelona',
+        },
+      ],
+    });
+
+    await expect(fetchAdminTranslations({ namespace: 'city' })).rejects.toThrow(
+      'Invalid admin translations response',
+    );
+  });
+
+  it('should ignore extra translation record fields from the API', async () => {
+    mockApiRequest.mockResolvedValue({
+      records: [
+        {
+          id: '64f1a2b3c4d5e6f7a8b9c0d1',
+          namespace: 'about',
+          locale: 'en',
+          key: 'title',
+          value: 'About',
+          format: 'plain',
+          kind: 'text',
+          isActive: true,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-02T00:00:00.000Z',
+        },
+      ],
+    });
+
+    await expect(fetchAdminTranslations({ namespace: 'about' })).resolves.toEqual([
+      {
+        id: '64f1a2b3c4d5e6f7a8b9c0d1',
+        namespace: 'about',
+        locale: 'en',
+        key: 'title',
+        value: 'About',
+        format: 'plain',
+        kind: 'text',
+        isActive: true,
+      },
+    ]);
+  });
+
+  it('should throw when locale translations payload is received instead of admin payload', async () => {
+    mockApiRequest.mockResolvedValue({
+      locale: 'en',
+      translations: {
+        country: {
+          es: {
+            value: 'Spain',
+            format: 'plain',
+            kind: 'text',
+          },
+        },
+      },
+    });
+
+    await expect(fetchAdminTranslations({ namespace: 'country' })).rejects.toThrow(
+      'received locale translations payload',
+    );
+  });
+});
+
+describe('putAdminTranslation', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should parse admin translation upsert response when payload is valid', async () => {
+    mockApiRequest.mockResolvedValue({
+      id: '64f1a2b3c4d5e6f7a8b9c0d1',
+      namespace: 'about',
+      locale: 'en',
+      key: 'title',
+      value: 'About us',
+      format: 'plain',
+      kind: 'text',
+      isActive: true,
+    });
+
+    await expect(
+      putAdminTranslation({
+        namespace: 'about',
+        locale: 'en',
+        key: 'title',
+        value: 'About us',
+        format: 'plain',
+        kind: 'text',
+        isActive: true,
+      }),
+    ).resolves.toEqual({
+      id: '64f1a2b3c4d5e6f7a8b9c0d1',
+      namespace: 'about',
+      locale: 'en',
+      key: 'title',
+      value: 'About us',
+      format: 'plain',
+      kind: 'text',
+      isActive: true,
+    });
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/translations', 'PUT', {
+      namespace: 'about',
+      locale: 'en',
+      key: 'title',
+      value: 'About us',
+      format: 'plain',
+      kind: 'text',
+      isActive: true,
+    });
+  });
+});
+
+describe('patchAdminTranslationActive', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should parse admin translation active patch response when payload is valid', async () => {
+    mockApiRequest.mockResolvedValue({
+      id: '64f1a2b3c4d5e6f7a8b9c0d1',
+      namespace: 'about',
+      locale: 'en',
+      key: 'title',
+      value: 'About',
+      format: 'plain',
+      kind: 'text',
+      isActive: false,
+    });
+
+    await expect(
+      patchAdminTranslationActive('64f1a2b3c4d5e6f7a8b9c0d1', { isActive: false }),
+    ).resolves.toEqual({
+      id: '64f1a2b3c4d5e6f7a8b9c0d1',
+      namespace: 'about',
+      locale: 'en',
+      key: 'title',
+      value: 'About',
+      format: 'plain',
+      kind: 'text',
+      isActive: false,
+    });
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/translations/64f1a2b3c4d5e6f7a8b9c0d1/active',
+      'PATCH',
+      { isActive: false },
+    );
+  });
+});
+
+describe('isAdminTranslationKind', () => {
+  it('should return true for supported translation kinds', () => {
+    expect(isAdminTranslationKind('text')).toBe(true);
+    expect(isAdminTranslationKind('template')).toBe(true);
+  });
+
+  it('should return false for unsupported translation kinds', () => {
+    expect(isAdminTranslationKind('html')).toBe(false);
   });
 });
 

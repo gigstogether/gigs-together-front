@@ -24,7 +24,10 @@ describe('GigCard', () => {
       title: 'Radiohead',
       date: '2026-06-12',
       venue: 'Palau Sant Jordi',
-      city: 'barcelona',
+      city: {
+        code: 'barcelona',
+        name: 'Barcelona',
+      },
       country: {
         iso: 'ES',
         name: 'Spain',

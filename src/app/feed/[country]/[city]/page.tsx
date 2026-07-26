@@ -1,13 +1,14 @@
 import { redirect } from 'next/navigation';
 import FeedClient from '../../_components/FeedClient';
-import { getTranslations } from '@/lib/translations.server';
-import { I18nProvider } from '@/lib/i18n';
-import { getFeed } from '@/lib/feed.server';
-import type { V1TranslationsByNamespace } from '@/lib/translations.server';
 import { clientEnv } from '@/env/client-env';
-import type { Event } from '@/lib/types';
+import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
+import { getFeed } from '@/lib/feed.server';
 import { gigToEvent } from '@/lib/feed.mapper';
 import { DEFAULT_FEED_ROUTE, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed.routes';
+import { I18nProvider } from '@/lib/i18n';
+import { resolveTranslationValue } from '@/lib/i18n/translation-value';
+import { getTranslations } from '@/lib/translations.server';
+import type { Event } from '@/lib/types';
 
 const PAGE_SIZE = clientEnv.feedPageSize;
 
@@ -17,11 +18,6 @@ export const revalidate = 60;
 export async function generateStaticParams() {
   return SUPPORTED_FEED_LOCATIONS.map((x) => ({ country: x.country, city: x.city }));
 }
-
-const tFromTranslations = (translations: V1TranslationsByNamespace, ns: string) => {
-  const normalizedNs = (ns || 'default').toString().trim().toLowerCase();
-  return (key: string): string => translations?.[normalizedNs]?.[key]?.value ?? key;
-};
 
 export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
   const { country, city } = await props.params;
@@ -34,12 +30,31 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
   }
 
   const [i18n, feed] = await Promise.all([
-    getTranslations('en', 'country'),
+    getTranslations('en', ['country', 'city']),
     getFeed({ limit: PAGE_SIZE, country, city }),
   ]);
-  const tCountry = tFromTranslations(i18n.translations, 'country');
+
+  const tCountry = (iso: string): string => {
+    const key = countryIsoToTranslationKey(iso);
+    return resolveTranslationValue({
+      entry: i18n.translations.country?.[key],
+      namespace: 'country',
+      key,
+    });
+  };
+
+  const tCity = (code: string): string =>
+    resolveTranslationValue({
+      entry: i18n.translations.city?.[code],
+      namespace: 'city',
+      key: code,
+    });
+
   const initialEvents: Event[] = feed.gigs.map((gig) =>
-    gigToEvent(gig, { resolveCountryName: (iso) => tCountry(iso) }),
+    gigToEvent(gig, {
+      resolveCountryName: (iso) => tCountry(iso),
+      resolveCityName: (code) => tCity(code),
+    }),
   );
 
   return (

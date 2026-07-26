@@ -57,5 +57,5 @@ export async function POST(req: NextRequest) {
     revalidatePath(path);
   }
 
-  return NextResponse.json({ ok: true, paths });
+  return new NextResponse(null, { status: 204 });
 }

@@ -1,6 +1,6 @@
 import type { PointerEvent as ReactPointerEvent } from 'react';
 
-const LANGUAGE_ITEM_SELECTOR = '[data-language-iso]';
+const LOCALE_ITEM_SELECTOR = '[data-locale-iso]';
 
 function getElementsAtPoint(clientX: number, clientY: number): Element[] {
   if (typeof document.elementsFromPoint === 'function') {
@@ -14,7 +14,7 @@ function getElementsAtPoint(clientX: number, clientY: number): Element[] {
   return element instanceof Element ? [element] : [];
 }
 
-export function getLanguageIsoFromPoint(
+export function getLocaleIsoFromPoint(
   clientX: number,
   clientY: number,
   excludedIso?: string | null,
@@ -22,12 +22,12 @@ export function getLanguageIsoFromPoint(
   const roots = getElementsAtPoint(clientX, clientY);
 
   for (const element of roots) {
-    const item = element.closest(LANGUAGE_ITEM_SELECTOR);
+    const item = element.closest(LOCALE_ITEM_SELECTOR);
     if (!(item instanceof HTMLElement)) {
       continue;
     }
 
-    const iso = item.dataset.languageIso ?? null;
+    const iso = item.dataset.localeIso ?? null;
     if (iso && iso !== excludedIso) {
       return iso;
     }
@@ -36,14 +36,14 @@ export function getLanguageIsoFromPoint(
   return null;
 }
 
-export interface AdminLanguagePointerReorderBindings {
+export interface AdminLocalePointerReorderBindings {
   readonly onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => void;
   readonly onPointerMove: (event: ReactPointerEvent<HTMLButtonElement>) => void;
   readonly onPointerUp: (event: ReactPointerEvent<HTMLButtonElement>) => void;
   readonly onPointerCancel: (event: ReactPointerEvent<HTMLButtonElement>) => void;
 }
 
-interface BindAdminLanguagePointerReorderParams {
+interface BindAdminLocalePointerReorderParams {
   readonly excludedIso: string;
   readonly isDisabled: boolean;
   readonly onStart: () => void;
@@ -52,15 +52,15 @@ interface BindAdminLanguagePointerReorderParams {
   readonly onEnd: () => void;
 }
 
-export function bindAdminLanguagePointerReorder(
-  params: BindAdminLanguagePointerReorderParams,
-): AdminLanguagePointerReorderBindings {
+export function bindAdminLocalePointerReorder(
+  params: BindAdminLocalePointerReorderParams,
+): AdminLocalePointerReorderBindings {
   const finishReorder = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
       return;
     }
 
-    const targetIso = getLanguageIsoFromPoint(event.clientX, event.clientY, params.excludedIso);
+    const targetIso = getLocaleIsoFromPoint(event.clientX, event.clientY, params.excludedIso);
     if (targetIso) {
       params.onDropOn(targetIso);
     }
@@ -89,7 +89,7 @@ export function bindAdminLanguagePointerReorder(
       }
 
       event.preventDefault();
-      const overIso = getLanguageIsoFromPoint(event.clientX, event.clientY, params.excludedIso);
+      const overIso = getLocaleIsoFromPoint(event.clientX, event.clientY, params.excludedIso);
       if (overIso) {
         params.onOver(overIso);
       }

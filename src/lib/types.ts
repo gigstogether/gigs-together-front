@@ -21,7 +21,10 @@ export type Event = {
   poster?: string;
   title: string;
   venue: string;
-  city: string;
+  city: {
+    code: string;
+    name: string;
+  };
   country: {
     iso: string;
     name: string;
@@ -67,6 +70,6 @@ export interface V1GigGetResponseBodyGig {
   postUrl?: string;
 }
 
-export type Language = 'en' | 'ru' | 'es' | string;
+export type LocaleIso = 'en' | 'ru' | 'es' | string;
 
 export {};
