@@ -10,6 +10,8 @@ const DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY = 'gt_tg_client_profile';
 const DEFAULT_FEED_PAGE_SIZE = 10;
 const DEFAULT_FEED_CALENDAR_DATES_STALE_TIME_MS = 600_000; // 10 minutes
 
+const PLAUSIBLE_SCRIPT_BASE_URL = 'https://plausible.io/js';
+
 const clientEnvSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).optional(),
@@ -78,5 +80,7 @@ export const clientEnv = {
   feedCalendarDatesStaleTimeMs:
     parsedClientEnv.NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS ??
     DEFAULT_FEED_CALENDAR_DATES_STALE_TIME_MS,
-  plausibleScriptId: parsedClientEnv.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID,
+  plausibleScriptSrc: parsedClientEnv.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID
+    ? `${PLAUSIBLE_SCRIPT_BASE_URL}/${parsedClientEnv.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID}.js`
+    : undefined,
 } as const;

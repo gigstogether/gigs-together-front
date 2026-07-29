@@ -106,20 +106,22 @@ describe('env/client', () => {
   });
 
   describe('NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID', () => {
-    it('should leave plausibleScriptId undefined when env var is missing', async () => {
+    it('should leave plausibleScriptSrc undefined when env var is missing', async () => {
       vi.stubEnv('NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID', undefined);
 
       const clientEnvModule = await importClientEnv();
 
-      expect(clientEnvModule.clientEnv.plausibleScriptId).toBeUndefined();
+      expect(clientEnvModule.clientEnv.plausibleScriptSrc).toBeUndefined();
     });
 
-    it('should return trimmed plausible script id when env var is set', async () => {
+    it('should build plausible script src when env var is set', async () => {
       vi.stubEnv('NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID', '  pa-_FpA9btdXUebMIHqavy2c  ');
 
       const clientEnvModule = await importClientEnv();
 
-      expect(clientEnvModule.clientEnv.plausibleScriptId).toBe('pa-_FpA9btdXUebMIHqavy2c');
+      expect(clientEnvModule.clientEnv.plausibleScriptSrc).toBe(
+        'https://plausible.io/js/pa-_FpA9btdXUebMIHqavy2c.js',
+      );
     });
   });
 
