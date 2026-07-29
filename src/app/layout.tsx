@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
 import { HeaderConfigProvider } from '@/app/_components/HeaderConfigProvider';
 import AppHeader from '@/app/_components/AppHeader';
+import PlausibleAnalyticsScript from '@/app/_components/PlausibleAnalyticsScript';
 import TelegramWebAppScript from '@/app/_components/TelegramWebAppScript';
 import { QueryProvider } from '@/app/_providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
@@ -101,6 +102,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <QueryProvider>
+          <PlausibleAnalyticsScript />
           <TelegramWebAppScript />
           <script
             type="application/ld+json"

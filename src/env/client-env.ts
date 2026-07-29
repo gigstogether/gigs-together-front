@@ -30,6 +30,7 @@ const clientEnvSchema = z
     NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS: createOptionalPositiveIntegerFromEnvSchema(
       'NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS',
     ),
+    NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID: optionalTrimmedStringFromEnvSchema,
   })
   .superRefine((value, ctx) => {
     if (value.NEXT_PUBLIC_AUTH_ENABLED && !value.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME) {
@@ -58,6 +59,7 @@ const parsedClientEnv = clientEnvSchema.parse({
   NEXT_PUBLIC_FEED_PAGE_SIZE: process.env.NEXT_PUBLIC_FEED_PAGE_SIZE,
   NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS:
     process.env.NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS,
+  NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID: process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID,
 });
 
 export const clientEnv = {
@@ -76,4 +78,5 @@ export const clientEnv = {
   feedCalendarDatesStaleTimeMs:
     parsedClientEnv.NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS ??
     DEFAULT_FEED_CALENDAR_DATES_STALE_TIME_MS,
+  plausibleScriptId: parsedClientEnv.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID,
 } as const;
