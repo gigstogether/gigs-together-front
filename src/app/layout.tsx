@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
 import { HeaderConfigProvider } from '@/app/_components/HeaderConfigProvider';
 import AppHeader from '@/app/_components/AppHeader';
+import PlausibleAnalyticsProvider from '@/app/_providers/PlausibleAnalyticsProvider';
 import TelegramWebAppScript from '@/app/_components/TelegramWebAppScript';
 import { QueryProvider } from '@/app/_providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
@@ -100,23 +101,25 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <QueryProvider>
-          <TelegramWebAppScript />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
-            }}
-          />
-          <HeaderConfigProvider>
-            <AppHeader
-              badgeAlt={HEADER_BADGE?.alt}
-              badgeSrc={HEADER_BADGE?.src}
+        <PlausibleAnalyticsProvider>
+          <QueryProvider>
+            <TelegramWebAppScript />
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+              }}
             />
-            <div className="pt-[var(--header-h)]">{children}</div>
-            <Toaster />
-          </HeaderConfigProvider>
-        </QueryProvider>
+            <HeaderConfigProvider>
+              <AppHeader
+                badgeAlt={HEADER_BADGE?.alt}
+                badgeSrc={HEADER_BADGE?.src}
+              />
+              <div className="pt-[var(--header-h)]">{children}</div>
+              <Toaster />
+            </HeaderConfigProvider>
+          </QueryProvider>
+        </PlausibleAnalyticsProvider>
       </body>
     </html>
   );

@@ -105,6 +105,26 @@ describe('env/client', () => {
     });
   });
 
+  describe('NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID', () => {
+    it('should leave plausibleScriptSrc undefined when env var is missing', async () => {
+      vi.stubEnv('NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID', undefined);
+
+      const clientEnvModule = await importClientEnv();
+
+      expect(clientEnvModule.clientEnv.plausibleScriptSrc).toBeUndefined();
+    });
+
+    it('should build plausible script src when env var is set', async () => {
+      vi.stubEnv('NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID', '  pa-_FpA9btdXUebMIHqavy2c  ');
+
+      const clientEnvModule = await importClientEnv();
+
+      expect(clientEnvModule.clientEnv.plausibleScriptSrc).toBe(
+        'https://plausible.io/js/pa-_FpA9btdXUebMIHqavy2c.js',
+      );
+    });
+  });
+
   describe('FEED_CALENDAR_DATES_STALE_TIME_MS', () => {
     it('should use default feed calendar dates stale time when env var is missing', async () => {
       vi.stubEnv('NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS', undefined);
