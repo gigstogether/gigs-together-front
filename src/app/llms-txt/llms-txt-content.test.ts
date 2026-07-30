@@ -1,5 +1,5 @@
 import type { V1TranslationValue } from '@/lib/api-boundary-schemas';
-import { buildLlmsTxtContent, LlmsTxtContentError } from '@/lib/llms-txt-content';
+import { buildLlmsTxtContent, LlmsTxtContentError } from './llms-txt-content';
 
 const BASE_URL = 'https://gigstogether.example';
 

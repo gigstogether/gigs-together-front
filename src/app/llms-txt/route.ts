@@ -4,7 +4,7 @@ import {
   buildLlmsTxtContent,
   LLMS_TRANSLATION_NAMESPACE,
   LlmsTxtContentError,
-} from '@/lib/llms-txt-content';
+} from './llms-txt-content';
 import { getTranslations } from '@/lib/translations.server';
 
 export async function GET(): Promise<Response> {

@@ -23,7 +23,9 @@ function removeEmptyMarkdownLinkLines(content: string): string {
 }
 
 function normalizeLlmsTxtContent(content: string): string {
-  return `${removeEmptyMarkdownLinkLines(content).replace(/\n{3,}/g, '\n\n').trim()}\n`;
+  return `${removeEmptyMarkdownLinkLines(content)
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()}\n`;
 }
 
 export function buildLlmsTxtContent(params: BuildLlmsTxtContentParams): string {
