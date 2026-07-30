@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { toLocalYMD } from '@/lib/utils';
+import { useClearFeedLocationHash } from './useClearFeedLocationHash';
 import type { FeedLoadingAction } from './feedLoading';
 
 export interface UseEventHashLoaderParams {
@@ -15,9 +15,7 @@ export interface UseEventHashLoaderParams {
 }
 
 export function useEventHashLoader(params: UseEventHashLoaderParams): void {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const clearHashFromUrl = useClearFeedLocationHash();
   const {
     isEnabled,
     isBusyRef,
@@ -63,9 +61,7 @@ export function useEventHashLoader(params: UseEventHashLoaderParams): void {
       const todayYmd = toLocalYMD(new Date());
       // Past events: redirect to same URL without anchor (feed shows only upcoming)
       if (anchorYmd < todayYmd) {
-        const search = searchParams.toString() ? `?${searchParams.toString()}` : '';
-        const href = `${pathname ?? ''}${search}`;
-        router.replace(href as Parameters<typeof router.replace>[0]);
+        clearHashFromUrl();
         return;
       }
       await loadAroundAndReplace(anchorYmd);
@@ -81,23 +77,19 @@ export function useEventHashLoader(params: UseEventHashLoaderParams): void {
       // On any error: clear hash, clear error, show current feed.
       lastMissingHashTargetRef.current = null;
       setError(null);
-      const search = searchParams.toString() ? `?${searchParams.toString()}` : '';
-      const url = `${pathname ?? ''}${search}`;
-      window.history.replaceState(null, '', url);
+      clearHashFromUrl();
     } finally {
       dispatchLoading({ type: 'jump:end' });
       setIsBusy(false);
     }
   }, [
     bumpInfiniteScrollResetKey,
+    clearHashFromUrl,
     dispatchLoading,
     isBusyRef,
     isEnabled,
     loadAroundAndReplace,
-    pathname,
     resolveAnchorYmdByEventId,
-    router,
-    searchParams,
     setError,
     setIsBusy,
   ]);

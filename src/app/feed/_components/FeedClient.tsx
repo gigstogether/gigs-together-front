@@ -1,7 +1,6 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useReducer, useRef, useState } from 'react';
 import { toLocalYMD } from '@/lib/utils';
 import type { Event } from '@/lib/types';
@@ -14,6 +13,7 @@ import { gigToEvent } from '@/lib/feed.mapper';
 import { useT } from '@/lib/i18n';
 import { FeedMonths } from './feed-client/FeedMonths';
 import { useCalendarAvailableDates } from './feed-client/useCalendarAvailableDates';
+import { useClearFeedLocationHash } from './feed-client/useClearFeedLocationHash';
 import { useFeedHeaderConfigSync } from './feed-client/useFeedHeaderConfigSync';
 import { useHeaderHeight } from './feed-client/useHeaderHeight';
 import { useHashAutoScroll } from './feed-client/useHashAutoScroll';
@@ -41,9 +41,7 @@ interface FeedClientProps {
 export default function FeedClient(props: FeedClientProps) {
   const { country, city, initialEvents, initialPrevCursor, initialNextCursor } = props;
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const clearHashFromUrl = useClearFeedLocationHash();
   const t = useT();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 45
@@ -138,14 +136,6 @@ export default function FeedClient(props: FeedClientProps) {
     [fetchAroundAndReplace],
   );
 
-  const clearFeedLocationHash = useCallback(() => {
-    if (!window.location.hash) return;
-    const search = searchParams.toString() ? `?${searchParams.toString()}` : '';
-    const url = `${pathname ?? ''}${search}`;
-    window.history.replaceState(null, '', url);
-    router.replace(url as Parameters<typeof router.replace>[0]);
-  }, [pathname, router, searchParams]);
-
   const fetchNextPage = useCallback(async () => {
     await fetchNextFeedPage();
   }, [fetchNextFeedPage]);
@@ -227,7 +217,7 @@ export default function FeedClient(props: FeedClientProps) {
     async (day: Date) => {
       const key = toLocalYMD(day);
 
-      clearFeedLocationHash();
+      clearHashFromUrl();
 
       const scrollToTarget = (el: HTMLElement) => {
         const headerPx = headerH ?? 0;
@@ -283,7 +273,7 @@ export default function FeedClient(props: FeedClientProps) {
         inFlightJumpRef.current = false;
       }
     },
-    [clearFeedLocationHash, events, fetchAroundAndReplace, headerH, bumpInfiniteScrollResetKey],
+    [clearHashFromUrl, events, fetchAroundAndReplace, headerH, bumpInfiniteScrollResetKey],
   );
 
   useFeedHeaderConfigSync({

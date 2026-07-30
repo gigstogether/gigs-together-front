@@ -1,10 +1,13 @@
 import type { MetadataRoute } from 'next';
-import { getAppBaseUrlOrThrow } from '@/env/server-env';
+import { getAppBaseUrlOrThrow, serverEnv } from '@/env/server-env';
 import { SUPPORTED_FEED_LOCATIONS, buildFeedPath } from '@/lib/feed.routes';
 
-const baseUrl = getAppBaseUrlOrThrow();
-
 export default function sitemap(): MetadataRoute.Sitemap {
+  if (!serverEnv.isProductionSite) {
+    return [];
+  }
+
+  const baseUrl = getAppBaseUrlOrThrow();
   const feedUrls = SUPPORTED_FEED_LOCATIONS.map((loc) => ({
     url: `${baseUrl}${buildFeedPath(loc)}`,
     lastModified: new Date(),

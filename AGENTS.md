@@ -13,6 +13,7 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Comments must be in English using the Latin alphabet only. Do not write comments in Cyrillic.
 - For numeric constants in seconds or milliseconds (for example `604_800`, `86_400`), add a short comment with human-readable equivalents (at least days or hours, and minutes when useful).
 - Boolean variables and flags should preferably start with `is`/`has`/`can`, for example `isActive`, `isAdmin`, `isValid`.
+- In `catch` clauses, bind the caught value as `e`, not `error`, when a binding is needed (for example `catch (e) { ... }`).
 - Always create new files with `LF` line endings (not `CRLF`). Prefer editor or Git settings that default new files to `LF`.
 - Keep line endings as `LF` in tracked files. If you hit formatter errors caused by `CRLF`, convert the file to `LF` and reformat.
 

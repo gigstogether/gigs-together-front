@@ -7,6 +7,14 @@ const nextConfig = {
   typedRoutes: true, // prevents from adding a wrong href to Link in routes
   reactCompiler: true,
   allowedDevOrigins,
+  async rewrites() {
+    return [
+      {
+        source: '/llms.txt',
+        destination: '/llms-txt',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

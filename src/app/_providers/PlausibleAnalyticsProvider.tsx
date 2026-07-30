@@ -1,16 +1,15 @@
-'use client';
-
 import PlausibleProvider from 'next-plausible';
 import type { ReactNode } from 'react';
 import { clientEnv } from '@/env/client-env';
+import { serverEnv } from '@/env/server-env';
 
 interface PlausibleAnalyticsProviderProps {
-  children: ReactNode;
+  readonly children: ReactNode;
 }
 
 export default function PlausibleAnalyticsProvider({ children }: PlausibleAnalyticsProviderProps) {
   const plausibleScriptSrc = clientEnv.plausibleScriptSrc;
-  if (!plausibleScriptSrc) {
+  if (!serverEnv.isProductionSite || !plausibleScriptSrc) {
     return children;
   }
 

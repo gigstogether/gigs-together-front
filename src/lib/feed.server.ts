@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { apiRequest } from '@/lib/api';
+import { apiPublicRequest } from '@/lib/api';
 import { parseV1GigGetResponseBody } from '@/lib/api-boundary-schemas';
 import type { V1GigGetResponseBody } from '@/lib/types';
 
@@ -10,6 +10,9 @@ export type GetFeedParams = Readonly<{
   city?: string;
   cursor?: string;
 }>;
+
+/** Aligns with `export const revalidate` on the feed page (ISR). */
+const FEED_REVALIDATE_SECONDS = 60; // 60 seconds (1 minute)
 
 /**
  * Server-side feed loader.
@@ -24,6 +27,10 @@ export async function getFeed(params: GetFeedParams): Promise<V1GigGetResponseBo
   if (country) qs.set('country', country);
   if (city) qs.set('city', city);
 
-  const raw = await apiRequest<unknown>(`v1/gig?${qs.toString()}`, 'GET');
+  const raw = await apiPublicRequest<unknown>(`v1/gig?${qs.toString()}`, 'GET', undefined, {
+    next: {
+      revalidate: FEED_REVALIDATE_SECONDS,
+    },
+  });
   return parseV1GigGetResponseBody(raw);
 }

@@ -43,11 +43,9 @@ export function useModeratorTelegramSession(): UseModeratorTelegramSessionResult
           description: 'This page is available only for admin accounts.',
           variant: 'destructive',
         });
-      } catch (error) {
+      } catch (e) {
         const description =
-          error instanceof ApiError
-            ? error.message
-            : 'Could not complete sign in. Please try again.';
+          e instanceof ApiError ? e.message : 'Could not complete sign in. Please try again.';
         toast({
           title: 'Sign in failed',
           description,

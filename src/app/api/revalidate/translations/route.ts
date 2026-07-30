@@ -20,6 +20,7 @@ interface RevalidateTranslationNamespaceCacheParams {
 
 const TRANSLATION_NAMESPACE_REVALIDATE_PATHS: Readonly<Record<string, readonly string[]>> = {
   about: ['/about'],
+  llms: ['/llms.txt'],
 };
 
 const isRevalidateTranslationsRequestBody = (

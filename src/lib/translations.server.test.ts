@@ -1,9 +1,11 @@
-const apiRequestMock = vi.hoisted(() => vi.fn());
+const { getTranslationsApiPublicRequestMock } = vi.hoisted(() => ({
+  getTranslationsApiPublicRequestMock: vi.fn(),
+}));
 
 vi.mock('server-only', () => ({}));
 
 vi.mock('@/lib/api', () => ({
-  apiRequest: apiRequestMock,
+  apiPublicRequest: getTranslationsApiPublicRequestMock,
 }));
 
 vi.mock('@/env/server-env', () => ({
@@ -14,8 +16,8 @@ vi.mock('@/env/server-env', () => ({
 
 describe('getTranslations', () => {
   beforeEach(() => {
-    apiRequestMock.mockReset();
-    apiRequestMock.mockResolvedValue({
+    getTranslationsApiPublicRequestMock.mockReset();
+    getTranslationsApiPublicRequestMock.mockResolvedValue({
       locale: 'en',
       translations: {},
     });
@@ -29,7 +31,7 @@ describe('getTranslations', () => {
         error instanceof GetTranslationsError &&
         error.message === 'getTranslations requires at least one namespace.',
     );
-    expect(apiRequestMock).not.toHaveBeenCalled();
+    expect(getTranslationsApiPublicRequestMock).not.toHaveBeenCalled();
   });
 
   it('should throw GetTranslationsError when namespace is invalid', async () => {
@@ -40,7 +42,7 @@ describe('getTranslations', () => {
         error instanceof GetTranslationsError &&
         error.message === 'Invalid translation namespace "$invalid".',
     );
-    expect(apiRequestMock).not.toHaveBeenCalled();
+    expect(getTranslationsApiPublicRequestMock).not.toHaveBeenCalled();
   });
 
   it('should tag fetch with per-namespace tags when namespaces are requested', async () => {
@@ -48,7 +50,7 @@ describe('getTranslations', () => {
 
     await getTranslations('en', ['about', 'country']);
 
-    expect(apiRequestMock).toHaveBeenCalledWith(
+    expect(getTranslationsApiPublicRequestMock).toHaveBeenCalledWith(
       '/v1/locale/translations?namespaces=about%2Ccountry',
       'GET',
       undefined,
@@ -66,7 +68,7 @@ describe('getTranslations', () => {
 
     await getTranslations('en', ['about', 'about']);
 
-    expect(apiRequestMock).toHaveBeenCalledWith(
+    expect(getTranslationsApiPublicRequestMock).toHaveBeenCalledWith(
       '/v1/locale/translations?namespaces=about',
       'GET',
       undefined,
