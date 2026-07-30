@@ -25,11 +25,9 @@ export default function HeaderSignInModal() {
           title: 'Signed in',
           description: label,
         });
-      } catch (error) {
+      } catch (e) {
         const description =
-          error instanceof ApiError
-            ? error.message
-            : 'Could not complete sign in. Please try again.';
+          e instanceof ApiError ? e.message : 'Could not complete sign in. Please try again.';
         toast({
           title: 'Sign in failed',
           description,

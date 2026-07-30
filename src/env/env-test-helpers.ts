@@ -19,8 +19,8 @@ export function expectZodIssue(error: unknown, expectedIssue: ExpectedZodIssue):
 export function captureThrownError(action: () => void): unknown {
   try {
     action();
-  } catch (error) {
-    return error;
+  } catch (e) {
+    return e;
   }
 
   throw new Error('Expected action to throw');
@@ -39,8 +39,8 @@ export function captureThrownErrorInstance(action: () => void): Error {
 export async function captureRejectedError<T>(action: () => Promise<T>): Promise<unknown> {
   try {
     await action();
-  } catch (error) {
-    return error;
+  } catch (e) {
+    return e;
   }
 
   throw new Error('Expected action to reject');
