@@ -7,6 +7,9 @@ function jsonResponse(body: unknown, status: number): Response {
   });
 }
 
+const SESSION_CREDENTIALS = { credentials: 'include' as const };
+const PUBLIC_CREDENTIALS = { credentials: 'omit' as const };
+
 const { postAuthRefreshMock } = vi.hoisted(() => ({
   postAuthRefreshMock: vi.fn<() => Promise<boolean>>(),
 }));
@@ -39,7 +42,12 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const { fetchApiJson } = await import('@/lib/api-core');
-    const result = await fetchApiJson<{ gigs: unknown[] }>('v1/gig?limit=10', 'GET');
+    const result = await fetchApiJson<{ gigs: unknown[] }>(
+      'v1/gig?limit=10',
+      'GET',
+      undefined,
+      SESSION_CREDENTIALS,
+    );
 
     expect(result).toEqual({ gigs: [] });
     expect(postAuthRefreshMock).toHaveBeenCalledTimes(1);
@@ -60,7 +68,10 @@ describe('fetchApiJson', () => {
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await expect(
-      fetchApiJson('v1/gig?limit=10', 'GET', undefined, { onUnauthorized }),
+      fetchApiJson('v1/gig?limit=10', 'GET', undefined, {
+        ...SESSION_CREDENTIALS,
+        onUnauthorized,
+      }),
     ).rejects.toMatchObject({
       name: 'ApiError',
       statusCode: 401,
@@ -81,7 +92,10 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig?limit=10', 'GET', undefined, { onUnauthorized });
+    const action = fetchApiJson('v1/gig?limit=10', 'GET', undefined, {
+      ...SESSION_CREDENTIALS,
+      onUnauthorized,
+    });
 
     await expect(action).rejects.toThrow();
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
@@ -97,7 +111,10 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/auth/refresh', 'POST', undefined, { onUnauthorized: vi.fn() });
+    const action = fetchApiJson('v1/auth/refresh', 'POST', undefined, {
+      ...SESSION_CREDENTIALS,
+      onUnauthorized: vi.fn(),
+    });
 
     await expect(action).rejects.toThrow();
     expect(postAuthRefreshMock).not.toHaveBeenCalled();
@@ -118,7 +135,12 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/auth/telegram/web-app', 'POST', { initData: 'abc' });
+    const action = fetchApiJson(
+      'v1/auth/telegram/web-app',
+      'POST',
+      { initData: 'abc' },
+      SESSION_CREDENTIALS,
+    );
 
     await expect(action).rejects.toMatchObject({
       name: 'ApiError',
@@ -141,7 +163,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig?limit=10', 'GET');
+    const action = fetchApiJson('v1/gig?limit=10', 'GET', undefined, PUBLIC_CREDENTIALS);
 
     await expect(action).rejects.toThrow('bad gateway');
   });
@@ -156,6 +178,7 @@ describe('fetchApiJson', () => {
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await fetchApiJson<{ ok: boolean }>('v1/receiver/gig', 'POST', formData, {
+      ...SESSION_CREDENTIALS,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -166,26 +189,26 @@ describe('fetchApiJson', () => {
     expect(headers.has('Content-Type')).toBe(false);
   });
 
-  it('should default credentials to include when credentials option is omitted', async () => {
+  it('should send omit credentials when credentials option is omit', async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(jsonResponse({ ok: true }, 200));
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET');
-
-    const init = fetchMock.mock.calls[0]?.[1];
-    expect(init?.credentials).toBe('include');
-  });
-
-  it('should preserve explicit credentials option when provided', async () => {
-    const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(jsonResponse({ ok: true }, 200));
-    vi.stubGlobal('fetch', fetchMock);
-    const { fetchApiJson } = await import('@/lib/api-core');
-
-    await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET', undefined, { credentials: 'omit' });
+    await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET', undefined, PUBLIC_CREDENTIALS);
 
     const init = fetchMock.mock.calls[0]?.[1];
     expect(init?.credentials).toBe('omit');
+  });
+
+  it('should send include credentials when credentials option is include', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(jsonResponse({ ok: true }, 200));
+    vi.stubGlobal('fetch', fetchMock);
+    const { fetchApiJson } = await import('@/lib/api-core');
+
+    await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET', undefined, SESSION_CREDENTIALS);
+
+    const init = fetchMock.mock.calls[0]?.[1];
+    expect(init?.credentials).toBe('include');
   });
 
   it('should not send request body when method is GET', async () => {
@@ -193,7 +216,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    await fetchApiJson<{ gigs: unknown[] }>('v1/gig', 'GET', { ignored: true });
+    await fetchApiJson<{ gigs: unknown[] }>('v1/gig', 'GET', { ignored: true }, PUBLIC_CREDENTIALS);
 
     const init = fetchMock.mock.calls[0]?.[1];
     expect(init?.body).toBeUndefined();
@@ -204,7 +227,12 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    await fetchApiJson<{ ok: boolean }>('v1/gig/lookup', 'POST', { name: 'test' });
+    await fetchApiJson<{ ok: boolean }>(
+      'v1/gig/lookup',
+      'POST',
+      { name: 'test' },
+      SESSION_CREDENTIALS,
+    );
 
     const init = fetchMock.mock.calls[0]?.[1];
     const headers = new Headers(init?.headers);
@@ -221,6 +249,7 @@ describe('fetchApiJson', () => {
       'POST',
       { name: 'test' },
       {
+        ...SESSION_CREDENTIALS,
         headers: {
           'Content-Type': 'application/merge-patch+json',
         },
@@ -250,7 +279,7 @@ describe('fetchApiJson', () => {
       'v1/auth/telegram/web-app',
       'POST',
       { initData: 'x' },
-      { onUnauthorized },
+      { ...SESSION_CREDENTIALS, onUnauthorized },
     );
 
     await expect(action).rejects.toThrow();
@@ -265,7 +294,10 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig?limit=10', 'GET', undefined, { onUnauthorized });
+    const action = fetchApiJson('v1/gig?limit=10', 'GET', undefined, {
+      ...SESSION_CREDENTIALS,
+      onUnauthorized,
+    });
 
     await expect(action).rejects.toThrow('forbidden');
     expect(onUnauthorized).not.toHaveBeenCalled();
@@ -278,7 +310,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig/lookup', 'POST', { name: 'x' });
+    const action = fetchApiJson('v1/gig/lookup', 'POST', { name: 'x' }, SESSION_CREDENTIALS);
 
     await expect(action).rejects.toThrow('Something went wrong');
   });
@@ -295,7 +327,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig', 'GET');
+    const action = fetchApiJson('v1/gig', 'GET', undefined, PUBLIC_CREDENTIALS);
 
     await expect(action).rejects.toThrow('Something went wrong');
   });

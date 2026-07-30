@@ -6,7 +6,12 @@ type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 const API_BASE_URL = clientEnv.appApiBaseUrl;
 
-export interface FetchApiJsonOptions extends RequestInit {
+export interface FetchApiJsonOptions extends Omit<RequestInit, 'credentials'> {
+  /**
+   * Must be set explicitly at every call site.
+   * Use `include` for cookie/session requests and `omit` for public cacheable GETs.
+   */
+  credentials: RequestCredentials;
   onUnauthorized?: () => void;
   /**
    * Internal: set after one `POST v1/auth/refresh` so a second 401 does not loop refresh.
@@ -91,15 +96,16 @@ async function postTelegramMiniAppReauth(): Promise<boolean> {
 export async function fetchApiJson<TResponse>(
   endpointOrUrl: string,
   method: HttpMethod,
-  data?: unknown,
-  init?: FetchApiJsonOptions,
+  data: unknown | undefined,
+  init: FetchApiJsonOptions,
 ): Promise<TResponse> {
   const {
     onUnauthorized,
     hasAttemptedTokenRefresh,
     hasAttemptedTelegramMiniAppReauth,
+    credentials,
     ...fetchInit
-  } = init ?? {};
+  } = init;
   const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
 
   const headers = new Headers(fetchInit.headers);
@@ -121,7 +127,7 @@ export async function fetchApiJson<TResponse>(
     method,
     headers,
     body,
-    credentials: fetchInit.credentials ?? 'include',
+    credentials,
   });
 
   if (
