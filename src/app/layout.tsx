@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import localFont from 'next/font/local';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
@@ -10,18 +9,6 @@ import TelegramWebAppScript from '@/app/_components/TelegramWebAppScript';
 import { QueryProvider } from '@/app/_providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
 import { NON_PRODUCTION_ROBOTS } from '@/lib/non-production-robots';
-
-const geistSans = localFont({
-  src: '../../public/fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-  weight: '100 900',
-});
-
-const geistMono = localFont({
-  src: '../../public/fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-  weight: '100 900',
-});
 
 const SITE_BASE_URL = serverEnv.appBaseUrl;
 
@@ -117,7 +104,7 @@ const jsonLd = serverEnv.isProductionSite
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body>
         <PlausibleAnalyticsProvider>
           <QueryProvider>
             <TelegramWebAppScript />
