@@ -47,10 +47,35 @@ function isStagingAppBaseUrl(appBaseUrl: string | undefined): boolean {
   return hostnameLabels.some((label) => label === 'stg' || label === 'staging');
 }
 
+function isLocalAppBaseUrl(appBaseUrl: string | undefined): boolean {
+  if (!appBaseUrl) {
+    return false;
+  }
+
+  const hostname = new URL(appBaseUrl).hostname;
+
+  return hostname === 'localhost' || hostname === '127.0.0.1';
+}
+
+function isProductionSite(
+  nodeEnv: (typeof parsedServerEnv)['NODE_ENV'],
+  appBaseUrl: string | undefined,
+): boolean {
+  if (nodeEnv !== 'production') {
+    return false;
+  }
+
+  return !(isStagingAppBaseUrl(appBaseUrl) || isLocalAppBaseUrl(appBaseUrl));
+}
+
 export const serverEnv = {
   nodeEnv: parsedServerEnv.NODE_ENV,
   isDevelopment: parsedServerEnv.NODE_ENV === 'development',
   isStaging: isStagingAppBaseUrl(parsedServerEnv.NEXT_PUBLIC_APP_BASE_URL),
+  isProductionSite: isProductionSite(
+    parsedServerEnv.NODE_ENV,
+    parsedServerEnv.NEXT_PUBLIC_APP_BASE_URL,
+  ),
   appBaseUrl: parsedServerEnv.NEXT_PUBLIC_APP_BASE_URL,
   brandName: parsedServerEnv.BRAND_NAME,
   sitePreviewTitle: parsedServerEnv.SITE_PREVIEW_TITLE,

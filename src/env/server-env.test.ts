@@ -82,6 +82,44 @@ describe('env/server', () => {
     });
   });
 
+  describe('isProductionSite', () => {
+    it('should be true when node env is production and app base url is a public host', async () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', 'https://gigstogether.example');
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.isProductionSite).toBe(true);
+    });
+
+    it('should be false when node env is development', async () => {
+      vi.stubEnv('NODE_ENV', 'development');
+      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', 'https://gigstogether.example');
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.isProductionSite).toBe(false);
+    });
+
+    it('should be false when app base url hostname contains staging labels', async () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', 'https://stg.example.com');
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.isProductionSite).toBe(false);
+    });
+
+    it('should be false when app base url points to localhost', async () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('NEXT_PUBLIC_APP_BASE_URL', 'http://localhost:3000');
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.isProductionSite).toBe(false);
+    });
+  });
+
   describe('getFeedRevalidateSecretOrThrow', () => {
     it('should return trimmed feed revalidate secret when env var is set', async () => {
       vi.stubEnv('NODE_ENV', 'test');
