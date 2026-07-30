@@ -132,8 +132,8 @@ export function useGigLookup(
     try {
       const result = await mutation.mutateAsync(input);
       handleLookupSuccess(result);
-    } catch (error) {
-      handleLookupError(error);
+    } catch (e) {
+      handleLookupError(e);
     }
   }
 

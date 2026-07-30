@@ -1,4 +1,4 @@
-import { apiRequest } from '@/lib/api';
+import { apiPublicRequest } from '@/lib/api';
 import {
   parseV1GigAroundGetResponseBody,
   parseV1GigByPublicIdGetResponseBody,
@@ -48,7 +48,7 @@ export async function fetchFeedPage(params: FetchFeedPageParams): Promise<V1GigG
   if (params.direction) qs.set('direction', params.direction);
   appendFeedLocationQuery(qs, params);
 
-  const raw = await apiRequest<unknown>(withQuery('v1/gig', qs), 'GET', undefined, {
+  const raw = await apiPublicRequest<unknown>(withQuery('v1/gig', qs), 'GET', undefined, {
     signal: params.signal,
   });
   return parseV1GigGetResponseBody(raw);
@@ -63,7 +63,7 @@ export async function fetchFeedAround(
   qs.set('afterLimit', String(params.afterLimit));
   appendFeedLocationQuery(qs, params);
 
-  const raw = await apiRequest<unknown>(withQuery('v1/gig/around', qs), 'GET', undefined, {
+  const raw = await apiPublicRequest<unknown>(withQuery('v1/gig/around', qs), 'GET', undefined, {
     signal: params.signal,
   });
   return parseV1GigAroundGetResponseBody(raw);
@@ -72,7 +72,7 @@ export async function fetchFeedAround(
 export async function fetchFeedAnchorYmdByPublicId(
   params: FetchFeedAnchorYmdByPublicIdParams,
 ): Promise<string> {
-  const raw = await apiRequest<unknown>(
+  const raw = await apiPublicRequest<unknown>(
     `v1/gig/date/${encodeURIComponent(params.publicId)}`,
     'GET',
     undefined,
@@ -86,7 +86,7 @@ export async function fetchFeedAvailableDates(params: FeedLocationParams): Promi
   const qs = new URLSearchParams();
   appendFeedLocationQuery(qs, params);
 
-  const raw = await apiRequest<unknown>(withQuery('v1/gig/dates', qs), 'GET', undefined, {
+  const raw = await apiPublicRequest<unknown>(withQuery('v1/gig/dates', qs), 'GET', undefined, {
     signal: params.signal,
   });
   const res = parseV1GigDatesGetResponseBody(raw);

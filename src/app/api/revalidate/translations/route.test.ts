@@ -80,4 +80,14 @@ describe('POST', () => {
     expect(revalidateTagMock).toHaveBeenCalledWith('translations:ns:country', { expire: 0 });
     expect(revalidatePathMock).not.toHaveBeenCalled();
   });
+
+  it('should revalidate llms.txt when llms namespace changes', async () => {
+    const response = await POST(
+      createRequest({ secret: 'top-secret', body: { namespace: 'llms' } }),
+    );
+
+    expect(response.status).toBe(204);
+    expect(revalidateTagMock).toHaveBeenCalledWith('translations:ns:llms', { expire: 0 });
+    expect(revalidatePathMock).toHaveBeenCalledWith('/llms.txt');
+  });
 });

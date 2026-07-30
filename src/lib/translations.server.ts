@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { apiRequest } from '@/lib/api';
+import { apiPublicRequest } from '@/lib/api';
 import { parseLocaleGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
 import type { V1LocaleGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
 import {
@@ -67,7 +67,7 @@ export async function getTranslations(
 
   const url = `/v1/locale/translations?namespaces=${encodeURIComponent(nsQuery)}`;
 
-  const raw = await apiRequest<unknown>(url, 'GET', undefined, {
+  const raw = await apiPublicRequest<unknown>(url, 'GET', undefined, {
     headers: { 'accept-language': locale },
     next: {
       revalidate: serverEnv.translationsRevalidateSeconds,

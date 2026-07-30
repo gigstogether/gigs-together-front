@@ -1,4 +1,4 @@
-import { apiRequest } from '@/lib/api';
+import { apiPublicRequest } from '@/lib/api';
 import {
   fetchFeedAnchorYmdByPublicId,
   fetchFeedAround,
@@ -8,7 +8,7 @@ import {
 import { toLocalYMD } from '@/lib/utils';
 
 vi.mock('@/lib/api', () => ({
-  apiRequest: vi.fn(),
+  apiPublicRequest: vi.fn(),
 }));
 
 describe('fetchFeedPage', () => {
@@ -17,8 +17,8 @@ describe('fetchFeedPage', () => {
   });
 
   it('should request feed page with location and cursor when params are provided', async () => {
-    const apiRequestMock = vi.mocked(apiRequest);
-    apiRequestMock.mockResolvedValueOnce({
+    const apiPublicRequestMock = vi.mocked(apiPublicRequest);
+    apiPublicRequestMock.mockResolvedValueOnce({
       gigs: [],
       prevCursor: 'prev',
       nextCursor: 'next',
@@ -37,7 +37,7 @@ describe('fetchFeedPage', () => {
       prevCursor: 'prev',
       nextCursor: 'next',
     });
-    expect(apiRequestMock).toHaveBeenCalledWith(
+    expect(apiPublicRequestMock).toHaveBeenCalledWith(
       'v1/gig?limit=10&cursor=abc&direction=prev&country=es&city=barcelona',
       'GET',
       undefined,
@@ -52,8 +52,8 @@ describe('fetchFeedAround', () => {
   });
 
   it('should request around endpoint when anchor and limits are provided', async () => {
-    const apiRequestMock = vi.mocked(apiRequest);
-    apiRequestMock.mockResolvedValueOnce({
+    const apiPublicRequestMock = vi.mocked(apiPublicRequest);
+    apiPublicRequestMock.mockResolvedValueOnce({
       before: [],
       after: [],
       prevCursor: 'prev',
@@ -74,7 +74,7 @@ describe('fetchFeedAround', () => {
       prevCursor: 'prev',
       nextCursor: 'next',
     });
-    expect(apiRequestMock).toHaveBeenCalledWith(
+    expect(apiPublicRequestMock).toHaveBeenCalledWith(
       'v1/gig/around?anchor=2026-04-21&beforeLimit=10&afterLimit=10&country=es&city=barcelona',
       'GET',
       undefined,
@@ -89,13 +89,13 @@ describe('fetchFeedAnchorYmdByPublicId', () => {
   });
 
   it('should return normalized anchor date when publicId is provided', async () => {
-    const apiRequestMock = vi.mocked(apiRequest);
-    apiRequestMock.mockResolvedValueOnce({ date: '2026-04-21T19:00:00.000Z' });
+    const apiPublicRequestMock = vi.mocked(apiPublicRequest);
+    apiPublicRequestMock.mockResolvedValueOnce({ date: '2026-04-21T19:00:00.000Z' });
 
     const result = await fetchFeedAnchorYmdByPublicId({ publicId: 'abc/def' });
 
     expect(result).toBe('2026-04-21');
-    expect(apiRequestMock).toHaveBeenCalledWith('v1/gig/date/abc%2Fdef', 'GET', undefined, {
+    expect(apiPublicRequestMock).toHaveBeenCalledWith('v1/gig/date/abc%2Fdef', 'GET', undefined, {
       signal: undefined,
     });
   });
@@ -108,8 +108,8 @@ describe('fetchFeedAvailableDates', () => {
 
   it('should return unique sorted dates when response contains mixed raw date formats', async () => {
     const unixSeconds = 1700000000;
-    const apiRequestMock = vi.mocked(apiRequest);
-    apiRequestMock.mockResolvedValueOnce({
+    const apiPublicRequestMock = vi.mocked(apiPublicRequest);
+    apiPublicRequestMock.mockResolvedValueOnce({
       dates: ['2026-04-21', '2026-04-21T12:00:00.000Z', unixSeconds],
     });
 
@@ -118,7 +118,7 @@ describe('fetchFeedAvailableDates', () => {
     expect(result).toEqual(
       Array.from(new Set(['2026-04-21', toLocalYMD(new Date(unixSeconds * 1000))])).sort(),
     );
-    expect(apiRequestMock).toHaveBeenCalledWith(
+    expect(apiPublicRequestMock).toHaveBeenCalledWith(
       'v1/gig/dates?country=es&city=barcelona',
       'GET',
       undefined,
