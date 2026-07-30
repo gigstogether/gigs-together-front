@@ -4,31 +4,24 @@ import { act, renderHook } from '@testing-library/react';
 
 import { useClearFeedLocationHash } from './useClearFeedLocationHash';
 
-const { routerReplaceMock, usePathnameMock, useSearchParamsMock } = vi.hoisted(() => ({
+const { routerReplaceMock } = vi.hoisted(() => ({
   routerReplaceMock: vi.fn(),
-  usePathnameMock: vi.fn(() => '/feed/es/barcelona'),
-  useSearchParamsMock: vi.fn(() => new URLSearchParams()),
 }));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     replace: routerReplaceMock,
   }),
-  usePathname: () => usePathnameMock(),
-  useSearchParams: () => useSearchParamsMock(),
 }));
 
 describe('useClearFeedLocationHash', () => {
   beforeEach(() => {
     routerReplaceMock.mockReset();
-    usePathnameMock.mockReturnValue('/feed/es/barcelona');
-    useSearchParamsMock.mockReturnValue(new URLSearchParams());
     window.history.replaceState(null, '', '/');
   });
 
   it('should not call replace when hash is empty', () => {
     window.history.replaceState(null, '', '/feed/es/barcelona?utm=1');
-    useSearchParamsMock.mockReturnValue(new URLSearchParams('utm=1'));
 
     const { result } = renderHook(() => useClearFeedLocationHash());
 
@@ -44,7 +37,6 @@ describe('useClearFeedLocationHash', () => {
 
   it('should clear hash and preserve search when both are present', () => {
     window.history.replaceState(null, '', '/feed/es/barcelona?utm=1#gig');
-    useSearchParamsMock.mockReturnValue(new URLSearchParams('utm=1'));
 
     const { result } = renderHook(() => useClearFeedLocationHash());
 
@@ -75,7 +67,6 @@ describe('useClearFeedLocationHash', () => {
 
   it('should call replace with the same url written by history.replaceState', () => {
     window.history.replaceState(null, '', '/feed/es/barcelona?ref=share#gig');
-    useSearchParamsMock.mockReturnValue(new URLSearchParams('ref=share'));
 
     const { result } = renderHook(() => useClearFeedLocationHash());
 
