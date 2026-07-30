@@ -1,5 +1,3 @@
-'use client';
-
 import PlausibleProvider from 'next-plausible';
 import type { ReactNode } from 'react';
 import { clientEnv } from '@/env/client-env';
