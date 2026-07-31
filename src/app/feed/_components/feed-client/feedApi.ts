@@ -2,7 +2,6 @@ import { apiPublicRequest } from '@/lib/api';
 import {
   parseV1GigAroundGetResponseBody,
   parseV1GigByPublicIdGetResponseBody,
-  parseV1GigDatesGetResponseBody,
   parseV1GigGetResponseBody,
 } from '@/lib/api-boundary-schemas';
 import { gigDateToYMD } from '@/lib/feed.mapper';
@@ -80,17 +79,4 @@ export async function fetchFeedAnchorYmdByPublicId(
   );
   const res = parseV1GigByPublicIdGetResponseBody(raw);
   return gigDateToYMD(res.date);
-}
-
-export async function fetchFeedAvailableDates(params: FeedLocationParams): Promise<string[]> {
-  const qs = new URLSearchParams();
-  appendFeedLocationQuery(qs, params);
-
-  const raw = await apiPublicRequest<unknown>(withQuery('v1/gig/dates', qs), 'GET', undefined, {
-    signal: params.signal,
-  });
-  const res = parseV1GigDatesGetResponseBody(raw);
-
-  const ymd = res.dates.map((x) => gigDateToYMD(x));
-  return Array.from(new Set(ymd)).sort();
 }

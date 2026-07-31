@@ -8,13 +8,13 @@ import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/f
 import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
 import HeaderSignInModal from '@/app/_components/HeaderSignInModal';
 import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/admin-gig-paths';
-import { SUGGEST_ROUTE } from '@/app/suggest/suggest-paths';
+import { SUGGEST_ROUTE } from '@/app/(default)/suggest/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { LocationIcon } from '@/components/ui/location-icon';
 import { clientEnv } from '@/env/client-env';
 import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { normalizeLocationTitle } from '@/lib/utils';
+import LocationPopover from '@/app/_components/LocationPopover';
 
 function HeaderMenuDivider() {
   return (
@@ -29,8 +29,8 @@ const headerMenuNavItemClass =
   'flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted';
 
 export interface HeaderActionsProps {
-  readonly country: string;
-  readonly city: string;
+  readonly country?: string;
+  readonly city?: string;
 }
 
 const adminHref: Route = '/admin';
@@ -39,14 +39,17 @@ const aboutHref: Route = '/about';
 export default function HeaderActions(props: HeaderActionsProps) {
   const { country, city } = props;
 
-  const locationLabel = city ? normalizeLocationTitle(city) : country.toUpperCase();
+  const location = country
+    ? city
+      ? normalizeLocationTitle(city)
+      : country.toUpperCase()
+    : undefined;
   const telegramUrl = clientEnv.telegramUrl;
   const githubUrl = clientEnv.githubUrl;
   const isAuthEnabled = clientEnv.isAuthEnabled;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
-  const [locationTipOpen, setLocationTipOpen] = useState(false);
 
   const { authState } = useTelegramAuth();
   const miniAppEnv = useTelegramMiniAppEnv();
@@ -78,27 +81,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
   return (
     <div className="min-w-0 justify-self-end flex items-center space-x-4">
       <div className="hidden sm:block">
-        <Popover
-          open={locationTipOpen}
-          onOpenChange={setLocationTipOpen}
-        >
-          <PopoverTrigger
-            type="button"
-            className="flex items-center gap-2 text-base font-normal text-gray-800"
-            aria-label="Current location"
-            title="Location"
-          >
-            <LocationIcon className="h-4 w-4" />
-            {locationLabel}
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-auto px-3 py-2 text-sm"
-            align="end"
-            side="bottom"
-          >
-            Currently, we only support one location: Barcelona.
-          </PopoverContent>
-        </Popover>
+        <LocationPopover location={location} />
       </div>
 
       {!!suggestGigHref && (
@@ -206,23 +189,10 @@ export default function HeaderActions(props: HeaderActionsProps) {
               <HeaderAuthActions />
               {showDividerAfterAuthMobile ? <HeaderMenuDivider /> : null}
 
-              <Popover>
-                <PopoverTrigger
-                  type="button"
-                  className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm text-gray-800 hover:bg-muted"
-                  aria-label="Current location"
-                >
-                  <LocationIcon className="h-4 w-4" />
-                  {locationLabel}
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-64 px-3 py-2 text-sm"
-                  align="start"
-                  side="bottom"
-                >
-                  Currently, we only support one location: Barcelona.
-                </PopoverContent>
-              </Popover>
+              <LocationPopover
+                location={location}
+                cn="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted"
+              />
 
               {!!telegramUrl && (
                 <a

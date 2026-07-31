@@ -7,10 +7,14 @@ import type { Event } from '@/lib/types';
 export interface FeedMonthsProps {
   events: Event[];
   registerEventRef: (eventId: string, element: HTMLElement | null) => void;
+  eagerPosterIds?: readonly string[];
+  priorityPosterId?: string;
 }
 
 export function FeedMonths(props: FeedMonthsProps) {
-  const { events, registerEventRef } = props;
+  const { events, registerEventRef, eagerPosterIds, priorityPosterId } = props;
+
+  const eagerPosterIdSet = eagerPosterIds ? new Set(eagerPosterIds) : undefined;
 
   if (events.length === 0) {
     return (
@@ -22,7 +26,7 @@ export function FeedMonths(props: FeedMonthsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+    <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
       {events.map((event, idx) => {
         const prev = events[idx - 1];
         const isFirstOfDate = idx === 0 || prev?.date !== event.date;
@@ -37,7 +41,11 @@ export function FeedMonths(props: FeedMonthsProps) {
               ref={(el) => registerEventRef(event.id, el)}
               className="gig-anchor"
             >
-              <GigCard gig={event} />
+              <GigCard
+                gig={event}
+                posterLoading={eagerPosterIdSet?.has(event.id) ? 'eager' : 'lazy'}
+                posterFetchPriority={event.id === priorityPosterId ? 'high' : undefined}
+              />
             </div>
           </Fragment>
         );

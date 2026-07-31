@@ -1,4 +1,4 @@
-import SuggestLaunchClient from '@/app/suggest/SuggestLaunchClient';
+import SuggestLaunchClient from '../SuggestLaunchClient';
 
 export default function SuggestLaunchPage() {
   return <SuggestLaunchClient />;

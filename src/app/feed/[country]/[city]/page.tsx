@@ -1,16 +1,18 @@
 import { redirect } from 'next/navigation';
 import FeedClient from '../../_components/FeedClient';
 import { clientEnv } from '@/env/client-env';
+import { serverEnv } from '@/env/server-env';
 import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
 import { getFeed } from '@/lib/feed.server';
 import { gigToEvent } from '@/lib/feed.mapper';
-import { DEFAULT_FEED_ROUTE, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed.routes';
+import { DEFAULT_FEED_ROUTE, normalizeSegment, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed.routes';
 import { I18nProvider } from '@/lib/i18n';
 import { resolveTranslationValue } from '@/lib/i18n/translation-value';
 import { getTranslations } from '@/lib/translations.server';
 import type { Event } from '@/lib/types';
 
 const PAGE_SIZE = clientEnv.feedPageSize;
+const EAGER_INITIAL_POSTER_COUNT = serverEnv.eagerInitialPosterCount;
 
 export const dynamicParams = false;
 export const revalidate = 60;
@@ -21,8 +23,8 @@ export async function generateStaticParams() {
 
 export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
   const { country, city } = await props.params;
-  const normalizedCountry = decodeURIComponent(country).trim().toLowerCase();
-  const normalizedCity = decodeURIComponent(city).trim().toLowerCase();
+  const normalizedCountry = normalizeSegment(country);
+  const normalizedCity = normalizeSegment(city);
 
   // Currently, we only support one location.
   if (normalizedCountry !== 'es' || normalizedCity !== 'barcelona') {
@@ -57,6 +59,12 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
     }),
   );
 
+  const initialEventsWithPosters = initialEvents.filter((event) => event.poster);
+  const eagerPosterIds = initialEventsWithPosters
+    .slice(0, EAGER_INITIAL_POSTER_COUNT)
+    .map((event) => event.id);
+  const priorityPosterId = initialEventsWithPosters[0]?.id;
+
   return (
     <I18nProvider
       locale={i18n.locale}
@@ -68,6 +76,8 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
         initialEvents={initialEvents}
         initialPrevCursor={feed.prevCursor}
         initialNextCursor={feed.nextCursor}
+        eagerPosterIds={eagerPosterIds}
+        priorityPosterId={priorityPosterId}
       />
     </I18nProvider>
   );

@@ -1,7 +1,11 @@
 import 'server-only';
 
 import { apiPublicRequest } from '@/lib/api';
-import { parseV1GigGetResponseBody } from '@/lib/api-boundary-schemas';
+import {
+  parseV1GigDatesGetResponseBody,
+  parseV1GigGetResponseBody,
+} from '@/lib/api-boundary-schemas';
+import { gigDateToYMD } from '@/lib/feed.mapper';
 import type { V1GigGetResponseBody } from '@/lib/types';
 
 export type GetFeedParams = Readonly<{
@@ -9,6 +13,11 @@ export type GetFeedParams = Readonly<{
   country?: string;
   city?: string;
   cursor?: string;
+}>;
+
+export type GetFeedAvailableDatesParams = Readonly<{
+  country: string;
+  city: string;
 }>;
 
 /** Aligns with `export const revalidate` on the feed page (ISR). */
@@ -33,4 +42,28 @@ export async function getFeed(params: GetFeedParams): Promise<V1GigGetResponseBo
     },
   });
   return parseV1GigGetResponseBody(raw);
+}
+
+/**
+ * Server-side calendar dates loader for the feed header.
+ * Use in the feed layout so the calendar opens without a client fetch.
+ */
+export async function getFeedAvailableDates(
+  params: GetFeedAvailableDatesParams,
+): Promise<string[]> {
+  const { country, city } = params;
+
+  const qs = new URLSearchParams();
+  qs.set('country', country);
+  qs.set('city', city);
+
+  const raw = await apiPublicRequest<unknown>(`v1/gig/dates?${qs.toString()}`, 'GET', undefined, {
+    next: {
+      revalidate: FEED_REVALIDATE_SECONDS,
+    },
+  });
+  const res = parseV1GigDatesGetResponseBody(raw);
+
+  const ymd = res.dates.map((x) => gigDateToYMD(x));
+  return Array.from(new Set(ymd)).sort();
 }

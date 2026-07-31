@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { getTelegramStartParam } from '@/lib/telegram-webapp';
-import { resolveSuggestLaunchPath } from '@/app/suggest/suggest-launch';
+import { resolveSuggestLaunchPath } from './suggest-launch';
 
 export default function SuggestLaunchClient() {
   const router = useRouter();
