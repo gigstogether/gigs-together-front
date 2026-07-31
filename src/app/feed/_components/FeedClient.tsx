@@ -35,10 +35,20 @@ interface FeedClientProps {
   readonly initialEvents?: Event[];
   readonly initialPrevCursor?: string;
   readonly initialNextCursor?: string;
+  readonly eagerPosterIds?: readonly string[];
+  readonly priorityPosterId?: string;
 }
 
 export default function FeedClient(props: FeedClientProps) {
-  const { country, city, initialEvents, initialPrevCursor, initialNextCursor } = props;
+  const {
+    country,
+    city,
+    initialEvents,
+    initialPrevCursor,
+    initialNextCursor,
+    eagerPosterIds,
+    priorityPosterId,
+  } = props;
 
   const clearHashFromUrl = useClearFeedLocationHash();
   const t = useT();
@@ -317,6 +327,8 @@ export default function FeedClient(props: FeedClientProps) {
             <FeedMonths
               events={events}
               registerEventRef={registerEventRef}
+              eagerPosterIds={eagerPosterIds}
+              priorityPosterId={priorityPosterId}
             />
           </div>
 

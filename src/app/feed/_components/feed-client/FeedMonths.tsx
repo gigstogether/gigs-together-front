@@ -7,10 +7,14 @@ import type { Event } from '@/lib/types';
 export interface FeedMonthsProps {
   events: Event[];
   registerEventRef: (eventId: string, element: HTMLElement | null) => void;
+  eagerPosterIds?: readonly string[];
+  priorityPosterId?: string;
 }
 
 export function FeedMonths(props: FeedMonthsProps) {
-  const { events, registerEventRef } = props;
+  const { events, registerEventRef, eagerPosterIds, priorityPosterId } = props;
+
+  const eagerPosterIdSet = eagerPosterIds ? new Set(eagerPosterIds) : undefined;
 
   if (events.length === 0) {
     return (
@@ -37,7 +41,11 @@ export function FeedMonths(props: FeedMonthsProps) {
               ref={(el) => registerEventRef(event.id, el)}
               className="gig-anchor"
             >
-              <GigCard gig={event} />
+              <GigCard
+                gig={event}
+                posterLoading={eagerPosterIdSet?.has(event.id) ? 'eager' : 'lazy'}
+                posterFetchPriority={event.id === priorityPosterId ? 'high' : undefined}
+              />
             </div>
           </Fragment>
         );
