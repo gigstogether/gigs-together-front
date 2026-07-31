@@ -1,8 +1,8 @@
 import 'server-only';
 
 import Image from 'next/image';
-import type { Route } from 'next';
 import { serverEnv } from '@/env/server-env';
+import { buildFeedHeaderHomeRoute } from '@/lib/feed.routes';
 import HeaderActions from '@/app/_components/HeaderActions';
 import type { ReactNode } from 'react';
 
@@ -39,7 +39,7 @@ export default function AppHeader(props: AppHeaderProps) {
   const { country, city, children } = props;
 
   const badge = getHeaderBadge();
-  const homeHref: Route = country ? (city ? `/feed/${country}/${city}` : `/feed/${country}`) : '/';
+  const homeHref = buildFeedHeaderHomeRoute(country ? { country, city } : undefined);
 
   return (
     <header
