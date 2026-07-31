@@ -1,7 +1,8 @@
 import 'server-only';
 
+import Image from 'next/image';
+import type { Route } from 'next';
 import { serverEnv } from '@/env/server-env';
-
 import AppHeaderClient from '@/app/_components/AppHeaderClient';
 
 interface HeaderBadge {
@@ -35,7 +36,10 @@ function getHeaderBadge(): HeaderBadge | null {
 }
 
 export default function AppHeader(props: AppHeaderProps) {
+  const { country, city } = props;
+
   const badge = getHeaderBadge();
+  const homeHref: Route = country ? (city ? `/feed/${country}/${city}` : `/feed/${country}`) : '/';
 
   return (
     <header
@@ -44,10 +48,33 @@ export default function AppHeader(props: AppHeaderProps) {
     >
       <div className="w-full px-4 h-full">
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center w-full h-full">
+          <div className="min-w-0 justify-self-start">
+            <h1 className="text-xl font-semibold whitespace-nowrap">
+              <a
+                href={homeHref}
+                className="inline-flex items-center gap-1.5 cursor-pointer select-none"
+                aria-label="Go to home"
+                title="Go to home"
+              >
+                <span className="leading-none">
+                  Gigs<span className="hidden sm:inline"> Together</span>!
+                </span>
+                {badge ? (
+                  <Image
+                    src={badge.src}
+                    alt={badge.alt}
+                    width={48}
+                    height={22}
+                    className="h-4 w-auto shrink-0 sm:h-[18px]"
+                  />
+                ) : null}
+              </a>
+            </h1>
+          </div>
           <AppHeaderClient
             {...props}
-            badgeAlt={badge?.alt}
-            badgeSrc={badge?.src}
+            country={country}
+            city={city}
           />
         </div>
       </div>
