@@ -334,10 +334,12 @@ export default function FeedClient(props: FeedClientProps) {
           {isLoadingPrev ? (
             <div className="py-4 text-center text-gray-500">Loading previous…</div>
           ) : null}
-          <FeedMonths
-            events={events}
-            registerEventRef={registerEventRef}
-          />
+          <div className="animate-in fade-in-0 duration-500 motion-reduce:animate-none">
+            <FeedMonths
+              events={events}
+              registerEventRef={registerEventRef}
+            />
+          </div>
 
           <div
             ref={bottomSentinelRef}
