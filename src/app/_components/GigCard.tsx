@@ -9,6 +9,8 @@ import { formatGigDate } from '@/lib/gig-date-format';
 
 interface GigCardProps {
   gig: Event;
+  posterLoading?: 'eager' | 'lazy';
+  posterFetchPriority?: 'high' | 'low' | 'auto';
 }
 
 interface GigDateProps {
@@ -17,6 +19,7 @@ interface GigDateProps {
   calendarUrl?: string;
 }
 
+// TODO: separate component for dates and location
 function GigDates(props: GigDateProps) {
   const datesStr = [
     formatGigDate(props.date),
@@ -84,7 +87,9 @@ function GigLocation(props: GigLocationProps) {
   );
 }
 
-export function GigCard({ gig }: GigCardProps) {
+export function GigCard(props: GigCardProps) {
+  const { gig, posterLoading, posterFetchPriority } = props;
+
   const location = [gig.venue, gig.city.name, gig.country.name].filter((str) => !!str).join(' ');
   const mapsHref = location
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
@@ -99,6 +104,8 @@ export function GigCard({ gig }: GigCardProps) {
           key={gig.poster}
           poster={gig.poster}
           title={gig.title}
+          loading={posterLoading}
+          fetchPriority={posterFetchPriority}
         />
       ) : (
         <div

@@ -4,9 +4,13 @@ import { ImageLightbox } from '@/app/_components/ImageLightbox';
 export interface GigPosterProps {
   poster: string;
   title: string;
+  loading?: 'eager' | 'lazy';
+  fetchPriority?: 'high' | 'low' | 'auto';
 }
 
-export function GigPoster({ poster, title }: GigPosterProps) {
+export function GigPoster(props: GigPosterProps) {
+  const { poster, title, loading = 'lazy', fetchPriority } = props;
+
   const [loadedPoster, setLoadedPoster] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const imgElRef = useRef<HTMLImageElement | null>(null);
@@ -51,7 +55,8 @@ export function GigPoster({ poster, title }: GigPosterProps) {
           ref={imgRef}
           src={poster}
           alt={title}
-          loading="lazy"
+          loading={loading}
+          fetchPriority={fetchPriority}
           onLoad={() => setLoadedPoster(poster)}
           onError={() => setLoadedPoster(poster)}
         />

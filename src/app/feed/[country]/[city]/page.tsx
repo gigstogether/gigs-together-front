@@ -11,6 +11,8 @@ import { getTranslations } from '@/lib/translations.server';
 import type { Event } from '@/lib/types';
 
 const PAGE_SIZE = clientEnv.feedPageSize;
+/** Posters from the initial feed batch that may appear above the fold (grid up to 5 cols). */
+const EAGER_INITIAL_POSTER_COUNT = 5;
 
 export const dynamicParams = false;
 export const revalidate = 60;
@@ -57,6 +59,12 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
     }),
   );
 
+  const initialEventsWithPosters = initialEvents.filter((event) => event.poster);
+  const eagerPosterIds = initialEventsWithPosters
+    .slice(0, EAGER_INITIAL_POSTER_COUNT)
+    .map((event) => event.id);
+  const priorityPosterId = initialEventsWithPosters[0]?.id;
+
   return (
     <I18nProvider
       locale={i18n.locale}
@@ -68,6 +76,8 @@ export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
         initialEvents={initialEvents}
         initialPrevCursor={feed.prevCursor}
         initialNextCursor={feed.nextCursor}
+        eagerPosterIds={eagerPosterIds}
+        priorityPosterId={priorityPosterId}
       />
     </I18nProvider>
   );
