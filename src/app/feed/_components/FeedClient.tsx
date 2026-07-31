@@ -314,7 +314,7 @@ export default function FeedClient(props: FeedClientProps) {
   return (
     <div className="min-h-[100svh]">
       <main className={feedMainClassName}>
-        <div className="px-8 md:px-8 py-8">
+        <div className="w-full px-8 md:px-8 py-8">
           {loading.jump ? (
             <div
               className="fixed left-1/2 -translate-x-1/2 z-50"
