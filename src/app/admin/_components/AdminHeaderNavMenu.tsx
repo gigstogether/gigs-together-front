@@ -5,11 +5,23 @@ import { useState } from 'react';
 
 import AdminNav from '@/app/admin/_components/AdminNav';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 
 const ADMIN_LABEL = 'ADMIN';
 
-export default function AdminHeaderNavMenu() {
+interface AdminHeaderNavMenuProps {
+  isEnabled: boolean;
+}
+
+export default function AdminHeaderNavMenu({ isEnabled }: AdminHeaderNavMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const { authState } = useTelegramAuth();
+
+  const shouldShowAdminHeaderNav = isEnabled && authState?.isAdmin === true;
+  if (!shouldShowAdminHeaderNav) {
+    return null;
+  }
 
   const handleNavigate = () => {
     setIsOpen(false);

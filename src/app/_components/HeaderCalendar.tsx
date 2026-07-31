@@ -9,13 +9,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn, toLocalYMD } from '@/lib/utils';
 import { FaRegCalendar } from 'react-icons/fa';
 import type { Modifiers } from 'react-day-picker';
+import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
 
 interface HeaderCalendarProps {
   country: string;
   city: string;
-  visibleEventDate?: string;
-  visibleEventDateRange?: VisibleEventDateRange;
-  onDayClick?: (day: Date, modifiers?: Modifiers, e?: MouseEvent) => void;
 }
 
 interface ParsedYearMonth {
@@ -65,7 +63,11 @@ const formatDisplayMonth = (
 };
 
 export default function HeaderCalendar(props: HeaderCalendarProps) {
-  const { country, city, visibleEventDate, visibleEventDateRange, onDayClick } = props;
+  const { country, city } = props;
+
+  const {
+    config: { earliestEventDate: visibleEventDate, visibleEventDateRange, onDayClick },
+  } = useHeaderConfig();
 
   const {
     availableDates,

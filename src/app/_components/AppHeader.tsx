@@ -3,7 +3,9 @@ import 'server-only';
 import Image from 'next/image';
 import type { Route } from 'next';
 import { serverEnv } from '@/env/server-env';
-import AppHeaderClient from '@/app/_components/AppHeaderClient';
+import HeaderActions from '@/app/_components/HeaderActions';
+import HeaderCalendar from '@/app/_components/HeaderCalendar';
+import AdminHeaderNavMenu from '@/app/admin/_components/AdminHeaderNavMenu';
 
 interface HeaderBadge {
   readonly src: string;
@@ -36,7 +38,7 @@ function getHeaderBadge(): HeaderBadge | null {
 }
 
 export default function AppHeader(props: AppHeaderProps) {
-  const { country, city } = props;
+  const { country, city, showCalendar = false, isAdminHeaderNavEnabled = false } = props;
 
   const badge = getHeaderBadge();
   const homeHref: Route = country ? (city ? `/feed/${country}/${city}` : `/feed/${country}`) : '/';
@@ -71,8 +73,18 @@ export default function AppHeader(props: AppHeaderProps) {
               </a>
             </h1>
           </div>
-          <AppHeaderClient
-            {...props}
+
+          <div className="min-w-0 justify-self-center">
+            {/*TODO: could be layering*/}
+            <AdminHeaderNavMenu isEnabled={isAdminHeaderNavEnabled} />
+            {showCalendar ? (
+              <HeaderCalendar
+                country={country!}
+                city={city!}
+              />
+            ) : null}
+          </div>
+          <HeaderActions
             country={country}
             city={city}
           />
