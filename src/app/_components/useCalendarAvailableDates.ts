@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchFeedAvailableDates } from './feedApi';
-import { feedKeys } from './feedKeys';
+import { fetchFeedAvailableDates } from '@/app/feed/_components/feed-client/feedApi';
+import { feedKeys } from '@/app/feed/_components/feed-client/feedKeys';
 import { clientEnv } from '@/env/client-env';
 
 export interface UseCalendarAvailableDatesParams {

@@ -2,8 +2,8 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 
-import { fetchFeedAvailableDates } from './feedApi';
-import { useCalendarAvailableDates } from './useCalendarAvailableDates';
+import { fetchFeedAvailableDates } from '@/app/feed/_components/feed-client/feedApi';
+import { useCalendarAvailableDates } from '@/app/_components/useCalendarAvailableDates';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
 
 interface FetchFeedAvailableDatesParams {
@@ -17,7 +17,7 @@ const { fetchFeedAvailableDatesMock } = vi.hoisted(() => ({
     vi.fn<(params: FetchFeedAvailableDatesParams) => Promise<string[]>>(),
 }));
 
-vi.mock('./feedApi', () => ({
+vi.mock('@/app/feed/_components/feed-client/feedApi', () => ({
   fetchFeedAvailableDates: fetchFeedAvailableDatesMock,
 }));
 

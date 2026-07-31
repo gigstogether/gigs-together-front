@@ -15,10 +15,6 @@ interface HeaderProps {
   earliestEventDate?: string;
   visibleEventDateRange?: VisibleEventDateRange;
   onDayClick?: (day: Date) => void;
-  availableDates?: string[]; // formatted as YYYY-MM-DD
-  calendarDatesIsLoading?: boolean;
-  calendarDatesIsError?: boolean;
-  calendarDatesError?: string;
   showCalendar?: boolean;
   centerContent?: ReactNode;
   country: string;
@@ -32,10 +28,6 @@ export default function Header(props: HeaderProps) {
     earliestEventDate,
     visibleEventDateRange,
     onDayClick,
-    availableDates,
-    calendarDatesIsLoading = true,
-    calendarDatesIsError = false,
-    calendarDatesError,
     showCalendar = true,
     centerContent,
     country,
@@ -78,13 +70,11 @@ export default function Header(props: HeaderProps) {
               centerContent
             ) : showCalendar ? (
               <HeaderCalendar
+                country={country}
+                city={city}
                 visibleEventDate={earliestEventDate}
                 visibleEventDateRange={visibleEventDateRange}
                 onDayClick={onDayClick}
-                availableDates={availableDates}
-                calendarDatesIsLoading={calendarDatesIsLoading}
-                calendarDatesIsError={calendarDatesIsError}
-                calendarDatesError={calendarDatesError}
               />
             ) : null}
           </div>

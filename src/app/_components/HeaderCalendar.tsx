@@ -4,19 +4,18 @@ import type { MouseEvent } from 'react';
 import { useMemo, useState } from 'react';
 import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
 import { Calendar } from '@/components/ui/calendar';
+import { useCalendarAvailableDates } from './useCalendarAvailableDates';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn, toLocalYMD } from '@/lib/utils';
 import { FaRegCalendar } from 'react-icons/fa';
 import type { Modifiers } from 'react-day-picker';
 
 interface HeaderCalendarProps {
+  country: string;
+  city: string;
   visibleEventDate?: string;
   visibleEventDateRange?: VisibleEventDateRange;
   onDayClick?: (day: Date, modifiers?: Modifiers, e?: MouseEvent) => void;
-  availableDates?: string[]; // list of dates that have events (YYYY-MM-DD)
-  calendarDatesIsLoading?: boolean;
-  calendarDatesIsError?: boolean;
-  calendarDatesError?: string;
 }
 
 interface ParsedYearMonth {
@@ -66,15 +65,22 @@ const formatDisplayMonth = (
 };
 
 export default function HeaderCalendar(props: HeaderCalendarProps) {
+  const { country, city, visibleEventDate, visibleEventDateRange, onDayClick } = props;
+
   const {
-    visibleEventDate,
-    visibleEventDateRange,
-    onDayClick,
     availableDates,
-    calendarDatesIsLoading = true,
-    calendarDatesIsError = false,
-    calendarDatesError,
-  } = props;
+    isLoading: calendarDatesIsLoading,
+    isError: calendarDatesIsError,
+    error: calendarDatesQueryError,
+  } = useCalendarAvailableDates({
+    country,
+    city,
+    isEnabled: true,
+  });
+
+  const calendarDatesError = calendarDatesIsError
+    ? (calendarDatesQueryError?.message ?? 'Failed to load calendar dates.')
+    : undefined;
 
   const availableSet = new Set(availableDates ?? []);
   const [open, setOpen] = useState(false);

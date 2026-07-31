@@ -6,10 +6,6 @@ import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/u
 export interface HeaderConfig {
   earliestEventDate?: string;
   visibleEventDateRange?: VisibleEventDateRange;
-  availableDates?: string[];
-  calendarDatesIsLoading?: boolean;
-  calendarDatesIsError?: boolean;
-  calendarDatesError?: string;
   onDayClick?: (day: Date) => void;
 }
 

@@ -61,10 +61,6 @@ export default function AppHeader(props: AppHeaderProps) {
       centerContent={showAdminHeaderNav ? <AdminHeaderNavMenu /> : undefined}
       earliestEventDate={config.earliestEventDate}
       visibleEventDateRange={config.visibleEventDateRange}
-      availableDates={config.availableDates}
-      calendarDatesIsLoading={config.calendarDatesIsLoading}
-      calendarDatesIsError={config.calendarDatesIsError}
-      calendarDatesError={config.calendarDatesError}
       onDayClick={config.onDayClick}
     />
   );
