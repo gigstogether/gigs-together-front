@@ -53,6 +53,39 @@ describe('env/server', () => {
     });
   });
 
+  describe('EAGER_INITIAL_POSTER_COUNT', () => {
+    it('should use default eager initial poster count when env var is missing', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('EAGER_INITIAL_POSTER_COUNT', undefined);
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.eagerInitialPosterCount).toBe(5);
+    });
+
+    it('should parse eager initial poster count when env var is a positive integer', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('EAGER_INITIAL_POSTER_COUNT', '3');
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.eagerInitialPosterCount).toBe(3);
+    });
+
+    it('should throw when eager initial poster count env var is not a positive integer', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('EAGER_INITIAL_POSTER_COUNT', '0');
+
+      const error = await captureRejectedError(() => importServerEnv());
+
+      expectZodIssue(error, {
+        code: 'custom',
+        message: 'EAGER_INITIAL_POSTER_COUNT must be a positive integer (got "0")',
+        path: ['EAGER_INITIAL_POSTER_COUNT'],
+      });
+    });
+  });
+
   describe('isStaging', () => {
     it('should be true when app base url hostname contains stg label', async () => {
       vi.stubEnv('NODE_ENV', 'test');
