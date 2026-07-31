@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { DEFAULT_FEED_CITY, DEFAULT_FEED_COUNTRY } from '@/lib/feed.routes';
 
 const AdminHeaderNavMenu = dynamic(() => import('@/app/admin/_components/AdminHeaderNavMenu'));
 const HeaderCalendar = dynamic(() => import('@/app/_components/HeaderCalendar'));
@@ -18,12 +17,7 @@ export interface AppHeaderClientProps {
 }
 
 export default function AppHeaderClient(props: AppHeaderClientProps) {
-  const {
-    country = DEFAULT_FEED_COUNTRY,
-    city = DEFAULT_FEED_CITY,
-    showCalendar = false,
-    isAdminHeaderNavEnabled = false,
-  } = props;
+  const { country, city, showCalendar = false, isAdminHeaderNavEnabled = false } = props;
 
   const { config } = useHeaderConfig();
   const { authState } = useTelegramAuth();
@@ -36,8 +30,8 @@ export default function AppHeaderClient(props: AppHeaderClientProps) {
           <AdminHeaderNavMenu />
         ) : showCalendar ? (
           <HeaderCalendar
-            country={country}
-            city={city}
+            country={country!}
+            city={city!}
             visibleEventDate={config.earliestEventDate}
             visibleEventDateRange={config.visibleEventDateRange}
             onDayClick={config.onDayClick}

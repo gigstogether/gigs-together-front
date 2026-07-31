@@ -8,8 +8,8 @@ export interface FeedLocation {
 import type { Route } from 'next';
 
 export type FeedPath = `/feed/${string}` | `/feed/${string}/${string}`;
-export const DEFAULT_FEED_COUNTRY = 'es';
-export const DEFAULT_FEED_CITY = 'barcelona';
+const DEFAULT_FEED_COUNTRY = 'es';
+const DEFAULT_FEED_CITY = 'barcelona';
 
 export const SUPPORTED_FEED_LOCATIONS: readonly FeedLocation[] = [
   // Currently, we only support one location.
