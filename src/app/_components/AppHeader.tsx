@@ -1,69 +1,85 @@
-'use client';
+import 'server-only';
 
-import { usePathname } from 'next/navigation';
+import Image from 'next/image';
+import type { Route } from 'next';
+import { serverEnv } from '@/env/server-env';
+import HeaderActions from '@/app/_components/HeaderActions';
+import type { ReactNode } from 'react';
 
-import Header from '@/app/_components/Header';
-import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
-import AdminHeaderNavMenu from '@/app/admin/_components/AdminHeaderNavMenu';
-import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-
-const DEFAULT_COUNTRY = 'es';
-const DEFAULT_CITY = 'barcelona';
-
-interface AppHeaderProps {
-  badgeSrc?: string;
-  badgeAlt?: string;
+interface HeaderBadge {
+  readonly src: string;
+  readonly alt: string;
 }
 
-function getLocationFromPath(pathname: string): { country: string; city: string } {
-  // Expected: /feed/[country]/[city]
-  // Also accept: /feed/[country]
-  const m = /^\/feed\/([^/]+)(?:\/([^/]+))?/.exec(pathname);
-  if (!m) return { country: DEFAULT_COUNTRY, city: DEFAULT_CITY };
-
-  const country =
-    decodeURIComponent(m[1] ?? '')
-      .trim()
-      .toLowerCase() || DEFAULT_COUNTRY;
-  const city =
-    decodeURIComponent(m[2] ?? '')
-      .trim()
-      .toLowerCase() || DEFAULT_CITY;
-
-  return { country, city };
+export interface AppHeaderProps {
+  readonly country?: string;
+  readonly city?: string;
+  readonly children?: ReactNode;
 }
 
-function isAdminRoute(pathname: string): boolean {
-  return pathname === '/admin' || pathname.startsWith('/admin/');
+function getHeaderBadge(): HeaderBadge | null {
+  if (serverEnv.isDevelopment) {
+    return {
+      src: '/badge-dev.svg',
+      alt: 'DEV environment badge',
+    };
+  }
+
+  if (serverEnv.isStaging) {
+    return {
+      src: '/badge-stg.svg',
+      alt: 'STG environment badge',
+    };
+  }
+
+  return null;
 }
 
-// TODO: merge with Header.tsx ?
 export default function AppHeader(props: AppHeaderProps) {
-  const { badgeSrc, badgeAlt } = props;
+  const { country, city, children } = props;
 
-  const pathname = usePathname() ?? '/';
-  const { config } = useHeaderConfig();
-  const { authState } = useTelegramAuth();
-  const isFeed = pathname === '/feed' || pathname.startsWith('/feed/');
-  const { country, city } = getLocationFromPath(pathname);
-  const showAdminHeaderNav = isAdminRoute(pathname) && authState?.isAdmin === true;
+  const badge = getHeaderBadge();
+  const homeHref: Route = country ? (city ? `/feed/${country}/${city}` : `/feed/${country}`) : '/';
 
-  // TODO: showCalendar -> centerContent
   return (
-    <Header
-      badgeAlt={badgeAlt}
-      badgeSrc={badgeSrc}
-      country={country}
-      city={city}
-      showCalendar={isFeed}
-      centerContent={showAdminHeaderNav ? <AdminHeaderNavMenu /> : undefined}
-      earliestEventDate={config.earliestEventDate}
-      visibleEventDateRange={config.visibleEventDateRange}
-      availableDates={config.availableDates}
-      calendarDatesIsLoading={config.calendarDatesIsLoading}
-      calendarDatesIsError={config.calendarDatesIsError}
-      calendarDatesError={config.calendarDatesError}
-      onDayClick={config.onDayClick}
-    />
+    <header
+      data-app-header
+      className="app-header-mobile-width bg-background fixed top-0 left-0 z-50 h-[45px] w-full border-b"
+    >
+      <div className="w-full px-4 h-full">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center w-full h-full">
+          <div className="min-w-0 justify-self-start">
+            <h1 className="text-xl font-semibold whitespace-nowrap">
+              <a
+                href={homeHref}
+                className="inline-flex items-center gap-1.5 cursor-pointer select-none"
+                aria-label="Go to home"
+                title="Go to home"
+              >
+                <span className="leading-none">
+                  Gigs<span className="hidden sm:inline"> Together</span>!
+                </span>
+                {badge ? (
+                  <Image
+                    src={badge.src}
+                    alt={badge.alt}
+                    width={48}
+                    height={22}
+                    className="h-4 w-auto shrink-0 sm:h-[18px]"
+                  />
+                ) : null}
+              </a>
+            </h1>
+          </div>
+
+          <div className="min-w-0 justify-self-center">{children}</div>
+
+          <HeaderActions
+            country={country}
+            city={city}
+          />
+        </div>
+      </div>
+    </header>
   );
 }

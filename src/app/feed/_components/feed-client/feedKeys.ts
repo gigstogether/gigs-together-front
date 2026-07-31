@@ -38,12 +38,6 @@ export const feedKeys = {
     return ['feed', 'events', buildFeedLocationKeyValue(params)];
   },
 
-  calendarAvailableDates(
-    params: FeedLocationKeyParams,
-  ): readonly ['feed', 'calendar-available-dates', FeedLocationKeyValue] {
-    return ['feed', 'calendar-available-dates', buildFeedLocationKeyValue(params)];
-  },
-
   around(params: FeedAroundKeyParams): readonly ['feed', 'around', FeedAroundKeyValue] {
     return ['feed', 'around', buildFeedAroundKeyValue(params)];
   },

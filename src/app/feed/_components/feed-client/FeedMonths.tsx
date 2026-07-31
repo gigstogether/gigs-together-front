@@ -22,7 +22,7 @@ export function FeedMonths(props: FeedMonthsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+    <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
       {events.map((event, idx) => {
         const prev = events[idx - 1];
         const isFirstOfDate = idx === 0 || prev?.date !== event.date;

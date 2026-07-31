@@ -16,7 +16,8 @@ export const SUPPORTED_FEED_LOCATIONS: readonly FeedLocation[] = [
   { country: DEFAULT_FEED_COUNTRY, city: DEFAULT_FEED_CITY },
 ];
 
-const normalizeSegment = (value: string): string => decodeURIComponent(value).trim().toLowerCase();
+export const normalizeSegment = (value: string): string =>
+  decodeURIComponent(value).trim().toLowerCase();
 
 export const buildFeedPath = (loc: FeedLocation): FeedPath => {
   const country = normalizeSegment(loc.country);

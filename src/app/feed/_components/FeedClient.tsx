@@ -12,7 +12,6 @@ import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key
 import { gigToEvent } from '@/lib/feed.mapper';
 import { useT } from '@/lib/i18n';
 import { FeedMonths } from './feed-client/FeedMonths';
-import { useCalendarAvailableDates } from './feed-client/useCalendarAvailableDates';
 import { useClearFeedLocationHash } from './feed-client/useClearFeedLocationHash';
 import { useFeedHeaderConfigSync } from './feed-client/useFeedHeaderConfigSync';
 import { useHeaderHeight } from './feed-client/useHeaderHeight';
@@ -153,22 +152,6 @@ export default function FeedClient(props: FeedClientProps) {
 
   const visibleError = error ?? feedError;
 
-  const {
-    availableDates: calendarAvailableDates,
-    isLoading: calendarDatesIsLoading,
-    isError: calendarDatesIsError,
-    isSuccess: isCalendarDatesSuccess,
-    error: calendarDatesQueryError,
-  } = useCalendarAvailableDates({
-    country,
-    city,
-    isEnabled: !isInitialLoading && !visibleError,
-  });
-
-  const calendarDatesError = calendarDatesIsError
-    ? (calendarDatesQueryError?.message ?? 'Failed to load calendar dates.')
-    : undefined;
-
   const { visibleEventDate, visibleEventDateRange } = useVisibleEventDateOnScroll({
     events,
     headerOffsetPx: headerH ?? 0,
@@ -280,10 +263,6 @@ export default function FeedClient(props: FeedClientProps) {
     setHeaderConfig,
     visibleEventDate,
     visibleEventDateRange,
-    availableDates: isCalendarDatesSuccess ? calendarAvailableDates : undefined,
-    calendarDatesIsLoading,
-    calendarDatesIsError,
-    calendarDatesError,
     onDayClick: handleDayClick,
   });
 
@@ -314,7 +293,7 @@ export default function FeedClient(props: FeedClientProps) {
   return (
     <div className="min-h-[100svh]">
       <main className={feedMainClassName}>
-        <div className="px-8 md:px-8 py-8">
+        <div className="w-full px-8 md:px-8 py-8">
           {loading.jump ? (
             <div
               className="fixed left-1/2 -translate-x-1/2 z-50"
@@ -334,10 +313,12 @@ export default function FeedClient(props: FeedClientProps) {
           {isLoadingPrev ? (
             <div className="py-4 text-center text-gray-500">Loading previous…</div>
           ) : null}
-          <FeedMonths
-            events={events}
-            registerEventRef={registerEventRef}
-          />
+          <div className="animate-in fade-in-0 duration-500 motion-reduce:animate-none">
+            <FeedMonths
+              events={events}
+              registerEventRef={registerEventRef}
+            />
+          </div>
 
           <div
             ref={bottomSentinelRef}

@@ -2,67 +2,73 @@ import { render, screen } from '@testing-library/react';
 
 import AppHeader from '@/app/_components/AppHeader';
 
-const mockUsePathname = vi.fn();
-const mockUseTelegramAuth = vi.fn();
+vi.mock('server-only', () => ({}));
 
-vi.mock('next/navigation', () => ({
-  usePathname: () => mockUsePathname(),
+const mockServerEnv = vi.hoisted(() => ({
+  isDevelopment: false,
+  isStaging: false,
 }));
 
-vi.mock('@/hooks/use-telegram-auth', () => ({
-  useTelegramAuth: () => mockUseTelegramAuth(),
-}));
-
-vi.mock('@/app/_components/HeaderConfigProvider', () => ({
-  useHeaderConfig: () => ({ config: {} }),
-}));
-
-vi.mock('@/app/_components/HeaderCalendar', () => ({
-  default: () => <div data-testid="header-calendar" />,
+vi.mock('@/env/server-env', () => ({
+  serverEnv: mockServerEnv,
 }));
 
 vi.mock('@/app/_components/HeaderActions', () => ({
   default: () => <div data-testid="header-actions" />,
 }));
 
-vi.mock('@/app/admin/_components/AdminHeaderNavMenu', () => ({
-  default: () => <div data-testid="admin-header-nav-menu" />,
-}));
-
 describe('AppHeader', () => {
   beforeEach(() => {
-    mockUsePathname.mockReturnValue('/feed/es/barcelona');
-    mockUseTelegramAuth.mockReturnValue({
-      authState: { displayLabel: '@admin', isAdmin: true },
-    });
+    mockServerEnv.isDevelopment = false;
+    mockServerEnv.isStaging = false;
   });
 
-  it('should show admin header navigation when admin visits an admin route', () => {
-    mockUsePathname.mockReturnValue('/admin/gigs');
-
-    render(<AppHeader />);
-
-    expect(screen.getByTestId('admin-header-nav-menu')).toBeInTheDocument();
-    expect(screen.queryByTestId('header-calendar')).not.toBeInTheDocument();
-  });
-
-  it('should not show admin header navigation when user is not admin', () => {
-    mockUsePathname.mockReturnValue('/admin');
-    mockUseTelegramAuth.mockReturnValue({ authState: null });
-
-    render(<AppHeader />);
-
-    expect(screen.queryByTestId('admin-header-nav-menu')).not.toBeInTheDocument();
-  });
-
-  it('should render environment badge when badge props are provided', () => {
+  it('should render center slot children', () => {
     render(
       <AppHeader
-        badgeAlt="DEV environment badge"
-        badgeSrc="/badge-dev.svg"
+        country="es"
+        city="barcelona"
+      >
+        <div data-testid="header-center-slot">Center</div>
+      </AppHeader>,
+    );
+
+    expect(screen.getByTestId('header-center-slot')).toBeInTheDocument();
+    expect(screen.getByTestId('header-actions')).toBeInTheDocument();
+  });
+
+  it('should link home to feed location when country and city are provided', () => {
+    render(
+      <AppHeader
+        country="es"
+        city="barcelona"
       />,
     );
 
+    expect(screen.getByRole('link', { name: 'Go to home' })).toHaveAttribute(
+      'href',
+      '/feed/es/barcelona',
+    );
+  });
+
+  it('should link home to root when location is omitted', () => {
+    render(<AppHeader />);
+
+    expect(screen.getByRole('link', { name: 'Go to home' })).toHaveAttribute('href', '/');
+  });
+
+  it('should render environment badge in development', () => {
+    mockServerEnv.isDevelopment = true;
+
+    render(<AppHeader />);
+
     expect(screen.getByAltText('DEV environment badge')).toHaveAttribute('src', '/badge-dev.svg');
+  });
+
+  it('should not render environment badge in production', () => {
+    render(<AppHeader />);
+
+    expect(screen.queryByAltText('DEV environment badge')).not.toBeInTheDocument();
+    expect(screen.queryByAltText('STG environment badge')).not.toBeInTheDocument();
   });
 });
