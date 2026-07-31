@@ -75,7 +75,6 @@ export default function HeaderCalendar(props: HeaderCalendarProps) {
   } = useCalendarAvailableDates({
     country,
     city,
-    isEnabled: true,
   });
 
   const calendarDatesError = calendarDatesIsError

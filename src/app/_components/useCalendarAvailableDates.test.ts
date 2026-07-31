@@ -31,7 +31,7 @@ describe('useCalendarAvailableDates', () => {
     vi.useRealTimers();
   });
 
-  it('should fetch available dates when query is enabled', async () => {
+  it('should fetch available dates for the location', async () => {
     vi.mocked(fetchFeedAvailableDates).mockResolvedValueOnce(['2026-04-21']);
 
     const queryClient = createTestQueryClient();
@@ -41,7 +41,6 @@ describe('useCalendarAvailableDates', () => {
         useCalendarAvailableDates({
           country: 'es',
           city: 'barcelona',
-          isEnabled: true,
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -60,31 +59,6 @@ describe('useCalendarAvailableDates', () => {
     });
   });
 
-  it('should not fetch available dates when query is disabled', () => {
-    const queryClient = createTestQueryClient();
-
-    const { result } = renderHook(
-      () =>
-        useCalendarAvailableDates({
-          country: 'es',
-          city: 'barcelona',
-          isEnabled: false,
-        }),
-      {
-        wrapper: createQueryClientWrapper(queryClient),
-      },
-    );
-
-    expect(result.current).toEqual({
-      availableDates: undefined,
-      error: null,
-      isLoading: false,
-      isError: false,
-      isSuccess: false,
-    });
-    expect(vi.mocked(fetchFeedAvailableDates)).not.toHaveBeenCalled();
-  });
-
   it('should expose loading state when query is pending', async () => {
     vi.mocked(fetchFeedAvailableDates).mockImplementationOnce(
       () => new Promise<string[]>(() => {}),
@@ -97,7 +71,6 @@ describe('useCalendarAvailableDates', () => {
         useCalendarAvailableDates({
           country: 'es',
           city: 'barcelona',
-          isEnabled: true,
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -120,7 +93,6 @@ describe('useCalendarAvailableDates', () => {
         useCalendarAvailableDates({
           country: 'es',
           city: 'barcelona',
-          isEnabled: true,
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -147,7 +119,6 @@ describe('useCalendarAvailableDates', () => {
         useCalendarAvailableDates({
           country,
           city,
-          isEnabled: true,
         }),
       {
         initialProps: {
@@ -199,7 +170,6 @@ describe('useCalendarAvailableDates', () => {
         useCalendarAvailableDates({
           country: 'es',
           city: 'barcelona',
-          isEnabled: true,
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -235,7 +205,6 @@ describe('useCalendarAvailableDates', () => {
         useCalendarAvailableDates({
           country: 'es',
           city: 'barcelona',
-          isEnabled: true,
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),

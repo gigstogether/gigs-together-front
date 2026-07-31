@@ -6,7 +6,6 @@ import { clientEnv } from '@/env/client-env';
 export interface UseCalendarAvailableDatesParams {
   country: string;
   city: string;
-  isEnabled: boolean;
 }
 
 export interface UseCalendarAvailableDatesResult {
@@ -22,11 +21,10 @@ const CALENDAR_DATES_TIMEOUT_MS = 15_000; // 15 seconds
 export function useCalendarAvailableDates(
   params: UseCalendarAvailableDatesParams,
 ): UseCalendarAvailableDatesResult {
-  const { country, city, isEnabled } = params;
+  const { country, city } = params;
 
   const query = useQuery<string[], Error>({
     queryKey: feedKeys.calendarAvailableDates({ country, city }),
-    enabled: isEnabled,
     staleTime: clientEnv.feedCalendarDatesStaleTimeMs,
     queryFn: async ({ signal }) => {
       const timeoutController = new AbortController();
@@ -53,7 +51,7 @@ export function useCalendarAvailableDates(
   return {
     availableDates,
     error,
-    isLoading: isEnabled && isPending,
+    isLoading: isPending,
     isError,
     isSuccess,
   };
