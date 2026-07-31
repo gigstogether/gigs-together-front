@@ -1,15 +1,20 @@
+import AppHeader from '@/app/_components/AppHeader';
+import AdminLayoutClient from '@/app/admin/AdminLayoutClient';
 import type { ReactNode } from 'react';
 
-import AdminLayoutClient from '@/app/admin/AdminLayoutClient';
-
 interface AdminLayoutProps {
-  children: ReactNode;
+  readonly children: ReactNode;
 }
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default function AdminLayout(props: AdminLayoutProps) {
+  const { children } = props;
+
   return (
-    <div className="min-h-[calc(100dvh-var(--header-h))] bg-gray-50">
-      <AdminLayoutClient>{children}</AdminLayoutClient>
-    </div>
+    <>
+      <AppHeader isAdminHeaderNavEnabled />
+      <div className="min-h-[calc(100dvh-var(--header-h))] bg-gray-50">
+        <AdminLayoutClient>{children}</AdminLayoutClient>
+      </div>
+    </>
   );
 }

@@ -8,7 +8,7 @@ vi.mock('next/navigation', () => ({
   redirect: mockRedirect,
 }));
 
-import GigPublicPage from '@/app/gigs/[publicId]/page';
+import GigPublicPage from './page';
 
 describe('GigPublicPage', () => {
   beforeEach(() => {

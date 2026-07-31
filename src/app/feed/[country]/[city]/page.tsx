@@ -4,7 +4,7 @@ import { clientEnv } from '@/env/client-env';
 import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
 import { getFeed } from '@/lib/feed.server';
 import { gigToEvent } from '@/lib/feed.mapper';
-import { DEFAULT_FEED_ROUTE, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed.routes';
+import { DEFAULT_FEED_ROUTE, normalizeSegment, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed.routes';
 import { I18nProvider } from '@/lib/i18n';
 import { resolveTranslationValue } from '@/lib/i18n/translation-value';
 import { getTranslations } from '@/lib/translations.server';
@@ -21,8 +21,8 @@ export async function generateStaticParams() {
 
 export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
   const { country, city } = await props.params;
-  const normalizedCountry = decodeURIComponent(country).trim().toLowerCase();
-  const normalizedCity = decodeURIComponent(city).trim().toLowerCase();
+  const normalizedCountry = normalizeSegment(country);
+  const normalizedCity = normalizeSegment(city);
 
   // Currently, we only support one location.
   if (normalizedCountry !== 'es' || normalizedCity !== 'barcelona') {

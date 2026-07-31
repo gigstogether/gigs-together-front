@@ -8,7 +8,7 @@ import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/f
 import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
 import HeaderSignInModal from '@/app/_components/HeaderSignInModal';
 import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/admin-gig-paths';
-import { SUGGEST_ROUTE } from '@/app/suggest/suggest-paths';
+import { SUGGEST_ROUTE } from '@/app/(default)/suggest/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationIcon } from '@/components/ui/location-icon';
 import { clientEnv } from '@/env/client-env';
