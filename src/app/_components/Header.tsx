@@ -6,8 +6,8 @@ import type { ReactNode } from 'react';
 import type { Route } from 'next';
 import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
 
-const HeaderCalendar = dynamic(() => import('@/app/_components/HeaderCalendar'), { ssr: false });
-const HeaderActions = dynamic(() => import('@/app/_components/HeaderActions'), { ssr: false });
+const HeaderCalendar = dynamic(() => import('@/app/_components/HeaderCalendar'));
+const HeaderActions = dynamic(() => import('@/app/_components/HeaderActions'));
 
 interface HeaderProps {
   badgeSrc?: string;
