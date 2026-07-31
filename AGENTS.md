@@ -11,6 +11,8 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Prefer correctness and maintainability over implementation speed.
 - Prefer explicit, strict typing. Keep types narrow and avoid widening to `string | number | ...` when the domain is known.
 - Comments must be in English using the Latin alphabet only. Do not write comments in Cyrillic.
+- Do not remove `TODO` comments (for example `// TODO: ...`) unless you are explicitly completing that TODO as part of the current task. Leave unrelated TODOs untouched.
+- Remove a TODO only when it explicitly describes the work you are doing now — not when it uses vague wording such as "refactor", "fix" or similar. Do not assume your change satisfies a TODO unless the comment clearly and specifically matches the task at hand; a generic TODO may refer to different work.
 - For numeric constants in seconds or milliseconds (for example `604_800`, `86_400`), add a short comment with human-readable equivalents (at least days or hours, and minutes when useful).
 - Boolean variables and flags should preferably start with `is`/`has`/`can`, for example `isActive`, `isAdmin`, `isValid`.
 - In `catch` clauses, bind the caught value as `e`, not `error`, when a binding is needed (for example `catch (e) { ... }`).
