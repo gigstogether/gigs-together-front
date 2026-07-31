@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
-import { HeaderConfigProvider } from '@/app/_components/HeaderConfigProvider';
 import PlausibleAnalyticsProvider from '@/app/_providers/PlausibleAnalyticsProvider';
 import TelegramWebAppScript from '@/app/_components/TelegramWebAppScript';
 import { QueryProvider } from '@/app/_providers/QueryProvider';
@@ -104,10 +103,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                 }}
               />
             ) : null}
-            <HeaderConfigProvider>
-              <div className="pt-[var(--header-h)]">{children}</div>
-              <Toaster />
-            </HeaderConfigProvider>
+            <div className="pt-[var(--header-h)]">{children}</div>
+            <Toaster />
           </QueryProvider>
         </PlausibleAnalyticsProvider>
       </body>
