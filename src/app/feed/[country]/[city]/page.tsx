@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import FeedClient from '../../_components/FeedClient';
 import { clientEnv } from '@/env/client-env';
+import { serverEnv } from '@/env/server-env';
 import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
 import { getFeed } from '@/lib/feed.server';
 import { gigToEvent } from '@/lib/feed.mapper';
@@ -11,8 +12,7 @@ import { getTranslations } from '@/lib/translations.server';
 import type { Event } from '@/lib/types';
 
 const PAGE_SIZE = clientEnv.feedPageSize;
-/** Posters from the initial feed batch that may appear above the fold (grid up to 5 cols). */
-const EAGER_INITIAL_POSTER_COUNT = 5;
+const EAGER_INITIAL_POSTER_COUNT = serverEnv.eagerInitialPosterCount;
 
 export const dynamicParams = false;
 export const revalidate = 60;

@@ -21,8 +21,8 @@ describe('HeaderCalendar', () => {
   });
 
   it('should fetch available dates and pass them to the client calendar', async () => {
-    const HeaderCalendar = (await import('@/app/_components/HeaderCalendarServer'))
-      .HeaderCalendarServer;
+    const HeaderCalendar = (await import('@/app/_components/HeaderCalendar'))
+      .default;
 
     render(
       await HeaderCalendar({
