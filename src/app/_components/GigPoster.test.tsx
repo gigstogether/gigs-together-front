@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 
 import { GigPoster } from '@/app/_components/GigPoster';
 
@@ -31,5 +31,24 @@ describe('GigPoster', () => {
     const img = screen.getByRole('img', { name: 'Radiohead' });
     expect(img).toHaveAttribute('loading', 'eager');
     expect(img).toHaveAttribute('fetchpriority', 'high');
+  });
+
+  it('should keep the image visible for LCP and show shimmer on the img until loaded', async () => {
+    const { container } = render(
+      <GigPoster
+        poster="https://cdn.example/poster.jpg"
+        title="Radiohead"
+      />,
+    );
+
+    const img = screen.getByRole('img', { name: 'Radiohead' });
+    expect(img).not.toHaveClass('opacity-0');
+    expect(img).toHaveClass('skeleton-shimmer');
+
+    await act(async () => {
+      img.dispatchEvent(new Event('load'));
+    });
+
+    expect(container.querySelector('img')).not.toHaveClass('skeleton-shimmer');
   });
 });
