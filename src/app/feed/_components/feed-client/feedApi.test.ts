@@ -2,10 +2,8 @@ import { apiPublicRequest } from '@/lib/api';
 import {
   fetchFeedAnchorYmdByPublicId,
   fetchFeedAround,
-  fetchFeedAvailableDates,
   fetchFeedPage,
 } from '@/app/feed/_components/feed-client/feedApi';
-import { toLocalYMD } from '@/lib/utils';
 
 vi.mock('@/lib/api', () => ({
   apiPublicRequest: vi.fn(),
@@ -98,31 +96,5 @@ describe('fetchFeedAnchorYmdByPublicId', () => {
     expect(apiPublicRequestMock).toHaveBeenCalledWith('v1/gig/date/abc%2Fdef', 'GET', undefined, {
       signal: undefined,
     });
-  });
-});
-
-describe('fetchFeedAvailableDates', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should return unique sorted dates when response contains mixed raw date formats', async () => {
-    const unixSeconds = 1700000000;
-    const apiPublicRequestMock = vi.mocked(apiPublicRequest);
-    apiPublicRequestMock.mockResolvedValueOnce({
-      dates: ['2026-04-21', '2026-04-21T12:00:00.000Z', unixSeconds],
-    });
-
-    const result = await fetchFeedAvailableDates({ country: 'es', city: 'barcelona' });
-
-    expect(result).toEqual(
-      Array.from(new Set(['2026-04-21', toLocalYMD(new Date(unixSeconds * 1000))])).sort(),
-    );
-    expect(apiPublicRequestMock).toHaveBeenCalledWith(
-      'v1/gig/dates?country=es&city=barcelona',
-      'GET',
-      undefined,
-      { signal: undefined },
-    );
   });
 });

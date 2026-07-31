@@ -125,6 +125,7 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 - One React component per file.
 - Exception: `src/components/ui/**` shadcn primitives.
+- After `const { ... } = props;`, always leave a blank line before the next statement.
 - Do not add `'use client'` to an existing server component without explicit approval. Converting a server component to a client component must be agreed on first; without approval, leave the server boundary unchanged. Prefer extracting client-only logic into a new client child module instead of changing an existing component's boundary.
 
 ## React Typing Style

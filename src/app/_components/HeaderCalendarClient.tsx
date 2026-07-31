@@ -4,16 +4,14 @@ import type { MouseEvent } from 'react';
 import { useMemo, useState } from 'react';
 import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
 import { Calendar } from '@/components/ui/calendar';
-import { useCalendarAvailableDates } from './useCalendarAvailableDates';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn, toLocalYMD } from '@/lib/utils';
 import { FaRegCalendar } from 'react-icons/fa';
 import type { Modifiers } from 'react-day-picker';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
 
-interface HeaderCalendarProps {
-  country: string;
-  city: string;
+export interface HeaderCalendarClientProps {
+  readonly availableDates: readonly string[];
 }
 
 interface ParsedYearMonth {
@@ -62,28 +60,14 @@ const formatDisplayMonth = (
   return `${formatMonthYear(start)} ${DASH} ${formatMonthYear(end)}`;
 };
 
-export default function HeaderCalendar(props: HeaderCalendarProps) {
-  const { country, city } = props;
+export default function HeaderCalendarClient(props: HeaderCalendarClientProps) {
+  const { availableDates } = props;
+  const availableSet = new Set(availableDates);
 
   const {
     config: { earliestEventDate: visibleEventDate, visibleEventDateRange, onDayClick },
   } = useHeaderConfig();
 
-  const {
-    availableDates,
-    isLoading: calendarDatesIsLoading,
-    isError: calendarDatesIsError,
-    error: calendarDatesQueryError,
-  } = useCalendarAvailableDates({
-    country,
-    city,
-  });
-
-  const calendarDatesError = calendarDatesIsError
-    ? (calendarDatesQueryError?.message ?? 'Failed to load calendar dates.')
-    : undefined;
-
-  const availableSet = new Set(availableDates ?? []);
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState<Date | undefined>(undefined);
 
@@ -96,12 +80,10 @@ export default function HeaderCalendar(props: HeaderCalendarProps) {
   }, [visibleEventDate, visibleEventDateRange]);
 
   const { startMonth, endMonth } = useMemo(() => {
-    const dates = availableDates ?? [];
-    if (dates.length === 0) return { startMonth: undefined, endMonth: undefined };
+    if (availableDates.length === 0) return { startMonth: undefined, endMonth: undefined };
 
-    const sorted = [...dates].sort();
-    const first = sorted[0];
-    const last = sorted[sorted.length - 1];
+    const first = availableDates[0];
+    const last = availableDates[availableDates.length - 1];
     if (!first || !last) return { startMonth: undefined, endMonth: undefined };
 
     const [startYear, startMonthValue] = first.split('-').map(Number);
@@ -122,7 +104,6 @@ export default function HeaderCalendar(props: HeaderCalendarProps) {
   };
 
   const disabledMatcher = (date: Date) => {
-    if (calendarDatesIsLoading || calendarDatesIsError) return true;
     return !availableSet.has(toLocalYMD(date));
   };
 
@@ -148,14 +129,6 @@ export default function HeaderCalendar(props: HeaderCalendarProps) {
           className="w-auto p-0"
           align="center"
         >
-          {calendarDatesIsLoading ? (
-            <div className="px-3 py-2 text-sm text-gray-600">Loading calendar…</div>
-          ) : null}
-          {calendarDatesIsError ? (
-            <div className="px-3 py-2 text-sm text-red-600">
-              Failed to load calendar dates{calendarDatesError ? `: ${calendarDatesError}` : '.'}
-            </div>
-          ) : null}
           <Calendar
             mode="single"
             month={month}
