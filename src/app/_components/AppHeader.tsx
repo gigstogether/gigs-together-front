@@ -1,11 +1,13 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 
 import Header from '@/app/_components/Header';
 import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
-import AdminHeaderNavMenu from '@/app/admin/_components/AdminHeaderNavMenu';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
+
+const AdminHeaderNavMenu = dynamic(() => import('@/app/admin/_components/AdminHeaderNavMenu'));
 
 const DEFAULT_COUNTRY = 'es';
 const DEFAULT_CITY = 'barcelona';

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 import AppHeader from '@/app/_components/AppHeader';
 
@@ -37,22 +37,26 @@ describe('AppHeader', () => {
     });
   });
 
-  it('should show admin header navigation when admin visits an admin route', () => {
+  it('should show admin header navigation when admin visits an admin route', async () => {
     mockUsePathname.mockReturnValue('/admin/gigs');
 
     render(<AppHeader />);
 
-    expect(screen.getByTestId('admin-header-nav-menu')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('admin-header-nav-menu')).toBeInTheDocument();
+    });
     expect(screen.queryByTestId('header-calendar')).not.toBeInTheDocument();
   });
 
-  it('should not show admin header navigation when user is not admin', () => {
+  it('should not show admin header navigation when user is not admin', async () => {
     mockUsePathname.mockReturnValue('/admin');
     mockUseTelegramAuth.mockReturnValue({ authState: null });
 
     render(<AppHeader />);
 
-    expect(screen.queryByTestId('admin-header-nav-menu')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId('admin-header-nav-menu')).not.toBeInTheDocument();
+    });
   });
 
   it('should render environment badge when badge props are provided', () => {
