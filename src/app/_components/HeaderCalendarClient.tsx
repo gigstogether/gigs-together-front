@@ -68,16 +68,19 @@ export default function HeaderCalendarClient(props: HeaderCalendarClientProps) {
     config: { earliestEventDate: visibleEventDate, visibleEventDateRange, onDayClick },
   } = useHeaderConfig();
 
+  const initialDisplayDate = availableDates[0];
+  const displayEventDate = visibleEventDate ?? initialDisplayDate;
+
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState<Date | undefined>(undefined);
 
   const monthFromVisibleDate = useMemo(() => {
-    const targetDate = visibleEventDateRange?.startDate ?? visibleEventDate;
+    const targetDate = visibleEventDateRange?.startDate ?? displayEventDate;
     if (!targetDate) return undefined;
     const [year, monthValue] = targetDate.split('-').map(Number);
     if (!year || !monthValue) return undefined;
     return new Date(year, monthValue - 1, 1);
-  }, [visibleEventDate, visibleEventDateRange]);
+  }, [displayEventDate, visibleEventDateRange]);
 
   const { startMonth, endMonth } = useMemo(() => {
     if (availableDates.length === 0) return { startMonth: undefined, endMonth: undefined };
@@ -122,7 +125,7 @@ export default function HeaderCalendarClient(props: HeaderCalendarClientProps) {
         >
           <span className="inline-flex items-center justify-center gap-2 px-2 text-base font-normal text-gray-800">
             <FaRegCalendar className="text-gray-600" />
-            {formatDisplayMonth(visibleEventDate, visibleEventDateRange)}
+            {formatDisplayMonth(displayEventDate, visibleEventDateRange)}
           </span>
         </PopoverTrigger>
         <PopoverContent
