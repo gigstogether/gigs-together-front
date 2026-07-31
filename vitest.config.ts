@@ -3,6 +3,7 @@ import { defineConfig } from 'vitest/config';
 
 const sharedAlias = {
   '@': fileURLToPath(new URL('./src', import.meta.url)),
+  'server-only': fileURLToPath(new URL('./src/test/server-only.mock.ts', import.meta.url)),
 } as const;
 
 export default defineConfig({
