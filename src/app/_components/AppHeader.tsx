@@ -4,8 +4,7 @@ import Image from 'next/image';
 import type { Route } from 'next';
 import { serverEnv } from '@/env/server-env';
 import HeaderActions from '@/app/_components/HeaderActions';
-import HeaderCalendar from '@/app/_components/HeaderCalendar';
-import AdminHeaderNavMenu from '@/app/admin/_components/AdminHeaderNavMenu';
+import type { ReactNode } from 'react';
 
 interface HeaderBadge {
   readonly src: string;
@@ -15,8 +14,7 @@ interface HeaderBadge {
 export interface AppHeaderProps {
   readonly country?: string;
   readonly city?: string;
-  readonly showCalendar?: boolean;
-  readonly isAdminHeaderNavEnabled?: boolean;
+  readonly children?: ReactNode;
 }
 
 function getHeaderBadge(): HeaderBadge | null {
@@ -38,7 +36,7 @@ function getHeaderBadge(): HeaderBadge | null {
 }
 
 export default function AppHeader(props: AppHeaderProps) {
-  const { country, city, showCalendar = false, isAdminHeaderNavEnabled = false } = props;
+  const { country, city, children } = props;
 
   const badge = getHeaderBadge();
   const homeHref: Route = country ? (city ? `/feed/${country}/${city}` : `/feed/${country}`) : '/';
@@ -74,16 +72,8 @@ export default function AppHeader(props: AppHeaderProps) {
             </h1>
           </div>
 
-          <div className="min-w-0 justify-self-center">
-            {/*TODO: could be layering*/}
-            <AdminHeaderNavMenu isEnabled={isAdminHeaderNavEnabled} />
-            {showCalendar ? (
-              <HeaderCalendar
-                country={country!}
-                city={city!}
-              />
-            ) : null}
-          </div>
+          <div className="min-w-0 justify-self-center">{children}</div>
+
           <HeaderActions
             country={country}
             city={city}

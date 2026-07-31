@@ -8,7 +8,7 @@ vi.mock('next/navigation', () => ({
 
 describe('AdminHeaderNavMenu', () => {
   it('should open admin navigation links when menu button is clicked', () => {
-    render(<AdminHeaderNavMenu isEnabled />);
+    render(<AdminHeaderNavMenu />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Admin navigation menu' }));
 
@@ -16,7 +16,7 @@ describe('AdminHeaderNavMenu', () => {
   });
 
   it('should point chevron up when menu is open', () => {
-    render(<AdminHeaderNavMenu isEnabled />);
+    render(<AdminHeaderNavMenu />);
 
     const button = screen.getByRole('button', { name: 'Admin navigation menu' });
 

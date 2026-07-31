@@ -9,17 +9,12 @@ import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 
 const ADMIN_LABEL = 'ADMIN';
 
-interface AdminHeaderNavMenuProps {
-  isEnabled: boolean;
-}
-
-export default function AdminHeaderNavMenu({ isEnabled }: AdminHeaderNavMenuProps) {
+export default function AdminHeaderNavMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
   const { authState } = useTelegramAuth();
 
-  const shouldShowAdminHeaderNav = isEnabled && authState?.isAdmin === true;
-  if (!shouldShowAdminHeaderNav) {
+  if (!authState?.isAdmin === true) {
     return null;
   }
 
