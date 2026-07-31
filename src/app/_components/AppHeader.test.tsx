@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import AppHeader from '@/app/_components/AppHeader';
 
@@ -13,68 +13,48 @@ vi.mock('@/env/server-env', () => ({
   serverEnv: mockServerEnv,
 }));
 
-const mockUseTelegramAuth = vi.fn();
-
-vi.mock('@/hooks/use-telegram-auth', () => ({
-  useTelegramAuth: () => mockUseTelegramAuth(),
-}));
-
-vi.mock('@/app/_components/HeaderConfigProvider', () => ({
-  useHeaderConfig: () => ({ config: {} }),
-}));
-
-vi.mock('@/app/_components/HeaderCalendar', () => ({
-  default: () => <div data-testid="header-calendar" />,
-}));
-
 vi.mock('@/app/_components/HeaderActions', () => ({
   default: () => <div data-testid="header-actions" />,
-}));
-
-vi.mock('@/app/admin/_components/AdminHeaderNavMenu', () => ({
-  default: () => <div data-testid="admin-header-nav-menu" />,
 }));
 
 describe('AppHeader', () => {
   beforeEach(() => {
     mockServerEnv.isDevelopment = false;
     mockServerEnv.isStaging = false;
-    mockUseTelegramAuth.mockReturnValue({
-      authState: { displayLabel: '@admin', isAdmin: true },
-    });
   });
 
-  it('should show admin header navigation when admin header nav is enabled for an admin user', async () => {
-    render(<AppHeader isAdminHeaderNavEnabled />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('admin-header-nav-menu')).toBeInTheDocument();
-    });
-    expect(screen.queryByTestId('header-calendar')).not.toBeInTheDocument();
-  });
-
-  it('should not show admin header navigation when user is not admin', async () => {
-    mockUseTelegramAuth.mockReturnValue({ authState: null });
-
-    render(<AppHeader isAdminHeaderNavEnabled />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('admin-header-nav-menu')).not.toBeInTheDocument();
-    });
-  });
-
-  it('should show calendar when showCalendar is enabled', async () => {
+  it('should render center slot children', () => {
     render(
       <AppHeader
         country="es"
         city="barcelona"
-        showCalendar
+      >
+        <div data-testid="header-center-slot">Center</div>
+      </AppHeader>,
+    );
+
+    expect(screen.getByTestId('header-center-slot')).toBeInTheDocument();
+    expect(screen.getByTestId('header-actions')).toBeInTheDocument();
+  });
+
+  it('should link home to feed location when country and city are provided', () => {
+    render(
+      <AppHeader
+        country="es"
+        city="barcelona"
       />,
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('header-calendar')).toBeInTheDocument();
-    });
+    expect(screen.getByRole('link', { name: 'Go to home' })).toHaveAttribute(
+      'href',
+      '/feed/es/barcelona',
+    );
+  });
+
+  it('should link home to root when location is omitted', () => {
+    render(<AppHeader />);
+
+    expect(screen.getByRole('link', { name: 'Go to home' })).toHaveAttribute('href', '/');
   });
 
   it('should render environment badge in development', () => {
