@@ -4,20 +4,25 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import AdminTranslationsPageClient from '@/app/admin/translations/_components/AdminTranslationsPageClient';
 import { stubResizeObserver } from '@/test-utils/moderator-telegram-session-mock';
 
-const mockFetchAdminTranslationNamespaces = vi.fn();
-const mockFetchAdminLocales = vi.fn();
-const mockFetchAdminTranslations = vi.fn();
-const mockPutAdminTranslation = vi.fn();
-const mockPatchAdminTranslationActive = vi.fn();
-
-vi.mock('@/app/admin/_lib/admin-api', () => ({
-  fetchAdminTranslationNamespaces: (...args: unknown[]) =>
-    mockFetchAdminTranslationNamespaces(...args),
-  fetchAdminLocales: (...args: unknown[]) => mockFetchAdminLocales(...args),
-  fetchAdminTranslations: (...args: unknown[]) => mockFetchAdminTranslations(...args),
-  putAdminTranslation: (...args: unknown[]) => mockPutAdminTranslation(...args),
-  patchAdminTranslationActive: (...args: unknown[]) => mockPatchAdminTranslationActive(...args),
+const adminApiMocks = vi.hoisted(() => ({
+  fetchAdminTranslationNamespaces: vi.fn(),
+  fetchAdminLocales: vi.fn(),
+  fetchAdminTranslations: vi.fn(),
+  putAdminTranslation: vi.fn(),
+  patchAdminTranslationActive: vi.fn(),
 }));
+
+vi.mock('@/app/admin/_lib/admin-api', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return {
+    ...actual,
+    fetchAdminTranslationNamespaces: adminApiMocks.fetchAdminTranslationNamespaces,
+    fetchAdminLocales: adminApiMocks.fetchAdminLocales,
+    fetchAdminTranslations: adminApiMocks.fetchAdminTranslations,
+    putAdminTranslation: adminApiMocks.putAdminTranslation,
+    patchAdminTranslationActive: adminApiMocks.patchAdminTranslationActive,
+  };
+});
 
 function renderWithQueryClient() {
   const queryClient = new QueryClient({
@@ -36,18 +41,18 @@ function renderWithQueryClient() {
 describe('AdminTranslationsPageClient', () => {
   beforeEach(() => {
     stubResizeObserver();
-    mockFetchAdminTranslationNamespaces.mockReset();
-    mockFetchAdminLocales.mockReset();
-    mockFetchAdminTranslations.mockReset();
-    mockPutAdminTranslation.mockReset();
-    mockPatchAdminTranslationActive.mockReset();
+    adminApiMocks.fetchAdminTranslationNamespaces.mockReset();
+    adminApiMocks.fetchAdminLocales.mockReset();
+    adminApiMocks.fetchAdminTranslations.mockReset();
+    adminApiMocks.putAdminTranslation.mockReset();
+    adminApiMocks.patchAdminTranslationActive.mockReset();
 
-    mockFetchAdminTranslationNamespaces.mockResolvedValue(['about', 'country']);
-    mockFetchAdminLocales.mockResolvedValue([
+    adminApiMocks.fetchAdminTranslationNamespaces.mockResolvedValue(['about', 'country']);
+    adminApiMocks.fetchAdminLocales.mockResolvedValue([
       { iso: 'en', nativeName: 'English', isActive: true, order: 0 },
       { iso: 'es', nativeName: 'Español', isActive: true, order: 1 },
     ]);
-    mockFetchAdminTranslations.mockResolvedValue([
+    adminApiMocks.fetchAdminTranslations.mockResolvedValue([
       {
         id: '64f1a2b3c4d5e6f7a8b9c0d1',
         namespace: 'about',
@@ -59,7 +64,7 @@ describe('AdminTranslationsPageClient', () => {
         isActive: true,
       },
     ]);
-    mockPutAdminTranslation.mockResolvedValue({
+    adminApiMocks.putAdminTranslation.mockResolvedValue({
       id: '64f1a2b3c4d5e6f7a8b9c0d1',
       namespace: 'about',
       locale: 'en',
@@ -69,7 +74,7 @@ describe('AdminTranslationsPageClient', () => {
       kind: 'text',
       isActive: true,
     });
-    mockPatchAdminTranslationActive.mockResolvedValue({
+    adminApiMocks.patchAdminTranslationActive.mockResolvedValue({
       id: '64f1a2b3c4d5e6f7a8b9c0d1',
       namespace: 'about',
       locale: 'en',
@@ -85,14 +90,17 @@ describe('AdminTranslationsPageClient', () => {
     renderWithQueryClient();
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Namespace' })).toBeEnabled();
-      expect(screen.getByRole('columnheader', { name: 'Key' })).toBeInTheDocument();
-      expect(screen.getByRole('columnheader', { name: 'Namespace' })).toBeInTheDocument();
-      expect(screen.getByText('title')).toBeInTheDocument();
-      expect(screen.getByText('Showing 1 translation.')).toBeInTheDocument();
+      expect(adminApiMocks.fetchAdminTranslationNamespaces).toHaveBeenCalled();
+      expect(adminApiMocks.fetchAdminLocales).toHaveBeenCalled();
     });
 
-    expect(mockFetchAdminTranslations).toHaveBeenCalledWith({
+    expect(await screen.findByRole('button', { name: 'Namespace' })).toBeEnabled();
+    expect(screen.getByRole('columnheader', { name: 'Key' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Namespace' })).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
+    expect(screen.getByText('Showing 1 translation.')).toBeInTheDocument();
+
+    expect(adminApiMocks.fetchAdminTranslations).toHaveBeenCalledWith({
       namespace: undefined,
       locale: undefined,
     });
@@ -109,7 +117,7 @@ describe('AdminTranslationsPageClient', () => {
     fireEvent.click(screen.getByRole('option', { name: 'country' }));
 
     await waitFor(() => {
-      expect(mockFetchAdminTranslations).toHaveBeenCalledWith({
+      expect(adminApiMocks.fetchAdminTranslations).toHaveBeenCalledWith({
         namespace: 'country',
         locale: undefined,
       });
@@ -145,7 +153,7 @@ describe('AdminTranslationsPageClient', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create translation' }));
 
     await waitFor(() => {
-      expect(mockPutAdminTranslation).toHaveBeenCalledWith({
+      expect(adminApiMocks.putAdminTranslation).toHaveBeenCalledWith({
         namespace: 'about',
         locale: 'en',
         key: 'subtitle',
@@ -174,7 +182,7 @@ describe('AdminTranslationsPageClient', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
     await waitFor(() => {
-      expect(mockPutAdminTranslation).toHaveBeenCalledWith({
+      expect(adminApiMocks.putAdminTranslation).toHaveBeenCalledWith({
         namespace: 'about',
         locale: 'en',
         key: 'title',
@@ -196,9 +204,12 @@ describe('AdminTranslationsPageClient', () => {
     fireEvent.click(screen.getByRole('switch', { name: 'Active for title' }));
 
     await waitFor(() => {
-      expect(mockPatchAdminTranslationActive).toHaveBeenCalledWith('64f1a2b3c4d5e6f7a8b9c0d1', {
-        isActive: false,
-      });
+      expect(adminApiMocks.patchAdminTranslationActive).toHaveBeenCalledWith(
+        '64f1a2b3c4d5e6f7a8b9c0d1',
+        {
+          isActive: false,
+        },
+      );
     });
   });
 });

@@ -2,15 +2,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 
+import * as adminApi from '@/app/admin/_lib/admin-api';
 import { useAdminTranslationsMutations } from '@/app/admin/translations/_hooks/use-admin-translations-mutations';
 
-const mockPutAdminTranslation = vi.fn();
-const mockPatchAdminTranslationActive = vi.fn();
-
-vi.mock('@/app/admin/_lib/admin-api', () => ({
-  putAdminTranslation: (...args: unknown[]) => mockPutAdminTranslation(...args),
-  patchAdminTranslationActive: (...args: unknown[]) => mockPatchAdminTranslationActive(...args),
-}));
+const mockPutAdminTranslation =
+  vi.fn<(body: adminApi.PutAdminTranslationBody) => Promise<adminApi.AdminTranslationRecord>>();
+const mockPatchAdminTranslationActive =
+  vi.fn<
+    (
+      id: string,
+      body: adminApi.PatchAdminTranslationActiveBody,
+    ) => Promise<adminApi.AdminTranslationRecord>
+  >();
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -50,6 +53,11 @@ describe('useAdminTranslationsMutations', () => {
       kind: 'text',
       isActive: false,
     });
+
+    vi.spyOn(adminApi, 'putAdminTranslation').mockImplementation(mockPutAdminTranslation);
+    vi.spyOn(adminApi, 'patchAdminTranslationActive').mockImplementation(
+      mockPatchAdminTranslationActive,
+    );
   });
 
   it('should upsert translation when upsert is called', async () => {
