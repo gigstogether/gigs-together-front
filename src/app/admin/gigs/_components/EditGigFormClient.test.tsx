@@ -26,16 +26,16 @@ vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
 }));
 
-vi.mock('@/app/admin/gigs/_lib/useEditGigFormData', () => ({
+vi.mock('@/app/admin/gigs/_hooks/useEditGigFormData', () => ({
   useEditGigFormData: (...args: Parameters<typeof mockUseEditGigFormData>) =>
     mockUseEditGigFormData(...args),
 }));
 
-vi.mock('@/app/admin/gigs/_lib/useGigLookup', () => ({
+vi.mock('@/app/admin/gigs/_hooks/useGigLookup', () => ({
   useGigLookup: (...args: Parameters<typeof mockUseGigLookup>) => mockUseGigLookup(...args),
 }));
 
-vi.mock('@/app/admin/gigs/_lib/useGigSubmit', () => ({
+vi.mock('@/app/admin/gigs/_hooks/useGigSubmit', () => ({
   useGigSubmit: (...args: Parameters<typeof mockUseGigSubmit>) => mockUseGigSubmit(...args),
 }));
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { toLocalYMD } from '@/lib/utils';
 import { useClearFeedLocationHash } from './useClearFeedLocationHash';
-import type { FeedLoadingAction } from './feedLoading';
+import type { FeedLoadingAction } from '@/app/feed/_lib/feedLoading';
 
 export interface UseEventHashLoaderParams {
   readonly isEnabled: boolean;

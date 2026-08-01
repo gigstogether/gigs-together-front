@@ -15,8 +15,8 @@ import type { GigUpsertResponse } from '@/lib/gig-form-api';
 import { createGig } from '@/lib/gig-form-api';
 import { defaultGigFormValues, gigFormSchema } from '@/app/admin/gigs/_lib/gig-form.shared';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import { useGigLookup } from '@/app/admin/gigs/_lib/useGigLookup';
-import { useGigSubmit } from '@/app/admin/gigs/_lib/useGigSubmit';
+import { useGigLookup } from '@/app/admin/gigs/_hooks/useGigLookup';
+import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';
 
 interface CreateGigFormClientProps {
   readonly countries: Country[];

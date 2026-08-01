@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { act } from 'react';
 
-import { useAdminGigModerationActions } from '@/app/admin/gigs/_lib/use-admin-gig-moderation-actions';
+import { useAdminGigModerationActions } from '@/app/admin/gigs/_hooks/use-admin-gig-moderation-actions';
 
 const mockPostAdminGigApprove = vi.fn();
 const mockPostAdminGigReject = vi.fn();

@@ -8,7 +8,7 @@ import type { GigLookupData } from '@/lib/gig-form-api';
 import type { UseFormReturn } from 'react-hook-form';
 
 import { lookupGig } from '@/lib/gig-form-api';
-import { useGigLookup } from '@/app/admin/gigs/_lib/useGigLookup';
+import { useGigLookup } from '@/app/admin/gigs/_hooks/useGigLookup';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
 

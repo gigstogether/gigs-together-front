@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 
-import { useAdminTranslationsMutations } from '@/app/admin/translations/_lib/use-admin-translations-mutations';
+import { useAdminTranslationsMutations } from '@/app/admin/translations/_hooks/use-admin-translations-mutations';
 
 const mockPutAdminTranslation = vi.fn();
 const mockPatchAdminTranslationActive = vi.fn();

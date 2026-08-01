@@ -14,7 +14,7 @@ import type {
   AdminTranslationNamespaceFilter,
   AdminTranslationStatusFilter,
 } from '@/app/admin/translations/_lib/admin-translations-filters';
-import { useAdminTranslationsMutations } from '@/app/admin/translations/_lib/use-admin-translations-mutations';
+import { useAdminTranslationsMutations } from '@/app/admin/translations/_hooks/use-admin-translations-mutations';
 import {
   ADMIN_ALL_TRANSLATION_KINDS,
   ADMIN_ALL_TRANSLATION_LOCALES,

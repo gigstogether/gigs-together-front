@@ -2,7 +2,7 @@
 
 import type { MouseEvent } from 'react';
 import { useMemo, useState } from 'react';
-import type { VisibleEventDateRange } from '@/app/feed/_lib/useVisibleEventDateOnScroll';
+import type { VisibleEventDateRange } from '@/app/feed/_hooks/useVisibleEventDateOnScroll';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn, toLocalYMD } from '@/lib/utils';

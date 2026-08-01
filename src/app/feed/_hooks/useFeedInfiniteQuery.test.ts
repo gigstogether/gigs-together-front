@@ -20,7 +20,7 @@ const { fetchFeedPageMock } = vi.hoisted(() => ({
   fetchFeedPageMock: vi.fn<(params: FetchFeedPageParams) => Promise<V1GigGetResponseBody>>(),
 }));
 
-vi.mock('./feedApi', () => ({
+vi.mock('@/app/feed/_lib/feedApi', () => ({
   fetchFeedPage: fetchFeedPageMock,
 }));
 

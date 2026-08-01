@@ -6,7 +6,7 @@ const mockPublishDigestAsync = vi.fn();
 const mockRevalidateFeed = vi.fn();
 const mockRevalidateTranslations = vi.fn();
 
-vi.mock('@/app/admin/_lib/use-admin-dashboard-actions', () => ({
+vi.mock('@/app/admin/_hooks/use-admin-dashboard-actions', () => ({
   useAdminDashboardActions: () => ({
     isPublishingDigest: false,
     isRevalidatingFeed: false,

@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { act } from 'react';
 
-import { useAdminDashboardActions } from '@/app/admin/_lib/use-admin-dashboard-actions';
+import { useAdminDashboardActions } from '@/app/admin/_hooks/use-admin-dashboard-actions';
 import { toast } from '@/hooks/use-toast';
 
 const mockPostAdminDigestPublish = vi.fn();

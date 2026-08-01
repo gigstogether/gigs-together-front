@@ -7,7 +7,7 @@ import { GigStatus } from '@/app/admin/gigs/_lib/types';
 import Link from 'next/link';
 import { Check, SquareArrowOutUpRight, Loader2, Megaphone, Pencil, X } from 'lucide-react';
 import { mapGigStatusFromAPI } from '@/app/admin/gigs/_lib/admin-gig-status';
-import { useAdminGigModerationActions } from '@/app/admin/gigs/_lib/use-admin-gig-moderation-actions';
+import { useAdminGigModerationActions } from '@/app/admin/gigs/_hooks/use-admin-gig-moderation-actions';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

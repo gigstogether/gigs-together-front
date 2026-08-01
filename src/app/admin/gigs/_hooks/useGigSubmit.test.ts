@@ -7,7 +7,7 @@ import type { GigUpsertApiParams, GigUpsertResponse } from '@/lib/gig-form-api';
 import { feedKeys } from '@/lib/feedKeys';
 import { gigFormKeys } from '@/app/admin/gigs/_lib/gigFormKeys';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import { useGigSubmit } from '@/app/admin/gigs/_lib/useGigSubmit';
+import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
 
 const { toastMock } = vi.hoisted(() => ({

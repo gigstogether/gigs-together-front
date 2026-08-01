@@ -2,7 +2,7 @@
 
 import { Pencil } from 'lucide-react';
 
-import type { SetAdminTranslationActiveMutationParams } from '@/app/admin/translations/_lib/use-admin-translations-mutations';
+import type { SetAdminTranslationActiveMutationParams } from '@/app/admin/translations/_hooks/use-admin-translations-mutations';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import type { AdminTranslationRecord, SupportedLocale } from '@/app/admin/_lib/admin-api';

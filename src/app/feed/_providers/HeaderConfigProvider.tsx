@@ -2,7 +2,7 @@
 
 import type { MouseEvent, ReactNode } from 'react';
 import { createContext, useContext, useMemo, useState } from 'react';
-import type { VisibleEventDateRange } from '@/app/feed/_lib/useVisibleEventDateOnScroll';
+import type { VisibleEventDateRange } from '@/app/feed/_hooks/useVisibleEventDateOnScroll';
 import type { Modifiers } from 'react-day-picker';
 
 export interface HeaderConfig {
