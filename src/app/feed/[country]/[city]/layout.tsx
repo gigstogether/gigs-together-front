@@ -1,4 +1,4 @@
-import AppHeader from '@/app/_components/AppHeader';
+import Header from '@/components/header/Header';
 import { HeaderConfigProvider } from '@/app/feed/_providers/HeaderConfigProvider';
 import HeaderCalendar from '@/app/feed/_components/HeaderCalendar';
 import { normalizeSegment } from '@/lib/feed.routes';
@@ -9,7 +9,7 @@ export default async function FeedLayout(props: LayoutProps<'/feed/[country]/[ci
 
   return (
     <HeaderConfigProvider>
-      <AppHeader
+      <Header
         country={normalizeSegment(country)}
         city={normalizeSegment(city)}
       >
@@ -17,7 +17,7 @@ export default async function FeedLayout(props: LayoutProps<'/feed/[country]/[ci
           country={country}
           city={city}
         />
-      </AppHeader>
+      </Header>
       {children}
     </HeaderConfigProvider>
   );

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
-import HeaderActions from '@/app/_components/HeaderActions';
+import HeaderActions from '@/components/header/HeaderActions';
 
 const { mockClientEnv } = vi.hoisted(() => ({
   mockClientEnv: {
@@ -12,7 +12,7 @@ const { mockClientEnv } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('@/app/_components/HeaderSignInModal', () => ({
+vi.mock('@/components/header/HeaderSignInModal', () => ({
   default: () => null,
 }));
 

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import SignInModal from '@/app/_components/SignInModal';
+import SignInModal from '@/components/header/SignInModal';
 
-vi.mock('@/app/_components/SignInContent', () => ({
+vi.mock('@/components/header/SignInContent', () => ({
   default: () => <div data-testid="sign-in-content" />,
 }));
 

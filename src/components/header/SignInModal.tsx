@@ -1,6 +1,6 @@
 'use client';
 
-import SignInContent from '@/app/_components/SignInContent';
+import SignInContent from '@/components/header/SignInContent';
 import {
   Dialog,
   DialogContent,

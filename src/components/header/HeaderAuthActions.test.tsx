@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
+import HeaderAuthActions from '@/components/header/HeaderAuthActions';
 
 const { mockClientEnv } = vi.hoisted(() => ({
   mockClientEnv: {

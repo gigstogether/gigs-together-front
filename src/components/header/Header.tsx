@@ -3,7 +3,7 @@ import 'server-only';
 import Image from 'next/image';
 import { serverEnv } from '@/env/server-env';
 import { buildFeedHeaderHomeRoute } from '@/lib/feed.routes';
-import HeaderActions from '@/app/_components/HeaderActions';
+import HeaderActions from '@/components/header/HeaderActions';
 import type { ReactNode } from 'react';
 
 interface HeaderBadge {
@@ -11,7 +11,7 @@ interface HeaderBadge {
   readonly alt: string;
 }
 
-export interface AppHeaderProps {
+export interface HeaderProps {
   readonly country?: string;
   readonly city?: string;
   readonly children?: ReactNode;
@@ -35,7 +35,7 @@ function getHeaderBadge(): HeaderBadge | null {
   return null;
 }
 
-export default function AppHeader(props: AppHeaderProps) {
+export default function Header(props: HeaderProps) {
   const { country, city, children } = props;
 
   const badge = getHeaderBadge();

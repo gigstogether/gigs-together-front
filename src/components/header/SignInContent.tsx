@@ -1,6 +1,6 @@
 'use client';
 
-import TelegramLoginWidget from '@/app/_components/TelegramLoginWidget';
+import TelegramLoginWidget from '@/components/header/TelegramLoginWidget';
 import type { TelegramWidgetUser } from '@/types/telegram-login';
 
 export interface SignInContentProps {

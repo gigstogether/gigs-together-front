@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
 import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
-import TelegramWebAppScript from '@/app/_components/TelegramWebAppScript';
+import TelegramWebAppScript from '@/components/TelegramWebAppScript';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
 import { NON_PRODUCTION_ROBOTS } from '@/lib/non-production-robots';

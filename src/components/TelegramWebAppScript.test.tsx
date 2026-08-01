@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import TelegramWebAppScript from '@/app/_components/TelegramWebAppScript';
+import TelegramWebAppScript from '@/components/TelegramWebAppScript';
 
 const isTelegramMiniAppMock = vi.hoisted(() => vi.fn());
 

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import AppHeader from '@/app/_components/AppHeader';
+import Header from '@/components/header/Header';
 
 vi.mock('server-only', () => ({}));
 
@@ -13,11 +13,11 @@ vi.mock('@/env/server-env', () => ({
   serverEnv: mockServerEnv,
 }));
 
-vi.mock('@/app/_components/HeaderActions', () => ({
+vi.mock('@/components/header/HeaderActions', () => ({
   default: () => <div data-testid="header-actions" />,
 }));
 
-describe('AppHeader', () => {
+describe('Header', () => {
   beforeEach(() => {
     mockServerEnv.isDevelopment = false;
     mockServerEnv.isStaging = false;
@@ -25,12 +25,12 @@ describe('AppHeader', () => {
 
   it('should render center slot children', () => {
     render(
-      <AppHeader
+      <Header
         country="es"
         city="barcelona"
       >
         <div data-testid="header-center-slot">Center</div>
-      </AppHeader>,
+      </Header>,
     );
 
     expect(screen.getByTestId('header-center-slot')).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe('AppHeader', () => {
 
   it('should link home to feed location when country and city are provided', () => {
     render(
-      <AppHeader
+      <Header
         country="es"
         city="barcelona"
       />,
@@ -52,7 +52,7 @@ describe('AppHeader', () => {
   });
 
   it('should link home to root when location is omitted', () => {
-    render(<AppHeader />);
+    render(<Header />);
 
     expect(screen.getByRole('link', { name: 'Go to home' })).toHaveAttribute('href', '/');
   });
@@ -60,13 +60,13 @@ describe('AppHeader', () => {
   it('should render environment badge in development', () => {
     mockServerEnv.isDevelopment = true;
 
-    render(<AppHeader />);
+    render(<Header />);
 
     expect(screen.getByAltText('DEV environment badge')).toHaveAttribute('src', '/badge-dev.svg');
   });
 
   it('should not render environment badge in production', () => {
-    render(<AppHeader />);
+    render(<Header />);
 
     expect(screen.queryByAltText('DEV environment badge')).not.toBeInTheDocument();
     expect(screen.queryByAltText('STG environment badge')).not.toBeInTheDocument();

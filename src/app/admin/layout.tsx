@@ -1,4 +1,4 @@
-import AppHeader from '@/app/_components/AppHeader';
+import Header from '@/components/header/Header';
 import AdminLayoutClient from '@/app/admin/_components/AdminLayoutClient';
 import type { ReactNode } from 'react';
 import AdminHeaderNavMenu from '@/app/admin/_components/AdminHeaderNavMenu';
@@ -12,9 +12,9 @@ export default function AdminLayout(props: AdminLayoutProps) {
 
   return (
     <>
-      <AppHeader>
+      <Header>
         <AdminHeaderNavMenu />
-      </AppHeader>
+      </Header>
       <div className="min-h-[calc(100dvh-var(--header-h))] bg-gray-50">
         <AdminLayoutClient>{children}</AdminLayoutClient>
       </div>
