@@ -114,6 +114,26 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Extract to a shared file only when there are **multiple consumers**, or when the boundary is already established (HTTP parsers, hooks reused across routes, module public API).
 - Prefer extending an existing file in the same feature area over creating parallel one-off helpers.
 
+## App Router colocation
+
+Under `src/app/`, colocate code with the route it belongs to:
+
+```
+app/
+├── _components/       # shared across the whole app
+├── _lib/              # shared across the whole app
+│
+├── dashboard/
+│   ├── _components/   # dashboard segment only
+│   ├── _lib/          # dashboard segment only
+│   └── page.tsx
+│
+└── page.tsx
+```
+
+- **Default:** new code lives next to its route — UI in `_components/`, non-UI logic (hooks, parsers, API clients, constants) in `_lib/`. Keep `page.tsx`, `layout.tsx`, and other Next.js route files at the route root.
+- **Lift on reuse:** when a **second real consumer** appears, move the shared code to the nearest common route ancestor (`app/_components`, `app/_lib`, or the parent segment’s `_components` / `_lib`). Do not pre-extract to a parent or global folder for a single consumer.
+
 ## Legacy and backward compatibility
 
 - Do not keep legacy code, aliases, fallbacks, or compatibility shims without a clear reason.
