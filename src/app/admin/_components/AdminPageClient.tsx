@@ -7,7 +7,7 @@ import AdminDashboardActions from '@/app/admin/_components/AdminDashboardActions
 import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 import { adminNavItems } from '@/app/admin/_lib/admin-nav-config';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
-import { ADMIN_GIGS_BASE_PATH } from '@/app/admin/gigs/_lib/admin-gig-paths';
+import { ADMIN_GIGS_BASE_PATH } from '@/lib/admin-gig-paths';
 import { ADMIN_GIGS_QUERY_STATUS } from '@/app/admin/gigs/_lib/admin-gigs-query';
 import { GigStatusFilter } from '@/app/admin/gigs/_lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

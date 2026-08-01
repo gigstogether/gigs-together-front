@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/_lib/admin-gig-paths';
+import { ADMIN_GIGS_NEW_ROUTE } from '@/lib/admin-gig-paths';
 import { resolveAdminGigLaunchPath, resolveSuggestLaunchPath } from './suggest-launch';
 import { SUGGEST_ROUTE } from './suggest-paths';
 

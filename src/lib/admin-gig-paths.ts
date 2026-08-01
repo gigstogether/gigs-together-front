@@ -9,6 +9,8 @@ export type AdminGigPublicIdPath = `/admin/gigs/${string}`;
 export type AdminGigEditPath = `/admin/gigs/${string}/edit`;
 // export type AdminGigsPath = '/admin/gigs' | `/admin/gigs?${string}`;
 
+// TODO: seems like this doesn't belong in a shared folder
+
 export function buildAdminGigPublicIdPath(publicId: string): AdminGigPublicIdPath {
   const trimmedId = publicId.trim();
   if (!trimmedId) {

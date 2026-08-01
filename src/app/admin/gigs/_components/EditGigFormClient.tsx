@@ -17,7 +17,7 @@ import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { useEditGigFormData } from '@/app/admin/gigs/_lib/useEditGigFormData';
 import { useGigLookup } from '@/app/admin/gigs/_lib/useGigLookup';
 import { useGigSubmit } from '@/app/admin/gigs/_lib/useGigSubmit';
-import { buildAdminGigPublicIdRoute } from '@/app/admin/gigs/_lib/admin-gig-paths';
+import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import { cn } from '@/lib/utils';
 import { GIG_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gigs/_lib/admin-gig-status';
 

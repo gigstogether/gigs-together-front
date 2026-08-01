@@ -23,7 +23,7 @@ import { useHeaderConfig } from '@/app/feed/_providers/HeaderConfigProvider';
 import { clientEnv } from '@/env/client-env';
 import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
 import { gigToEvent } from '@/lib/feed.mapper';
-import { useT } from '@/lib/i18n';
+import { useT } from '@/providers/I18nProvider';
 
 const feedMainClassName =
   'mx-auto flex w-full flex-col gap-2.5 overflow-auto pb-5 max-[600px]:items-center';

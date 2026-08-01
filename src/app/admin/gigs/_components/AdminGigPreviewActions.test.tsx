@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { buildAdminGigEditRoute } from '@/app/admin/gigs/_lib/admin-gig-paths';
+import { buildAdminGigEditRoute } from '@/lib/admin-gig-paths';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
 import type { AdminGigDetail } from '@/app/admin/gigs/_lib/types';
 import { GigStatusAPI } from '@/app/admin/gigs/_lib/types';

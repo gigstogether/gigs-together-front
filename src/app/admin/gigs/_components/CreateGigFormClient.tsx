@@ -10,7 +10,7 @@ import type { Country } from '@/lib/countries.server';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/admin/gigs/_components/gig-form/GigFormFields';
 import PosterField from '@/app/admin/gigs/_components/gig-form/PosterField';
-import { buildAdminGigPublicIdRoute } from '@/app/admin/gigs/_lib/admin-gig-paths';
+import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import type { GigUpsertResponse } from '@/lib/gig-form-api';
 import { createGig } from '@/lib/gig-form-api';
 import { defaultGigFormValues, gigFormSchema } from '@/app/admin/gigs/_lib/gig-form.shared';

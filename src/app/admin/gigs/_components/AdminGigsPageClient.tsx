@@ -18,7 +18,7 @@ import type { AdminGigsSortBy } from '@/app/admin/gigs/_lib/admin-gigs-sort';
 import { ADMIN_GIGS_DEFAULT_SORT_BY } from '@/app/admin/gigs/_lib/admin-gigs-sort';
 import { AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
 import type { GigStatusFilter } from '@/app/admin/gigs/_lib/types';
-import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/_lib/admin-gig-paths';
+import { ADMIN_GIGS_NEW_ROUTE } from '@/lib/admin-gig-paths';
 import { fetchAdminGigs } from '@/app/admin/_lib/admin-api';
 import { getGigStatusEmptyMessage } from '@/app/admin/gigs/_lib/admin-gig-status';
 

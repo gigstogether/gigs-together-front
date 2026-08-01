@@ -8,7 +8,7 @@ import {
   buildAdminGigPublicIdPath,
   buildAdminGigPublicIdRoute,
   buildAdminGigsRoute,
-} from '@/app/admin/gigs/_lib/admin-gig-paths';
+} from '@/lib/admin-gig-paths';
 
 describe('buildAdminGigEditPath', () => {
   it('should build encoded edit path when publicId contains special characters', () => {

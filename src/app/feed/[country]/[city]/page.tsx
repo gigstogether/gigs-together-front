@@ -6,7 +6,7 @@ import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key
 import { getFeed } from '@/lib/feed.server';
 import { gigToEvent } from '@/lib/feed.mapper';
 import { DEFAULT_FEED_ROUTE, normalizeSegment, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed.routes';
-import { I18nProvider } from '@/lib/i18n';
+import { I18nProvider } from '@/providers/I18nProvider';
 import { resolveTranslationValue } from '@/lib/i18n/translation-value';
 import { getTranslations } from '@/lib/translations.server';
 import type { Event } from '@/lib/types';

@@ -1,6 +1,6 @@
 import type { Route } from 'next';
 
-import { ADMIN_GIGS_ROUTE } from '@/app/admin/gigs/_lib/admin-gig-paths';
+import { ADMIN_GIGS_ROUTE } from '@/lib/admin-gig-paths';
 
 export interface AdminNavItem {
   readonly href: Route;

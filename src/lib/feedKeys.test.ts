@@ -1,4 +1,4 @@
-import { feedKeys } from './feedKeys';
+import { feedKeys } from '@/lib/feedKeys';
 
 describe('feedKeys', () => {
   it('should build a root key for feed invalidation', () => {

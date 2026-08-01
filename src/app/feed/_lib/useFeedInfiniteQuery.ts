@@ -8,7 +8,7 @@ import { clientEnv } from '@/env/client-env';
 import { gigToEvent } from '@/lib/feed.mapper';
 import { mergeUniqueSorted } from './feedEvents';
 import { fetchFeedPage } from './feedApi';
-import { feedKeys } from './feedKeys';
+import { feedKeys } from '@/lib/feedKeys';
 
 export type ResolveCountryName = (iso: string) => string;
 export type ResolveCityName = (code: string) => string;

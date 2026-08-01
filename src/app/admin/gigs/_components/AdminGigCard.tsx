@@ -16,10 +16,7 @@ import { cn } from '@/lib/utils';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
 import AdminGigPreviewPoster from '@/app/admin/gigs/_components/AdminGigPreviewPoster';
 import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPreviewTitleRow';
-import {
-  buildAdminGigEditRoute,
-  buildAdminGigPublicIdPath,
-} from '@/app/admin/gigs/_lib/admin-gig-paths';
+import { buildAdminGigEditRoute, buildAdminGigPublicIdPath } from '@/lib/admin-gig-paths';
 
 interface MetaRowProps {
   readonly icon: ReactNode;
