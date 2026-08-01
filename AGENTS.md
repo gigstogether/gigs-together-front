@@ -142,6 +142,7 @@ src/
 - **Provider modules:** colocate the context, provider component, and its consumer hook in **one file** under `_providers/` or `src/providers/`. Export only what callers outside the module need (typically the provider component, the hook, and public types).
 - **Lift within a segment:** when a **second real consumer** appears under the same route subtree, move shared code to the nearest common route ancestor’s `_components` / `_hooks` / `_lib` / `_providers` (for example from `app/admin/gigs/_lib/` to `app/admin/_lib/`). Do not pre-extract for a single consumer.
 - **Lift across segments:** when code is reused across unrelated route segments, move it out of `app/` into the appropriate top-level folder (`src/components/`, `src/hooks/`, `src/lib/`, `src/providers/`, etc.), matching existing project conventions.
+- **Shared-by-nature exception:** code may live in the matching top-level folder even with one consumer when it is **domain-agnostic** — reusable UI, browser behavior, parsers, constants, or types with no route-specific or feature-specific logic. Put it in the appropriate shared folder (`src/hooks/`, `src/lib/`, `src/components/`, `src/providers/`, or a bounded subfolder such as `src/lib/telegram/`). Prefer segment colocation when the module encodes segment rules, copy, workflows, or admin-only behavior (for example admin sign-in gating, initData-expired toasts). When unsure, colocate first; lift once reuse is likely or the module is clearly generic.
 
 ## Legacy and backward compatibility
 
