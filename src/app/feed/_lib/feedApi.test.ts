@@ -3,7 +3,7 @@ import {
   fetchFeedAnchorYmdByPublicId,
   fetchFeedAround,
   fetchFeedPage,
-} from '@/app/feed/_components/feed-client/feedApi';
+} from '@/app/feed/_lib/feedApi';
 
 vi.mock('@/lib/api', () => ({
   apiPublicRequest: vi.fn(),

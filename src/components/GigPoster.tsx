@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { ImageLightbox } from '@/app/_components/ImageLightbox';
+import { ImageLightbox } from '@/components/ImageLightbox';
 import { cn } from '@/lib/utils';
 
 export interface GigPosterProps {

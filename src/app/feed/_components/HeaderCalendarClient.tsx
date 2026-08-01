@@ -2,13 +2,13 @@
 
 import type { MouseEvent } from 'react';
 import { useMemo, useState } from 'react';
-import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
+import type { VisibleEventDateRange } from '@/app/feed/_lib/useVisibleEventDateOnScroll';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn, toLocalYMD } from '@/lib/utils';
 import { FaRegCalendar } from 'react-icons/fa';
 import type { Modifiers } from 'react-day-picker';
-import { useHeaderConfig } from '@/app/_components/HeaderConfigProvider';
+import { useHeaderConfig } from '@/app/feed/_providers/HeaderConfigProvider';
 
 export interface HeaderCalendarClientProps {
   readonly availableDates: readonly string[];

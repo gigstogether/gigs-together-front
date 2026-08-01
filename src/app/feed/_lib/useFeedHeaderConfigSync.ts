@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { HeaderConfig } from '@/app/_components/HeaderConfigProvider';
+import type { HeaderConfig } from '@/app/feed/_providers/HeaderConfigProvider';
 import type { VisibleEventDateRange } from './useVisibleEventDateOnScroll';
 
 export interface UseFeedHeaderConfigSyncParams {

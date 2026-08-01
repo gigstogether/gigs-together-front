@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 
-import { GigCard } from '@/app/_components/GigCard';
+import { GigCard } from '@/app/feed/_components/GigCard';
 import type { Event } from '@/lib/types';
 
-vi.mock('@/app/_components/GigPoster', () => ({
+vi.mock('@/components/GigPoster', () => ({
   GigPoster: ({ title }: { title: string }) => <div>{title}</div>,
 }));
 

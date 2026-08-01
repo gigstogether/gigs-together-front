@@ -8,7 +8,7 @@ vi.mock('@/lib/feed.server', () => ({
   getFeedAvailableDates: mockGetFeedAvailableDates,
 }));
 
-vi.mock('@/app/_components/HeaderCalendarClient', () => ({
+vi.mock('@/app/feed/_components/HeaderCalendarClient', () => ({
   default: ({ availableDates }: { availableDates: readonly string[] }) => (
     <div data-testid="header-calendar-client">{availableDates.join(',')}</div>
   ),
@@ -21,8 +21,7 @@ describe('HeaderCalendar', () => {
   });
 
   it('should fetch available dates and pass them to the client calendar', async () => {
-    const HeaderCalendar = (await import('@/app/_components/HeaderCalendar'))
-      .default;
+    const HeaderCalendar = (await import('@/app/feed/_components/HeaderCalendar')).default;
 
     render(
       await HeaderCalendar({

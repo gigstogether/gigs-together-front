@@ -1,8 +1,8 @@
 import { act, render, screen } from '@testing-library/react';
 
-import { GigPoster } from '@/app/_components/GigPoster';
+import { GigPoster } from '@/components/GigPoster';
 
-vi.mock('@/app/_components/ImageLightbox', () => ({
+vi.mock('@/components/ImageLightbox', () => ({
   ImageLightbox: () => null,
 }));
 

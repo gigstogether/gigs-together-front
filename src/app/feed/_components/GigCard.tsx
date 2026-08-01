@@ -3,7 +3,7 @@ import { ShareButton } from '@/components/ShareButton';
 import { LocationIcon } from '@/components/ui/location-icon';
 import { Calendar, Ticket } from 'lucide-react';
 import { FaTelegramPlane } from 'react-icons/fa';
-import { GigPoster } from '@/app/_components/GigPoster';
+import { GigPoster } from '@/components/GigPoster';
 import { clientEnv } from '@/env/client-env';
 import { formatGigDate } from '@/lib/gig-date-format';
 

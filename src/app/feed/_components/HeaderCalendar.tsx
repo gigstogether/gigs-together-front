@@ -1,6 +1,6 @@
 import 'server-only';
 
-import HeaderCalendarClient from '@/app/_components/HeaderCalendarClient';
+import HeaderCalendarClient from '@/app/feed/_components/HeaderCalendarClient';
 import { getFeedAvailableDates } from '@/lib/feed.server';
 
 export interface HeaderCalendarProps {

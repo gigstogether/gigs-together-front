@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 
-import { FeedMonths } from '@/app/feed/_components/feed-client/FeedMonths';
+import { FeedMonths } from '@/app/feed/_components/FeedMonths';
 import type { Event } from '@/lib/types';
 
-vi.mock('@/app/_components/GigCard', () => ({
+vi.mock('@/app/feed/_components/GigCard', () => ({
   GigCard: ({
     gig,
     posterLoading,

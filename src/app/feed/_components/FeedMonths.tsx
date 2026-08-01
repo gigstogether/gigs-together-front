@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment } from 'react';
-import { GigCard } from '@/app/_components/GigCard';
+import { GigCard } from '@/app/feed/_components/GigCard';
 import type { Event } from '@/lib/types';
 
 export interface FeedMonthsProps {

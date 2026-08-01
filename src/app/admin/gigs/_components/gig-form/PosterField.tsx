@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import type { ChangeEvent, ClipboardEvent, RefObject } from 'react';
 
-import { GigPoster } from '@/app/_components/GigPoster';
+import { GigPoster } from '@/components/GigPoster';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';

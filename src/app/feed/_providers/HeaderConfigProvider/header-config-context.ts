@@ -2,7 +2,7 @@
 
 import { createContext } from 'react';
 import type { MouseEvent } from 'react';
-import type { VisibleEventDateRange } from '@/app/feed/_components/feed-client/useVisibleEventDateOnScroll';
+import type { VisibleEventDateRange } from '@/app/feed/_lib/useVisibleEventDateOnScroll';
 import type { Modifiers } from 'react-day-picker';
 
 export interface HeaderConfig {

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import PlausibleAnalyticsProvider from '@/app/_providers/PlausibleAnalyticsProvider';
+import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
 
 const PlausibleProviderMock = vi.hoisted(() =>
   vi.fn(({ children }: { children: ReactNode }) => <div data-testid="plausible">{children}</div>),
@@ -35,7 +35,7 @@ describe('PlausibleAnalyticsProvider', () => {
       },
     }));
 
-    const providerModule = await import('@/app/_providers/PlausibleAnalyticsProvider');
+    const providerModule = await import('@/providers/PlausibleAnalyticsProvider');
     const html = renderToStaticMarkup(
       <providerModule.default>
         <span>content</span>
@@ -59,7 +59,7 @@ describe('PlausibleAnalyticsProvider', () => {
       },
     }));
 
-    const providerModule = await import('@/app/_providers/PlausibleAnalyticsProvider');
+    const providerModule = await import('@/providers/PlausibleAnalyticsProvider');
     const html = renderToStaticMarkup(
       <providerModule.default>
         <span>content</span>

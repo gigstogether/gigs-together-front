@@ -2,11 +2,11 @@ import { render, screen } from '@testing-library/react';
 
 const mockUseHeaderConfig = vi.fn();
 
-vi.mock('@/app/_components/HeaderConfigProvider', () => ({
+vi.mock('@/app/feed/_providers/HeaderConfigProvider', () => ({
   useHeaderConfig: () => mockUseHeaderConfig(),
 }));
 
-import HeaderCalendarClient from '@/app/_components/HeaderCalendarClient';
+import HeaderCalendarClient from '@/app/feed/_components/HeaderCalendarClient';
 
 describe('HeaderCalendarClient', () => {
   beforeEach(() => {
