@@ -8,7 +8,7 @@ import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/f
 import HeaderAuthActions from '@/components/header/HeaderAuthActions';
 import HeaderSignInModal from '@/components/header/HeaderSignInModal';
 import { ADMIN_GIGS_NEW_ROUTE } from '@/lib/admin-gig-paths';
-import { SUGGEST_ROUTE } from '@/app/(default)/suggest/suggest-paths';
+import { SUGGEST_ROUTE } from '@/app/(default)/suggest/_lib/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { clientEnv } from '@/env/client-env';
 import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
