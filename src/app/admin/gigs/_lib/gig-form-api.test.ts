@@ -1,5 +1,5 @@
 import { apiRequest } from '@/lib/api';
-import { lookupGig } from '@/lib/gig-form-api';
+import { lookupGig } from '@/app/admin/gigs/_lib/gig-form-api';
 
 vi.mock('@/lib/api', () => ({
   apiRequest: vi.fn(),

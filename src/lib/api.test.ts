@@ -13,12 +13,12 @@ vi.mock('@/lib/api-core', () => ({
   fetchApiJson: fetchApiJsonMock,
 }));
 
-vi.mock('@/lib/telegram-auth', () => ({
+vi.mock('@/lib/telegram/telegram-auth', () => ({
   clearStoredTelegramClientProfile: clearStoredTelegramClientProfileMock,
   requestTelegramSignIn: requestTelegramSignInMock,
 }));
 
-vi.mock('@/lib/telegram-webapp', () => ({
+vi.mock('@/lib/telegram/telegram-webapp', () => ({
   isTelegramMiniApp: () => false,
 }));
 

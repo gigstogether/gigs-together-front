@@ -5,8 +5,8 @@ import SignInModal from '@/components/header/SignInModal';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { ApiError } from '@/lib/api-errors';
-import { subscribeTelegramSignInRequest } from '@/lib/telegram-auth';
-import type { TelegramWidgetUser } from '@/types/telegram-login';
+import { subscribeTelegramSignInRequest } from '@/lib/telegram/telegram-auth';
+import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 import { clientEnv } from '@/env/client-env';
 
 export default function HeaderSignInModal() {

@@ -3,12 +3,12 @@
 import { act, renderHook } from '@testing-library/react';
 
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import type { GigUpsertApiParams, GigUpsertResponse } from '@/lib/gig-form-api';
+import type { GigUpsertApiParams, GigUpsertResponse } from '@/app/admin/gigs/_lib/gig-form-api';
 import { feedKeys } from '@/lib/feedKeys';
 import { gigFormKeys } from '@/app/admin/gigs/_lib/gigFormKeys';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';
-import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
+import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 
 const { toastMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
@@ -22,7 +22,7 @@ vi.mock('@/hooks/use-toast', () => ({
   toast: toastMock,
 }));
 
-vi.mock('@/lib/telegram-init-data-expired', () => ({
+vi.mock('@/app/admin/gigs/_lib/telegram-init-data-expired', () => ({
   toastTelegramInitDataExpired: toastTelegramInitDataExpiredMock,
 }));
 

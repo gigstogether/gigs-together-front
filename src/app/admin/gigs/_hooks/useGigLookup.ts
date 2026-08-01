@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import type { UseFormReturn } from 'react-hook-form';
 import { toast } from '@/hooks/use-toast';
-import { lookupGig } from '@/lib/gig-form-api';
-import type { GigLookupData } from '@/lib/gig-form-api';
-import { toastTelegramInitDataExpired } from '@/lib/telegram-init-data-expired';
+import { lookupGig } from '@/app/admin/gigs/_lib/gig-form-api';
+import type { GigLookupData } from '@/app/admin/gigs/_lib/gig-form-api';
+import { toastTelegramInitDataExpired } from '@/app/admin/gigs/_lib/telegram-init-data-expired';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 
 export interface GigLookupInput {

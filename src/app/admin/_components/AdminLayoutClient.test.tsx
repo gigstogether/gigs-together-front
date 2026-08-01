@@ -2,17 +2,17 @@ import type { ReactNode } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import AdminLayoutClient from '@/app/admin/_components/AdminLayoutClient';
-import type { UseModeratorTelegramSessionResult } from '@/hooks/use-moderator-telegram-session';
-import { requestTelegramSignIn } from '@/lib/telegram-auth';
-import { buildModeratorTelegramSessionMock } from '@/test-utils/moderator-telegram-session-mock';
+import type { UseModeratorTelegramSessionResult } from '@/app/admin/_hooks/use-moderator-telegram-session';
+import { requestTelegramSignIn } from '@/lib/telegram/telegram-auth';
+import { buildModeratorTelegramSessionMock } from '@/test/moderator-telegram-session-mock';
 
 const mockUseModeratorTelegramSession = vi.fn<() => UseModeratorTelegramSessionResult>();
 
-vi.mock('@/hooks/use-moderator-telegram-session', () => ({
+vi.mock('@/app/admin/_hooks/use-moderator-telegram-session', () => ({
   useModeratorTelegramSession: () => mockUseModeratorTelegramSession(),
 }));
 
-vi.mock('@/lib/telegram-auth', () => ({
+vi.mock('@/lib/telegram/telegram-auth', () => ({
   requestTelegramSignIn: vi.fn(),
 }));
 

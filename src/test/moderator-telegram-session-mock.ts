@@ -1,4 +1,4 @@
-import type { UseModeratorTelegramSessionResult } from '@/hooks/use-moderator-telegram-session';
+import type { UseModeratorTelegramSessionResult } from '@/app/admin/_hooks/use-moderator-telegram-session';
 
 export function buildModeratorTelegramSessionMock(
   partial: Partial<UseModeratorTelegramSessionResult> = {},

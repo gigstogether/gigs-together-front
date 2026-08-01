@@ -1,6 +1,6 @@
 import type { FetchFeedAnchorYmdByPublicIdParams } from './feedApi';
 import { feedAnchorDateByPublicIdQueryOptions } from './fetchFeedAnchorDateQuery';
-import { createTestQueryClient } from '@/test-utils/react-query-client';
+import { createTestQueryClient } from '@/test/react-query-client';
 
 const { fetchFeedAnchorYmdByPublicIdMock } = vi.hoisted(() => ({
   fetchFeedAnchorYmdByPublicIdMock:

@@ -4,13 +4,13 @@ import { act, renderHook } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import type { GigLookupData } from '@/lib/gig-form-api';
+import type { GigLookupData } from '@/app/admin/gigs/_lib/gig-form-api';
 import type { UseFormReturn } from 'react-hook-form';
 
-import { lookupGig } from '@/lib/gig-form-api';
+import { lookupGig } from '@/app/admin/gigs/_lib/gig-form-api';
 import { useGigLookup } from '@/app/admin/gigs/_hooks/useGigLookup';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
+import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 
 const { toastMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
@@ -24,11 +24,11 @@ vi.mock('@/hooks/use-toast', () => ({
   toast: toastMock,
 }));
 
-vi.mock('@/lib/telegram-init-data-expired', () => ({
+vi.mock('@/app/admin/gigs/_lib/telegram-init-data-expired', () => ({
   toastTelegramInitDataExpired: vi.fn(() => false),
 }));
 
-vi.mock('@/lib/gig-form-api', () => ({
+vi.mock('@/app/admin/gigs/_lib/gig-form-api', () => ({
   lookupGig: lookupGigMock,
 }));
 

@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 import Script from 'next/script';
-import { isTelegramMiniApp } from '@/lib/telegram-webapp';
+import { isTelegramMiniApp } from '@/lib/telegram/telegram-webapp';
 
 function subscribeToTelegramMiniAppEnv(): () => void {
   // Mini App detection is resolved from URL/localStorage before React mounts.

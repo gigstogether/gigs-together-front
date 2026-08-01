@@ -6,8 +6,8 @@ import AdminDeniedGate from '@/app/admin/_components/AdminDeniedGate';
 import AdminShell from '@/app/admin/_components/AdminShell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useModeratorTelegramSession } from '@/hooks/use-moderator-telegram-session';
-import { requestTelegramSignIn } from '@/lib/telegram-auth';
+import { useModeratorTelegramSession } from '@/app/admin/_hooks/use-moderator-telegram-session';
+import { requestTelegramSignIn } from '@/lib/telegram/telegram-auth';
 
 interface AdminLayoutClientProps {
   children: ReactNode;

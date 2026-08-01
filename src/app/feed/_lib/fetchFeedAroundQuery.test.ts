@@ -1,5 +1,5 @@
 import { feedAroundQueryOptions } from './fetchFeedAroundQuery';
-import { createTestQueryClient } from '@/test-utils/react-query-client';
+import { createTestQueryClient } from '@/test/react-query-client';
 import type { V1GigAroundGetResponseBody } from '@/lib/types';
 
 interface FetchFeedAroundCallParams {

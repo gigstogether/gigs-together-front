@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import AdminTranslationFormDialog from '@/app/admin/translations/_components/AdminTranslationFormDialog';
-import { stubResizeObserver } from '@/test-utils/moderator-telegram-session-mock';
+import { stubResizeObserver } from '@/test/moderator-telegram-session-mock';
 
 describe('AdminTranslationFormDialog', () => {
   beforeEach(() => {

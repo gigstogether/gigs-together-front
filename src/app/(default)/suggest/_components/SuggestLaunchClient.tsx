@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { getTelegramStartParam } from '@/lib/telegram-webapp';
+import { getTelegramStartParam } from '@/lib/telegram/telegram-webapp';
 import { resolveSuggestLaunchPath } from '@/app/(default)/suggest/_lib/suggest-launch';
 
 export default function SuggestLaunchClient() {

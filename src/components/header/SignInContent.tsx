@@ -1,7 +1,7 @@
 'use client';
 
 import TelegramLoginWidget from '@/components/header/TelegramLoginWidget';
-import type { TelegramWidgetUser } from '@/types/telegram-login';
+import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 
 export interface SignInContentProps {
   readonly telegramBotUsername: string | undefined;

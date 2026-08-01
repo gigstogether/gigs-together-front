@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
-import { useModeratorTelegramSession } from '@/hooks/use-moderator-telegram-session';
-import type { TelegramWidgetUser } from '@/types/telegram-login';
+import { useModeratorTelegramSession } from '@/app/admin/_hooks/use-moderator-telegram-session';
+import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 
 const { mockClientEnv, toastMock } = vi.hoisted(() => ({
   mockClientEnv: {

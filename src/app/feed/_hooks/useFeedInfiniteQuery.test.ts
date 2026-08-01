@@ -4,7 +4,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 
 import type { Event, V1GigGetResponseBody } from '@/lib/types';
 
-import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
+import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 import { useFeedInfiniteQuery } from './useFeedInfiniteQuery';
 
 interface FetchFeedPageParams {

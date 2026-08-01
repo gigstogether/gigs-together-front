@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import type { TelegramWidgetUser } from '@/types/telegram-login';
+import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 
 export interface SignInModalProps {
   readonly isOpen: boolean;

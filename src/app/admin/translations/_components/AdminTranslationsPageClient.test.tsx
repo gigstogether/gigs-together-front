@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import AdminTranslationsPageClient from '@/app/admin/translations/_components/AdminTranslationsPageClient';
-import { stubResizeObserver } from '@/test-utils/moderator-telegram-session-mock';
+import { stubResizeObserver } from '@/test/moderator-telegram-session-mock';
 
 const adminApiMocks = vi.hoisted(() => ({
   fetchAdminTranslationNamespaces: vi.fn(),

@@ -5,8 +5,8 @@ import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { ApiError } from '@/lib/api-errors';
-import type { TelegramAuthState } from '@/types/telegram-auth';
-import type { TelegramWidgetUser } from '@/types/telegram-login';
+import type { TelegramAuthState } from '@/lib/telegram/telegram-auth.types';
+import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 
 export interface UseModeratorTelegramSessionResult {
   readonly authState: TelegramAuthState | null;

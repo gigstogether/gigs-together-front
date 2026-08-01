@@ -1,3 +1,3 @@
-import { captureTelegramLaunchParamsFromUrl } from '@/lib/telegram-webapp';
+import { captureTelegramLaunchParamsFromUrl } from '@/lib/telegram/telegram-webapp';
 
 captureTelegramLaunchParamsFromUrl();

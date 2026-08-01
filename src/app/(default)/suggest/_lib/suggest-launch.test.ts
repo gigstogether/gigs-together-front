@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ADMIN_GIGS_NEW_ROUTE } from '@/lib/admin-gig-paths';
 import { resolveAdminGigLaunchPath, resolveSuggestLaunchPath } from './suggest-launch';
-import { SUGGEST_ROUTE } from './suggest-paths';
+import { SUGGEST_ROUTE } from '@/lib/suggest-paths';
 
 describe('resolveAdminGigLaunchPath', () => {
   it('should route to create page when start param is missing', () => {

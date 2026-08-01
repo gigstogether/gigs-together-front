@@ -6,7 +6,7 @@ import { clientEnv } from '@/env/client-env';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { requestTelegramSignIn } from '@/lib/telegram-auth';
+import { requestTelegramSignIn } from '@/lib/telegram/telegram-auth';
 
 const menuRowClass =
   'flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted';

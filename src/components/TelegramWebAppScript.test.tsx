@@ -18,7 +18,7 @@ vi.mock('next/script', () => ({
   },
 }));
 
-vi.mock('@/lib/telegram-webapp', () => ({
+vi.mock('@/lib/telegram/telegram-webapp', () => ({
   isTelegramMiniApp: () => isTelegramMiniAppMock(),
 }));
 

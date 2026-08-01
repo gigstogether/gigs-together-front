@@ -10,7 +10,7 @@ import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { fetchAdminGigByPublicId } from '@/app/admin/_lib/admin-api';
 import { useEditGigFormData } from '@/app/admin/gigs/_hooks/useEditGigFormData';
-import { createQueryClientWrapper, createTestQueryClient } from '@/test-utils/react-query-client';
+import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 
 const { toastMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
@@ -24,7 +24,7 @@ vi.mock('@/hooks/use-toast', () => ({
   toast: toastMock,
 }));
 
-vi.mock('@/lib/telegram-init-data-expired', () => ({
+vi.mock('@/app/admin/gigs/_lib/telegram-init-data-expired', () => ({
   getTelegramInitDataExpiredToastContent: vi.fn(() => null),
 }));
 

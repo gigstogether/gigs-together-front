@@ -16,7 +16,7 @@ vi.mock('@/env/client-env', () => ({
   clientEnv: mockClientEnv,
 }));
 
-vi.mock('@/lib/telegram-auth', () => ({
+vi.mock('@/lib/telegram/telegram-auth', () => ({
   requestTelegramSignIn: vi.fn(),
 }));
 

@@ -1,9 +1,9 @@
 import { fetchApiJson } from '@/lib/api-core';
 import { clientEnv } from '@/env/client-env';
 import { isRecord } from '@/lib/is-record';
-import type { TelegramAuthExchangeResponse } from '@/types/telegram-auth-exchange-response';
-import type { TelegramStoredClientProfile } from '@/types/telegram-client-profile';
-import type { TelegramWidgetUser } from '@/types/telegram-login';
+import type { TelegramAuthExchangeResponse } from '@/lib/telegram/telegram-auth-exchange-response.types';
+import type { TelegramStoredClientProfile } from '@/lib/telegram/telegram-client-profile.types';
+import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 
 export type { TelegramAuthExchangeResponse };
 
@@ -239,7 +239,7 @@ export async function bootstrapTelegramAuthFromWebApp(): Promise<boolean> {
     telegramMiniAppBootstrapPromise = (async () => {
       try {
         const { isTelegramMiniApp, waitForTelegramInitData } = await import(
-          '@/lib/telegram-webapp'
+          '@/lib/telegram/telegram-webapp'
         );
         if (!isTelegramMiniApp()) {
           return false;

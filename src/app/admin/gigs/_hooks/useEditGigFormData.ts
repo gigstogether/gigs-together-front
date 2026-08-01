@@ -4,9 +4,9 @@ import type { UseFormReturn } from 'react-hook-form';
 
 import { toast } from '@/hooks/use-toast';
 import { fetchAdminGigByPublicId } from '@/app/admin/_lib/admin-api';
-import { normalizeGigApiDate } from '@/lib/gig-form-api';
+import { normalizeGigApiDate } from '@/app/admin/gigs/_lib/gig-form-api';
 import type { AdminGigFormData, GigStatus } from '@/app/admin/gigs/_lib/types';
-import { getTelegramInitDataExpiredToastContent } from '@/lib/telegram-init-data-expired';
+import { getTelegramInitDataExpiredToastContent } from '@/app/admin/gigs/_lib/telegram-init-data-expired';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { gigFormKeys } from '@/app/admin/gigs/_lib/gigFormKeys';
 

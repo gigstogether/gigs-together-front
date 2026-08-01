@@ -3,8 +3,8 @@
 import { useEffect, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { clientEnv } from '@/env/client-env';
-import { exchangeTelegramAuthFromLoginWidget } from '@/lib/telegram-auth';
-import type { TelegramWidgetUser } from '@/types/telegram-login';
+import { exchangeTelegramAuthFromLoginWidget } from '@/lib/telegram/telegram-auth';
+import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 
 const TELEGRAM_WIDGET_SCRIPT_SRC = 'https://telegram.org/js/telegram-widget.js?22';
 
