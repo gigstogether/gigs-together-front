@@ -4,7 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import type { GigUpsertApiParams, GigUpsertResponse } from '@/app/admin/gigs/_lib/gig-form-api';
-import { feedKeys } from '@/lib/feedKeys';
+import { feedKeys } from '@/lib/feed/feedKeys';
 import { gigFormKeys } from '@/app/admin/gigs/_lib/gigFormKeys';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';

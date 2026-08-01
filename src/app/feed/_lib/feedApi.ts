@@ -4,7 +4,7 @@ import {
   parseV1GigByPublicIdGetResponseBody,
   parseV1GigGetResponseBody,
 } from '@/lib/api-boundary-schemas';
-import { gigDateToYMD } from '@/lib/feed.mapper';
+import { gigDateToYMD } from '@/lib/feed/feed.mapper';
 import type { V1GigAroundGetResponseBody, V1GigGetResponseBody } from '@/lib/types';
 
 interface FeedLocationParams {

@@ -2,7 +2,7 @@ import 'server-only';
 
 import Image from 'next/image';
 import { serverEnv } from '@/env/server-env';
-import { buildFeedHeaderHomeRoute } from '@/lib/feed.routes';
+import { buildFeedHeaderHomeRoute } from '@/lib/feed/feed.routes';
 import HeaderActions from '@/components/header/HeaderActions';
 import type { ReactNode } from 'react';
 

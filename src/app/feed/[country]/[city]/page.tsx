@@ -3,9 +3,13 @@ import FeedClient from '../../_components/FeedClient';
 import { clientEnv } from '@/env/client-env';
 import { serverEnv } from '@/env/server-env';
 import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
-import { getFeed } from '@/lib/feed.server';
-import { gigToEvent } from '@/lib/feed.mapper';
-import { DEFAULT_FEED_ROUTE, normalizeSegment, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed.routes';
+import { getFeed } from '@/app/feed/_lib/get-feed.server';
+import { gigToEvent } from '@/lib/feed/feed.mapper';
+import {
+  DEFAULT_FEED_ROUTE,
+  normalizeSegment,
+  SUPPORTED_FEED_LOCATIONS,
+} from '@/lib/feed/feed.routes';
 import { I18nProvider } from '@/providers/I18nProvider';
 import { resolveTranslationValue } from '@/lib/i18n/translation-value';
 import { getTranslations } from '@/lib/translations.server';

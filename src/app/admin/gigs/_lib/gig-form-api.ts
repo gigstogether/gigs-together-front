@@ -1,5 +1,5 @@
 import { apiRequest } from '@/lib/api';
-import { gigDateToYMD } from '@/lib/feed.mapper';
+import { gigDateToYMD } from '@/lib/feed/feed.mapper';
 import { isRecord } from '@/lib/is-record';
 
 export type PosterMode = 'upload' | 'url';

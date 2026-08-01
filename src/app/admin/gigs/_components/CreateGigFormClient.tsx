@@ -6,7 +6,7 @@ import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import type { Country } from '@/lib/countries.server';
+import type { Country } from '@/app/admin/gigs/_lib/countries.server';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/admin/gigs/_components/gig-form/GigFormFields';
 import PosterField from '@/app/admin/gigs/_components/gig-form/PosterField';

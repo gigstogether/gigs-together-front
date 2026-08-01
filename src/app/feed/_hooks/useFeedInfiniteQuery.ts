@@ -5,10 +5,10 @@ import type { InfiniteData } from '@tanstack/react-query';
 import type { Event, V1GigGetResponseBodyGig } from '@/lib/types';
 
 import { clientEnv } from '@/env/client-env';
-import { gigToEvent } from '@/lib/feed.mapper';
+import { gigToEvent } from '@/lib/feed/feed.mapper';
 import { mergeUniqueSorted } from '@/app/feed/_lib/feedEvents';
 import { fetchFeedPage } from '@/app/feed/_lib/feedApi';
-import { feedKeys } from '@/lib/feedKeys';
+import { feedKeys } from '@/lib/feed/feedKeys';
 
 export type ResolveCountryName = (iso: string) => string;
 export type ResolveCityName = (code: string) => string;

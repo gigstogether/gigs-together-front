@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { DEFAULT_FEED_PATH } from '@/lib/feed.routes';
+import { DEFAULT_FEED_PATH } from '@/lib/feed/feed.routes';
 
 export function proxy(request: NextRequest) {
   const { nextUrl } = request;

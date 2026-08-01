@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
-import { feedKeys } from '@/lib/feedKeys';
+import { feedKeys } from '@/lib/feed/feedKeys';
 import { gigFormKeys } from '@/app/admin/gigs/_lib/gigFormKeys';
 import { toastTelegramInitDataExpired } from '@/app/admin/gigs/_lib/telegram-init-data-expired';
 

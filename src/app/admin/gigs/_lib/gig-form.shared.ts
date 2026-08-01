@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { gigDateToYMD } from '@/lib/feed.mapper';
+import { gigDateToYMD } from '@/lib/feed/feed.mapper';
 
 export const gigFormSchema = z.object({
   title: z.string().min(2, {

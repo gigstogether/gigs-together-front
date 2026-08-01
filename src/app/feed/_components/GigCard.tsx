@@ -5,7 +5,7 @@ import { Calendar, Ticket } from 'lucide-react';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { GigPoster } from '@/components/GigPoster';
 import { clientEnv } from '@/env/client-env';
-import { formatGigDate } from '@/lib/gig-date-format';
+import { formatGigDate } from '@/lib/feed/gig-date-format';
 
 interface GigCardProps {
   gig: Event;

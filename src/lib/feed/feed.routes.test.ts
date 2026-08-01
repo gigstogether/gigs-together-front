@@ -1,4 +1,4 @@
-import { buildFeedHeaderHomeRoute } from '@/lib/feed.routes';
+import { buildFeedHeaderHomeRoute } from '@/lib/feed/feed.routes';
 
 describe('buildFeedHeaderHomeRoute', () => {
   it('should return root when location is omitted', () => {

@@ -1,7 +1,7 @@
 import GigFormClient from '@/app/admin/gigs/_components/GigFormClient';
 import AdminGigDetailBackLink from '@/app/admin/gigs/_components/AdminGigDetailBackLink';
 import { I18nProvider } from '@/providers/I18nProvider';
-import { getCountries } from '@/lib/countries.server';
+import { getCountries } from '@/app/admin/gigs/_lib/countries.server';
 import { getTranslations } from '@/lib/translations.server';
 
 interface AdminGigFormPageProps {

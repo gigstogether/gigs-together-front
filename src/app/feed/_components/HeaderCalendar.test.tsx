@@ -2,10 +2,10 @@ import { render, screen } from '@testing-library/react';
 
 vi.mock('server-only', () => ({}));
 
-const mockGetFeedAvailableDates = vi.hoisted(() => vi.fn());
+const mockGetAvailableGigDates = vi.hoisted(() => vi.fn());
 
-vi.mock('@/lib/feed.server', () => ({
-  getFeedAvailableDates: mockGetFeedAvailableDates,
+vi.mock('@/app/feed/_lib/get-available-gig-dates.server', () => ({
+  getAvailableGigDates: mockGetAvailableGigDates,
 }));
 
 vi.mock('@/app/feed/_components/HeaderCalendarClient', () => ({
@@ -16,8 +16,8 @@ vi.mock('@/app/feed/_components/HeaderCalendarClient', () => ({
 
 describe('HeaderCalendar', () => {
   beforeEach(() => {
-    mockGetFeedAvailableDates.mockReset();
-    mockGetFeedAvailableDates.mockResolvedValue(['2026-04-21', '2026-05-01']);
+    mockGetAvailableGigDates.mockReset();
+    mockGetAvailableGigDates.mockResolvedValue(['2026-04-21', '2026-05-01']);
   });
 
   it('should fetch available dates and pass them to the client calendar', async () => {
@@ -30,7 +30,7 @@ describe('HeaderCalendar', () => {
       }),
     );
 
-    expect(mockGetFeedAvailableDates).toHaveBeenCalledWith({
+    expect(mockGetAvailableGigDates).toHaveBeenCalledWith({
       country: 'es',
       city: 'barcelona',
     });

@@ -1,7 +1,7 @@
 import type { QueryFunctionContext } from '@tanstack/react-query';
 
 import { fetchFeedAnchorYmdByPublicId } from './feedApi';
-import { feedKeys } from '@/lib/feedKeys';
+import { feedKeys } from '@/lib/feed/feedKeys';
 
 /** 300_000 ms (5 minutes): gig date for a stable public id changes rarely during a session. */
 export const FEED_ANCHOR_DATE_BY_PUBLIC_ID_STALE_TIME_MS = 300_000;

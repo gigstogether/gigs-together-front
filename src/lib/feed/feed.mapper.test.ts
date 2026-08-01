@@ -1,4 +1,4 @@
-import { gigDateToYMD } from '@/lib/feed.mapper';
+import { gigDateToYMD } from '@/lib/feed/feed.mapper';
 import { toLocalYMD } from '@/lib/utils';
 
 describe('gigDateToYMD', () => {

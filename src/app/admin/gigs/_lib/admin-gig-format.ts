@@ -5,7 +5,7 @@ import type {
   AdminGigQueueItem,
   AdminGigSuggestedBy,
 } from '@/app/admin/gigs/_lib/types';
-import { formatGigDate } from '@/lib/gig-date-format';
+import { formatGigDate } from '@/lib/feed/gig-date-format';
 
 export function formatAdminGigEventDate(date: string, endDate?: string): string {
   const start = formatGigDate(date);

@@ -22,7 +22,7 @@ import { useFeedInfiniteQuery } from '@/app/feed/_hooks/useFeedInfiniteQuery';
 import { useHeaderConfig } from '@/app/feed/_providers/HeaderConfigProvider';
 import { clientEnv } from '@/env/client-env';
 import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
-import { gigToEvent } from '@/lib/feed.mapper';
+import { gigToEvent } from '@/lib/feed/feed.mapper';
 import { useT } from '@/providers/I18nProvider';
 
 const feedMainClassName =
