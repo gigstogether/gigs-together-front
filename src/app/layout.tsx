@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
-import PlausibleAnalyticsProvider from '@/app/_providers/PlausibleAnalyticsProvider';
+import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
 import TelegramWebAppScript from '@/app/_components/TelegramWebAppScript';
-import { QueryProvider } from '@/app/_providers/QueryProvider';
+import { QueryProvider } from '@/providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
 import { NON_PRODUCTION_ROBOTS } from '@/lib/non-production-robots';
 

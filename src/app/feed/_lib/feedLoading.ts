@@ -41,14 +41,3 @@ export function feedLoadingReducer(
     }
   }
 }
-
-export function createInitialFeedLoadingState(params: {
-  readonly hasInitialEvents: boolean;
-}): FeedLoadingState {
-  return {
-    initial: !params.hasInitialEvents,
-    next: false,
-    prev: false,
-    jump: false,
-  };
-}
