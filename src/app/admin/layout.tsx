@@ -1,5 +1,5 @@
 import AppHeader from '@/app/_components/AppHeader';
-import AdminLayoutClient from '@/app/admin/AdminLayoutClient';
+import AdminLayoutClient from '@/app/admin/_components/AdminLayoutClient';
 import type { ReactNode } from 'react';
 import AdminHeaderNavMenu from '@/app/admin/_components/AdminHeaderNavMenu';
 

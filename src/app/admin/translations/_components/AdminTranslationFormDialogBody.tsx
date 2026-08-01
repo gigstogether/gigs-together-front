@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import AdminTranslationLocaleSelect from '@/app/admin/translations/_components/AdminTranslationLocaleSelect';
 import AdminTranslationNamespaceCombobox from '@/app/admin/translations/_components/AdminTranslationNamespaceCombobox';
-import type { AdminTranslationFormValues } from '@/app/admin/translations/admin-translation-form.types';
+import type { AdminTranslationFormValues } from '@/app/admin/translations/_lib/admin-translation-form.types';
 import { Button } from '@/components/ui/button';
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import type { PutAdminTranslationBody, SupportedLocale } from '@/lib/admin-api';
+import type { PutAdminTranslationBody, SupportedLocale } from '@/app/admin/_lib/admin-api';
 import { cn } from '@/lib/utils';
 import { isValidTranslationKey } from '@/lib/translation-identifiers';
 

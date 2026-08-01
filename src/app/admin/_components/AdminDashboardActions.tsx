@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Loader2, Megaphone, RefreshCw } from 'lucide-react';
 
-import { useAdminDashboardActions } from '@/app/admin/use-admin-dashboard-actions';
+import { useAdminDashboardActions } from '@/app/admin/_lib/use-admin-dashboard-actions';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

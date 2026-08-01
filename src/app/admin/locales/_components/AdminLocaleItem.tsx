@@ -3,11 +3,11 @@
 import { GripVertical } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { bindAdminLocalePointerReorder } from '@/app/admin/locales/admin-locale-pointer-reorder';
+import { bindAdminLocalePointerReorder } from '@/app/admin/locales/_lib/admin-locale-pointer-reorder';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import type { PatchAdminLocaleBody, SupportedLocale } from '@/lib/admin-api';
+import type { PatchAdminLocaleBody, SupportedLocale } from '@/app/admin/_lib/admin-api';
 
 /** Must stay active; matches API translation default locale fallback. */
 const REQUIRED_ACTIVE_LOCALE_ISO = 'en';

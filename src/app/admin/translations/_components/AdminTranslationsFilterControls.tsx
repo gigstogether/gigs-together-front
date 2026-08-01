@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import {
   ADMIN_ALL_TRANSLATION_LOCALES,
   ADMIN_ALL_TRANSLATION_NAMESPACES,
-} from '@/app/admin/adminKeys';
+} from '@/app/admin/_lib/adminKeys';
 import AdminTranslationsFilterSelect from '@/app/admin/translations/_components/AdminTranslationsFilterSelect';
 import {
   ADMIN_TRANSLATION_KIND_FILTER_OPTIONS,
@@ -16,16 +16,16 @@ import {
   isAdminTranslationLocaleFilter,
   isAdminTranslationNamespaceFilter,
   isAdminTranslationStatusFilter,
-} from '@/app/admin/translations/admin-translations-filters';
+} from '@/app/admin/translations/_lib/admin-translations-filters';
 import type {
   AdminTranslationFilterOption,
   AdminTranslationKindFilter,
   AdminTranslationLocaleFilter,
   AdminTranslationNamespaceFilter,
   AdminTranslationStatusFilter,
-} from '@/app/admin/translations/admin-translations-filters';
+} from '@/app/admin/translations/_lib/admin-translations-filters';
 import { Button } from '@/components/ui/button';
-import type { SupportedLocale } from '@/lib/admin-api';
+import type { SupportedLocale } from '@/app/admin/_lib/admin-api';
 
 function buildLocaleFilterOptions(
   locales: readonly SupportedLocale[],

@@ -6,7 +6,7 @@ import {
   ADMIN_ALL_TRANSLATION_LOCALES,
   ADMIN_ALL_TRANSLATION_NAMESPACES,
   ADMIN_ALL_TRANSLATION_STATUSES,
-} from '@/app/admin/adminKeys';
+} from '@/app/admin/_lib/adminKeys';
 
 describe('AdminTranslationsFilterControls', () => {
   it('should render filter dropdowns and create action in one row', () => {

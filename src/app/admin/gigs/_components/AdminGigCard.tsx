@@ -8,10 +8,10 @@ import {
   buildAdminGigPublicHref,
   formatAdminGigEventDate,
   formatAdminGigSuggestedBy,
-} from '@/app/admin/gigs/admin-gig-format';
-import { mapGigStatusFromAPI } from '@/app/admin/gigs/admin-gig-status';
-import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
-import { GigStatus } from '@/app/admin/gigs/types';
+} from '@/app/admin/gigs/_lib/admin-gig-format';
+import { mapGigStatusFromAPI } from '@/app/admin/gigs/_lib/admin-gig-status';
+import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/_lib/types';
+import { GigStatus } from '@/app/admin/gigs/_lib/types';
 import { cn } from '@/lib/utils';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
 import AdminGigPreviewPoster from '@/app/admin/gigs/_components/AdminGigPreviewPoster';
@@ -19,7 +19,7 @@ import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPrevie
 import {
   buildAdminGigEditRoute,
   buildAdminGigPublicIdPath,
-} from '@/app/admin/gigs/admin-gig-paths';
+} from '@/app/admin/gigs/_lib/admin-gig-paths';
 
 interface MetaRowProps {
   readonly icon: ReactNode;

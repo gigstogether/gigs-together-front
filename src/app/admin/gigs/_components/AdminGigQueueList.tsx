@@ -1,5 +1,5 @@
-import type { AdminGigQueueItem } from '@/app/admin/gigs/types';
-import { formatAdminGigListMeta } from '@/app/admin/gigs/admin-gig-format';
+import type { AdminGigQueueItem } from '@/app/admin/gigs/_lib/types';
+import { formatAdminGigListMeta } from '@/app/admin/gigs/_lib/admin-gig-format';
 import { cn } from '@/lib/utils';
 
 interface AdminGigQueueListProps {

@@ -1,6 +1,6 @@
 import type { Route } from 'next';
 
-import { ADMIN_GIGS_NEW_ROUTE, buildAdminGigEditRoute } from '@/app/admin/gigs/admin-gig-paths';
+import { ADMIN_GIGS_NEW_ROUTE, buildAdminGigEditRoute } from '@/app/admin/gigs/_lib/admin-gig-paths';
 import { SUGGEST_ROUTE } from './suggest-paths';
 
 const GIG_FORM_START_PARAM_PATTERN = /^[a-z0-9-]{1,64}$/i;

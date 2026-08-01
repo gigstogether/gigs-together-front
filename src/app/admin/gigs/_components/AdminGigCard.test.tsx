@@ -2,8 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 
 import AdminGigCard from '@/app/admin/gigs/_components/AdminGigCard';
-import type { AdminGigDetail } from '@/app/admin/gigs/types';
-import { GigStatusAPI } from '@/app/admin/gigs/types';
+import type { AdminGigDetail } from '@/app/admin/gigs/_lib/types';
+import { GigStatusAPI } from '@/app/admin/gigs/_lib/types';
 
 const mockPostAdminGigApprove = vi.fn();
 
@@ -11,7 +11,7 @@ vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
 }));
 
-vi.mock('@/lib/admin-api', () => ({
+vi.mock('@/app/admin/_lib/admin-api', () => ({
   postAdminGigApprove: (publicId: string) => mockPostAdminGigApprove(publicId),
   postAdminGigReject: vi.fn(),
   postAdminGigPost: vi.fn(),

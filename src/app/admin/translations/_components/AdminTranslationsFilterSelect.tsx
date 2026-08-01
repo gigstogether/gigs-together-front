@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 
-import type { AdminTranslationFilterOption } from '@/app/admin/translations/admin-translations-filters';
+import type { AdminTranslationFilterOption } from '@/app/admin/translations/_lib/admin-translations-filters';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';

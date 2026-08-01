@@ -7,7 +7,7 @@ import { SlidersHorizontal } from 'lucide-react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
 import HeaderAuthActions from '@/app/_components/HeaderAuthActions';
 import HeaderSignInModal from '@/app/_components/HeaderSignInModal';
-import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/admin-gig-paths';
+import { ADMIN_GIGS_NEW_ROUTE } from '@/app/admin/gigs/_lib/admin-gig-paths';
 import { SUGGEST_ROUTE } from '@/app/(default)/suggest/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { clientEnv } from '@/env/client-env';

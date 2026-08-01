@@ -1,4 +1,4 @@
-import GigFormClient from '@/app/admin/gigs/_gig-form/GigFormClient';
+import GigFormClient from '@/app/admin/gigs/_components/GigFormClient';
 import AdminGigDetailBackLink from '@/app/admin/gigs/_components/AdminGigDetailBackLink';
 import { I18nProvider } from '@/lib/i18n';
 import { getCountries } from '@/lib/countries.server';

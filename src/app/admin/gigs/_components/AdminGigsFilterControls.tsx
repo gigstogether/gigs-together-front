@@ -2,8 +2,8 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 
-import { GIG_FILTER_STATUSES, getGigStatusLabel } from '@/app/admin/gigs/admin-gig-status';
-import type { GigStatusFilter } from '@/app/admin/gigs/types';
+import { GIG_FILTER_STATUSES, getGigStatusLabel } from '@/app/admin/gigs/_lib/admin-gig-status';
+import type { GigStatusFilter } from '@/app/admin/gigs/_lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
