@@ -116,28 +116,32 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 ## App Router colocation
 
-Under `src/app/`, colocate code with the route it belongs to. **Shared** UI and logic live **outside** `app/` in established top-level folders (`src/components/`, `src/lib/`, `src/hooks/`, etc.) — not in `app/_components` or `app/_lib`.
+Under `src/app/`, colocate code with the route it belongs to. **Shared** code lives **outside** `app/` in established top-level folders — not in `app/_components`, `app/_lib`, `app/_hooks`, or `app/_providers`.
 
 ```
 src/
 ├── components/        # shared UI (outside app)
-├── lib/               # shared non-UI (outside app)
-├── providers/         # shared providers (outside app)
+├── hooks/             # shared React hooks (outside app)
+├── lib/               # shared non-hook logic (outside app)
+├── providers/         # shared context providers (outside app)
 │
 └── app/
     ├── dashboard/
     │   ├── _components/   # dashboard segment only
-    │   ├── _lib/          # dashboard segment only
-    │   ├── _providers/    # dashboard segment only
+    │   ├── _hooks/          # dashboard segment only
+    │   ├── _lib/            # dashboard segment only
+    │   ├── _providers/      # dashboard segment only
     │   └── page.tsx
     │
     └── page.tsx
 ```
 
-- **Default:** new code lives next to its route — UI in `_components/`, non-UI logic (hooks, parsers, API clients, constants) in `_lib/`, React context providers in `_providers/`. Keep `page.tsx`, `layout.tsx`, and other Next.js route files at the route root.
-- **Providers:** place React context providers in `_providers/` under the route segment they belong to. Providers reused across unrelated route segments live in `src/providers/` (outside `app/`), not in `app/_providers`. Do not put providers in `_components/`.
-- **Lift within a segment:** when a **second real consumer** appears under the same route subtree, move shared code to the nearest common route ancestor’s `_components` / `_lib` / `_providers` (for example from `app/admin/gigs/_lib/` to `app/admin/_lib/`). Do not pre-extract for a single consumer.
-- **Lift across segments:** when code is reused across unrelated route segments, move it out of `app/` into the appropriate top-level folder (`src/components/`, `src/lib/`, `src/providers/`, etc.), matching existing project conventions.
+- **Default:** new code lives next to its route — UI in `_components/`, React hooks in `_hooks/`, other non-UI logic (parsers, API clients, constants, reducers) in `_lib/`, context providers in `_providers/`. Keep `page.tsx`, `layout.tsx`, and other Next.js route files at the route root.
+- **Hooks vs lib:** put React hooks (`use*`) in `_hooks/` (or `src/hooks/` when shared across segments). Keep `_lib/` for non-hook modules. Do not mix hooks into `_lib/` files.
+- **Providers:** place React context providers in `_providers/` under the route segment they belong to. Providers reused across unrelated route segments live in `src/providers/` (outside `app/`). Do not put providers in `_components/` or `_hooks/`.
+- **Provider modules:** colocate the context, provider component, and its consumer hook in **one file** under `_providers/` or `src/providers/`. Export only what callers outside the module need (typically the provider component, the hook, and public types).
+- **Lift within a segment:** when a **second real consumer** appears under the same route subtree, move shared code to the nearest common route ancestor’s `_components` / `_hooks` / `_lib` / `_providers` (for example from `app/admin/gigs/_lib/` to `app/admin/_lib/`). Do not pre-extract for a single consumer.
+- **Lift across segments:** when code is reused across unrelated route segments, move it out of `app/` into the appropriate top-level folder (`src/components/`, `src/hooks/`, `src/lib/`, `src/providers/`, etc.), matching existing project conventions.
 
 ## Legacy and backward compatibility
 
