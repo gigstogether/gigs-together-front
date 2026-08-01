@@ -116,23 +116,28 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 ## App Router colocation
 
-Under `src/app/`, colocate code with the route it belongs to:
+Under `src/app/`, colocate code with the route it belongs to. **Shared** UI and logic live **outside** `app/` in established top-level folders (`src/components/`, `src/lib/`, `src/hooks/`, etc.) — not in `app/_components` or `app/_lib`.
 
 ```
-app/
-├── _components/       # shared across the whole app
-├── _lib/              # shared across the whole app
+src/
+├── components/        # shared UI (outside app)
+├── lib/               # shared non-UI (outside app)
+├── providers/         # shared providers (outside app)
 │
-├── dashboard/
-│   ├── _components/   # dashboard segment only
-│   ├── _lib/          # dashboard segment only
-│   └── page.tsx
-│
-└── page.tsx
+└── app/
+    ├── dashboard/
+    │   ├── _components/   # dashboard segment only
+    │   ├── _lib/          # dashboard segment only
+    │   ├── _providers/    # dashboard segment only
+    │   └── page.tsx
+    │
+    └── page.tsx
 ```
 
-- **Default:** new code lives next to its route — UI in `_components/`, non-UI logic (hooks, parsers, API clients, constants) in `_lib/`. Keep `page.tsx`, `layout.tsx`, and other Next.js route files at the route root.
-- **Lift on reuse:** when a **second real consumer** appears, move the shared code to the nearest common route ancestor (`app/_components`, `app/_lib`, or the parent segment’s `_components` / `_lib`). Do not pre-extract to a parent or global folder for a single consumer.
+- **Default:** new code lives next to its route — UI in `_components/`, non-UI logic (hooks, parsers, API clients, constants) in `_lib/`, React context providers in `_providers/`. Keep `page.tsx`, `layout.tsx`, and other Next.js route files at the route root.
+- **Providers:** place React context providers in `_providers/` under the route segment they belong to. Providers reused across unrelated route segments live in `src/providers/` (outside `app/`), not in `app/_providers`. Do not put providers in `_components/`.
+- **Lift within a segment:** when a **second real consumer** appears under the same route subtree, move shared code to the nearest common route ancestor’s `_components` / `_lib` / `_providers` (for example from `app/admin/gigs/_lib/` to `app/admin/_lib/`). Do not pre-extract for a single consumer.
+- **Lift across segments:** when code is reused across unrelated route segments, move it out of `app/` into the appropriate top-level folder (`src/components/`, `src/lib/`, `src/providers/`, etc.), matching existing project conventions.
 
 ## Legacy and backward compatibility
 
