@@ -1,5 +1,9 @@
 import { apiPublicRequest, apiRequest } from '@/lib/api';
 
+const { fetchApiJsonWithSessionRecoveryMock } = vi.hoisted(() => ({
+  fetchApiJsonWithSessionRecoveryMock: vi.fn(),
+}));
+
 const { fetchApiJsonMock } = vi.hoisted(() => ({
   fetchApiJsonMock: vi.fn(),
 }));
@@ -7,6 +11,10 @@ const { fetchApiJsonMock } = vi.hoisted(() => ({
 const { clearStoredTelegramClientProfileMock, requestTelegramSignInMock } = vi.hoisted(() => ({
   clearStoredTelegramClientProfileMock: vi.fn(),
   requestTelegramSignInMock: vi.fn(),
+}));
+
+vi.mock('@/lib/api-session-recovery', () => ({
+  fetchApiJsonWithSessionRecovery: fetchApiJsonWithSessionRecoveryMock,
 }));
 
 vi.mock('@/lib/api-core', () => ({
@@ -30,22 +38,20 @@ vi.mock('@/lib/logger', () => ({
 
 describe('apiRequest', () => {
   beforeEach(() => {
-    fetchApiJsonMock.mockReset();
+    fetchApiJsonWithSessionRecoveryMock.mockReset();
     clearStoredTelegramClientProfileMock.mockReset();
     requestTelegramSignInMock.mockReset();
-    fetchApiJsonMock.mockResolvedValue({ ok: true });
+    fetchApiJsonWithSessionRecoveryMock.mockResolvedValue({ ok: true });
   });
 
-  it('should call fetchApiJson with session credentials, session recovery, and onUnauthorized', async () => {
+  it('should delegate to session recovery coordinator with onUnauthorized callback', async () => {
     await apiRequest('v1/admin/dashboard', 'GET');
 
-    expect(fetchApiJsonMock).toHaveBeenCalledWith(
+    expect(fetchApiJsonWithSessionRecoveryMock).toHaveBeenCalledWith(
       'v1/admin/dashboard',
       'GET',
       undefined,
       expect.objectContaining({
-        credentials: 'include',
-        authRecovery: 'session',
         onUnauthorized: expect.any(Function),
       }),
     );
@@ -54,10 +60,10 @@ describe('apiRequest', () => {
   it('should trigger sign-in recovery when onUnauthorized runs', async () => {
     await apiRequest('v1/admin/dashboard', 'GET');
 
-    const init = fetchApiJsonMock.mock.calls[0]?.[3] as {
+    const options = fetchApiJsonWithSessionRecoveryMock.mock.calls[0]?.[3] as {
       onUnauthorized?: () => void;
     };
-    init.onUnauthorized?.();
+    options.onUnauthorized?.();
 
     expect(clearStoredTelegramClientProfileMock).toHaveBeenCalledTimes(1);
     expect(requestTelegramSignInMock).toHaveBeenCalledTimes(1);
@@ -67,12 +73,11 @@ describe('apiRequest', () => {
 describe('apiPublicRequest', () => {
   beforeEach(() => {
     fetchApiJsonMock.mockReset();
-    clearStoredTelegramClientProfileMock.mockReset();
-    requestTelegramSignInMock.mockReset();
+    fetchApiJsonWithSessionRecoveryMock.mockReset();
     fetchApiJsonMock.mockResolvedValue({ ok: true });
   });
 
-  it('should call fetchApiJson with omit credentials, no session recovery, and without onUnauthorized', async () => {
+  it('should call pure transport with omit credentials and without session recovery', async () => {
     await apiPublicRequest('v1/gig?limit=10', 'GET');
 
     expect(fetchApiJsonMock).toHaveBeenCalledWith(
@@ -81,11 +86,8 @@ describe('apiPublicRequest', () => {
       undefined,
       expect.objectContaining({
         credentials: 'omit',
-        authRecovery: 'none',
       }),
     );
-
-    const init = fetchApiJsonMock.mock.calls[0]?.[3] as Record<string, unknown>;
-    expect(init.onUnauthorized).toBeUndefined();
+    expect(fetchApiJsonWithSessionRecoveryMock).not.toHaveBeenCalled();
   });
 });

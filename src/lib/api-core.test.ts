@@ -7,48 +7,13 @@ function jsonResponse(body: unknown, status: number): Response {
   });
 }
 
-const SESSION_REQUEST_OPTIONS = {
-  credentials: 'include' as const,
-  authRecovery: 'session' as const,
-};
-
-const PUBLIC_REQUEST_OPTIONS = {
-  credentials: 'omit' as const,
-  authRecovery: 'none' as const,
-};
-
-const AUTH_REQUEST_OPTIONS = {
-  credentials: 'include' as const,
-  authRecovery: 'none' as const,
-};
-
-const { postAuthRefreshMock } = vi.hoisted(() => ({
-  postAuthRefreshMock: vi.fn<() => Promise<boolean>>(),
-}));
-
-const { isTelegramMiniAppMock, waitForTelegramInitDataMock } = vi.hoisted(() => ({
-  isTelegramMiniAppMock: vi.fn<() => boolean>(),
-  waitForTelegramInitDataMock: vi.fn<() => Promise<string>>(),
-}));
-
-vi.mock('@/lib/auth-refresh', () => ({
-  postAuthRefresh: postAuthRefreshMock,
-}));
-
-vi.mock('@/lib/telegram/telegram-webapp', () => ({
-  isTelegramMiniApp: isTelegramMiniAppMock,
-  waitForTelegramInitData: waitForTelegramInitDataMock,
-}));
+const INCLUDE_CREDENTIALS = { credentials: 'include' as const };
+const OMIT_CREDENTIALS = { credentials: 'omit' as const };
 
 describe('fetchApiJson', () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_APP_API_BASE_URL = 'https://api.example.com';
     vi.resetModules();
-    postAuthRefreshMock.mockReset();
-    postAuthRefreshMock.mockResolvedValue(false);
-    isTelegramMiniAppMock.mockReset();
-    isTelegramMiniAppMock.mockReturnValue(false);
-    waitForTelegramInitDataMock.mockReset();
   });
 
   afterEach(() => {
@@ -56,120 +21,21 @@ describe('fetchApiJson', () => {
     vi.clearAllMocks();
   });
 
-  it('should retry request once when refresh succeeds after 401', async () => {
-    postAuthRefreshMock.mockResolvedValue(true);
-
+  it('should throw ApiError on 401 without making a second request', async () => {
     const fetchMock = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ message: 'unauthorized' }, 401))
-      .mockResolvedValueOnce(jsonResponse({ gigs: [] }, 200));
-
-    vi.stubGlobal('fetch', fetchMock);
-
-    const { fetchApiJson } = await import('@/lib/api-core');
-    const result = await fetchApiJson<{ gigs: unknown[] }>(
-      'v1/gig?limit=10',
-      'GET',
-      undefined,
-      SESSION_REQUEST_OPTIONS,
-    );
-
-    expect(result).toEqual({ gigs: [] });
-    expect(postAuthRefreshMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-  });
-
-  it('should throw ApiError with 401 status when request is still unauthorized after refresh retry', async () => {
-    postAuthRefreshMock.mockResolvedValue(true);
-
-    const onUnauthorized = vi.fn();
-    const fetchMock = vi
-      .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ message: 'unauthorized' }, 401))
-      .mockResolvedValueOnce(jsonResponse({ message: 'still unauthorized' }, 401));
-
+      .mockResolvedValueOnce(jsonResponse({ message: 'unauthorized' }, 401));
     vi.stubGlobal('fetch', fetchMock);
 
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await expect(
-      fetchApiJson('v1/gig?limit=10', 'GET', undefined, {
-        ...SESSION_REQUEST_OPTIONS,
-        onUnauthorized,
-      }),
+      fetchApiJson('v1/gig?limit=10', 'GET', undefined, OMIT_CREDENTIALS),
     ).rejects.toMatchObject({
       name: 'ApiError',
       statusCode: 401,
     });
-    expect(postAuthRefreshMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-  });
-
-  it('should call onUnauthorized once when second request is still unauthorized', async () => {
-    postAuthRefreshMock.mockResolvedValue(true);
-
-    const onUnauthorized = vi.fn();
-    const fetchMock = vi
-      .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ message: 'unauthorized' }, 401))
-      .mockResolvedValueOnce(jsonResponse({ message: 'still unauthorized' }, 401));
-
-    vi.stubGlobal('fetch', fetchMock);
-    const { fetchApiJson } = await import('@/lib/api-core');
-
-    const action = fetchApiJson('v1/gig?limit=10', 'GET', undefined, {
-      ...SESSION_REQUEST_OPTIONS,
-      onUnauthorized,
-    });
-
-    await expect(action).rejects.toThrow();
-    expect(onUnauthorized).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not trigger refresh flow when endpoint is auth refresh itself', async () => {
-    postAuthRefreshMock.mockResolvedValue(true);
-
-    const fetchMock = vi
-      .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ message: 'unauthorized' }, 401));
-
-    vi.stubGlobal('fetch', fetchMock);
-    const { fetchApiJson } = await import('@/lib/api-core');
-
-    const action = fetchApiJson('v1/auth/refresh', 'POST', undefined, {
-      ...SESSION_REQUEST_OPTIONS,
-      onUnauthorized: vi.fn(),
-    });
-
-    await expect(action).rejects.toThrow();
-    expect(postAuthRefreshMock).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not run session recovery for a public request after 401', async () => {
-    postAuthRefreshMock.mockResolvedValue(true);
-    isTelegramMiniAppMock.mockReturnValue(true);
-    waitForTelegramInitDataMock.mockResolvedValue('init-data');
-
-    const fetchMock = vi
-      .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ message: 'unauthorized' }, 401));
-    vi.stubGlobal('fetch', fetchMock);
-    vi.stubGlobal('window', {});
-
-    const { fetchApiJson } = await import('@/lib/api-core');
-
-    await expect(
-      fetchApiJson('v1/gig?limit=10', 'GET', undefined, PUBLIC_REQUEST_OPTIONS),
-    ).rejects.toMatchObject({
-      name: 'ApiError',
-      statusCode: 401,
-    });
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(postAuthRefreshMock).not.toHaveBeenCalled();
-    expect(isTelegramMiniAppMock).not.toHaveBeenCalled();
-    expect(waitForTelegramInitDataMock).not.toHaveBeenCalled();
   });
 
   it('should propagate machine-readable error code when backend provides it', async () => {
@@ -190,7 +56,7 @@ describe('fetchApiJson', () => {
       'v1/auth/telegram/web-app',
       'POST',
       { initData: 'abc' },
-      AUTH_REQUEST_OPTIONS,
+      INCLUDE_CREDENTIALS,
     );
 
     await expect(action).rejects.toMatchObject({
@@ -214,7 +80,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig?limit=10', 'GET', undefined, PUBLIC_REQUEST_OPTIONS);
+    const action = fetchApiJson('v1/gig?limit=10', 'GET', undefined, OMIT_CREDENTIALS);
 
     await expect(action).rejects.toThrow('bad gateway');
   });
@@ -229,7 +95,7 @@ describe('fetchApiJson', () => {
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await fetchApiJson<{ ok: boolean }>('v1/receiver/gig', 'POST', formData, {
-      ...SESSION_REQUEST_OPTIONS,
+      ...INCLUDE_CREDENTIALS,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -245,7 +111,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET', undefined, PUBLIC_REQUEST_OPTIONS);
+    await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET', undefined, OMIT_CREDENTIALS);
 
     const init = fetchMock.mock.calls[0]?.[1];
     expect(init?.credentials).toBe('omit');
@@ -256,7 +122,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET', undefined, SESSION_REQUEST_OPTIONS);
+    await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET', undefined, INCLUDE_CREDENTIALS);
 
     const init = fetchMock.mock.calls[0]?.[1];
     expect(init?.credentials).toBe('include');
@@ -267,12 +133,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    await fetchApiJson<{ gigs: unknown[] }>(
-      'v1/gig',
-      'GET',
-      { ignored: true },
-      PUBLIC_REQUEST_OPTIONS,
-    );
+    await fetchApiJson<{ gigs: unknown[] }>('v1/gig', 'GET', { ignored: true }, OMIT_CREDENTIALS);
 
     const init = fetchMock.mock.calls[0]?.[1];
     expect(init?.body).toBeUndefined();
@@ -287,7 +148,7 @@ describe('fetchApiJson', () => {
       'v1/gig/lookup',
       'POST',
       { name: 'test' },
-      SESSION_REQUEST_OPTIONS,
+      INCLUDE_CREDENTIALS,
     );
 
     const init = fetchMock.mock.calls[0]?.[1];
@@ -305,7 +166,7 @@ describe('fetchApiJson', () => {
       'POST',
       { name: 'test' },
       {
-        ...SESSION_REQUEST_OPTIONS,
+        ...INCLUDE_CREDENTIALS,
         headers: {
           'Content-Type': 'application/merge-patch+json',
         },
@@ -317,48 +178,6 @@ describe('fetchApiJson', () => {
     expect(headers.get('Content-Type')).toBe('application/merge-patch+json');
   });
 
-  it('should call onUnauthorized when response is 401 and no refresh retry is attempted', async () => {
-    const onUnauthorized = vi.fn();
-    const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(
-      jsonResponse(
-        {
-          message: 'unauthorized',
-          code: 'X',
-        },
-        401,
-      ),
-    );
-    vi.stubGlobal('fetch', fetchMock);
-    const { fetchApiJson } = await import('@/lib/api-core');
-
-    const action = fetchApiJson(
-      'v1/auth/telegram/web-app',
-      'POST',
-      { initData: 'x' },
-      { ...AUTH_REQUEST_OPTIONS, onUnauthorized },
-    );
-
-    await expect(action).rejects.toThrow();
-    expect(onUnauthorized).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not call onUnauthorized when response status is not 401', async () => {
-    const onUnauthorized = vi.fn();
-    const fetchMock = vi
-      .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ message: 'forbidden' }, 403));
-    vi.stubGlobal('fetch', fetchMock);
-    const { fetchApiJson } = await import('@/lib/api-core');
-
-    const action = fetchApiJson('v1/gig?limit=10', 'GET', undefined, {
-      ...SESSION_REQUEST_OPTIONS,
-      onUnauthorized,
-    });
-
-    await expect(action).rejects.toThrow('forbidden');
-    expect(onUnauthorized).not.toHaveBeenCalled();
-  });
-
   it('should throw fallback message when json error payload has empty message', async () => {
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -366,7 +185,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig/lookup', 'POST', { name: 'x' }, SESSION_REQUEST_OPTIONS);
+    const action = fetchApiJson('v1/gig/lookup', 'POST', { name: 'x' }, INCLUDE_CREDENTIALS);
 
     await expect(action).rejects.toThrow('Something went wrong');
   });
@@ -383,7 +202,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig', 'GET', undefined, PUBLIC_REQUEST_OPTIONS);
+    const action = fetchApiJson('v1/gig', 'GET', undefined, OMIT_CREDENTIALS);
 
     await expect(action).rejects.toThrow('Something went wrong');
   });

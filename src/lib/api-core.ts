@@ -6,28 +6,12 @@ type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 const API_BASE_URL = clientEnv.appApiBaseUrl;
 
-export type ApiAuthRecoveryPolicy = 'none' | 'session';
-
 export interface FetchApiJsonOptions extends Omit<RequestInit, 'credentials'> {
   /**
    * Must be set explicitly at every call site.
    * Use `include` for cookie/session requests and `omit` for public cacheable GETs.
    */
   credentials: RequestCredentials;
-  /**
-   * `none` returns the original 401 without session recovery.
-   * `session` tries token refresh and Telegram Mini App re-auth.
-   */
-  authRecovery: ApiAuthRecoveryPolicy;
-  onUnauthorized?: () => void;
-  /**
-   * Internal: set after one `POST v1/auth/refresh` so a second 401 does not loop refresh.
-   */
-  hasAttemptedTokenRefresh?: boolean;
-  /**
-   * Internal: set after one Telegram Mini App re-auth so a second 401 does not loop re-auth.
-   */
-  hasAttemptedTelegramMiniAppReauth?: boolean;
 }
 
 export function buildUrl(endpointOrUrl: string): string {
@@ -36,14 +20,6 @@ export function buildUrl(endpointOrUrl: string): string {
     throw new Error('Missing NEXT_PUBLIC_APP_API_BASE_URL for direct API calls');
   }
   return `${API_BASE_URL.replace(/\/$/, '')}/${endpointOrUrl.replace(/^\//, '')}`;
-}
-
-function isAuthRefreshEndpoint(endpointOrUrl: string): boolean {
-  return endpointOrUrl.includes('v1/auth/refresh');
-}
-
-function isTelegramWebAppAuthEndpoint(endpointOrUrl: string): boolean {
-  return endpointOrUrl.includes('v1/auth/telegram/web-app');
 }
 
 function isJsonContentType(contentType: string): boolean {
@@ -55,75 +31,13 @@ function hasNoResponseBody(method: HttpMethod, response: Response): boolean {
   return method === 'HEAD' || response.status === 204 || response.status === 205;
 }
 
-let authRefreshPromise: Promise<boolean> | null = null;
-let telegramMiniAppReauthPromise: Promise<boolean> | null = null;
-
-async function postAuthRefreshSingleFlight(): Promise<boolean> {
-  if (!authRefreshPromise) {
-    authRefreshPromise = (async () => {
-      try {
-        const { postAuthRefresh } = await import('@/lib/auth-refresh');
-        return await postAuthRefresh();
-      } finally {
-        authRefreshPromise = null;
-      }
-    })();
-  }
-
-  return authRefreshPromise;
-}
-
-async function postTelegramMiniAppReauth(): Promise<boolean> {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  if (!telegramMiniAppReauthPromise) {
-    telegramMiniAppReauthPromise = (async () => {
-      try {
-        const { isTelegramMiniApp, waitForTelegramInitData } = await import(
-          '@/lib/telegram/telegram-webapp'
-        );
-        if (!isTelegramMiniApp()) {
-          return false;
-        }
-
-        const initData = await waitForTelegramInitData();
-        const response = await fetch(buildUrl('v1/auth/telegram/web-app'), {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ initData }),
-        });
-        return response.ok;
-      } catch {
-        return false;
-      } finally {
-        telegramMiniAppReauthPromise = null;
-      }
-    })();
-  }
-
-  return telegramMiniAppReauthPromise;
-}
-
 export async function fetchApiJson<TResponse>(
   endpointOrUrl: string,
   method: HttpMethod,
   data: unknown | undefined,
   init: FetchApiJsonOptions,
 ): Promise<TResponse> {
-  const {
-    authRecovery,
-    onUnauthorized,
-    hasAttemptedTokenRefresh,
-    hasAttemptedTelegramMiniAppReauth,
-    credentials,
-    ...fetchInit
-  } = init;
-  const shouldRecoverSession = authRecovery === 'session';
+  const { credentials, ...fetchInit } = init;
   const hasRequestBody = method !== 'GET' && method !== 'HEAD' && data !== undefined;
   const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
 
@@ -147,37 +61,6 @@ export async function fetchApiJson<TResponse>(
     credentials,
   });
 
-  if (
-    shouldRecoverSession &&
-    response.status === 401 &&
-    !hasAttemptedTokenRefresh &&
-    !isAuthRefreshEndpoint(endpointOrUrl)
-  ) {
-    const refreshed = await postAuthRefreshSingleFlight();
-    if (refreshed) {
-      return fetchApiJson<TResponse>(endpointOrUrl, method, data, {
-        ...init,
-        hasAttemptedTokenRefresh: true,
-      });
-    }
-  }
-
-  if (
-    shouldRecoverSession &&
-    response.status === 401 &&
-    !hasAttemptedTelegramMiniAppReauth &&
-    !isAuthRefreshEndpoint(endpointOrUrl) &&
-    !isTelegramWebAppAuthEndpoint(endpointOrUrl)
-  ) {
-    const isReauthenticated = await postTelegramMiniAppReauth();
-    if (isReauthenticated) {
-      return fetchApiJson<TResponse>(endpointOrUrl, method, data, {
-        ...init,
-        hasAttemptedTelegramMiniAppReauth: true,
-      });
-    }
-  }
-
   const contentType = response.headers.get('Content-Type') ?? '';
   const result = hasNoResponseBody(method, response)
     ? undefined
@@ -186,9 +69,6 @@ export async function fetchApiJson<TResponse>(
       : await response.text();
 
   if (!response.ok) {
-    if (response.status === 401 && onUnauthorized) {
-      onUnauthorized();
-    }
     if (isRecord(result)) {
       const r = result;
       const msg =

@@ -1,5 +1,6 @@
 import { fetchApiJson } from '@/lib/api-core';
 import type { FetchApiJsonOptions } from '@/lib/api-core';
+import { fetchApiJsonWithSessionRecovery } from '@/lib/api-session-recovery';
 import { logger } from '@/lib/logger';
 import {
   clearStoredTelegramClientProfile,
@@ -15,7 +16,7 @@ export {
 
 type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-type ApiRequestInit = Omit<FetchApiJsonOptions, 'credentials' | 'authRecovery' | 'onUnauthorized'>;
+type ApiRequestInit = Omit<FetchApiJsonOptions, 'credentials'>;
 
 /**
  * Authenticated / session API call. Sends cookies and runs sign-in recovery on 401.
@@ -28,11 +29,11 @@ export async function apiRequest<TResponse = unknown, TBody = unknown>(
 ): Promise<TResponse> {
   try {
     const headers = new Headers(init?.headers);
-    return await fetchApiJson<TResponse>(endpointOrUrl, method, data, {
-      ...init,
-      headers,
-      credentials: 'include',
-      authRecovery: 'session',
+    return await fetchApiJsonWithSessionRecovery<TResponse>(endpointOrUrl, method, data, {
+      init: {
+        ...init,
+        headers,
+      },
       onUnauthorized: () => {
         clearStoredTelegramClientProfile();
         if (!isTelegramMiniApp()) {
@@ -62,7 +63,6 @@ export async function apiPublicRequest<TResponse = unknown, TBody = unknown>(
       ...init,
       headers,
       credentials: 'omit',
-      authRecovery: 'none',
     });
   } catch (e) {
     logger.errorFromUnknown('api_public_request_failed', e, { endpointOrUrl, method });

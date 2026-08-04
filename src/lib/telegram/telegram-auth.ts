@@ -210,7 +210,6 @@ export async function signOutTelegramAuthOnServer(): Promise<void> {
   try {
     await fetchApiJson<unknown>('v1/auth/logout', 'POST', undefined, {
       credentials: 'include',
-      authRecovery: 'none',
     });
   } catch {
     /* best-effort: still clear local profile */
@@ -224,7 +223,7 @@ export async function exchangeTelegramAuthFromWebApp(initData: string): Promise<
     {
       initData,
     },
-    { credentials: 'include', authRecovery: 'none' },
+    { credentials: 'include' },
   );
   const { profile } = parseAuthExchangeResponse(raw);
   setStoredTelegramClientProfile(profile);
@@ -269,7 +268,6 @@ export async function exchangeTelegramAuthFromLoginWidget(
 ): Promise<TelegramAuthExchangeResponse> {
   const raw = await fetchApiJson<unknown>('v1/auth/telegram/login-widget', 'POST', user, {
     credentials: 'include',
-    authRecovery: 'none',
   });
   const response = parseAuthExchangeResponse(raw);
   setStoredTelegramClientProfile(response.profile);

@@ -1,7 +1,4 @@
-const PUBLIC_REQUEST_OPTIONS = {
-  credentials: 'omit' as const,
-  authRecovery: 'none' as const,
-};
+const PUBLIC_REQUEST_OPTIONS = { credentials: 'omit' as const };
 
 describe('fetchApiJson HTTP semantics', () => {
   beforeEach(() => {
