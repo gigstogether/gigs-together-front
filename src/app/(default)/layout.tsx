@@ -1,4 +1,4 @@
-import AppHeader from '@/app/_components/AppHeader';
+import Header from '@/components/header/Header';
 import type { ReactNode } from 'react';
 
 interface DefaultLayoutProps {
@@ -10,7 +10,7 @@ export default function DefaultLayout(props: DefaultLayoutProps) {
 
   return (
     <>
-      <AppHeader />
+      <Header />
       {children}
     </>
   );

@@ -9,7 +9,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 
-import type { AdminGigsSortBy } from '@/app/admin/gigs/admin-gigs-sort';
+import type { AdminGigsSortBy } from '@/app/admin/gigs/_lib/admin-gigs-sort';
 import {
   AdminGigsSortOrder,
   ADMIN_GIGS_SORT_BY_LABELS,
@@ -17,7 +17,7 @@ import {
   ADMIN_GIGS_SORT_ORDER_VALUES,
   getAdminGigsSortOrderLabel,
   getAdminGigsSortOrderShortLabel,
-} from '@/app/admin/gigs/admin-gigs-sort';
+} from '@/app/admin/gigs/_lib/admin-gigs-sort';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';

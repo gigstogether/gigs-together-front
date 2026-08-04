@@ -8,10 +8,10 @@ import {
   signOutTelegramAuthOnServer,
   subscribeTelegramMiniAppBootstrap,
   subscribeTelegramClientProfile,
-} from '@/lib/telegram-auth';
-import type { TelegramAuthExchangeResponse } from '@/types/telegram-auth-exchange-response';
-import type { TelegramAuthState } from '@/types/telegram-auth';
-import type { TelegramWidgetUser } from '@/types/telegram-login';
+} from '@/lib/telegram/telegram-auth';
+import type { TelegramAuthExchangeResponse } from '@/lib/telegram/telegram-auth-exchange-response.types';
+import type { TelegramAuthState } from '@/lib/telegram/telegram-auth.types';
+import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 
 function subscribeNoop(): () => void {
   return () => undefined;

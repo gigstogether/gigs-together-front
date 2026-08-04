@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { DEFAULT_FEED_PATH, DEFAULT_FEED_ROUTE } from '@/lib/feed.routes';
+import { DEFAULT_FEED_PATH, DEFAULT_FEED_ROUTE } from '@/lib/feed/feed.routes';
 
 interface GigPublicPageProps {
   params: Promise<{ publicId: string }>;

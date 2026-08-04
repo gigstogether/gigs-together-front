@@ -2,7 +2,7 @@ import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getFeedRevalidateSecretOrThrow } from '@/env/server-env';
-import { buildFeedPath, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed.routes';
+import { buildFeedPath, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed/feed.routes';
 import { isRecord } from '@/lib/is-record';
 
 export const runtime = 'nodejs';

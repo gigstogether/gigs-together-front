@@ -1,7 +1,7 @@
 import type { Route } from 'next';
 import Link from 'next/link';
 
-import { ADMIN_GIGS_ROUTE } from '@/app/admin/gigs/admin-gig-paths';
+import { ADMIN_GIGS_ROUTE } from '@/lib/admin-gig-paths';
 
 interface AdminGigDetailBackLinkProps {
   readonly returnHref?: Route | null;

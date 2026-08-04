@@ -1,4 +1,4 @@
-import { GigPoster } from '@/app/_components/GigPoster';
+import { GigPoster } from '@/components/GigPoster';
 
 interface AdminGigPreviewPosterProps {
   readonly posterUrl?: string;

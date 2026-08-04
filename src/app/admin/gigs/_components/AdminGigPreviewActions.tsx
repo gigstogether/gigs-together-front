@@ -2,12 +2,12 @@
 
 import type { ReactNode } from 'react';
 import type { Route } from 'next';
-import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/types';
-import { GigStatus } from '@/app/admin/gigs/types';
+import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/_lib/types';
+import { GigStatus } from '@/app/admin/gigs/_lib/types';
 import Link from 'next/link';
 import { Check, SquareArrowOutUpRight, Loader2, Megaphone, Pencil, X } from 'lucide-react';
-import { mapGigStatusFromAPI } from '@/app/admin/gigs/admin-gig-status';
-import { useAdminGigModerationActions } from '@/app/admin/gigs/use-admin-gig-moderation-actions';
+import { mapGigStatusFromAPI } from '@/app/admin/gigs/_lib/admin-gig-status';
+import { useAdminGigModerationActions } from '@/app/admin/gigs/_hooks/use-admin-gig-moderation-actions';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

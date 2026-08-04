@@ -1,5 +1,5 @@
 import AdminGigDetailBackLink from '@/app/admin/gigs/_components/AdminGigDetailBackLink';
-import AdminGigDetailPageClient from '@/app/admin/gigs/AdminGigDetailPageClient';
+import AdminGigDetailPageClient from '@/app/admin/gigs/_components/AdminGigDetailPageClient';
 
 interface AdminGigDetailPageProps {
   params: Promise<{ publicId: string }>;

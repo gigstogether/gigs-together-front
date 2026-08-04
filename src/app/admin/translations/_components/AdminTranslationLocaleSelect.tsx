@@ -5,7 +5,7 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useDismissOnPointerDownOutside } from '@/hooks/use-dismiss-on-pointer-down-outside';
-import type { SupportedLocale } from '@/lib/admin-api';
+import type { SupportedLocale } from '@/app/admin/_lib/admin-api';
 import { cn } from '@/lib/utils';
 
 interface AdminTranslationLocaleSelectProps {

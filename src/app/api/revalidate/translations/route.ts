@@ -6,7 +6,7 @@ import { isRecord } from '@/lib/is-record';
 import {
   buildTranslationNamespaceCacheTag,
   isValidTranslationNamespace,
-} from '@/lib/translation-identifiers';
+} from '@/lib/i18n/translation-identifiers';
 
 export const runtime = 'nodejs';
 
