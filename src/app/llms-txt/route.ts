@@ -5,7 +5,7 @@ import {
   LLMS_TRANSLATION_NAMESPACE,
   LlmsTxtContentError,
 } from './llms-txt-content';
-import { getTranslations } from '@/lib/translations.server';
+import { getTranslations } from '@/lib/i18n/translations.server';
 
 export async function GET(): Promise<Response> {
   if (!serverEnv.isProductionSite) {

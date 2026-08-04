@@ -10,7 +10,7 @@ import type {
   AdminTranslationRecord,
   SupportedLocale,
 } from '@/app/admin/_lib/admin-api';
-import { isValidTranslationNamespace } from '@/lib/translation-identifiers';
+import { isValidTranslationNamespace } from '@/lib/i18n/translation-identifiers';
 
 export interface AdminTranslationFilterOption<TValue extends string = string> {
   readonly value: TValue;

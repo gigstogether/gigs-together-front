@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { PutAdminTranslationBody, SupportedLocale } from '@/app/admin/_lib/admin-api';
 import { cn } from '@/lib/utils';
-import { isValidTranslationKey } from '@/lib/translation-identifiers';
+import { isValidTranslationKey } from '@/lib/i18n/translation-identifiers';
 
 interface AdminTranslationFormDialogBodyProps {
   readonly mode: 'create' | 'edit';

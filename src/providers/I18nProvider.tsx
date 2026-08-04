@@ -8,7 +8,7 @@ import {
   resolveTranslationValue,
   TranslationValueResolutionError,
 } from '@/lib/i18n/translation-value';
-import { isValidTranslationNamespace } from '@/lib/translation-identifiers';
+import { isValidTranslationNamespace } from '@/lib/i18n/translation-identifiers';
 
 export type { TParams };
 

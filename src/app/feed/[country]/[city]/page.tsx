@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import FeedClient from '../../_components/FeedClient';
 import { clientEnv } from '@/env/client-env';
 import { serverEnv } from '@/env/server-env';
-import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
+import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
 import { getFeed } from '@/app/feed/_lib/feed.server';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
 import {
@@ -12,7 +12,7 @@ import {
 } from '@/lib/feed/feed.routes';
 import { I18nProvider } from '@/providers/I18nProvider';
 import { resolveTranslationValue } from '@/lib/i18n/translation-value';
-import { getTranslations } from '@/lib/translations.server';
+import { getTranslations } from '@/lib/i18n/translations.server';
 import type { Event } from '@/lib/types';
 
 const PAGE_SIZE = clientEnv.feedPageSize;

@@ -2,7 +2,7 @@ import {
   buildTranslationNamespaceCacheTag,
   isValidTranslationKey,
   isValidTranslationNamespace,
-} from '@/lib/translation-identifiers';
+} from '@/lib/i18n/translation-identifiers';
 
 describe('isValidTranslationNamespace', () => {
   it('should accept camelCase namespaces', () => {

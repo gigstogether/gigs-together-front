@@ -6,7 +6,7 @@ import type { V1LocaleGetTranslationsResponseBody } from '@/lib/api-boundary-sch
 import {
   buildTranslationNamespaceCacheTag,
   isValidTranslationNamespace,
-} from '@/lib/translation-identifiers';
+} from '@/lib/i18n/translation-identifiers';
 import { serverEnv } from '@/env/server-env';
 import type { LocaleIso } from '@/lib/types';
 

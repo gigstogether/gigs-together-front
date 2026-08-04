@@ -24,7 +24,9 @@ describe('getTranslations', () => {
   });
 
   it('should throw GetTranslationsError when namespaces are omitted', async () => {
-    const { GetTranslationsError, getTranslations } = await import('@/lib/translations.server');
+    const { GetTranslationsError, getTranslations } = await import(
+      '@/lib/i18n/translations.server'
+    );
 
     await expect(getTranslations('en', [])).rejects.toSatisfy(
       (error: unknown) =>
@@ -35,7 +37,9 @@ describe('getTranslations', () => {
   });
 
   it('should throw GetTranslationsError when namespace is invalid', async () => {
-    const { GetTranslationsError, getTranslations } = await import('@/lib/translations.server');
+    const { GetTranslationsError, getTranslations } = await import(
+      '@/lib/i18n/translations.server'
+    );
 
     await expect(getTranslations('en', ['$invalid'])).rejects.toSatisfy(
       (error: unknown) =>
@@ -46,7 +50,7 @@ describe('getTranslations', () => {
   });
 
   it('should tag fetch with per-namespace tags when namespaces are requested', async () => {
-    const { getTranslations } = await import('@/lib/translations.server');
+    const { getTranslations } = await import('@/lib/i18n/translations.server');
 
     await getTranslations('en', ['about', 'country']);
 
@@ -64,7 +68,7 @@ describe('getTranslations', () => {
   });
 
   it('should dedupe repeated namespaces before fetch', async () => {
-    const { getTranslations } = await import('@/lib/translations.server');
+    const { getTranslations } = await import('@/lib/i18n/translations.server');
 
     await getTranslations('en', ['about', 'about']);
 

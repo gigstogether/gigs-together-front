@@ -32,7 +32,7 @@ import type {
   AdminTranslationRecord,
   PutAdminTranslationBody,
 } from '@/app/admin/_lib/admin-api';
-import { isValidTranslationNamespace } from '@/lib/translation-identifiers';
+import { isValidTranslationNamespace } from '@/lib/i18n/translation-identifiers';
 
 const DEFAULT_NEW_TRANSLATION_KIND: AdminTranslationKind = 'text';
 
