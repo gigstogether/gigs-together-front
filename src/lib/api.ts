@@ -1,8 +1,11 @@
 import { fetchApiJson } from '@/lib/api-core';
 import type { FetchApiJsonOptions } from '@/lib/api-core';
 import { logger } from '@/lib/logger';
-import { clearStoredTelegramClientProfile, requestTelegramSignIn } from '@/lib/telegram-auth';
-import { isTelegramMiniApp } from '@/lib/telegram-webapp';
+import {
+  clearStoredTelegramClientProfile,
+  requestTelegramSignIn,
+} from '@/lib/telegram/telegram-auth';
+import { isTelegramMiniApp } from '@/lib/telegram/telegram-webapp';
 
 export {
   ApiError,

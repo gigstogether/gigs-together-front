@@ -1,9 +1,9 @@
 'use client';
 
 import AdminTranslationFormDialogBody from '@/app/admin/translations/_components/AdminTranslationFormDialogBody';
-import type { AdminTranslationFormValues } from '@/app/admin/translations/admin-translation-form.types';
+import type { AdminTranslationFormValues } from '@/app/admin/translations/_lib/admin-translation-form.types';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import type { PutAdminTranslationBody, SupportedLocale } from '@/lib/admin-api';
+import type { PutAdminTranslationBody, SupportedLocale } from '@/app/admin/_lib/admin-api';
 
 interface AdminTranslationFormDialogProps {
   readonly mode: 'create' | 'edit';

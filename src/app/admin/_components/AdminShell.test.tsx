@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 
 import AdminShell from '@/app/admin/_components/AdminShell';
-import { stubResizeObserver } from '@/test-utils/moderator-telegram-session-mock';
+import { stubResizeObserver } from '@/test/moderator-telegram-session-mock';
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/admin',

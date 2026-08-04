@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState } from 'react';
-import { isTelegramMiniApp } from '@/lib/telegram-webapp';
+import { isTelegramMiniApp } from '@/lib/telegram/telegram-webapp';
 
 export type TelegramMiniAppEnv = 'unknown' | 'mini' | 'browser';
 

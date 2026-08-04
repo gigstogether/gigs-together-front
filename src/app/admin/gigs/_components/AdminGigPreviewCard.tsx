@@ -1,4 +1,4 @@
-import type { AdminGigDetail } from '@/app/admin/gigs/types';
+import type { AdminGigDetail } from '@/app/admin/gigs/_lib/types';
 import AdminGigCard from '@/app/admin/gigs/_components/AdminGigCard';
 
 interface AdminGigPreviewCardProps {

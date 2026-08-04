@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import AdminGigsPageClient from '@/app/admin/gigs/AdminGigsPageClient';
+import AdminGigsPageClient from '@/app/admin/gigs/_components/AdminGigsPageClient';
 
 export default function AdminGigsPage() {
   return (

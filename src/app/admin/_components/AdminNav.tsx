@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { adminNavItems } from '@/app/admin/admin-nav-config';
+import { adminNavItems } from '@/app/admin/_lib/admin-nav-config';
 import { cn } from '@/lib/utils';
 
 interface AdminNavProps {

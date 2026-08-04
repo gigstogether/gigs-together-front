@@ -23,9 +23,9 @@ Apply these rules to the whole repository unless a more specific instruction exi
 
 - Do not run `build`, `dev`, or start watchers or servers unless the user explicitly asks.
 - If command execution is needed to validate a change, ask first instead of running it proactively.
-- After source code changes (`*.ts`, `*.tsx`, `*.js`, `*.jsx`, `*.json`), run `npm run lint:fix` before finishing the task without asking the user.
+- After source code changes (`*.ts`, `*.tsx`, `*.js`, `*.jsx`, `*.json`), run `npm run lint:fix` and `npx tsc --noEmit` before finishing the task without asking the user.
 - If necessary for the task, it's allowed to run relevant tests without asking the user.
-- Do not run lint after documentation-only changes (for example `*.md`).
+- Do not run lint or `tsc` after documentation-only changes (for example `*.md`).
 
 ## Secrets Access Policy
 
@@ -113,6 +113,36 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Do not add a new file when the code has a **single call site** — colocate it in the existing module (component, service, route, or parser) instead.
 - Extract to a shared file only when there are **multiple consumers**, or when the boundary is already established (HTTP parsers, hooks reused across routes, module public API).
 - Prefer extending an existing file in the same feature area over creating parallel one-off helpers.
+
+## App Router colocation
+
+Under `src/app/`, colocate code with the route it belongs to. **Shared** code lives **outside** `app/` in established top-level folders — not in `app/_components`, `app/_lib`, `app/_hooks`, or `app/_providers`.
+
+```
+src/
+├── components/        # shared UI (outside app)
+├── hooks/             # shared React hooks (outside app)
+├── lib/               # shared non-hook logic (outside app)
+├── providers/         # shared context providers (outside app)
+│
+└── app/
+    ├── dashboard/
+    │   ├── _components/   # dashboard segment only
+    │   ├── _hooks/          # dashboard segment only
+    │   ├── _lib/            # dashboard segment only
+    │   ├── _providers/      # dashboard segment only
+    │   └── page.tsx
+    │
+    └── page.tsx
+```
+
+- **Default:** new code lives next to its route — UI in `_components/`, React hooks in `_hooks/`, other non-UI logic (parsers, API clients, constants, reducers) in `_lib/`, context providers in `_providers/`. Keep `page.tsx`, `layout.tsx`, and other Next.js route files at the route root.
+- **Hooks vs lib:** put React hooks (`use*`) in `_hooks/` (or `src/hooks/` when shared across segments). Keep `_lib/` for non-hook modules. Do not mix hooks into `_lib/` files.
+- **Providers:** place React context providers in `_providers/` under the route segment they belong to. Providers reused across unrelated route segments live in `src/providers/` (outside `app/`). Do not put providers in `_components/` or `_hooks/`.
+- **Provider modules:** colocate the context, provider component, and its consumer hook in **one file** under `_providers/` or `src/providers/`. Export only what callers outside the module need (typically the provider component, the hook, and public types).
+- **Lift within a segment:** when a **second real consumer** appears under the same route subtree, move shared code to the nearest common route ancestor’s `_components` / `_hooks` / `_lib` / `_providers` (for example from `app/admin/gigs/_lib/` to `app/admin/_lib/`). Do not pre-extract for a single consumer.
+- **Lift across segments:** when code is reused across unrelated route segments, move it out of `app/` into the appropriate top-level folder (`src/components/`, `src/hooks/`, `src/lib/`, `src/providers/`, etc.), matching existing project conventions.
+- **Shared-by-nature exception:** code may live in the matching top-level folder even with one consumer when it is **domain-agnostic** — reusable UI, browser behavior, parsers, constants, or types with no route-specific or feature-specific logic. Put it in the appropriate shared folder (`src/hooks/`, `src/lib/`, `src/components/`, `src/providers/`, or a bounded subfolder such as `src/lib/telegram/`). Prefer segment colocation when the module encodes segment rules, copy, workflows, or admin-only behavior (for example admin sign-in gating, initData-expired toasts). When unsure, colocate first; lift once reuse is likely or the module is clearly generic.
 
 ## Legacy and backward compatibility
 

@@ -2,8 +2,8 @@
 
 import { ShareButton } from '@/components/ShareButton';
 import { cn } from '@/lib/utils';
-import type { GigStatus } from '@/app/admin/gigs/types';
-import { GIG_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gigs/admin-gig-status';
+import type { GigStatus } from '@/app/admin/gigs/_lib/types';
+import { GIG_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gigs/_lib/admin-gig-status';
 
 interface AdminGigPreviewTitleRowProps {
   readonly title: string;

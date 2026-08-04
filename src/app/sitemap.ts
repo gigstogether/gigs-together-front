@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getAppBaseUrlOrThrow, serverEnv } from '@/env/server-env';
-import { SUPPORTED_FEED_LOCATIONS, buildFeedPath } from '@/lib/feed.routes';
+import { SUPPORTED_FEED_LOCATIONS, buildFeedPath } from '@/lib/feed/feed.routes';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   if (!serverEnv.isProductionSite) {

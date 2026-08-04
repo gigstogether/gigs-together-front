@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import AdminTranslationNamespaceCombobox from '@/app/admin/translations/_components/AdminTranslationNamespaceCombobox';
-import { stubResizeObserver } from '@/test-utils/moderator-telegram-session-mock';
+import { stubResizeObserver } from '@/test/moderator-telegram-session-mock';
 
 describe('AdminTranslationNamespaceCombobox', () => {
   beforeEach(() => {
