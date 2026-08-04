@@ -39,6 +39,15 @@ function isTelegramWebAppAuthEndpoint(endpointOrUrl: string): boolean {
   return endpointOrUrl.includes('v1/auth/telegram/web-app');
 }
 
+function isJsonContentType(contentType: string): boolean {
+  const mediaType = contentType.split(';', 1)[0]?.trim().toLowerCase();
+  return mediaType === 'application/json' || mediaType?.endsWith('+json') === true;
+}
+
+function hasNoResponseBody(method: HttpMethod, response: Response): boolean {
+  return method === 'HEAD' || response.status === 204 || response.status === 205;
+}
+
 let authRefreshPromise: Promise<boolean> | null = null;
 let telegramMiniAppReauthPromise: Promise<boolean> | null = null;
 
@@ -106,21 +115,20 @@ export async function fetchApiJson<TResponse>(
     credentials,
     ...fetchInit
   } = init;
+  const hasRequestBody = method !== 'GET' && method !== 'HEAD' && data !== undefined;
   const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
 
   const headers = new Headers(fetchInit.headers);
-  if (isFormData) {
+  if (!headers.has('Accept')) {
+    headers.set('Accept', 'application/json');
+  }
+  if (hasRequestBody && isFormData) {
     if (headers.has('Content-Type')) headers.delete('Content-Type');
-  } else if (!headers.has('Content-Type')) {
+  } else if (hasRequestBody && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
 
-  const body =
-    method !== 'GET' && method !== 'HEAD' && data !== undefined
-      ? isFormData
-        ? data
-        : JSON.stringify(data)
-      : undefined;
+  const body = hasRequestBody ? (isFormData ? data : JSON.stringify(data)) : undefined;
 
   const response = await fetch(buildUrl(endpointOrUrl), {
     ...fetchInit,
@@ -159,10 +167,12 @@ export async function fetchApiJson<TResponse>(
     }
   }
 
-  const contentType = response.headers.get('Content-Type') || '';
-  const isJson = contentType.includes('application/json');
-
-  const result = isJson ? await response.json() : await response.text();
+  const contentType = response.headers.get('Content-Type') ?? '';
+  const result = hasNoResponseBody(method, response)
+    ? undefined
+    : isJsonContentType(contentType)
+      ? await response.json()
+      : await response.text();
 
   if (!response.ok) {
     if (response.status === 401 && onUnauthorized) {
@@ -175,7 +185,7 @@ export async function fetchApiJson<TResponse>(
       const code = typeof r.code === 'string' ? r.code : undefined;
       throw new ApiError(msg, response.status, code);
     }
-    throw new Error(typeof result === 'string' ? result : 'Something went wrong');
+    throw new Error(typeof result === 'string' && result ? result : 'Something went wrong');
   }
 
   return result as TResponse;
