@@ -1,7 +1,15 @@
 import { redirect } from 'next/navigation';
 import { DEFAULT_FEED_ROUTE } from '@/lib/feed/feed.routes';
 
-export default async function Page(props: PageProps<'/feed/[country]'>) {
+interface FeedCountryRouteParams {
+  readonly country: string;
+}
+
+interface FeedCountryPageProps {
+  readonly params: Promise<FeedCountryRouteParams>;
+}
+
+export default async function Page(props: FeedCountryPageProps) {
   const { country } = await props.params;
   const normalizedCountry = decodeURIComponent(country).trim().toLowerCase();
 

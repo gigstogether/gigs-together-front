@@ -25,7 +25,16 @@ export async function generateStaticParams() {
   return SUPPORTED_FEED_LOCATIONS.map((x) => ({ country: x.country, city: x.city }));
 }
 
-export default async function Page(props: PageProps<'/feed/[country]/[city]'>) {
+interface FeedCityRouteParams {
+  readonly country: string;
+  readonly city: string;
+}
+
+interface FeedCityPageProps {
+  readonly params: Promise<FeedCityRouteParams>;
+}
+
+export default async function Page(props: FeedCityPageProps) {
   const { country, city } = await props.params;
   const normalizedCountry = normalizeSegment(country);
   const normalizedCity = normalizeSegment(city);
