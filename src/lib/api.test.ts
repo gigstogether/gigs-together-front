@@ -36,7 +36,7 @@ describe('apiRequest', () => {
     fetchApiJsonMock.mockResolvedValue({ ok: true });
   });
 
-  it('should call fetchApiJson with include credentials and onUnauthorized', async () => {
+  it('should call fetchApiJson with session credentials, session recovery, and onUnauthorized', async () => {
     await apiRequest('v1/admin/dashboard', 'GET');
 
     expect(fetchApiJsonMock).toHaveBeenCalledWith(
@@ -45,6 +45,7 @@ describe('apiRequest', () => {
       undefined,
       expect.objectContaining({
         credentials: 'include',
+        authRecovery: 'session',
         onUnauthorized: expect.any(Function),
       }),
     );
@@ -71,7 +72,7 @@ describe('apiPublicRequest', () => {
     fetchApiJsonMock.mockResolvedValue({ ok: true });
   });
 
-  it('should call fetchApiJson with omit credentials and without onUnauthorized', async () => {
+  it('should call fetchApiJson with omit credentials, no session recovery, and without onUnauthorized', async () => {
     await apiPublicRequest('v1/gig?limit=10', 'GET');
 
     expect(fetchApiJsonMock).toHaveBeenCalledWith(
@@ -80,6 +81,7 @@ describe('apiPublicRequest', () => {
       undefined,
       expect.objectContaining({
         credentials: 'omit',
+        authRecovery: 'none',
       }),
     );
 

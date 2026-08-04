@@ -6,12 +6,19 @@ type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 const API_BASE_URL = clientEnv.appApiBaseUrl;
 
+export type ApiAuthRecoveryPolicy = 'none' | 'session';
+
 export interface FetchApiJsonOptions extends Omit<RequestInit, 'credentials'> {
   /**
    * Must be set explicitly at every call site.
    * Use `include` for cookie/session requests and `omit` for public cacheable GETs.
    */
   credentials: RequestCredentials;
+  /**
+   * `none` returns the original 401 without session recovery.
+   * `session` tries token refresh and Telegram Mini App re-auth.
+   */
+  authRecovery: ApiAuthRecoveryPolicy;
   onUnauthorized?: () => void;
   /**
    * Internal: set after one `POST v1/auth/refresh` so a second 401 does not loop refresh.
@@ -109,12 +116,14 @@ export async function fetchApiJson<TResponse>(
   init: FetchApiJsonOptions,
 ): Promise<TResponse> {
   const {
+    authRecovery,
     onUnauthorized,
     hasAttemptedTokenRefresh,
     hasAttemptedTelegramMiniAppReauth,
     credentials,
     ...fetchInit
   } = init;
+  const shouldRecoverSession = authRecovery === 'session';
   const hasRequestBody = method !== 'GET' && method !== 'HEAD' && data !== undefined;
   const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
 
@@ -139,6 +148,7 @@ export async function fetchApiJson<TResponse>(
   });
 
   if (
+    shouldRecoverSession &&
     response.status === 401 &&
     !hasAttemptedTokenRefresh &&
     !isAuthRefreshEndpoint(endpointOrUrl)
@@ -153,6 +163,7 @@ export async function fetchApiJson<TResponse>(
   }
 
   if (
+    shouldRecoverSession &&
     response.status === 401 &&
     !hasAttemptedTelegramMiniAppReauth &&
     !isAuthRefreshEndpoint(endpointOrUrl) &&

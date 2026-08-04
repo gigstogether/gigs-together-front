@@ -1,4 +1,7 @@
-const PUBLIC_CREDENTIALS_1 = { credentials: 'omit' as const };
+const PUBLIC_REQUEST_OPTIONS = {
+  credentials: 'omit' as const,
+  authRecovery: 'none' as const,
+};
 
 describe('fetchApiJson HTTP semantics', () => {
   beforeEach(() => {
@@ -22,7 +25,7 @@ describe('fetchApiJson HTTP semantics', () => {
 
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET', undefined, PUBLIC_CREDENTIALS_1);
+    await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET', undefined, PUBLIC_REQUEST_OPTIONS);
 
     const requestHeaders = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
     expect(requestHeaders.get('Accept')).toBe('application/json');
@@ -41,7 +44,7 @@ describe('fetchApiJson HTTP semantics', () => {
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await fetchApiJson<{ ok: boolean }>('v1/gig', 'GET', undefined, {
-      ...PUBLIC_CREDENTIALS_1,
+      ...PUBLIC_REQUEST_OPTIONS,
       headers: { Accept: 'application/vnd.gigstogether+json' },
     });
 
@@ -66,7 +69,7 @@ describe('fetchApiJson HTTP semantics', () => {
 
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig', 'GET', undefined, PUBLIC_CREDENTIALS_1);
+    const action = fetchApiJson('v1/gig', 'GET', undefined, PUBLIC_REQUEST_OPTIONS);
 
     await expect(action).rejects.toMatchObject({
       name: 'ApiError',
@@ -88,7 +91,7 @@ describe('fetchApiJson HTTP semantics', () => {
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await expect(
-      fetchApiJson<void>('v1/admin/gig/demo/approve', 'POST', undefined, PUBLIC_CREDENTIALS_1),
+      fetchApiJson<void>('v1/admin/gig/demo/approve', 'POST', undefined, PUBLIC_REQUEST_OPTIONS),
     ).resolves.toBeUndefined();
   });
 
@@ -104,7 +107,9 @@ describe('fetchApiJson HTTP semantics', () => {
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await expect(
-      fetchApiJson<void>('v1/gig', 'HEAD', undefined, PUBLIC_CREDENTIALS_1),
+      fetchApiJson<void>('v1/gig', 'HEAD', undefined, PUBLIC_REQUEST_OPTIONS),
     ).resolves.toBeUndefined();
   });
 });
+
+export {};

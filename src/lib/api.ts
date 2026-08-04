@@ -15,7 +15,7 @@ export {
 
 type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-type ApiRequestInit = Omit<FetchApiJsonOptions, 'credentials' | 'onUnauthorized'>;
+type ApiRequestInit = Omit<FetchApiJsonOptions, 'credentials' | 'authRecovery' | 'onUnauthorized'>;
 
 /**
  * Authenticated / session API call. Sends cookies and runs sign-in recovery on 401.
@@ -32,6 +32,7 @@ export async function apiRequest<TResponse = unknown, TBody = unknown>(
       ...init,
       headers,
       credentials: 'include',
+      authRecovery: 'session',
       onUnauthorized: () => {
         clearStoredTelegramClientProfile();
         if (!isTelegramMiniApp()) {
@@ -46,8 +47,8 @@ export async function apiRequest<TResponse = unknown, TBody = unknown>(
 }
 
 /**
- * Public API call. Omits cookies so Next can cache server fetches for SSG/ISR.
- * Does not trigger sign-in UI on 401.
+ * Public API call. Omits cookies and disables session recovery.
+ * Next.js cache behavior is configured explicitly at each server call site.
  */
 export async function apiPublicRequest<TResponse = unknown, TBody = unknown>(
   endpointOrUrl: string,
@@ -61,6 +62,7 @@ export async function apiPublicRequest<TResponse = unknown, TBody = unknown>(
       ...init,
       headers,
       credentials: 'omit',
+      authRecovery: 'none',
     });
   } catch (e) {
     logger.errorFromUnknown('api_public_request_failed', e, { endpointOrUrl, method });
