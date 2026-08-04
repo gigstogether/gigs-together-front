@@ -7,7 +7,7 @@ import type {
   GigStatusFilter,
 } from '@/app/admin/gigs/_lib/types';
 import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
-import { apiRequest } from '@/lib/api';
+import { apiClientRequest } from '@/lib/api-session-client';
 import { isRecord } from '@/lib/is-record';
 
 const V1_ADMIN_API_PREFIX = 'v1/admin/';
@@ -305,17 +305,17 @@ function buildAdminTranslationsEndpoint(params: FetchAdminTranslationsParams): s
 }
 
 export async function fetchAdminDashboard(): Promise<AdminDashboard> {
-  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}dashboard`, 'GET');
+  const raw = await apiClientRequest<unknown>(`${V1_ADMIN_API_PREFIX}dashboard`, 'GET');
   return parseAdminDashboard(raw);
 }
 
 export async function fetchAdminLocales(): Promise<readonly SupportedLocale[]> {
-  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}locales`, 'GET');
+  const raw = await apiClientRequest<unknown>(`${V1_ADMIN_API_PREFIX}locales`, 'GET');
   return parseAdminLocalesList(raw);
 }
 
 export async function fetchAdminGigs(params: FetchAdminGigsParams): Promise<AdminGigsList> {
-  const raw = await apiRequest<unknown>(buildAdminGigsEndpoint(params), 'GET');
+  const raw = await apiClientRequest<unknown>(buildAdminGigsEndpoint(params), 'GET');
   return parseAdminGigsList(raw);
 }
 
@@ -323,9 +323,14 @@ export async function fetchAdminGigByPublicId(
   params: FetchAdminGigByPublicIdParams,
 ): Promise<AdminGigFormData> {
   const publicId = encodeURIComponent(params.publicId.trim());
-  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}gig/${publicId}`, 'GET', undefined, {
-    signal: params.signal,
-  });
+  const raw = await apiClientRequest<unknown>(
+    `${V1_ADMIN_API_PREFIX}gig/${publicId}`,
+    'GET',
+    undefined,
+    {
+      signal: params.signal,
+    },
+  );
   return parseAdminGigFormData(raw);
 }
 
@@ -333,7 +338,7 @@ export async function patchAdminLocale(
   iso: string,
   body: PatchAdminLocaleBody,
 ): Promise<SupportedLocale> {
-  const raw = await apiRequest<unknown>(
+  const raw = await apiClientRequest<unknown>(
     `${V1_ADMIN_API_PREFIX}locales/${encodeURIComponent(iso)}`,
     'PATCH',
     body,
@@ -344,28 +349,31 @@ export async function patchAdminLocale(
 export async function patchAdminLocalesOrder(
   locales: readonly LocaleOrderUpdate[],
 ): Promise<readonly SupportedLocale[]> {
-  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}locales/order`, 'PATCH', {
+  const raw = await apiClientRequest<unknown>(`${V1_ADMIN_API_PREFIX}locales/order`, 'PATCH', {
     locales,
   });
   return parseAdminLocalesList(raw);
 }
 
 export async function fetchAdminTranslationNamespaces(): Promise<readonly string[]> {
-  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}translations/namespaces`, 'GET');
+  const raw = await apiClientRequest<unknown>(
+    `${V1_ADMIN_API_PREFIX}translations/namespaces`,
+    'GET',
+  );
   return parseAdminTranslationNamespacesList(raw);
 }
 
 export async function fetchAdminTranslations(
   params: FetchAdminTranslationsParams,
 ): Promise<readonly AdminTranslationRecord[]> {
-  const raw = await apiRequest<unknown>(buildAdminTranslationsEndpoint(params), 'GET');
+  const raw = await apiClientRequest<unknown>(buildAdminTranslationsEndpoint(params), 'GET');
   return parseAdminTranslationsList(raw);
 }
 
 export async function putAdminTranslation(
   body: PutAdminTranslationBody,
 ): Promise<AdminTranslationRecord> {
-  const raw = await apiRequest<unknown>(`${V1_ADMIN_API_PREFIX}translations`, 'PUT', body);
+  const raw = await apiClientRequest<unknown>(`${V1_ADMIN_API_PREFIX}translations`, 'PUT', body);
   return parseAdminTranslationRecord(raw);
 }
 
@@ -373,7 +381,7 @@ export async function patchAdminTranslationActive(
   id: string,
   body: PatchAdminTranslationActiveBody,
 ): Promise<AdminTranslationRecord> {
-  const raw = await apiRequest<unknown>(
+  const raw = await apiClientRequest<unknown>(
     `${V1_ADMIN_API_PREFIX}translations/${encodeURIComponent(id.trim())}/active`,
     'PATCH',
     body,
@@ -383,27 +391,27 @@ export async function patchAdminTranslationActive(
 
 export function postAdminGigApprove(publicId: string): Promise<void> {
   const encodedPublicId = encodeURIComponent(publicId.trim());
-  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/approve`, 'POST');
+  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/approve`, 'POST');
 }
 
 export function postAdminGigReject(publicId: string): Promise<void> {
   const encodedPublicId = encodeURIComponent(publicId.trim());
-  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/reject`, 'POST');
+  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/reject`, 'POST');
 }
 
 export function postAdminGigPost(publicId: string): Promise<void> {
   const encodedPublicId = encodeURIComponent(publicId.trim());
-  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/post`, 'POST');
+  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/post`, 'POST');
 }
 
 export function postAdminDigestPublish(): Promise<void> {
-  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}digest/publish`, 'POST');
+  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}digest/publish`, 'POST');
 }
 
 export function postAdminFeedRevalidate(): Promise<void> {
-  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}feed/revalidate`, 'POST');
+  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}feed/revalidate`, 'POST');
 }
 
 export function postAdminTranslationsRevalidate(): Promise<void> {
-  return apiRequest<void>(`${V1_ADMIN_API_PREFIX}translations/revalidate`, 'POST');
+  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}translations/revalidate`, 'POST');
 }

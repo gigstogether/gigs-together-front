@@ -8,26 +8,12 @@ const { fetchApiJsonMock } = vi.hoisted(() => ({
   fetchApiJsonMock: vi.fn(),
 }));
 
-const { clearStoredTelegramClientProfileMock, requestTelegramSignInMock } = vi.hoisted(() => ({
-  clearStoredTelegramClientProfileMock: vi.fn(),
-  requestTelegramSignInMock: vi.fn(),
-}));
-
 vi.mock('@/lib/api-session-recovery', () => ({
   fetchApiJsonWithSessionRecovery: fetchApiJsonWithSessionRecoveryMock,
 }));
 
 vi.mock('@/lib/api-core', () => ({
   fetchApiJson: fetchApiJsonMock,
-}));
-
-vi.mock('@/lib/telegram/telegram-auth', () => ({
-  clearStoredTelegramClientProfile: clearStoredTelegramClientProfileMock,
-  requestTelegramSignIn: requestTelegramSignInMock,
-}));
-
-vi.mock('@/lib/telegram/telegram-webapp', () => ({
-  isTelegramMiniApp: () => false,
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -39,12 +25,10 @@ vi.mock('@/lib/logger', () => ({
 describe('apiRequest', () => {
   beforeEach(() => {
     fetchApiJsonWithSessionRecoveryMock.mockReset();
-    clearStoredTelegramClientProfileMock.mockReset();
-    requestTelegramSignInMock.mockReset();
     fetchApiJsonWithSessionRecoveryMock.mockResolvedValue({ ok: true });
   });
 
-  it('should delegate to session recovery coordinator with onUnauthorized callback', async () => {
+  it('should delegate to session recovery coordinator without onUnauthorized', async () => {
     await apiRequest('v1/admin/dashboard', 'GET');
 
     expect(fetchApiJsonWithSessionRecoveryMock).toHaveBeenCalledWith(
@@ -52,21 +36,16 @@ describe('apiRequest', () => {
       'GET',
       undefined,
       expect.objectContaining({
-        onUnauthorized: expect.any(Function),
+        init: expect.objectContaining({
+          headers: expect.any(Headers),
+        }),
       }),
     );
-  });
-
-  it('should trigger sign-in recovery when onUnauthorized runs', async () => {
-    await apiRequest('v1/admin/dashboard', 'GET');
 
     const options = fetchApiJsonWithSessionRecoveryMock.mock.calls[0]?.[3] as {
       onUnauthorized?: () => void;
     };
-    options.onUnauthorized?.();
-
-    expect(clearStoredTelegramClientProfileMock).toHaveBeenCalledTimes(1);
-    expect(requestTelegramSignInMock).toHaveBeenCalledTimes(1);
+    expect(options.onUnauthorized).toBeUndefined();
   });
 });
 

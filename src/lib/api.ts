@@ -2,11 +2,6 @@ import { fetchApiJson } from '@/lib/api-core';
 import type { FetchApiJsonOptions } from '@/lib/api-core';
 import { fetchApiJsonWithSessionRecovery } from '@/lib/api-session-recovery';
 import { logger } from '@/lib/logger';
-import {
-  clearStoredTelegramClientProfile,
-  requestTelegramSignIn,
-} from '@/lib/telegram/telegram-auth';
-import { isTelegramMiniApp } from '@/lib/telegram/telegram-webapp';
 
 export {
   ApiError,
@@ -19,7 +14,8 @@ type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 type ApiRequestInit = Omit<FetchApiJsonOptions, 'credentials'>;
 
 /**
- * Authenticated / session API call. Sends cookies and runs sign-in recovery on 401.
+ * Session API call with cookie auth and transport-level session recovery.
+ * Does not trigger client sign-in UI; use {@link apiClientRequest} in browser code.
  */
 export async function apiRequest<TResponse = unknown, TBody = unknown>(
   endpointOrUrl: string,
@@ -33,12 +29,6 @@ export async function apiRequest<TResponse = unknown, TBody = unknown>(
       init: {
         ...init,
         headers,
-      },
-      onUnauthorized: () => {
-        clearStoredTelegramClientProfile();
-        if (!isTelegramMiniApp()) {
-          requestTelegramSignIn();
-        }
       },
     });
   } catch (e) {
