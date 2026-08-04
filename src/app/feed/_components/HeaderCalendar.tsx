@@ -1,7 +1,7 @@
 import 'server-only';
 
 import HeaderCalendarClient from '@/app/feed/_components/HeaderCalendarClient';
-import { getAvailableGigDates } from '@/app/feed/_lib/get-available-gig-dates.server';
+import { getAvailableGigDates } from '@/app/feed/_lib/feed.server';
 
 export interface HeaderCalendarProps {
   readonly country: string;

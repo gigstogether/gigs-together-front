@@ -3,7 +3,7 @@ import FeedClient from '../../_components/FeedClient';
 import { clientEnv } from '@/env/client-env';
 import { serverEnv } from '@/env/server-env';
 import { countryIsoToTranslationKey } from '@/lib/country-iso-to-translation-key';
-import { getFeed } from '@/app/feed/_lib/get-feed.server';
+import { getFeed } from '@/app/feed/_lib/feed.server';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
 import {
   DEFAULT_FEED_ROUTE,

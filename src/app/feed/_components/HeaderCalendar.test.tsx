@@ -4,7 +4,7 @@ vi.mock('server-only', () => ({}));
 
 const mockGetAvailableGigDates = vi.hoisted(() => vi.fn());
 
-vi.mock('@/app/feed/_lib/get-available-gig-dates.server', () => ({
+vi.mock('@/app/feed/_lib/feed.server', () => ({
   getAvailableGigDates: mockGetAvailableGigDates,
 }));
 
