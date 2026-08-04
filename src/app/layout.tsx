@@ -6,7 +6,6 @@ import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
 import TelegramWebAppScript from '@/components/TelegramWebAppScript';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
-import { NON_PRODUCTION_ROBOTS } from '@/lib/non-production-robots';
 
 const SITE_BASE_URL = serverEnv.appBaseUrl;
 
@@ -62,6 +61,16 @@ const socialMetadata = {
     images: [previewImage],
   },
 } satisfies Pick<Metadata, 'openGraph' | 'twitter'>;
+
+const NON_PRODUCTION_ROBOTS: NonNullable<Metadata['robots']> = {
+  index: false,
+  follow: false,
+  nocache: true,
+  googleBot: {
+    index: false,
+    follow: false,
+  },
+};
 
 export const metadata: Metadata = serverEnv.isProductionSite
   ? {
