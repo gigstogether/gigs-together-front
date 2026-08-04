@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { apiPublicRequest } from '@/lib/api';
+import { apiPublicRequest } from '@/lib/api-public';
 import { parseCountries } from '@/lib/api-boundary-schemas';
 
 export interface Country {

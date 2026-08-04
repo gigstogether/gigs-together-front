@@ -1,19 +1,11 @@
-import { apiPublicRequest, apiRequest } from '@/lib/api';
+import { apiRequest } from '@/lib/api';
 
 const { fetchApiJsonWithSessionRecoveryMock } = vi.hoisted(() => ({
   fetchApiJsonWithSessionRecoveryMock: vi.fn(),
 }));
 
-const { fetchApiJsonMock } = vi.hoisted(() => ({
-  fetchApiJsonMock: vi.fn(),
-}));
-
 vi.mock('@/lib/api-session-recovery', () => ({
   fetchApiJsonWithSessionRecovery: fetchApiJsonWithSessionRecoveryMock,
-}));
-
-vi.mock('@/lib/api-core', () => ({
-  fetchApiJson: fetchApiJsonMock,
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -46,27 +38,5 @@ describe('apiRequest', () => {
       onUnauthorized?: () => void;
     };
     expect(options.onUnauthorized).toBeUndefined();
-  });
-});
-
-describe('apiPublicRequest', () => {
-  beforeEach(() => {
-    fetchApiJsonMock.mockReset();
-    fetchApiJsonWithSessionRecoveryMock.mockReset();
-    fetchApiJsonMock.mockResolvedValue({ ok: true });
-  });
-
-  it('should call pure transport with omit credentials and without session recovery', async () => {
-    await apiPublicRequest('v1/gig?limit=10', 'GET');
-
-    expect(fetchApiJsonMock).toHaveBeenCalledWith(
-      'v1/gig?limit=10',
-      'GET',
-      undefined,
-      expect.objectContaining({
-        credentials: 'omit',
-      }),
-    );
-    expect(fetchApiJsonWithSessionRecoveryMock).not.toHaveBeenCalled();
   });
 });

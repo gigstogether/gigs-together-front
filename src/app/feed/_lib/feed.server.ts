@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { apiPublicRequest } from '@/lib/api';
+import { apiPublicRequest } from '@/lib/api-public';
 import {
   parseV1GigDatesGetResponseBody,
   parseV1GigGetResponseBody,

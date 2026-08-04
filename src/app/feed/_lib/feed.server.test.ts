@@ -4,7 +4,7 @@ const { feedServerApiPublicRequestMock } = vi.hoisted(() => ({
 
 vi.mock('server-only', () => ({}));
 
-vi.mock('@/lib/api', () => ({
+vi.mock('@/lib/api-public', () => ({
   apiPublicRequest: feedServerApiPublicRequestMock,
 }));
 
