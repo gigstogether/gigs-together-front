@@ -4,7 +4,7 @@ import { logger } from '@/lib/logger';
 
 type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-type ApiPublicRequestInit = Omit<FetchApiJsonOptions, 'credentials'>;
+export type ApiPublicRequestInit = Omit<FetchApiJsonOptions, 'credentials'>;
 
 /**
  * Public API call. Omits cookies and disables session recovery.
