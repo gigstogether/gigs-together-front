@@ -182,7 +182,9 @@ Key areas:
 - `src/app/suggest` contains the public suggest placeholder and Telegram launch routing
 - `src/app/admin` contains the moderator-only admin shell and moderation tools
 - `src/app/api/revalidate` contains manual cache revalidation endpoints
-- `src/lib/api.ts` contains the shared API request wrapper
+- `src/lib/api-core.ts` is the shared HTTP transport (`fetchApiJson` / `buildUrl`)
+- `src/lib/api-public.ts` is the server-safe public API client (no cookies / session recovery)
+- `src/lib/api-session-client.ts` is the browser session API client (recovery + sign-in UI on 401)
 
 ## API and runtime assumptions
 
