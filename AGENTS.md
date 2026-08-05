@@ -122,7 +122,7 @@ Keep network access and server/client separation explicit. These rules protect c
   - API infrastructure under `src/lib/` (transport, session recovery, auth refresh);
   - auth bootstrap modules (for example Telegram sign-in exchange);
   - Next.js Route Handlers (`src/app/**/route.ts`).
-- **Components, hooks, and pages** call typed endpoint modules (`*_api.ts`, `*.server.ts` loaders, or feature `_lib/` clients) — not `fetch`, not raw paths.
+- **Components, hooks, and pages** call typed endpoint modules (`*_api.ts`, feature `_lib/` clients) or thin `*.server.ts` loaders that wrap those modules — not `fetch`, not raw paths.
 
 ### Server and client imports
 
@@ -132,8 +132,9 @@ Keep network access and server/client separation explicit. These rules protect c
 
 ### Endpoint paths
 
-- Do not put API path strings (`v1/...`, `/v1/...`) in components or hooks.
-- Endpoint paths belong in endpoint modules next to the feature (`admin-api.ts`, `feedApi.ts`, `feed.server.ts`, etc.).
+- Do not put API path strings (`v1/...`, `/v1/...`) in components, hooks, or `*.server.ts` loaders.
+- Endpoint paths belong in endpoint modules next to the feature (`admin-api.ts`, `feedApi.ts`, `gig-form-api.ts`, etc.).
+- Server loaders (`*.server.ts`) are thin wrappers: they call endpoint-module functions and may add server-only options (for example ISR `next.revalidate`). They must not duplicate path strings.
 - Hooks and components call named functions (`fetchFeedPage`, `lookupGig`, `getCountries`) and receive typed results.
 
 ## File placement
