@@ -14,12 +14,35 @@ export interface FetchApiJsonOptions extends Omit<RequestInit, 'credentials'> {
   credentials: RequestCredentials;
 }
 
-export function buildUrl(endpointOrUrl: string): string {
-  if (/^https?:\/\//i.test(endpointOrUrl)) return endpointOrUrl;
+const API_ENDPOINT_PREFIX = 'v1/';
+
+function assertRelativeApiEndpoint(endpoint: string): string {
+  const trimmed = endpoint.trim();
+  if (!trimmed) {
+    throw new Error('API endpoint must be a non-empty relative path.');
+  }
+  if (trimmed.includes('://') || trimmed.startsWith('//')) {
+    throw new Error(`API endpoint must be a relative path under v1/, got: ${endpoint}`);
+  }
+  if (trimmed.includes('..')) {
+    throw new Error(`API endpoint must not contain "..", got: ${endpoint}`);
+  }
+
+  const normalized = trimmed.replace(/^\/+/, '');
+  if (!normalized.startsWith(API_ENDPOINT_PREFIX)) {
+    throw new Error(`API endpoint must start with "v1/", got: ${endpoint}`);
+  }
+
+  return normalized;
+}
+
+export function buildUrl(endpoint: string): string {
   if (!API_BASE_URL) {
     throw new Error('Missing NEXT_PUBLIC_APP_API_BASE_URL for direct API calls');
   }
-  return `${API_BASE_URL.replace(/\/$/, '')}/${endpointOrUrl.replace(/^\//, '')}`;
+
+  const normalizedEndpoint = assertRelativeApiEndpoint(endpoint);
+  return `${API_BASE_URL.replace(/\/$/, '')}/${normalizedEndpoint}`;
 }
 
 function isJsonContentType(contentType: string): boolean {

@@ -10,6 +10,70 @@ function jsonResponse(body: unknown, status: number): Response {
 const INCLUDE_CREDENTIALS = { credentials: 'include' as const };
 const OMIT_CREDENTIALS = { credentials: 'omit' as const };
 
+describe('buildUrl', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_APP_API_BASE_URL = 'https://api.example.com';
+    vi.resetModules();
+  });
+
+  it('should build URL from a relative v1 endpoint', async () => {
+    const { buildUrl } = await import('@/lib/api-core');
+
+    expect(buildUrl('v1/gig?limit=10')).toBe('https://api.example.com/v1/gig?limit=10');
+  });
+
+  it('should normalize a leading slash on v1 endpoint', async () => {
+    const { buildUrl } = await import('@/lib/api-core');
+
+    expect(buildUrl('/v1/location/countries')).toBe(
+      'https://api.example.com/v1/location/countries',
+    );
+  });
+
+  it('should throw when endpoint is an absolute URL', async () => {
+    const { buildUrl } = await import('@/lib/api-core');
+
+    expect(() => buildUrl('https://evil.com/v1/gig')).toThrow(
+      'API endpoint must be a relative path under v1/, got: https://evil.com/v1/gig',
+    );
+  });
+
+  it('should throw when endpoint uses a protocol-relative URL', async () => {
+    const { buildUrl } = await import('@/lib/api-core');
+
+    expect(() => buildUrl('//evil.com/v1/gig')).toThrow(
+      'API endpoint must be a relative path under v1/, got: //evil.com/v1/gig',
+    );
+  });
+
+  it('should throw when endpoint contains path traversal', async () => {
+    const { buildUrl } = await import('@/lib/api-core');
+
+    expect(() => buildUrl('v1/../admin/dashboard')).toThrow(
+      'API endpoint must not contain "..", got: v1/../admin/dashboard',
+    );
+  });
+
+  it('should throw when endpoint is not under v1', async () => {
+    const { buildUrl } = await import('@/lib/api-core');
+
+    expect(() => buildUrl('admin/dashboard')).toThrow(
+      'API endpoint must start with "v1/", got: admin/dashboard',
+    );
+  });
+
+  it('should throw when API base URL is missing', async () => {
+    delete process.env.NEXT_PUBLIC_APP_API_BASE_URL;
+    vi.resetModules();
+
+    const { buildUrl } = await import('@/lib/api-core');
+
+    expect(() => buildUrl('v1/gig')).toThrow(
+      'Missing NEXT_PUBLIC_APP_API_BASE_URL for direct API calls',
+    );
+  });
+});
+
 describe('fetchApiJson', () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_APP_API_BASE_URL = 'https://api.example.com';
