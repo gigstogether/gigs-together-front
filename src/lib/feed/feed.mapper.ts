@@ -1,8 +1,10 @@
-import type { Event, V1GigGetResponseBodyGig } from '@/lib/types';
+import type { Event, V1GigDatesGetResponseBody, V1GigGetResponseBodyGig } from '@/lib/types';
 import { toLocalYMD } from '@/lib/utils';
 
 export type CountryNameResolver = (iso: string) => string;
 export type CityNameResolver = (code: string) => string;
+export type GigDateInput = V1GigGetResponseBodyGig['date'] | number;
+export type GigDatesInput = V1GigDatesGetResponseBody['dates'];
 
 export interface GigToEventOptions {
   readonly resolveCountryName?: CountryNameResolver;
@@ -45,7 +47,7 @@ function parseUnixTimestampToYmd(value: string): string {
   );
 }
 
-export function gigDateToYMD(date: V1GigGetResponseBodyGig['date'] | number): string {
+export function gigDateToYMD(date: GigDateInput): string {
   if (typeof date === 'number') {
     if (!Number.isFinite(date) || !Number.isInteger(date)) {
       throw new Error(
@@ -85,6 +87,11 @@ export function gigDateToYMD(date: V1GigGetResponseBodyGig['date'] | number): st
   throw new Error(
     `Invalid gig date "${value}": expected YYYY-MM-DD, ISO date-time, or unix timestamp (10/13 digits)`,
   );
+}
+
+export function gigDatesToSortedUniqueYmd(dates: GigDatesInput): string[] {
+  const ymd = dates.map((date) => gigDateToYMD(date));
+  return Array.from(new Set(ymd)).sort();
 }
 
 export function gigToEvent(gig: V1GigGetResponseBodyGig, options: GigToEventOptions = {}): Event {

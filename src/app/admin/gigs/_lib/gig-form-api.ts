@@ -1,4 +1,4 @@
-import { apiRequest } from '@/lib/api';
+import { apiClientRequest } from '@/lib/api-session-client';
 import { gigDateToYMD } from '@/lib/feed/feed.mapper';
 import { isRecord } from '@/lib/is-record';
 
@@ -169,16 +169,16 @@ async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TRe
     const fd = new FormData();
     fd.append('posterFile', posterFile);
     fd.append('gig', JSON.stringify(gig));
-    return apiRequest<TResponse, FormData>(params.endpoint, params.method, fd);
+    return apiClientRequest<TResponse, FormData>(params.endpoint, params.method, fd);
   }
 
   if (posterUrl) {
-    return apiRequest<TResponse>(params.endpoint, params.method, {
+    return apiClientRequest<TResponse>(params.endpoint, params.method, {
       gig: { ...gig, posterUrl },
     });
   }
 
-  return apiRequest<TResponse>(params.endpoint, params.method, {
+  return apiClientRequest<TResponse>(params.endpoint, params.method, {
     gig,
   });
 }
@@ -192,7 +192,7 @@ export async function lookupGig(params: LookupGigParams): Promise<GigLookupData 
   if (!location) {
     throw new Error('Invalid lookup request: "location" is required');
   }
-  const raw = await apiRequest<GigLookupApiResponseBody>(
+  const raw = await apiClientRequest<GigLookupApiResponseBody>(
     'v1/gig/lookup',
     'POST',
     {

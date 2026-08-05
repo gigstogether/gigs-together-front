@@ -1,33 +1,51 @@
-import { apiPublicRequest } from '@/lib/api';
+import { apiPublicRequest } from '@/lib/api-public';
+import type { ApiPublicRequestInit } from '@/lib/api-public';
 import {
   parseV1GigAroundGetResponseBody,
   parseV1GigByPublicIdGetResponseBody,
+  parseV1GigDatesGetResponseBody,
   parseV1GigGetResponseBody,
 } from '@/lib/api-boundary-schemas';
 import { gigDateToYMD } from '@/lib/feed/feed.mapper';
-import type { V1GigAroundGetResponseBody, V1GigGetResponseBody } from '@/lib/types';
+import type {
+  V1GigAroundGetResponseBody,
+  V1GigDatesGetResponseBody,
+  V1GigGetResponseBody,
+} from '@/lib/types';
 
 interface FeedLocationParams {
   readonly country?: string;
   readonly city?: string;
   readonly signal?: AbortSignal;
+  readonly requestInit?: ApiPublicRequestInit;
 }
 
-interface FetchFeedPageParams extends FeedLocationParams {
+export interface FetchFeedPageParams extends FeedLocationParams {
   readonly limit: number;
   readonly cursor?: string;
   readonly direction?: 'prev';
 }
 
-interface FetchFeedAroundParams extends FeedLocationParams {
+export interface FetchFeedAroundParams extends FeedLocationParams {
   readonly anchorYmd: string;
   readonly beforeLimit: number;
   readonly afterLimit: number;
 }
 
+export interface FetchFeedAvailableDatesParams extends FeedLocationParams {
+  readonly country: string;
+  readonly city: string;
+}
+
 export interface FetchFeedAnchorYmdByPublicIdParams {
   readonly publicId: string;
   readonly signal?: AbortSignal;
+  readonly requestInit?: ApiPublicRequestInit;
+}
+
+interface BuildApiPublicRequestInitParams {
+  readonly signal?: AbortSignal;
+  readonly requestInit?: ApiPublicRequestInit;
 }
 
 function appendFeedLocationQuery(qs: URLSearchParams, params: FeedLocationParams): void {
@@ -40,6 +58,21 @@ function withQuery(path: string, qs: URLSearchParams): string {
   return query ? `${path}?${query}` : path;
 }
 
+function buildApiPublicRequestInit(
+  params: BuildApiPublicRequestInitParams,
+): ApiPublicRequestInit | undefined {
+  const { signal, requestInit } = params;
+
+  if (signal === undefined) {
+    return requestInit;
+  }
+
+  return {
+    ...requestInit,
+    signal,
+  };
+}
+
 export async function fetchFeedPage(params: FetchFeedPageParams): Promise<V1GigGetResponseBody> {
   const qs = new URLSearchParams();
   qs.set('limit', String(params.limit));
@@ -47,10 +80,29 @@ export async function fetchFeedPage(params: FetchFeedPageParams): Promise<V1GigG
   if (params.direction) qs.set('direction', params.direction);
   appendFeedLocationQuery(qs, params);
 
-  const raw = await apiPublicRequest<unknown>(withQuery('v1/gig', qs), 'GET', undefined, {
-    signal: params.signal,
-  });
+  const raw = await apiPublicRequest<unknown>(
+    withQuery('v1/gig', qs),
+    'GET',
+    undefined,
+    buildApiPublicRequestInit(params),
+  );
   return parseV1GigGetResponseBody(raw);
+}
+
+export async function fetchFeedAvailableDates(
+  params: FetchFeedAvailableDatesParams,
+): Promise<V1GigDatesGetResponseBody> {
+  const qs = new URLSearchParams();
+  qs.set('country', params.country);
+  qs.set('city', params.city);
+
+  const raw = await apiPublicRequest<unknown>(
+    withQuery('v1/gig/dates', qs),
+    'GET',
+    undefined,
+    buildApiPublicRequestInit(params),
+  );
+  return parseV1GigDatesGetResponseBody(raw);
 }
 
 export async function fetchFeedAround(
@@ -62,9 +114,12 @@ export async function fetchFeedAround(
   qs.set('afterLimit', String(params.afterLimit));
   appendFeedLocationQuery(qs, params);
 
-  const raw = await apiPublicRequest<unknown>(withQuery('v1/gig/around', qs), 'GET', undefined, {
-    signal: params.signal,
-  });
+  const raw = await apiPublicRequest<unknown>(
+    withQuery('v1/gig/around', qs),
+    'GET',
+    undefined,
+    buildApiPublicRequestInit(params),
+  );
   return parseV1GigAroundGetResponseBody(raw);
 }
 
@@ -75,7 +130,7 @@ export async function fetchFeedAnchorYmdByPublicId(
     `v1/gig/date/${encodeURIComponent(params.publicId)}`,
     'GET',
     undefined,
-    { signal: params.signal },
+    buildApiPublicRequestInit(params),
   );
   const res = parseV1GigByPublicIdGetResponseBody(raw);
   return gigDateToYMD(res.date);
