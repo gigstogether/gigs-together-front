@@ -87,6 +87,9 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Prefer `interface` over `type` for object shapes unless `type` is clearly the better fit.
 - Use `type` for unions, intersections, mapped types, conditional types, tuples, and other patterns that interfaces cannot express cleanly.
 - Keep type imports separate from value imports. Do not mix them in one import statement.
+- Default: keep param/DTO types in the owning module (`feedApi.ts`, `admin-api.ts`, etc.).
+- Create a colocated `*.types.ts` only when a consumer cannot import the owning module (for example client code must not import `*.server.ts`), or when the same shapes are shared across modules that must stay decoupled from that owner's runtime.
+- Do not extract types into `*.types.ts` only because they are exported or used in tests.
 - Files under `types/` and files named `*.types.ts` must export **types only** (`interface`, `type`, `enum`, type-only helpers). Put runtime constants and functions in a colocated `*.constants.ts` file or the owning module artifact (service, parser, controller).
 
 ## Strictness
@@ -107,6 +110,32 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - **Do** propose refactoring when the current structure blocks the correct solution or would accumulate avoidable technical debt.
 - Inferior or shortcut options may be listed **only after** presenting the preferred approach, **or** when the user explicitly requests alternatives. Always label them as not the best/default choice and explain why (tradeoffs, debt, limits).
 - Perfection everywhere is not required, but **initial decisions should aim at the right long-term shape**; shortcuts must be conscious and explicit, not silent defaults.
+
+## HTTP and runtime boundaries
+
+Keep network access and server/client separation explicit. These rules protect caching, bundle boundaries, and API contract ownership.
+
+### Where HTTP calls may live
+
+- **Default:** app code does not call `fetch` directly.
+- **Allowed `fetch` sites:**
+  - API infrastructure under `src/lib/` (transport, session recovery, auth refresh);
+  - auth bootstrap modules (for example Telegram sign-in exchange);
+  - Next.js Route Handlers (`src/app/**/route.ts`).
+- **Components, hooks, and pages** call typed endpoint modules (`*_api.ts`, feature `_lib/` clients) or thin `*.server.ts` loaders that wrap those modules — not `fetch`, not raw paths.
+
+### Server and client imports
+
+- Files named `*.server.ts` (or modules with `import 'server-only'`) are **server-only**. Do not import browser APIs, client env, React client hooks, or DOM globals into them.
+- Client modules (`'use client'`, `*.client.ts`, hooks) must not import server-only modules — not even for types. In that case only, share shapes via colocated `*.types.ts`, `types/`, or feature `_lib/` files without `'server-only'`. Do not invent a `*.types.ts` when consumers can import the owning non-server module directly.
+- If a module is imported from both server and client, split it: server-safe transport/wrappers on one side, browser UI/session effects on the other.
+
+### Endpoint paths
+
+- Do not put API path strings (`v1/...`, `/v1/...`) in components, hooks, or `*.server.ts` loaders.
+- Endpoint paths belong in endpoint modules next to the feature (`admin-api.ts`, `feedApi.ts`, `gig-form-api.ts`, etc.).
+- Server loaders (`*.server.ts`) are thin wrappers: they call endpoint-module functions and may add server-only options (for example ISR `next.revalidate`). They must not duplicate path strings.
+- Hooks and components call named functions (`fetchFeedPage`, `lookupGig`, `getCountries`) and receive typed results.
 
 ## File placement
 

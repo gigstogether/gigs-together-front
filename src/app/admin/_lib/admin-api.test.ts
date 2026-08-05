@@ -19,8 +19,8 @@ import { GigStatusAPI, GigStatusFilter } from '@/app/admin/gigs/_lib/types';
 
 const mockApiRequest = vi.fn();
 
-vi.mock('@/lib/api', () => ({
-  apiRequest: (...args: unknown[]) => mockApiRequest(...args),
+vi.mock('@/lib/api-session-client', () => ({
+  apiClientRequest: (...args: unknown[]) => mockApiRequest(...args),
 }));
 
 describe('fetchAdminDashboard', () => {

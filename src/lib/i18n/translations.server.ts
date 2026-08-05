@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { apiPublicRequest } from '@/lib/api';
+import { apiPublicRequest } from '@/lib/api-public';
 import { parseLocaleGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
 import type { V1LocaleGetTranslationsResponseBody } from '@/lib/api-boundary-schemas';
 import {

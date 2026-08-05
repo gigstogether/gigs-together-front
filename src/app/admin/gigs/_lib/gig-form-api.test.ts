@@ -1,8 +1,8 @@
-import { apiRequest } from '@/lib/api';
+import { apiClientRequest } from '@/lib/api-session-client';
 import { lookupGig } from '@/app/admin/gigs/_lib/gig-form-api';
 
-vi.mock('@/lib/api', () => ({
-  apiRequest: vi.fn(),
+vi.mock('@/lib/api-session-client', () => ({
+  apiClientRequest: vi.fn(),
 }));
 
 describe('lookupGig', () => {
@@ -11,7 +11,7 @@ describe('lookupGig', () => {
   });
 
   it('should call lookup endpoint with trimmed name and location when request is valid', async () => {
-    vi.mocked(apiRequest).mockResolvedValueOnce({
+    vi.mocked(apiClientRequest).mockResolvedValueOnce({
       gig: null,
     });
 
@@ -20,7 +20,7 @@ describe('lookupGig', () => {
       location: '  Barcelona, ES  ',
     });
 
-    expect(vi.mocked(apiRequest)).toHaveBeenCalledWith(
+    expect(vi.mocked(apiClientRequest)).toHaveBeenCalledWith(
       'v1/gig/lookup',
       'POST',
       {
@@ -32,7 +32,7 @@ describe('lookupGig', () => {
   });
 
   it('should return normalized lookup dates when API returns a matching gig', async () => {
-    vi.mocked(apiRequest).mockResolvedValueOnce({
+    vi.mocked(apiClientRequest).mockResolvedValueOnce({
       gig: {
         title: 'Arctic Monkeys',
         date: '2026-07-01T20:00:00.000Z',
@@ -63,7 +63,7 @@ describe('lookupGig', () => {
   });
 
   it('should return null when API reports no matching gig', async () => {
-    vi.mocked(apiRequest).mockResolvedValueOnce({
+    vi.mocked(apiClientRequest).mockResolvedValueOnce({
       gig: null,
     });
 
@@ -76,7 +76,7 @@ describe('lookupGig', () => {
   });
 
   it('should throw when API returns a matching gig without date', async () => {
-    vi.mocked(apiRequest).mockResolvedValueOnce({
+    vi.mocked(apiClientRequest).mockResolvedValueOnce({
       gig: {
         title: 'Arctic Monkeys',
       },
@@ -94,7 +94,7 @@ describe('lookupGig', () => {
   });
 
   it('should throw when API returns an invalid lookup date', async () => {
-    vi.mocked(apiRequest).mockResolvedValueOnce({
+    vi.mocked(apiClientRequest).mockResolvedValueOnce({
       gig: {
         title: 'Arctic Monkeys',
         date: 'not-a-date',
@@ -137,7 +137,7 @@ describe('lookupGig', () => {
   });
 
   it('should throw when API response omits gig field', async () => {
-    vi.mocked(apiRequest).mockResolvedValueOnce({});
+    vi.mocked(apiClientRequest).mockResolvedValueOnce({});
 
     const action = lookupGig({
       name: 'Arctic Monkeys',

@@ -12,85 +12,46 @@ export interface FetchApiJsonOptions extends Omit<RequestInit, 'credentials'> {
    * Use `include` for cookie/session requests and `omit` for public cacheable GETs.
    */
   credentials: RequestCredentials;
-  onUnauthorized?: () => void;
-  /**
-   * Internal: set after one `POST v1/auth/refresh` so a second 401 does not loop refresh.
-   */
-  hasAttemptedTokenRefresh?: boolean;
-  /**
-   * Internal: set after one Telegram Mini App re-auth so a second 401 does not loop re-auth.
-   */
-  hasAttemptedTelegramMiniAppReauth?: boolean;
 }
 
-export function buildUrl(endpointOrUrl: string): string {
-  if (/^https?:\/\//i.test(endpointOrUrl)) return endpointOrUrl;
+const API_ENDPOINT_PREFIX = 'v1/';
+
+function assertRelativeApiEndpoint(endpoint: string): string {
+  const trimmed = endpoint.trim();
+  if (!trimmed) {
+    throw new Error('API endpoint must be a non-empty relative path.');
+  }
+  if (trimmed.includes('://') || trimmed.startsWith('//')) {
+    throw new Error(`API endpoint must be a relative path under v1/, got: ${endpoint}`);
+  }
+  if (trimmed.includes('..')) {
+    throw new Error(`API endpoint must not contain "..", got: ${endpoint}`);
+  }
+
+  const normalized = trimmed.replace(/^\/+/, '');
+  if (!normalized.startsWith(API_ENDPOINT_PREFIX)) {
+    throw new Error(`API endpoint must start with "v1/", got: ${endpoint}`);
+  }
+
+  return normalized;
+}
+
+export function buildUrl(endpoint: string): string {
   if (!API_BASE_URL) {
     throw new Error('Missing NEXT_PUBLIC_APP_API_BASE_URL for direct API calls');
   }
-  return `${API_BASE_URL.replace(/\/$/, '')}/${endpointOrUrl.replace(/^\//, '')}`;
+
+  const normalizedEndpoint = assertRelativeApiEndpoint(endpoint);
+  return `${API_BASE_URL.replace(/\/$/, '')}/${normalizedEndpoint}`;
 }
 
-function isAuthRefreshEndpoint(endpointOrUrl: string): boolean {
-  return endpointOrUrl.includes('v1/auth/refresh');
+function isJsonContentType(contentType: string): boolean {
+  const mediaType = contentType.split(';', 1)[0]?.trim().toLowerCase();
+  return mediaType === 'application/json' || mediaType?.endsWith('+json') === true;
 }
 
-function isTelegramWebAppAuthEndpoint(endpointOrUrl: string): boolean {
-  return endpointOrUrl.includes('v1/auth/telegram/web-app');
-}
-
-let authRefreshPromise: Promise<boolean> | null = null;
-let telegramMiniAppReauthPromise: Promise<boolean> | null = null;
-
-async function postAuthRefreshSingleFlight(): Promise<boolean> {
-  if (!authRefreshPromise) {
-    authRefreshPromise = (async () => {
-      try {
-        const { postAuthRefresh } = await import('@/lib/auth-refresh');
-        return await postAuthRefresh();
-      } finally {
-        authRefreshPromise = null;
-      }
-    })();
-  }
-
-  return authRefreshPromise;
-}
-
-async function postTelegramMiniAppReauth(): Promise<boolean> {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  if (!telegramMiniAppReauthPromise) {
-    telegramMiniAppReauthPromise = (async () => {
-      try {
-        const { isTelegramMiniApp, waitForTelegramInitData } = await import(
-          '@/lib/telegram/telegram-webapp'
-        );
-        if (!isTelegramMiniApp()) {
-          return false;
-        }
-
-        const initData = await waitForTelegramInitData();
-        const response = await fetch(buildUrl('v1/auth/telegram/web-app'), {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ initData }),
-        });
-        return response.ok;
-      } catch {
-        return false;
-      } finally {
-        telegramMiniAppReauthPromise = null;
-      }
-    })();
-  }
-
-  return telegramMiniAppReauthPromise;
+function hasNoResponseBody(method: HttpMethod, response: Response): boolean {
+  return method === 'HEAD' || response.status === 204 || response.status === 205;
 }
 
 export async function fetchApiJson<TResponse>(
@@ -99,28 +60,21 @@ export async function fetchApiJson<TResponse>(
   data: unknown | undefined,
   init: FetchApiJsonOptions,
 ): Promise<TResponse> {
-  const {
-    onUnauthorized,
-    hasAttemptedTokenRefresh,
-    hasAttemptedTelegramMiniAppReauth,
-    credentials,
-    ...fetchInit
-  } = init;
+  const { credentials, ...fetchInit } = init;
+  const hasRequestBody = method !== 'GET' && method !== 'HEAD' && data !== undefined;
   const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
 
   const headers = new Headers(fetchInit.headers);
-  if (isFormData) {
+  if (!headers.has('Accept')) {
+    headers.set('Accept', 'application/json');
+  }
+  if (hasRequestBody && isFormData) {
     if (headers.has('Content-Type')) headers.delete('Content-Type');
-  } else if (!headers.has('Content-Type')) {
+  } else if (hasRequestBody && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
 
-  const body =
-    method !== 'GET' && method !== 'HEAD' && data !== undefined
-      ? isFormData
-        ? data
-        : JSON.stringify(data)
-      : undefined;
+  const body = hasRequestBody ? (isFormData ? data : JSON.stringify(data)) : undefined;
 
   const response = await fetch(buildUrl(endpointOrUrl), {
     ...fetchInit,
@@ -130,44 +84,14 @@ export async function fetchApiJson<TResponse>(
     credentials,
   });
 
-  if (
-    response.status === 401 &&
-    !hasAttemptedTokenRefresh &&
-    !isAuthRefreshEndpoint(endpointOrUrl)
-  ) {
-    const refreshed = await postAuthRefreshSingleFlight();
-    if (refreshed) {
-      return fetchApiJson<TResponse>(endpointOrUrl, method, data, {
-        ...init,
-        hasAttemptedTokenRefresh: true,
-      });
-    }
-  }
-
-  if (
-    response.status === 401 &&
-    !hasAttemptedTelegramMiniAppReauth &&
-    !isAuthRefreshEndpoint(endpointOrUrl) &&
-    !isTelegramWebAppAuthEndpoint(endpointOrUrl)
-  ) {
-    const isReauthenticated = await postTelegramMiniAppReauth();
-    if (isReauthenticated) {
-      return fetchApiJson<TResponse>(endpointOrUrl, method, data, {
-        ...init,
-        hasAttemptedTelegramMiniAppReauth: true,
-      });
-    }
-  }
-
-  const contentType = response.headers.get('Content-Type') || '';
-  const isJson = contentType.includes('application/json');
-
-  const result = isJson ? await response.json() : await response.text();
+  const contentType = response.headers.get('Content-Type') ?? '';
+  const result = hasNoResponseBody(method, response)
+    ? undefined
+    : isJsonContentType(contentType)
+      ? await response.json()
+      : await response.text();
 
   if (!response.ok) {
-    if (response.status === 401 && onUnauthorized) {
-      onUnauthorized();
-    }
     if (isRecord(result)) {
       const r = result;
       const msg =
@@ -175,7 +99,7 @@ export async function fetchApiJson<TResponse>(
       const code = typeof r.code === 'string' ? r.code : undefined;
       throw new ApiError(msg, response.status, code);
     }
-    throw new Error(typeof result === 'string' ? result : 'Something went wrong');
+    throw new Error(typeof result === 'string' && result ? result : 'Something went wrong');
   }
 
   return result as TResponse;

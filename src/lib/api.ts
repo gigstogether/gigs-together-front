@@ -1,12 +1,8 @@
-import { fetchApiJson } from '@/lib/api-core';
 import type { FetchApiJsonOptions } from '@/lib/api-core';
+import { fetchApiJsonWithSessionRecovery } from '@/lib/api-session-recovery';
 import { logger } from '@/lib/logger';
-import {
-  clearStoredTelegramClientProfile,
-  requestTelegramSignIn,
-} from '@/lib/telegram/telegram-auth';
-import { isTelegramMiniApp } from '@/lib/telegram/telegram-webapp';
 
+export { apiPublicRequest } from '@/lib/api-public';
 export {
   ApiError,
   TELEGRAM_INIT_DATA_EXPIRED_CODE,
@@ -15,10 +11,11 @@ export {
 
 type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-type ApiRequestInit = Omit<FetchApiJsonOptions, 'credentials' | 'onUnauthorized'>;
+type ApiRequestInit = Omit<FetchApiJsonOptions, 'credentials'>;
 
 /**
- * Authenticated / session API call. Sends cookies and runs sign-in recovery on 401.
+ * Session API call with cookie auth and transport-level session recovery.
+ * Does not trigger client sign-in UI; use {@link apiClientRequest} in browser code.
  */
 export async function apiRequest<TResponse = unknown, TBody = unknown>(
   endpointOrUrl: string,
@@ -28,42 +25,14 @@ export async function apiRequest<TResponse = unknown, TBody = unknown>(
 ): Promise<TResponse> {
   try {
     const headers = new Headers(init?.headers);
-    return await fetchApiJson<TResponse>(endpointOrUrl, method, data, {
-      ...init,
-      headers,
-      credentials: 'include',
-      onUnauthorized: () => {
-        clearStoredTelegramClientProfile();
-        if (!isTelegramMiniApp()) {
-          requestTelegramSignIn();
-        }
+    return await fetchApiJsonWithSessionRecovery<TResponse>(endpointOrUrl, method, data, {
+      init: {
+        ...init,
+        headers,
       },
     });
   } catch (e) {
     logger.errorFromUnknown('api_request_failed', e, { endpointOrUrl, method });
-    throw e;
-  }
-}
-
-/**
- * Public API call. Omits cookies so Next can cache server fetches for SSG/ISR.
- * Does not trigger sign-in UI on 401.
- */
-export async function apiPublicRequest<TResponse = unknown, TBody = unknown>(
-  endpointOrUrl: string,
-  method: HttpMethod,
-  data?: TBody,
-  init?: ApiRequestInit,
-): Promise<TResponse> {
-  try {
-    const headers = new Headers(init?.headers);
-    return await fetchApiJson<TResponse>(endpointOrUrl, method, data, {
-      ...init,
-      headers,
-      credentials: 'omit',
-    });
-  } catch (e) {
-    logger.errorFromUnknown('api_public_request_failed', e, { endpointOrUrl, method });
     throw e;
   }
 }

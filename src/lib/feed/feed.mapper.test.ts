@@ -1,4 +1,4 @@
-import { gigDateToYMD } from '@/lib/feed/feed.mapper';
+import { gigDateToYMD, gigDatesToSortedUniqueYmd } from '@/lib/feed/feed.mapper';
 import { toLocalYMD } from '@/lib/utils';
 
 describe('gigDateToYMD', () => {
@@ -47,5 +47,21 @@ describe('gigDateToYMD', () => {
 
   it('should throw when unix timestamp has unsupported precision', () => {
     expect(() => gigDateToYMD('170000000000')).toThrow('10 (seconds) or 13 (milliseconds)');
+  });
+});
+
+describe('gigDatesToSortedUniqueYmd', () => {
+  it('should normalize mixed raw date formats into sorted unique YMD values', () => {
+    const unixSeconds = 1_700_000_000;
+
+    const result = gigDatesToSortedUniqueYmd([
+      '2026-04-21',
+      '2026-04-21T12:00:00.000Z',
+      unixSeconds,
+    ]);
+
+    expect(result).toEqual(
+      Array.from(new Set(['2026-04-21', toLocalYMD(new Date(unixSeconds * 1000))])).sort(),
+    );
   });
 });

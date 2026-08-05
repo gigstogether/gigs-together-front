@@ -36,7 +36,7 @@ vi.mock('@/env/client-env', () => ({
   },
 }));
 
-vi.mock('@/lib/translations.server', () => ({
+vi.mock('@/lib/i18n/translations.server', () => ({
   getTranslations: getTranslationsMock,
 }));
 

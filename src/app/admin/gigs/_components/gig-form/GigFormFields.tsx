@@ -8,7 +8,7 @@ import { Field, FieldError, FieldLabel, FieldSeparator } from '@/components/ui/f
 import { Input } from '@/components/ui/input';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import type { Country } from '@/app/admin/gigs/_lib/countries.server';
+import type { Country } from '@/app/admin/gigs/_lib/countries.types';
 import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
 import { useT } from '@/providers/I18nProvider';
 
