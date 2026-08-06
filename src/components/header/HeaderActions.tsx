@@ -1,12 +1,12 @@
 'use client';
 
 import type { Route } from 'next';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
 import HeaderAuthActions from '@/components/header/HeaderAuthActions';
-import HeaderSignInModal from '@/components/header/HeaderSignInModal';
 import { ADMIN_GIGS_NEW_ROUTE } from '@/lib/admin-gig-paths';
 import { SUGGEST_ROUTE } from '@/lib/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -15,6 +15,10 @@ import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { normalizeLocationTitle } from '@/lib/utils';
 import LocationPopover from '@/components/header/LocationPopover';
+
+const HeaderSignInModal = dynamic(() => import('@/components/header/HeaderSignInModal'), {
+  ssr: false,
+});
 
 function HeaderMenuDivider() {
   return (
@@ -247,7 +251,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
           </PopoverContent>
         </Popover>
       </div>
-      <HeaderSignInModal />
+      {miniAppEnv === 'browser' ? <HeaderSignInModal /> : null}
     </div>
   );
 }
