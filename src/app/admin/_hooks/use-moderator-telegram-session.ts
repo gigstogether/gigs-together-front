@@ -11,6 +11,7 @@ import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 export interface UseModeratorTelegramSessionResult {
   readonly authState: TelegramAuthState | null;
   readonly isLoadingAuthState: boolean;
+  readonly hasTelegramMiniAppAuthError: boolean;
   readonly telegramBotUsername: string | undefined;
   readonly isTelegramSignInAvailable: boolean;
   readonly miniAppEnv: TelegramMiniAppEnv;
@@ -19,7 +20,8 @@ export interface UseModeratorTelegramSessionResult {
 }
 
 export function useModeratorTelegramSession(): UseModeratorTelegramSessionResult {
-  const { authState, isLoadingAuthState, signIn, signOut } = useTelegramAuth();
+  const { authState, isLoadingAuthState, hasTelegramMiniAppAuthError, signIn, signOut } =
+    useTelegramAuth();
 
   const telegramBotUsername = clientEnv.telegramBotUsername;
   const isTelegramSignInAvailable = Boolean(telegramBotUsername?.trim());
@@ -67,6 +69,7 @@ export function useModeratorTelegramSession(): UseModeratorTelegramSessionResult
   return {
     authState,
     isLoadingAuthState,
+    hasTelegramMiniAppAuthError,
     telegramBotUsername,
     isTelegramSignInAvailable,
     miniAppEnv,

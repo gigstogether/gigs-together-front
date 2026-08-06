@@ -64,6 +64,25 @@ describe('AdminLayoutClient', () => {
     expect(screen.queryByTestId('admin-shell')).not.toBeInTheDocument();
   });
 
+  it('should explain how to recover when Telegram Mini App authentication fails', () => {
+    mockUseModeratorTelegramSession.mockReturnValue(
+      buildModeratorTelegramSessionMock({
+        authState: null,
+        hasTelegramMiniAppAuthError: true,
+      }),
+    );
+
+    render(
+      <AdminLayoutClient>
+        <div data-testid="admin-child" />
+      </AdminLayoutClient>,
+    );
+
+    expect(screen.getByText('Telegram sign-in failed')).toBeInTheDocument();
+    expect(screen.getByText(/Fully close Telegram, reopen it/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Sign in' })).not.toBeInTheDocument();
+  });
+
   it('should open shared sign-in modal when guest clicks Sign in', () => {
     mockUseModeratorTelegramSession.mockReturnValue(
       buildModeratorTelegramSessionMock({

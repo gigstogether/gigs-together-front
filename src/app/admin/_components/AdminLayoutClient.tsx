@@ -14,7 +14,7 @@ interface AdminLayoutClientProps {
 }
 
 export default function AdminLayoutClient({ children }: AdminLayoutClientProps) {
-  const { authState, isLoadingAuthState, isTelegramSignInAvailable } =
+  const { authState, isLoadingAuthState, hasTelegramMiniAppAuthError, isTelegramSignInAvailable } =
     useModeratorTelegramSession();
 
   if (isLoadingAuthState) {
@@ -26,6 +26,22 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
   }
 
   if (!authState) {
+    if (hasTelegramMiniAppAuthError) {
+      return (
+        <div className="flex min-h-[50vh] items-center justify-center py-6 px-4">
+          <Card className="w-full max-w-md border-0">
+            <CardHeader>
+              <CardTitle>Telegram sign-in failed</CardTitle>
+              <CardDescription>
+                Could not authenticate this Mini App session. Fully close Telegram, reopen it, and
+                try again.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      );
+    }
+
     return (
       <div className="flex min-h-[50vh] items-center justify-center py-6 px-4">
         <Card className="w-full max-w-md border-0">

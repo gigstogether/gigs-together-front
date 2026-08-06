@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
   bootstrapTelegramAuthFromWebApp,
   clearStoredTelegramClientProfile,
@@ -20,6 +20,7 @@ function subscribeNoop(): () => void {
 export interface UseTelegramAuthResult {
   readonly authState: TelegramAuthState | null;
   readonly isLoadingAuthState: boolean;
+  readonly hasTelegramMiniAppAuthError: boolean;
   readonly signIn: (user: TelegramWidgetUser) => Promise<TelegramAuthExchangeResponse>;
   readonly signOut: () => Promise<void>;
 }
@@ -45,6 +46,7 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     () => false,
   );
   const hasAttemptedMiniAppBootstrapRef = useRef(false);
+  const [hasTelegramMiniAppAuthError, setHasTelegramMiniAppAuthError] = useState(false);
 
   const authState = useMemo((): TelegramAuthState | null => {
     if (!profileSnapshot) {
@@ -71,13 +73,19 @@ export function useTelegramAuth(): UseTelegramAuthResult {
       return;
     }
 
-    hasAttemptedMiniAppBootstrapRef.current = true;
-    void bootstrapTelegramAuthFromWebApp();
+    const bootstrap = async (): Promise<void> => {
+      hasAttemptedMiniAppBootstrapRef.current = true;
+      const result = await bootstrapTelegramAuthFromWebApp();
+      setHasTelegramMiniAppAuthError(result === 'failed');
+    };
+
+    void bootstrap();
   }, [authState, isHydrated]);
 
   return {
     authState,
     isLoadingAuthState: !isHydrated || isTelegramMiniAppBootstrapPending,
+    hasTelegramMiniAppAuthError,
     signIn,
     signOut,
   };
