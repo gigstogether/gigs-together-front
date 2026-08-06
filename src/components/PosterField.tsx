@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { ChangeEvent, ClipboardEvent, RefObject } from 'react';
 
 import { GigPoster } from '@/components/GigPoster';
@@ -33,6 +33,7 @@ export default function PosterField(props: PosterFieldProps) {
 
   const isEdit = variant === 'edit';
 
+  // Object URL must be stable across renders so the cleanup effect can revoke it.
   const localPreviewUrl = useMemo(() => {
     if (!posterFile) {
       return null;
@@ -59,44 +60,38 @@ export default function PosterField(props: PosterFieldProps) {
 
   const isPosterSelected = !!posterFile || !!posterUrl?.trim();
 
-  const handlePaste = useCallback(
-    (event: ClipboardEvent<HTMLDivElement | HTMLInputElement>) => {
-      const items = event.clipboardData?.items;
-      if (!items) {
-        return;
-      }
+  function handlePaste(event: ClipboardEvent<HTMLDivElement | HTMLInputElement>) {
+    const items = event.clipboardData?.items;
+    if (!items) {
+      return;
+    }
 
-      for (let index = 0; index < items.length; index += 1) {
-        const item = items[index];
-        if (item.kind === 'file' && item.type.startsWith('image/')) {
-          const file = item.getAsFile();
-          if (!file) {
-            continue;
-          }
-
-          event.preventDefault();
-          onPosterUrlChange('');
-          onPosterFileChange(file);
-          if (posterFileInputRef.current) {
-            posterFileInputRef.current.value = '';
-          }
-          break;
+    for (let index = 0; index < items.length; index += 1) {
+      const item = items[index];
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (!file) {
+          continue;
         }
-      }
-    },
-    [onPosterFileChange, onPosterUrlChange, posterFileInputRef],
-  );
 
-  const handleFileChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0] ?? null;
-      onPosterFileChange(file);
-      if (file) {
+        event.preventDefault();
         onPosterUrlChange('');
+        onPosterFileChange(file);
+        if (posterFileInputRef.current) {
+          posterFileInputRef.current.value = '';
+        }
+        break;
       }
-    },
-    [onPosterFileChange, onPosterUrlChange],
-  );
+    }
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    onPosterFileChange(file);
+    if (file) {
+      onPosterUrlChange('');
+    }
+  }
 
   const description = isEdit
     ? 'Upload a new image file, paste URL, or paste image from clipboard (optional).'
@@ -104,7 +99,12 @@ export default function PosterField(props: PosterFieldProps) {
 
   return (
     <Field>
-      <FieldLabel htmlFor="poster-file">Poster:</FieldLabel>
+      <FieldLabel
+        id="poster-file-label"
+        htmlFor="poster-file"
+      >
+        Poster:
+      </FieldLabel>
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
@@ -113,6 +113,7 @@ export default function PosterField(props: PosterFieldProps) {
             ref={posterFileInputRef}
             type="file"
             accept="image/*"
+            aria-labelledby="poster-file-label"
             onChange={handleFileChange}
           />
           <Button
@@ -126,9 +127,11 @@ export default function PosterField(props: PosterFieldProps) {
         </div>
 
         <Input
+          id="poster-url"
           type="url"
           placeholder="Or paste poster URL or image (Ctrl+V)"
           value={posterUrl ?? ''}
+          aria-label="Poster URL"
           onChange={(event) => {
             const nextValue = event.target.value;
             onPosterUrlChange(nextValue);

@@ -34,6 +34,8 @@ const countrySchema = z.object({
   iso: z.string().min(1),
 });
 
+export type Country = z.infer<typeof countrySchema>;
+
 const countriesSchema = z.array(countrySchema);
 
 const gigDateSchema = z.union([z.string().min(1), z.number().int().finite()]);
