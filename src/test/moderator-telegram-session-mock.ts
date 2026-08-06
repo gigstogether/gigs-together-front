@@ -6,6 +6,7 @@ export function buildModeratorTelegramSessionMock(
   return {
     authState: null,
     isLoadingAuthState: false,
+    hasTelegramMiniAppAuthError: false,
     telegramBotUsername: 'gigs_test_bot',
     isTelegramSignInAvailable: true,
     miniAppEnv: 'browser',
