@@ -9,7 +9,7 @@ export type { TelegramAuthExchangeResponse };
 
 const TELEGRAM_SIGN_IN_REQUIRED_EVENT = 'gt:telegram-sign-in-required';
 const telegramMiniAppBootstrapListeners = new Set<() => void>();
-let telegramMiniAppBootstrapPromise: Promise<boolean> | null = null;
+let telegramMiniAppBootstrapPromise: Promise<void> | null = null;
 let isTelegramMiniAppBootstrapPending = false;
 
 /**
@@ -229,9 +229,9 @@ export async function exchangeTelegramAuthFromWebApp(initData: string): Promise<
   setStoredTelegramClientProfile(profile);
 }
 
-export async function bootstrapTelegramAuthFromWebApp(): Promise<boolean> {
+export async function bootstrapTelegramAuthFromWebApp(): Promise<void> {
   if (typeof window === 'undefined') {
-    return false;
+    return;
   }
 
   if (!telegramMiniAppBootstrapPromise) {
@@ -242,13 +242,10 @@ export async function bootstrapTelegramAuthFromWebApp(): Promise<boolean> {
           '@/lib/telegram/telegram-webapp'
         );
         if (!isTelegramMiniApp()) {
-          return false;
+          return;
         }
         const initData = await waitForTelegramInitData();
         await exchangeTelegramAuthFromWebApp(initData);
-        return true;
-      } catch {
-        return false;
       } finally {
         telegramMiniAppBootstrapPromise = null;
         setTelegramMiniAppBootstrapPending(false);

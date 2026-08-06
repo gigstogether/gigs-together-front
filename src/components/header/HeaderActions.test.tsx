@@ -56,6 +56,7 @@ describe('HeaderActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: null,
       isLoadingAuthState: false,
+      hasTelegramMiniAppAuthError: false,
       signIn: vi.fn(),
       signOut: vi.fn(),
     });
@@ -69,6 +70,7 @@ describe('HeaderActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: { displayLabel: '@admin', isAdmin: true },
       isLoadingAuthState: false,
+      hasTelegramMiniAppAuthError: false,
       signIn: vi.fn(),
       signOut: vi.fn(),
     });
@@ -96,6 +98,7 @@ describe('HeaderActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: { displayLabel: '@only', isAdmin: false },
       isLoadingAuthState: false,
+      hasTelegramMiniAppAuthError: false,
       signIn: vi.fn(),
       signOut: vi.fn(),
     });
@@ -137,6 +140,7 @@ describe('HeaderActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: { displayLabel: '@admin', isAdmin: true },
       isLoadingAuthState: false,
+      hasTelegramMiniAppAuthError: false,
       signIn: vi.fn(),
       signOut: vi.fn(),
     });

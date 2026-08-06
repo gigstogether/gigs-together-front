@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
   bootstrapTelegramAuthFromWebApp,
   clearStoredTelegramClientProfile,
@@ -12,6 +12,7 @@ import {
 import type { TelegramAuthExchangeResponse } from '@/lib/telegram/telegram-auth-exchange-response.types';
 import type { TelegramAuthState } from '@/lib/telegram/telegram-auth.types';
 import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
+import { logger } from '@/lib/logger';
 
 function subscribeNoop(): () => void {
   return () => undefined;
@@ -20,6 +21,7 @@ function subscribeNoop(): () => void {
 export interface UseTelegramAuthResult {
   readonly authState: TelegramAuthState | null;
   readonly isLoadingAuthState: boolean;
+  readonly hasTelegramMiniAppAuthError: boolean;
   readonly signIn: (user: TelegramWidgetUser) => Promise<TelegramAuthExchangeResponse>;
   readonly signOut: () => Promise<void>;
 }
@@ -45,6 +47,7 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     () => false,
   );
   const hasAttemptedMiniAppBootstrapRef = useRef(false);
+  const [hasTelegramMiniAppAuthError, setHasTelegramMiniAppAuthError] = useState(false);
 
   const authState = useMemo((): TelegramAuthState | null => {
     if (!profileSnapshot) {
@@ -71,13 +74,24 @@ export function useTelegramAuth(): UseTelegramAuthResult {
       return;
     }
 
-    hasAttemptedMiniAppBootstrapRef.current = true;
-    void bootstrapTelegramAuthFromWebApp();
+    const bootstrap = async (): Promise<void> => {
+      hasAttemptedMiniAppBootstrapRef.current = true;
+      try {
+        await bootstrapTelegramAuthFromWebApp();
+        setHasTelegramMiniAppAuthError(false);
+      } catch (e) {
+        logger.errorFromUnknown('telegram_mini_app_bootstrap_failed', e);
+        setHasTelegramMiniAppAuthError(true);
+      }
+    };
+
+    void bootstrap();
   }, [authState, isHydrated]);
 
   return {
     authState,
     isLoadingAuthState: !isHydrated || isTelegramMiniAppBootstrapPending,
+    hasTelegramMiniAppAuthError,
     signIn,
     signOut,
   };
