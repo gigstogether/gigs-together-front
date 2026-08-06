@@ -1,23 +1,22 @@
-import Link from 'next/link';
+import SuggestAuthGate from '@/app/(default)/suggest/_components/SuggestAuthGate';
+import SuggestGigFormClient from '@/app/(default)/suggest/_components/SuggestGigFormClient';
+import { getTranslations } from '@/lib/i18n/translations.server';
+import { getCountries } from '@/lib/countries.server';
+import { I18nProvider } from '@/providers/I18nProvider';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DEFAULT_FEED_ROUTE } from '@/lib/feed/feed.routes';
+export default async function SuggestPage() {
+  const [countries, i18n] = await Promise.all([getCountries(), getTranslations('en', 'country')]);
 
-export default function SuggestPage() {
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-var(--header-h))] w-full max-w-md items-start px-4 py-6">
-      <Card className="w-full border-0">
-        <CardHeader>
-          <CardTitle>Under development</CardTitle>
-          <CardDescription>Gig suggestion flow is not available yet.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button asChild>
-            <Link href={DEFAULT_FEED_ROUTE}>Home</Link>
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+    <I18nProvider
+      locale={i18n.locale}
+      translations={i18n.translations}
+    >
+      <div className="mx-auto flex min-h-[calc(100dvh-var(--header-h))] w-full max-w-md items-start px-4 py-6">
+        <SuggestAuthGate>
+          <SuggestGigFormClient countries={countries} />
+        </SuggestAuthGate>
+      </div>
+    </I18nProvider>
   );
 }

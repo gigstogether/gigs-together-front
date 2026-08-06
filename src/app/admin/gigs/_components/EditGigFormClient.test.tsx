@@ -43,7 +43,7 @@ vi.mock('@/app/admin/gigs/_components/gig-form/GigFormFields', () => ({
   default: () => <div data-testid="gig-form-fields" />,
 }));
 
-vi.mock('@/app/admin/gigs/_components/gig-form/PosterField', () => ({
+vi.mock('@/components/PosterField', () => ({
   default: () => <div data-testid="poster-field" />,
 }));
 

@@ -6,10 +6,10 @@ import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import type { Country } from '@/app/admin/gigs/_lib/countries.types';
+import type { Country } from '@/lib/api-boundary-schemas';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/admin/gigs/_components/gig-form/GigFormFields';
-import PosterField from '@/app/admin/gigs/_components/gig-form/PosterField';
+import PosterField from '@/components/PosterField';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import type { GigUpsertResponse } from '@/app/admin/gigs/_lib/gig-form-api';
 import { createGig } from '@/app/admin/gigs/_lib/gig-form-api';
@@ -19,7 +19,7 @@ import { useGigLookup } from '@/app/admin/gigs/_hooks/useGigLookup';
 import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';
 
 interface CreateGigFormClientProps {
-  readonly countries: Country[];
+  countries: Country[];
 }
 
 export default function CreateGigFormClient(props: CreateGigFormClientProps) {

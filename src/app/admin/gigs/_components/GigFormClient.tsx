@@ -2,7 +2,7 @@
 
 import CreateGigFormClient from '@/app/admin/gigs/_components/CreateGigFormClient';
 import EditGigFormClient from '@/app/admin/gigs/_components/EditGigFormClient';
-import type { Country } from '@/app/admin/gigs/_lib/countries.types';
+import type { Country } from '@/lib/api-boundary-schemas';
 
 interface GigFormClientProps {
   countries: Country[];
