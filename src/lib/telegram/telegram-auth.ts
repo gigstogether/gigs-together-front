@@ -1,7 +1,6 @@
 import { fetchApiJson } from '@/lib/api-core';
 import { clientEnv } from '@/env/client-env';
 import { isRecord } from '@/lib/is-record';
-import { logger } from '@/lib/logger';
 import type { TelegramAuthExchangeResponse } from '@/lib/telegram/telegram-auth-exchange-response.types';
 import type { TelegramStoredClientProfile } from '@/lib/telegram/telegram-client-profile.types';
 import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
@@ -10,9 +9,7 @@ export type { TelegramAuthExchangeResponse };
 
 const TELEGRAM_SIGN_IN_REQUIRED_EVENT = 'gt:telegram-sign-in-required';
 const telegramMiniAppBootstrapListeners = new Set<() => void>();
-export type TelegramMiniAppBootstrapResult = 'authenticated' | 'not-mini-app' | 'failed';
-
-let telegramMiniAppBootstrapPromise: Promise<TelegramMiniAppBootstrapResult> | null = null;
+let telegramMiniAppBootstrapPromise: Promise<void> | null = null;
 let isTelegramMiniAppBootstrapPending = false;
 
 /**
@@ -232,9 +229,9 @@ export async function exchangeTelegramAuthFromWebApp(initData: string): Promise<
   setStoredTelegramClientProfile(profile);
 }
 
-export async function bootstrapTelegramAuthFromWebApp(): Promise<TelegramMiniAppBootstrapResult> {
+export async function bootstrapTelegramAuthFromWebApp(): Promise<void> {
   if (typeof window === 'undefined') {
-    return 'not-mini-app';
+    return;
   }
 
   if (!telegramMiniAppBootstrapPromise) {
@@ -245,14 +242,10 @@ export async function bootstrapTelegramAuthFromWebApp(): Promise<TelegramMiniApp
           '@/lib/telegram/telegram-webapp'
         );
         if (!isTelegramMiniApp()) {
-          return 'not-mini-app';
+          return;
         }
         const initData = await waitForTelegramInitData();
         await exchangeTelegramAuthFromWebApp(initData);
-        return 'authenticated';
-      } catch (e) {
-        logger.errorFromUnknown('telegram_mini_app_bootstrap_failed', e);
-        return 'failed';
       } finally {
         telegramMiniAppBootstrapPromise = null;
         setTelegramMiniAppBootstrapPending(false);

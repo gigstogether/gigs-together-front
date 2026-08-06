@@ -1,9 +1,5 @@
 export {};
 
-const { loggerErrorFromUnknownMock } = vi.hoisted(() => ({
-  loggerErrorFromUnknownMock: vi.fn(),
-}));
-
 const { bootstrapIsTelegramMiniAppMock, bootstrapWaitForTelegramInitDataMock } = vi.hoisted(() => ({
   bootstrapIsTelegramMiniAppMock: vi.fn<() => boolean>(),
   bootstrapWaitForTelegramInitDataMock: vi.fn<() => Promise<string>>(),
@@ -16,12 +12,6 @@ vi.mock('@/env/client-env', () => ({
   },
 }));
 
-vi.mock('@/lib/logger', () => ({
-  logger: {
-    errorFromUnknown: loggerErrorFromUnknownMock,
-  },
-}));
-
 vi.mock('@/lib/telegram/telegram-webapp', () => ({
   isTelegramMiniApp: bootstrapIsTelegramMiniAppMock,
   waitForTelegramInitData: bootstrapWaitForTelegramInitDataMock,
@@ -29,7 +19,6 @@ vi.mock('@/lib/telegram/telegram-webapp', () => ({
 
 describe('bootstrapTelegramAuthFromWebApp', () => {
   beforeEach(() => {
-    loggerErrorFromUnknownMock.mockReset();
     bootstrapIsTelegramMiniAppMock.mockReset();
     bootstrapIsTelegramMiniAppMock.mockReturnValue(true);
     bootstrapWaitForTelegramInitDataMock.mockReset();
@@ -41,15 +30,9 @@ describe('bootstrapTelegramAuthFromWebApp', () => {
     vi.unstubAllGlobals();
   });
 
-  it('should log and return explicit failure when Mini App bootstrap fails', async () => {
+  it('should propagate error when Mini App bootstrap fails', async () => {
     const { bootstrapTelegramAuthFromWebApp } = await import('@/lib/telegram/telegram-auth');
 
-    const result = await bootstrapTelegramAuthFromWebApp();
-
-    expect(result).toBe('failed');
-    expect(loggerErrorFromUnknownMock).toHaveBeenCalledWith(
-      'telegram_mini_app_bootstrap_failed',
-      expect.objectContaining({ message: 'initData unavailable' }),
-    );
+    await expect(bootstrapTelegramAuthFromWebApp()).rejects.toThrow('initData unavailable');
   });
 });

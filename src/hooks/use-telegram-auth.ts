@@ -12,6 +12,7 @@ import {
 import type { TelegramAuthExchangeResponse } from '@/lib/telegram/telegram-auth-exchange-response.types';
 import type { TelegramAuthState } from '@/lib/telegram/telegram-auth.types';
 import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
+import { logger } from '@/lib/logger';
 
 function subscribeNoop(): () => void {
   return () => undefined;
@@ -75,8 +76,13 @@ export function useTelegramAuth(): UseTelegramAuthResult {
 
     const bootstrap = async (): Promise<void> => {
       hasAttemptedMiniAppBootstrapRef.current = true;
-      const result = await bootstrapTelegramAuthFromWebApp();
-      setHasTelegramMiniAppAuthError(result === 'failed');
+      try {
+        await bootstrapTelegramAuthFromWebApp();
+        setHasTelegramMiniAppAuthError(false);
+      } catch (e) {
+        logger.errorFromUnknown('telegram_mini_app_bootstrap_failed', e);
+        setHasTelegramMiniAppAuthError(true);
+      }
     };
 
     void bootstrap();
