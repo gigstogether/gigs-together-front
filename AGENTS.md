@@ -16,6 +16,11 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - For numeric constants in seconds or milliseconds (for example `604_800`, `86_400`), add a short comment with human-readable equivalents (at least days or hours, and minutes when useful).
 - Boolean variables and flags should preferably start with `is`/`has`/`can`, for example `isActive`, `isAdmin`, `isValid`.
 - In `catch` clauses, bind the caught value as `e`, not `error`, when a binding is needed (for example `catch (e) { ... }`).
+- Every `catch` block must have an observable, meaningful effect: rethrow or translate the error,
+  return an explicit typed failure result, update user-visible state, or log actionable context at
+  the appropriate level. Empty catches, comment-only catches, and catches that silently return a
+  generic fallback are forbidden. Best-effort cleanup may continue after failure, but it must still
+  record enough context to diagnose the failure without logging secrets or sensitive payloads.
 - Always create new files with `LF` line endings (not `CRLF`). Prefer editor or Git settings that default new files to `LF`.
 - Keep line endings as `LF` in tracked files. If you hit formatter errors caused by `CRLF`, convert the file to `LF` and reformat.
 
@@ -76,7 +81,8 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Prefer parsing and validation at boundaries such as HTTP, env, storage, and third-party SDKs so the rest of the code stays strongly typed.
 - Avoid `as any` entirely.
 
-- Prefer `readonly` where immutability is appropriate, especially for DTOs, config objects, and constants.
+- Do **not** use `readonly` by default on DTOs, params, domain types, or props. Omit it unless there is a real need to prevent mutation at the type level for callers that would otherwise mutate shared state.
+- Add `readonly` only when immutability is part of the contract and the risk is concrete (for example a shared config object, a cached snapshot, or an API surface where callers must not reassign fields). If there is no such risk, leave fields mutable in the type.
 
 - Prefer named types for public APIs such as service methods, controller responses, and module exports.
 - Do not use inline object types in public signatures such as `Promise<{ ... }>` or `foo(arg: { ... })`.

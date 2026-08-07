@@ -53,9 +53,8 @@ What they are used for:
 | `NEXT_PUBLIC_APP_BASE_URL`                        | Optional\*                       | Public site base URL used for metadata, sitemap, and robots. \*Recommended; required at runtime for `/sitemap.xml` and `/robots.txt`.            |
 | `NEXT_PUBLIC_GITHUB_URL`                          | Optional                         | GitHub link rendered in the header.                                                                                                              |
 | `NEXT_PUBLIC_TELEGRAM_URL`                        | Optional                         | Telegram link used in the header and as a fallback on gig cards.                                                                                 |
-| `NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL`      | Optional                         | Deep link to the Telegram service chat where users can terminate an active login session.                                                        |
 | `NEXT_PUBLIC_AUTH_ENABLED`                        | Optional                         | Shows/hides auth menu button. Parsed as boolean. Default: `false`.                                                                               |
-| `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME`               | Required\*                       | Telegram bot username used by auth flow. \*Required when `NEXT_PUBLIC_AUTH_ENABLED` is `true`.                                                   |
+| `NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID`             | Required\*                       | Public Telegram Login Client ID from BotFather. Must be a positive integer. \*Required when `NEXT_PUBLIC_AUTH_ENABLED` is `true`.                |
 | `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` | Optional                         | localStorage key for the cached Telegram display profile. Default: `gt_tg_client_profile`.                                                       |
 | `NEXT_PUBLIC_FEED_PAGE_SIZE`                      | Optional                         | Feed page size. Must be a positive integer. Default is `10`.                                                                                     |
 | `NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS`   | Optional                         | Calendar dates query stale time in milliseconds. Must be a positive integer. Default is `600000` (10 minutes).                                   |
@@ -182,7 +181,9 @@ Key areas:
 - `src/app/suggest` contains the public suggest placeholder and Telegram launch routing
 - `src/app/admin` contains the moderator-only admin shell and moderation tools
 - `src/app/api/revalidate` contains manual cache revalidation endpoints
-- `src/lib/api.ts` contains the shared API request wrapper
+- `src/lib/api-core.ts` is the shared HTTP transport (`fetchApiJson` / `buildUrl`)
+- `src/lib/api-public.ts` is the server-safe public API client (no cookies / session recovery)
+- `src/lib/api-session-client.ts` is the browser session API client (recovery + sign-in UI on 401)
 
 ## API and runtime assumptions
 

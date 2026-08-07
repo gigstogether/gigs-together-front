@@ -14,7 +14,7 @@ const menuRowClass =
 export default function HeaderAuthActions() {
   const { authState, signOut } = useTelegramAuth();
   const isAuthEnabled = clientEnv.isAuthEnabled;
-  const telegramBotUsername = clientEnv.telegramBotUsername;
+  const telegramOidcClientId = clientEnv.telegramOidcClientId;
   const miniAppEnv = useTelegramMiniAppEnv();
 
   const handleSignOut = useCallback(async () => {
@@ -26,12 +26,12 @@ export default function HeaderAuthActions() {
     });
   }, [authState, signOut]);
 
-  if (!authState && (!isAuthEnabled || !telegramBotUsername?.trim())) {
+  if (!authState && (!isAuthEnabled || !telegramOidcClientId)) {
     return null;
   }
 
   const showSignInButton =
-    !authState && isAuthEnabled && Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
+    !authState && isAuthEnabled && Boolean(telegramOidcClientId) && miniAppEnv === 'browser';
   const showSignOutButton = authState && miniAppEnv !== 'mini';
 
   return (

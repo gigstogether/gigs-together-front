@@ -4,57 +4,22 @@ import type { TelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { ApiError } from '@/lib/api-errors';
 import type { TelegramAuthState } from '@/lib/telegram/telegram-auth.types';
-import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 
 export interface UseModeratorTelegramSessionResult {
   readonly authState: TelegramAuthState | null;
   readonly isLoadingAuthState: boolean;
-  readonly telegramBotUsername: string | undefined;
+  readonly hasTelegramMiniAppAuthError: boolean;
   readonly isTelegramSignInAvailable: boolean;
   readonly miniAppEnv: TelegramMiniAppEnv;
-  readonly handleAuthenticated: (user: TelegramWidgetUser) => Promise<void>;
   readonly handleSignOut: () => Promise<void>;
 }
 
 export function useModeratorTelegramSession(): UseModeratorTelegramSessionResult {
-  const { authState, isLoadingAuthState, signIn, signOut } = useTelegramAuth();
+  const { authState, isLoadingAuthState, hasTelegramMiniAppAuthError, signOut } = useTelegramAuth();
 
-  const telegramBotUsername = clientEnv.telegramBotUsername;
-  const isTelegramSignInAvailable = Boolean(telegramBotUsername?.trim());
+  const isTelegramSignInAvailable = Boolean(clientEnv.telegramOidcClientId);
   const miniAppEnv = useTelegramMiniAppEnv();
-
-  const handleAuthenticated = useCallback(
-    async (user: TelegramWidgetUser) => {
-      try {
-        const { profile } = await signIn(user);
-        const label =
-          profile.displayLabel || (user.username ? `@${user.username}` : user.first_name);
-        if (profile.isAdmin) {
-          toast({
-            title: 'Signed in',
-            description: label,
-          });
-          return;
-        }
-        toast({
-          title: 'Access denied',
-          description: 'This page is available only for admin accounts.',
-          variant: 'destructive',
-        });
-      } catch (e) {
-        const description =
-          e instanceof ApiError ? e.message : 'Could not complete sign in. Please try again.';
-        toast({
-          title: 'Sign in failed',
-          description,
-          variant: 'destructive',
-        });
-      }
-    },
-    [signIn],
-  );
 
   const handleSignOut = useCallback(async () => {
     await signOut();
@@ -67,10 +32,9 @@ export function useModeratorTelegramSession(): UseModeratorTelegramSessionResult
   return {
     authState,
     isLoadingAuthState,
-    telegramBotUsername,
+    hasTelegramMiniAppAuthError,
     isTelegramSignInAvailable,
     miniAppEnv,
-    handleAuthenticated,
     handleSignOut,
   };
 }

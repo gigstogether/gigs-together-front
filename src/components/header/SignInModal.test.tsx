@@ -11,7 +11,7 @@ describe('SignInModal', () => {
       <SignInModal
         isOpen={false}
         onOpenChange={vi.fn()}
-        telegramBotUsername="gigs_test_bot"
+        telegramOidcClientId={123456}
         onAuthenticated={vi.fn()}
       />,
     );
@@ -25,7 +25,7 @@ describe('SignInModal', () => {
       <SignInModal
         isOpen
         onOpenChange={vi.fn()}
-        telegramBotUsername="gigs_test_bot"
+        telegramOidcClientId={123456}
         onAuthenticated={vi.fn()}
       />,
     );
