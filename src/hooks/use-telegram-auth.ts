@@ -2,16 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import {
   bootstrapTelegramAuthFromWebApp,
   clearStoredTelegramClientProfile,
-  exchangeTelegramAuthFromLoginWidget,
   getTelegramMiniAppBootstrapSnapshot,
   getTelegramClientProfileSnapshot,
   signOutTelegramAuthOnServer,
   subscribeTelegramMiniAppBootstrap,
   subscribeTelegramClientProfile,
 } from '@/lib/telegram/telegram-auth';
-import type { TelegramAuthExchangeResponse } from '@/lib/telegram/telegram-auth-exchange-response.types';
 import type { TelegramAuthState } from '@/lib/telegram/telegram-auth.types';
-import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 import { logger } from '@/lib/logger';
 
 function subscribeNoop(): () => void {
@@ -22,7 +19,6 @@ export interface UseTelegramAuthResult {
   readonly authState: TelegramAuthState | null;
   readonly isLoadingAuthState: boolean;
   readonly hasTelegramMiniAppAuthError: boolean;
-  readonly signIn: (user: TelegramWidgetUser) => Promise<TelegramAuthExchangeResponse>;
   readonly signOut: () => Promise<void>;
 }
 
@@ -60,10 +56,6 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     };
   }, [profileSnapshot]);
 
-  const signIn = useCallback(async (user: TelegramWidgetUser) => {
-    return exchangeTelegramAuthFromLoginWidget(user);
-  }, []);
-
   const signOut = useCallback(async () => {
     await signOutTelegramAuthOnServer();
     clearStoredTelegramClientProfile();
@@ -92,7 +84,6 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     authState,
     isLoadingAuthState: !isHydrated || isTelegramMiniAppBootstrapPending,
     hasTelegramMiniAppAuthError,
-    signIn,
     signOut,
   };
 }

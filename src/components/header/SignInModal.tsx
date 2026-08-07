@@ -8,20 +8,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
-
+import type { TelegramOidcCredentials } from '@/lib/telegram/telegram-auth';
 export interface SignInModalProps {
-  readonly isOpen: boolean;
-  readonly onOpenChange: (isOpen: boolean) => void;
-  readonly telegramBotUsername: string | undefined;
-  readonly onAuthenticated: (user: TelegramWidgetUser) => void | Promise<void>;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  telegramOidcClientId: number | undefined;
+  onAuthenticated: (credentials: TelegramOidcCredentials) => void | Promise<void>;
 }
 
 export default function SignInModal(props: SignInModalProps) {
-  const { isOpen, onOpenChange, telegramBotUsername, onAuthenticated } = props;
+  const { isOpen, onOpenChange, telegramOidcClientId, onAuthenticated } = props;
 
-  const botUsername = telegramBotUsername?.trim();
-  if (!isOpen || !botUsername) {
+  if (!isOpen || !telegramOidcClientId) {
     return null;
   }
 
@@ -42,9 +40,9 @@ export default function SignInModal(props: SignInModalProps) {
           Continue with the button below to sign in to your account.
         </DialogDescription>
         <SignInContent
-          telegramBotUsername={botUsername}
-          onAuthenticated={async (user) => {
-            await onAuthenticated(user);
+          telegramOidcClientId={telegramOidcClientId}
+          onAuthenticated={async (credentials) => {
+            await onAuthenticated(credentials);
             onOpenChange(false);
           }}
         />

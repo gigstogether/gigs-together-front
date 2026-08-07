@@ -15,7 +15,6 @@ vi.mock('@/lib/logger', () => ({
 vi.mock('@/lib/telegram/telegram-auth', () => ({
   bootstrapTelegramAuthFromWebApp: hookMocks.bootstrapTelegramAuthFromWebApp,
   clearStoredTelegramClientProfile: vi.fn(),
-  exchangeTelegramAuthFromLoginWidget: vi.fn(),
   getTelegramMiniAppBootstrapSnapshot: () => false,
   getTelegramClientProfileSnapshot: () => null,
   signOutTelegramAuthOnServer: vi.fn(),

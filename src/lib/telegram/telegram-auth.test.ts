@@ -1,8 +1,14 @@
 export {};
 
-const { bootstrapIsTelegramMiniAppMock, bootstrapWaitForTelegramInitDataMock } = vi.hoisted(() => ({
-  bootstrapIsTelegramMiniAppMock: vi.fn<() => boolean>(),
-  bootstrapWaitForTelegramInitDataMock: vi.fn<() => Promise<string>>(),
+const { bootstrapIsTelegramMiniAppMock, bootstrapWaitForTelegramInitDataMock, fetchApiJsonMock } =
+  vi.hoisted(() => ({
+    bootstrapIsTelegramMiniAppMock: vi.fn<() => boolean>(),
+    bootstrapWaitForTelegramInitDataMock: vi.fn<() => Promise<string>>(),
+    fetchApiJsonMock: vi.fn(),
+  }));
+
+vi.mock('@/lib/api-core', () => ({
+  fetchApiJson: fetchApiJsonMock,
 }));
 
 vi.mock('@/env/client-env', () => ({
