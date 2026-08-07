@@ -3,9 +3,12 @@ import { clientEnv } from '@/env/client-env';
 import { isRecord } from '@/lib/is-record';
 import type { TelegramAuthExchangeResponse } from '@/lib/telegram/telegram-auth-exchange-response.types';
 import type { TelegramStoredClientProfile } from '@/lib/telegram/telegram-client-profile.types';
-import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
 
 export type { TelegramAuthExchangeResponse };
+
+export interface TelegramOidcCredentials {
+  idToken: string;
+}
 
 const TELEGRAM_SIGN_IN_REQUIRED_EVENT = 'gt:telegram-sign-in-required';
 const telegramMiniAppBootstrapListeners = new Set<() => void>();
@@ -256,14 +259,10 @@ export async function bootstrapTelegramAuthFromWebApp(): Promise<void> {
   return telegramMiniAppBootstrapPromise;
 }
 
-/**
- * Telegram Login Widget: exchanges the callback payload for an access JWT (HttpOnly cookie) and
- * persists the non-sensitive profile in localStorage (see `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY`).
- */
-export async function exchangeTelegramAuthFromLoginWidget(
-  user: TelegramWidgetUser,
+export async function exchangeTelegramAuthFromOidc(
+  credentials: TelegramOidcCredentials,
 ): Promise<TelegramAuthExchangeResponse> {
-  const raw = await fetchApiJson<unknown>('v1/auth/telegram/login-widget', 'POST', user, {
+  const raw = await fetchApiJson<unknown>('v1/auth/telegram/oidc', 'POST', credentials, {
     credentials: 'include',
   });
   const response = parseAuthExchangeResponse(raw);

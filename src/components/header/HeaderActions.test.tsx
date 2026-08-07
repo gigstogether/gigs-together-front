@@ -7,7 +7,7 @@ const { mockClientEnv, miniAppEnvMock } = vi.hoisted(() => ({
     telegramUrl: undefined,
     githubUrl: undefined,
     isPublicSuggestGigEnabled: false,
-    telegramBotUsername: 'bot',
+    telegramOidcClientId: 123456,
     isAuthEnabled: true,
   },
   miniAppEnvMock: vi.fn<() => 'browser' | 'mini' | 'unknown'>(),
@@ -60,7 +60,6 @@ describe('HeaderActions', () => {
       authState: null,
       isLoadingAuthState: false,
       hasTelegramMiniAppAuthError: false,
-      signIn: vi.fn(),
       signOut: vi.fn(),
     });
   });
@@ -88,7 +87,6 @@ describe('HeaderActions', () => {
       authState: { displayLabel: '@admin', isAdmin: true },
       isLoadingAuthState: false,
       hasTelegramMiniAppAuthError: false,
-      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 
@@ -116,7 +114,6 @@ describe('HeaderActions', () => {
       authState: { displayLabel: '@only', isAdmin: false },
       isLoadingAuthState: false,
       hasTelegramMiniAppAuthError: false,
-      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 
@@ -158,7 +155,6 @@ describe('HeaderActions', () => {
       authState: { displayLabel: '@admin', isAdmin: true },
       isLoadingAuthState: false,
       hasTelegramMiniAppAuthError: false,
-      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 

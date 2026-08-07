@@ -58,7 +58,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const { authState } = useTelegramAuth();
   const miniAppEnv = useTelegramMiniAppEnv();
 
-  const telegramBotUsername = clientEnv.telegramBotUsername;
+  const telegramOidcClientId = clientEnv.telegramOidcClientId;
   const isAdmin = authState?.isAdmin === true;
   const suggestGigHref = isAdmin
     ? ADMIN_GIGS_NEW_ROUTE
@@ -66,7 +66,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
       ? SUGGEST_ROUTE
       : undefined;
   const isSignInShownInMenu =
-    isAuthEnabled && Boolean(telegramBotUsername?.trim()) && miniAppEnv === 'browser';
+    isAuthEnabled && Boolean(telegramOidcClientId) && miniAppEnv === 'browser';
   const hasVisibleAuthState = Boolean(authState);
 
   /** Profile / Sign in row is visible — same predicates as HeaderAuthActions non-empty UX. */

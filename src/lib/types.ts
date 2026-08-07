@@ -1,6 +1,22 @@
 declare global {
+  interface TelegramLoginOptions {
+    client_id: number;
+    scope: ['profile'];
+  }
+
+  interface TelegramLoginResult {
+    id_token?: string;
+    error?: string;
+  }
+
   interface Window {
     Telegram?: {
+      Login?: {
+        auth: (
+          options: TelegramLoginOptions,
+          callback: (result: TelegramLoginResult) => void,
+        ) => void;
+      };
       WebApp?: {
         initData: string;
         initDataUnsafe?: {

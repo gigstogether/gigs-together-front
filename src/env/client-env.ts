@@ -20,9 +20,10 @@ const clientEnvSchema = z
     NEXT_PUBLIC_TELEGRAM_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_GITHUB_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_SUGGEST_GIG_ENABLED: optionalBooleanFromEnvSchema.default(false),
-    NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_AUTH_ENABLED: optionalBooleanFromEnvSchema.default(false),
-    NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: optionalTrimmedStringFromEnvSchema,
+    NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID: createOptionalPositiveIntegerFromEnvSchema(
+      'NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID',
+    ),
     NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY: optionalTrimmedStringFromEnvSchema.default(
       DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY,
     ),
@@ -35,12 +36,12 @@ const clientEnvSchema = z
     NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID: optionalTrimmedStringFromEnvSchema,
   })
   .superRefine((value, ctx) => {
-    if (value.NEXT_PUBLIC_AUTH_ENABLED && !value.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME) {
+    if (value.NEXT_PUBLIC_AUTH_ENABLED && !value.NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'NEXT_PUBLIC_TELEGRAM_BOT_USERNAME is required when NEXT_PUBLIC_AUTH_ENABLED is true',
-        path: ['NEXT_PUBLIC_TELEGRAM_BOT_USERNAME'],
+          'NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID is required when NEXT_PUBLIC_AUTH_ENABLED is true',
+        path: ['NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID'],
       });
     }
   });
@@ -52,10 +53,8 @@ const parsedClientEnv = clientEnvSchema.parse({
   NEXT_PUBLIC_TELEGRAM_URL: process.env.NEXT_PUBLIC_TELEGRAM_URL,
   NEXT_PUBLIC_GITHUB_URL: process.env.NEXT_PUBLIC_GITHUB_URL,
   NEXT_PUBLIC_SUGGEST_GIG_ENABLED: process.env.NEXT_PUBLIC_SUGGEST_GIG_ENABLED,
-  NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL:
-    process.env.NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL,
   NEXT_PUBLIC_AUTH_ENABLED: process.env.NEXT_PUBLIC_AUTH_ENABLED,
-  NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME,
+  NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID: process.env.NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID,
   NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY:
     process.env.NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY,
   NEXT_PUBLIC_FEED_PAGE_SIZE: process.env.NEXT_PUBLIC_FEED_PAGE_SIZE,
@@ -72,9 +71,8 @@ export const clientEnv = {
   telegramUrl: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_URL,
   githubUrl: parsedClientEnv.NEXT_PUBLIC_GITHUB_URL,
   isPublicSuggestGigEnabled: parsedClientEnv.NEXT_PUBLIC_SUGGEST_GIG_ENABLED,
-  telegramAuthSessionHelpUrl: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_AUTH_SESSION_HELP_URL,
   isAuthEnabled: parsedClientEnv.NEXT_PUBLIC_AUTH_ENABLED,
-  telegramBotUsername: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME,
+  telegramOidcClientId: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID,
   telegramClientProfileStorageKey: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY,
   feedPageSize: parsedClientEnv.NEXT_PUBLIC_FEED_PAGE_SIZE ?? DEFAULT_FEED_PAGE_SIZE,
   feedCalendarDatesStaleTimeMs:
