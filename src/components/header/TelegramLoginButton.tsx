@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import type { TelegramOidcCredentials } from '@/lib/telegram/telegram-auth';
+import type { TelegramLoginResult } from '@/lib/types';
 
 const TELEGRAM_LOGIN_SCRIPT_SRC = 'https://oauth.telegram.org/js/telegram-login.js?3';
 

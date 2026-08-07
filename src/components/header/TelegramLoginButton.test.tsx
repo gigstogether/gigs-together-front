@@ -19,9 +19,8 @@ describe('TelegramLoginButton', () => {
 
   it('should pass OIDC credentials when Telegram login succeeds', async () => {
     const onAuth = vi.fn();
-    const auth = vi.fn(
-      (_options: TelegramLoginOptions, callback: (result: TelegramLoginResult) => void) =>
-        callback({ id_token: 'signed-id-token' }),
+    const auth: NonNullable<NonNullable<Window['Telegram']>['Login']>['auth'] = vi.fn(
+      (_options, callback) => callback({ id_token: 'signed-id-token' }),
     );
     window.Telegram = { ...window.Telegram, Login: { auth } };
 
@@ -45,9 +44,8 @@ describe('TelegramLoginButton', () => {
   });
 
   it('should show an error when Telegram rejects login', async () => {
-    const auth = vi.fn(
-      (_options: TelegramLoginOptions, callback: (result: TelegramLoginResult) => void) =>
-        callback({ error: 'Access denied' }),
+    const auth: NonNullable<NonNullable<Window['Telegram']>['Login']>['auth'] = vi.fn(
+      (_options, callback) => callback({ error: 'Access denied' }),
     );
     window.Telegram = { ...window.Telegram, Login: { auth } };
 
