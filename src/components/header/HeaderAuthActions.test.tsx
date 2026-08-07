@@ -4,7 +4,7 @@ import HeaderAuthActions from '@/components/header/HeaderAuthActions';
 const { mockClientEnv } = vi.hoisted(() => ({
   mockClientEnv: {
     isAuthEnabled: true,
-    telegramBotUsername: 'bot',
+    telegramOidcClientId: 123456,
   },
 }));
 
@@ -29,7 +29,6 @@ vi.mock('@/hooks/use-telegram-auth', () => ({
     authState: null,
     isLoadingAuthState: false,
     hasTelegramMiniAppAuthError: false,
-    signIn: vi.fn(),
     signOut: vi.fn(),
   })),
 }));
@@ -46,7 +45,6 @@ describe('HeaderAuthActions', () => {
       authState: null,
       isLoadingAuthState: false,
       hasTelegramMiniAppAuthError: false,
-      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 
@@ -61,7 +59,6 @@ describe('HeaderAuthActions', () => {
       authState: null,
       isLoadingAuthState: false,
       hasTelegramMiniAppAuthError: false,
-      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 

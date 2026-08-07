@@ -15,9 +15,9 @@ describe('env/client', () => {
   });
 
   describe('auth config', () => {
-    it('should set isAuthEnabled to true when NEXT_PUBLIC_AUTH_ENABLED=true and telegram bot username is set', async () => {
+    it('should set isAuthEnabled to true when auth and Telegram OIDC are configured', async () => {
       vi.stubEnv('NEXT_PUBLIC_AUTH_ENABLED', 'true');
-      vi.stubEnv('NEXT_PUBLIC_TELEGRAM_BOT_USERNAME', 'gigs_together_bot');
+      vi.stubEnv('NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID', '123456');
 
       const clientEnvModule = await importClientEnv();
 
@@ -32,18 +32,26 @@ describe('env/client', () => {
       expect(clientEnvModule.clientEnv.isAuthEnabled).toBe(false);
     });
 
-    it('should throw when auth is enabled and telegram bot username is missing', async () => {
+    it('should throw when auth is enabled and Telegram OIDC client ID is missing', async () => {
       vi.stubEnv('NEXT_PUBLIC_AUTH_ENABLED', 'true');
-      vi.stubEnv('NEXT_PUBLIC_TELEGRAM_BOT_USERNAME', undefined);
+      vi.stubEnv('NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID', undefined);
 
       const error = await captureRejectedError(() => importClientEnv());
 
       expectZodIssue(error, {
         code: 'custom',
         message:
-          'NEXT_PUBLIC_TELEGRAM_BOT_USERNAME is required when NEXT_PUBLIC_AUTH_ENABLED is true',
-        path: ['NEXT_PUBLIC_TELEGRAM_BOT_USERNAME'],
+          'NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID is required when NEXT_PUBLIC_AUTH_ENABLED is true',
+        path: ['NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID'],
       });
+    });
+
+    it('should parse Telegram OIDC client ID as a positive integer', async () => {
+      vi.stubEnv('NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID', '123456');
+
+      const clientEnvModule = await importClientEnv();
+
+      expect(clientEnvModule.clientEnv.telegramOidcClientId).toBe(123456);
     });
   });
 

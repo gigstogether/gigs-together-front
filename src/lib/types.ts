@@ -1,6 +1,21 @@
+export interface TelegramLoginOptions {
+  client_id: number;
+  scope: ['profile'];
+}
+
+export interface TelegramLoginResult {
+  id_token?: string;
+  error?: string;
+}
+
+interface TelegramLoginSdk {
+  auth: (options: TelegramLoginOptions, callback: (result: TelegramLoginResult) => void) => void;
+}
+
 declare global {
   interface Window {
     Telegram?: {
+      Login?: TelegramLoginSdk;
       WebApp?: {
         initData: string;
         initDataUnsafe?: {

@@ -1,18 +1,16 @@
 'use client';
 
-import TelegramLoginWidget from '@/components/header/TelegramLoginWidget';
-import type { TelegramWidgetUser } from '@/lib/telegram/telegram-login.types';
-
+import TelegramLoginButton from '@/components/header/TelegramLoginButton';
+import type { TelegramOidcCredentials } from '@/lib/telegram/telegram-auth';
 export interface SignInContentProps {
-  readonly telegramBotUsername: string | undefined;
-  readonly onAuthenticated: (user: TelegramWidgetUser) => void | Promise<void>;
+  telegramOidcClientId: number | undefined;
+  onAuthenticated: (credentials: TelegramOidcCredentials) => void | Promise<void>;
 }
 
 export default function SignInContent(props: SignInContentProps) {
-  const { telegramBotUsername, onAuthenticated } = props;
+  const { telegramOidcClientId, onAuthenticated } = props;
 
-  const botUsername = telegramBotUsername?.trim();
-  if (!botUsername) {
+  if (!telegramOidcClientId) {
     return null;
   }
 
@@ -25,9 +23,8 @@ export default function SignInContent(props: SignInContentProps) {
         </p>
       </div>
       <div className="flex justify-center pt-1">
-        <TelegramLoginWidget
-          botUsername={botUsername}
-          size="large"
+        <TelegramLoginButton
+          clientId={telegramOidcClientId}
           onAuth={onAuthenticated}
         />
       </div>
