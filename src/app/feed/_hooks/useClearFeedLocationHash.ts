@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 
 /**
  * Returns a callback that drops the current location hash while keeping pathname + search.
@@ -8,8 +7,6 @@ import { useRouter } from 'next/navigation';
  * Call the result only from client handlers / effects — not during SSR render.
  */
 export function useClearFeedLocationHash(): () => void {
-  const router = useRouter();
-
   return useCallback(() => {
     const hasHash = Boolean(window.location.hash);
     if (!hasHash) {
@@ -17,7 +14,6 @@ export function useClearFeedLocationHash(): () => void {
     }
 
     const url = `${window.location.pathname}${window.location.search}`;
-    window.history.replaceState(null, '', url);
-    router.replace(url as Parameters<typeof router.replace>[0]);
-  }, [router]);
+    window.history.replaceState(window.history.state, '', url);
+  }, []);
 }
