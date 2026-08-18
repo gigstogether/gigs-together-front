@@ -17,6 +17,7 @@ interface PosterFieldProps {
   posterFileInputRef: RefObject<HTMLInputElement | null>;
   existingPosterUrl?: string;
   variant?: 'create' | 'edit';
+  isUrlInputEnabled?: boolean;
 }
 
 export default function PosterField(props: PosterFieldProps) {
@@ -29,6 +30,7 @@ export default function PosterField(props: PosterFieldProps) {
     posterFileInputRef,
     existingPosterUrl,
     variant,
+    isUrlInputEnabled = true,
   } = props;
 
   const isEdit = variant === 'edit';
@@ -93,9 +95,11 @@ export default function PosterField(props: PosterFieldProps) {
     }
   }
 
-  const description = isEdit
-    ? 'Upload a new image file, paste URL, or paste image from clipboard (optional).'
-    : 'Upload an image file (max 10MB), paste URL, or paste image from clipboard.';
+  const description = isUrlInputEnabled
+    ? isEdit
+      ? 'Upload a new image file, paste URL, or paste image from clipboard (optional).'
+      : 'Upload an image file (max 10MB), paste URL, or paste image from clipboard.'
+    : 'Upload an image file (max 10MB).';
 
   return (
     <Field>
@@ -126,24 +130,27 @@ export default function PosterField(props: PosterFieldProps) {
           </Button>
         </div>
 
-        <Input
-          id="poster-url"
-          type="url"
-          placeholder="Or paste poster URL or image (Ctrl+V)"
-          value={posterUrl ?? ''}
-          aria-label="Poster URL"
-          onChange={(event) => {
-            const nextValue = event.target.value;
-            onPosterUrlChange(nextValue);
-            if (nextValue.trim()) {
-              onPosterFileChange(null);
-              if (posterFileInputRef.current) {
-                posterFileInputRef.current.value = '';
+        {/* TODO: Re-enable URL input for user suggestions after backend URL downloads are SSRF-safe and size-limited. */}
+        {isUrlInputEnabled ? (
+          <Input
+            id="poster-url"
+            type="url"
+            placeholder="Or paste poster URL or image (Ctrl+V)"
+            value={posterUrl ?? ''}
+            aria-label="Poster URL"
+            onChange={(event) => {
+              const nextValue = event.target.value;
+              onPosterUrlChange(nextValue);
+              if (nextValue.trim()) {
+                onPosterFileChange(null);
+                if (posterFileInputRef.current) {
+                  posterFileInputRef.current.value = '';
+                }
               }
-            }
-          }}
-          onPaste={handlePaste}
-        />
+            }}
+            onPaste={handlePaste}
+          />
+        ) : null}
       </div>
 
       {previewSrc ? (

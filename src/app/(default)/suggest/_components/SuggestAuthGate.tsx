@@ -16,7 +16,7 @@ export default function SuggestAuthGate(props: SuggestAuthGateProps) {
   const { children } = props;
 
   const { authState, isLoadingAuthState } = useTelegramAuth();
-  const isTelegramSignInAvailable = Boolean(clientEnv.telegramBotUsername?.trim());
+  const isTelegramSignInAvailable = Boolean(clientEnv.telegramOidcClientId);
 
   if (isLoadingAuthState) {
     return (

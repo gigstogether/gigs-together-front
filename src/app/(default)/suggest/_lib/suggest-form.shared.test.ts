@@ -47,4 +47,27 @@ describe('suggestGigFormSchema', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('should reject a date that does not exist in the calendar', () => {
+    const result = suggestGigFormSchema.safeParse({
+      title: 'Band',
+      country: 'ES',
+      city: 'Barcelona',
+      date: '2026-02-31',
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject an end date before the start date', () => {
+    const result = suggestGigFormSchema.safeParse({
+      title: 'Band',
+      country: 'ES',
+      city: 'Barcelona',
+      date: '2026-08-10',
+      endDate: '2026-08-09',
+    });
+
+    expect(result.success).toBe(false);
+  });
 });

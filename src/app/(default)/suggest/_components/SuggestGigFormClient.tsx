@@ -102,6 +102,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
             onPosterUrlChange={setPosterUrl}
             onClearPoster={clearPoster}
             posterFileInputRef={posterFileInputRef}
+            isUrlInputEnabled={false}
           />
           <Button
             type="submit"
