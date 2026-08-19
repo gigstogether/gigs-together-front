@@ -28,7 +28,7 @@ describe('createGigCandidate', () => {
       poster: { mode: 'url', file: null, url: '' },
     });
 
-    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/gig-candidate', 'POST', {
+    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/gig-candidates', 'POST', {
       gig: {
         title: 'Band',
         date: '2026-08-01',
@@ -55,7 +55,7 @@ describe('createGigCandidate', () => {
       poster: { mode: 'url', file: null, url: 'https://cdn.example/poster.jpg' },
     });
 
-    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/gig-candidate', 'POST', {
+    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/gig-candidates', 'POST', {
       gig: {
         title: 'Band',
         date: '2026-08-01',
@@ -84,7 +84,7 @@ describe('createGigCandidate', () => {
     });
 
     expect(apiClientRequestMock).toHaveBeenCalledWith(
-      'v1/gig-candidate',
+      'v1/gig-candidates',
       'POST',
       expect.any(FormData),
     );

@@ -1,4 +1,6 @@
 import { apiClientRequest } from '@/lib/api-session-client';
+
+const GIG_CANDIDATES_ENDPOINT = 'v1/gig-candidates';
 import { isRecord } from '@/lib/is-record';
 
 export type GigCandidatePosterMode = 'upload' | 'url';
@@ -72,13 +74,13 @@ export async function createGigCandidate(
     const fd = new FormData();
     fd.append('posterFile', params.poster.file);
     fd.append('gig', JSON.stringify(gig));
-    raw = await apiClientRequest<unknown, FormData>('v1/gig-candidate', 'POST', fd);
+    raw = await apiClientRequest<unknown, FormData>(GIG_CANDIDATES_ENDPOINT, 'POST', fd);
   } else if (posterUrl) {
-    raw = await apiClientRequest<unknown>('v1/gig-candidate', 'POST', {
+    raw = await apiClientRequest<unknown>(GIG_CANDIDATES_ENDPOINT, 'POST', {
       gig: { ...gig, posterUrl },
     });
   } else {
-    raw = await apiClientRequest<unknown>('v1/gig-candidate', 'POST', { gig });
+    raw = await apiClientRequest<unknown>(GIG_CANDIDATES_ENDPOINT, 'POST', { gig });
   }
 
   return parseGigCandidateCreateResponse(raw);
