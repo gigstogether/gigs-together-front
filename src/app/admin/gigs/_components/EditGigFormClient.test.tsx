@@ -7,12 +7,10 @@ import { GigStatusAPI } from '@/app/admin/gigs/_lib/types';
 
 const mockPush = vi.fn();
 const mockBack = vi.fn();
-const mockOnLookup = vi.fn<() => Promise<void>>();
 const mockOnSubmit = vi.fn();
 const mockRetryLoadingGig = vi.fn<() => Promise<void>>();
 
 const mockUseEditGigFormData = vi.fn();
-const mockUseGigLookup = vi.fn();
 const mockUseGigSubmit = vi.fn();
 
 vi.mock('next/navigation', () => ({
@@ -29,10 +27,6 @@ vi.mock('@/hooks/use-toast', () => ({
 vi.mock('@/app/admin/gigs/_hooks/useEditGigFormData', () => ({
   useEditGigFormData: (...args: Parameters<typeof mockUseEditGigFormData>) =>
     mockUseEditGigFormData(...args),
-}));
-
-vi.mock('@/app/admin/gigs/_hooks/useGigLookup', () => ({
-  useGigLookup: (...args: Parameters<typeof mockUseGigLookup>) => mockUseGigLookup(...args),
 }));
 
 vi.mock('@/app/admin/gigs/_hooks/useGigSubmit', () => ({
@@ -59,11 +53,6 @@ function renderClient() {
 describe('EditGigFormClient', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
-    mockUseGigLookup.mockReturnValue({
-      isLookingUp: false,
-      onLookup: mockOnLookup,
-    });
 
     mockUseGigSubmit.mockReturnValue({
       isSubmitting: false,

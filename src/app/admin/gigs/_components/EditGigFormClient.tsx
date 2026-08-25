@@ -15,7 +15,6 @@ import { updateGig } from '@/app/admin/gigs/_lib/gig-form-api';
 import { defaultGigFormValues, gigFormSchema } from '@/app/admin/gigs/_lib/gig-form.shared';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { useEditGigFormData } from '@/app/admin/gigs/_hooks/useEditGigFormData';
-import { useGigLookup } from '@/app/admin/gigs/_hooks/useGigLookup';
 import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import { cn } from '@/lib/utils';
@@ -38,8 +37,6 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
     resolver: zodResolver(gigFormSchema),
     defaultValues: defaultGigFormValues,
   });
-
-  const { isLookingUp, onLookup } = useGigLookup(form, setPosterFile, setPosterUrl);
 
   const { isSubmitting, onSubmit } = useGigSubmit({
     posterFile,
@@ -130,10 +127,8 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
               <GigFormFields
                 form={form}
                 countries={countries}
-                isLookingUp={isLookingUp}
                 isSubmitting={isSubmitting}
                 isLoading={isLoadingGig}
-                onLookup={onLookup}
               />
 
               <PosterField

@@ -14,7 +14,7 @@ import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/_lib/typ
 import { GigStatus } from '@/app/admin/gigs/_lib/types';
 import { cn } from '@/lib/utils';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
-import AdminGigPreviewPoster from '@/app/admin/gigs/_components/AdminGigPreviewPoster';
+import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
 import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPreviewTitleRow';
 import { buildAdminGigEditRoute, buildAdminGigPublicIdPath } from '@/lib/admin-gig-paths';
 
@@ -175,7 +175,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
         </div>
 
         <div className="p-2 pt-0">
-          <AdminGigPreviewPoster
+          <AdminPreviewPoster
             posterUrl={gig.posterUrl}
             title={gig.title}
           />

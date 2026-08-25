@@ -1,0 +1,40 @@
+import {
+  GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES,
+  GIG_CANDIDATE_STATUS_FILTERS,
+  parseGigCandidateStatusFilter,
+} from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate-status';
+import {
+  GigCandidateStatusAPI,
+  GigCandidateStatusFilter,
+} from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
+
+describe('parseGigCandidateStatusFilter', () => {
+  it('should expose every GigCandidate workflow status', () => {
+    expect(GIG_CANDIDATE_STATUS_FILTERS).toEqual([
+      GigCandidateStatusFilter.Pending,
+      GigCandidateStatusFilter.Reviewing,
+      GigCandidateStatusFilter.Approved,
+      GigCandidateStatusFilter.Rejected,
+    ]);
+  });
+
+  it.each(GIG_CANDIDATE_STATUS_FILTERS)(
+    'should parse the %s GigCandidate status',
+    (gigCandidateStatus) => {
+      expect(parseGigCandidateStatusFilter(gigCandidateStatus)).toBe(gigCandidateStatus);
+    },
+  );
+
+  it('should fall back to Pending when the GigCandidate status is unknown', () => {
+    expect(parseGigCandidateStatusFilter('unknown')).toBe(GigCandidateStatusFilter.Pending);
+  });
+
+  it('should use the legacy New and Pending colors for Pending and Reviewing', () => {
+    expect(GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES).toEqual({
+      [GigCandidateStatusAPI.Pending]: 'bg-slate-500',
+      [GigCandidateStatusAPI.Reviewing]: 'bg-yellow-500',
+      [GigCandidateStatusAPI.Approved]: 'bg-emerald-500',
+      [GigCandidateStatusAPI.Rejected]: 'bg-rose-500',
+    });
+  });
+});

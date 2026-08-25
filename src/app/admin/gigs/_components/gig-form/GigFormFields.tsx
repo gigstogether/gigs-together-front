@@ -15,14 +15,23 @@ import { useT } from '@/providers/I18nProvider';
 interface GigFormFieldsProps {
   form: UseFormReturn<GigFormValues>;
   countries: Country[];
-  isLookingUp: boolean;
   isSubmitting: boolean;
   isLoading?: boolean;
-  onLookup: () => Promise<void>;
+  allowEmptyCountry?: boolean;
+  isLookingUp?: boolean;
+  onLookup?: () => Promise<void>;
 }
 
 export default function GigFormFields(props: GigFormFieldsProps) {
-  const { form, countries, isLookingUp, isSubmitting, isLoading, onLookup } = props;
+  const {
+    form,
+    countries,
+    isSubmitting,
+    isLoading,
+    allowEmptyCountry = false,
+    isLookingUp = false,
+    onLookup,
+  } = props;
 
   const t = useT();
 
@@ -60,6 +69,7 @@ export default function GigFormFields(props: GigFormFieldsProps) {
                 value={field.value ?? defaultGigFormValues.country}
                 className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               >
+                {allowEmptyCountry ? <option value="">Not set</option> : null}
                 {countries.map((country) => (
                   <option
                     key={country.iso}
@@ -93,56 +103,66 @@ export default function GigFormFields(props: GigFormFieldsProps) {
         />
       </div>
 
-      <div className="flex items-center gap-3">
-        <FieldSeparator className="flex-1" />
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={isLookingUp || isSubmitting || !!isLoading}
-          onClick={() => {
-            void onLookup();
-          }}
-        >
-          {isLookingUp ? 'Looking up...' : 'Find info with AI'}
-        </Button>
-        <FieldSeparator className="flex-1" />
+      {onLookup ? (
+        <div className="flex items-center gap-3">
+          <FieldSeparator className="flex-1" />
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isLookingUp || isSubmitting || !!isLoading}
+            onClick={() => {
+              void onLookup();
+            }}
+          >
+            {isLookingUp ? 'Looking up...' : 'Find info with AI'}
+          </Button>
+          <FieldSeparator className="flex-1" />
+        </div>
+      ) : null}
+
+      <div className="grid min-w-0 grid-cols-2 gap-4">
+        <Controller
+          control={form.control}
+          name="date"
+          render={({ field, fieldState }) => (
+            <Field
+              className="min-w-0"
+              data-invalid={fieldState.invalid}
+            >
+              <FieldLabel htmlFor="gig-date">Date:</FieldLabel>
+              <Input
+                {...field}
+                id="gig-date"
+                type="date"
+                aria-invalid={fieldState.invalid}
+                value={field.value ?? ''}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
+
+        <Controller
+          control={form.control}
+          name="endDate"
+          render={({ field, fieldState }) => (
+            <Field
+              className="min-w-0"
+              data-invalid={fieldState.invalid}
+            >
+              <FieldLabel htmlFor="gig-end-date">End Date: (optional)</FieldLabel>
+              <Input
+                {...field}
+                id="gig-end-date"
+                type="date"
+                aria-invalid={fieldState.invalid}
+                value={field.value ?? ''}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
       </div>
-
-      <Controller
-        control={form.control}
-        name="date"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="gig-date">Date:</FieldLabel>
-            <Input
-              {...field}
-              id="gig-date"
-              type="date"
-              aria-invalid={fieldState.invalid}
-              value={field.value ?? ''}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
-
-      <Controller
-        control={form.control}
-        name="endDate"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="gig-end-date">End Date: (optional)</FieldLabel>
-            <Input
-              {...field}
-              id="gig-end-date"
-              type="date"
-              aria-invalid={fieldState.invalid}
-              value={field.value ?? ''}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
 
       <Controller
         control={form.control}

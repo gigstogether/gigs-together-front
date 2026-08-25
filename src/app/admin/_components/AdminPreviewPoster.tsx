@@ -1,12 +1,11 @@
 import { GigPoster } from '@/components/GigPoster';
 
-interface AdminGigPreviewPosterProps {
-  readonly posterUrl?: string;
-  readonly title: string;
+interface AdminPreviewPosterProps {
+  posterUrl?: string;
+  title: string;
 }
 
-// TODO: unite all poster components to a common component?
-export default function AdminGigPreviewPoster(props: AdminGigPreviewPosterProps) {
+export default function AdminPreviewPoster(props: AdminPreviewPosterProps) {
   const { posterUrl, title } = props;
 
   if (!posterUrl) {

@@ -1,5 +1,10 @@
 import type { GigStatusFilter } from '@/app/admin/gigs/_lib/types';
 import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
+import type {
+  AdminGigCandidatesSortBy,
+  AdminGigCandidatesSortOrder,
+  GigCandidateStatusFilter,
+} from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
 
 /** Sentinel for "no filter" in admin translation dropdowns; not a valid domain value. */
 export const ADMIN_FILTER_ALL = '__all__' as const;
@@ -47,5 +52,27 @@ export const adminKeys = {
 
   gigsRoot(): readonly ['admin', 'gigs'] {
     return ['admin', 'gigs'];
+  },
+
+  gigCandidates(
+    filter: GigCandidateStatusFilter,
+    sortBy: AdminGigCandidatesSortBy,
+    sortOrder: AdminGigCandidatesSortOrder,
+  ): readonly [
+    'admin',
+    'gigCandidates',
+    GigCandidateStatusFilter,
+    AdminGigCandidatesSortBy,
+    AdminGigCandidatesSortOrder,
+  ] {
+    return ['admin', 'gigCandidates', filter, sortBy, sortOrder];
+  },
+
+  gigCandidatesRoot(): readonly ['admin', 'gigCandidates'] {
+    return ['admin', 'gigCandidates'];
+  },
+
+  gigCandidateById(gigCandidateId: string): readonly ['admin', 'gigCandidate', string] {
+    return ['admin', 'gigCandidate', gigCandidateId.trim()];
   },
 } as const;

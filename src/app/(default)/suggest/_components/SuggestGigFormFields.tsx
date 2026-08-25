@@ -106,53 +106,61 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
         />
       </div>
 
-      <Controller
-        control={form.control}
-        name="date"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel
-              id="suggest-gig-date-label"
-              htmlFor="suggest-gig-date"
+      <div className="grid min-w-0 grid-cols-2 gap-4">
+        <Controller
+          control={form.control}
+          name="date"
+          render={({ field, fieldState }) => (
+            <Field
+              className="min-w-0"
+              data-invalid={fieldState.invalid}
             >
-              Date:
-            </FieldLabel>
-            <Input
-              {...field}
-              id="suggest-gig-date"
-              type="date"
-              aria-labelledby="suggest-gig-date-label"
-              aria-invalid={fieldState.invalid}
-              value={field.value ?? ''}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
+              <FieldLabel
+                id="suggest-gig-date-label"
+                htmlFor="suggest-gig-date"
+              >
+                Date:
+              </FieldLabel>
+              <Input
+                {...field}
+                id="suggest-gig-date"
+                type="date"
+                aria-labelledby="suggest-gig-date-label"
+                aria-invalid={fieldState.invalid}
+                value={field.value ?? ''}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
 
-      <Controller
-        control={form.control}
-        name="endDate"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel
-              id="suggest-gig-end-date-label"
-              htmlFor="suggest-gig-end-date"
+        <Controller
+          control={form.control}
+          name="endDate"
+          render={({ field, fieldState }) => (
+            <Field
+              className="min-w-0"
+              data-invalid={fieldState.invalid}
             >
-              End Date: (optional)
-            </FieldLabel>
-            <Input
-              {...field}
-              id="suggest-gig-end-date"
-              type="date"
-              aria-labelledby="suggest-gig-end-date-label"
-              aria-invalid={fieldState.invalid}
-              value={field.value ?? ''}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
+              <FieldLabel
+                id="suggest-gig-end-date-label"
+                htmlFor="suggest-gig-end-date"
+              >
+                End Date: (optional)
+              </FieldLabel>
+              <Input
+                {...field}
+                id="suggest-gig-end-date"
+                type="date"
+                aria-labelledby="suggest-gig-end-date-label"
+                aria-invalid={fieldState.invalid}
+                value={field.value ?? ''}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
+      </div>
 
       <Controller
         control={form.control}

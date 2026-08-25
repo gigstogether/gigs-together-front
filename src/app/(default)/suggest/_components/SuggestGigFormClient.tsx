@@ -62,7 +62,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
 
   if (isSubmitted) {
     return (
-      <Card className="w-full max-w-md m-auto border-0">
+      <Card className="w-full border-0">
         <CardHeader>
           <CardTitle>Suggestion received</CardTitle>
         </CardHeader>
