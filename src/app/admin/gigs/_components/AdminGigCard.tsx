@@ -1,6 +1,5 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { AlertTriangle, Calendar, ExternalLink, Rss, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import { LocationIcon } from '@/components/ui/location-icon';
@@ -12,26 +11,11 @@ import {
 import { mapGigStatusFromAPI } from '@/app/admin/gigs/_lib/admin-gig-status';
 import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/_lib/types';
 import { GigStatus } from '@/app/admin/gigs/_lib/types';
-import { cn } from '@/lib/utils';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
 import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
+import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
 import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPreviewTitleRow';
 import { buildAdminGigEditRoute, buildAdminGigPublicIdPath } from '@/lib/admin-gig-paths';
-
-interface MetaRowProps {
-  readonly icon: ReactNode;
-  readonly children: ReactNode;
-  readonly className?: string;
-}
-
-function MetaRow(props: MetaRowProps) {
-  return (
-    <div className={cn('flex min-w-0 items-start gap-2 text-sm', props.className)}>
-      <span className="mt-0.5 shrink-0 text-muted-foreground">{props.icon}</span>
-      <span className="min-w-0 flex-1 leading-snug">{props.children}</span>
-    </div>
-  );
-}
 
 interface AdminGigCardProps {
   readonly gig: AdminGigDetail | AdminGigFormData;
@@ -60,7 +44,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             status={status}
           />
 
-          <MetaRow
+          <AdminPreviewMetaRow
             icon={
               <Calendar
                 className="h-4 w-4"
@@ -69,8 +53,8 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             }
           >
             {dateLabel}
-          </MetaRow>
-          <MetaRow
+          </AdminPreviewMetaRow>
+          <AdminPreviewMetaRow
             icon={
               <LocationIcon
                 className="h-4 w-4"
@@ -79,9 +63,9 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             }
           >
             {gig.venue}
-          </MetaRow>
+          </AdminPreviewMetaRow>
           {gig.ticketsUrl ? (
-            <MetaRow
+            <AdminPreviewMetaRow
               icon={
                 <Ticket
                   className="h-4 w-4"
@@ -97,7 +81,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
               >
                 {gig.ticketsUrl}
               </a>
-            </MetaRow>
+            </AdminPreviewMetaRow>
           ) : null}
 
           <div className="border-t border-border pt-2 pb-1 space-y-2">

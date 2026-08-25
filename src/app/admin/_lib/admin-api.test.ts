@@ -280,7 +280,7 @@ describe('fetchAdminGigCandidates', () => {
 
     await expect(
       fetchAdminGigCandidates({ status: GigCandidateStatusFilter.Pending }),
-    ).rejects.toThrow('Invalid admin GigCandidates response');
+    ).rejects.toThrow('Invalid admin Gig Candidates response');
   });
 });
 
@@ -318,7 +318,7 @@ describe('fetchAdminGigCandidateById', () => {
     mockApiRequest.mockResolvedValue({ id: 'gigCandidate' });
 
     await expect(fetchAdminGigCandidateById({ gigCandidateId: 'gigCandidate' })).rejects.toThrow(
-      'Invalid admin GigCandidate response',
+      'Invalid admin Gig Candidate response',
     );
   });
 });
@@ -403,7 +403,7 @@ describe('admin GigCandidate commands', () => {
 
     await expect(
       lookupAdminGigCandidateDraft({ title: 'Band', location: 'Barcelona, ES' }),
-    ).rejects.toThrow('GigCandidate lookup did not return a date');
+    ).rejects.toThrow('Gig Candidate lookup did not return a date');
   });
 });
 

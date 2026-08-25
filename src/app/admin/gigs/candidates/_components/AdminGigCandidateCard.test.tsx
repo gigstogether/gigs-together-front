@@ -36,10 +36,13 @@ const gigCandidate: AdminGigCandidate = {
   updatedAt: '2026-08-02T10:00:00.000Z',
 };
 
-function renderCard(candidate: AdminGigCandidate = gigCandidate, isRejectActionVisible = true) {
+function renderCard(
+  gigCandidateToRender: AdminGigCandidate = gigCandidate,
+  isRejectActionVisible = true,
+) {
   return render(
     <AdminGigCandidateCard
-      gigCandidate={candidate}
+      gigCandidate={gigCandidateToRender}
       isRejectActionVisible={isRejectActionVisible}
     />,
     {

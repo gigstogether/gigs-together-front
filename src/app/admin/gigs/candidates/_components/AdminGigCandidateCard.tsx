@@ -14,6 +14,7 @@ import {
 import Link from 'next/link';
 
 import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
+import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
 import { rejectAdminGigCandidate } from '@/app/admin/_lib/admin-api';
 import { formatAdminEventDate } from '@/app/admin/_lib/admin-event-format';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
@@ -106,29 +107,38 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
           </div>
 
           {gigDraft.date ? (
-            <div className="flex items-start gap-2 text-sm">
-              <Calendar
-                className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
-                aria-hidden
-              />
-              <span>{formatAdminEventDate(gigDraft.date, gigDraft.endDate)}</span>
-            </div>
+            <AdminPreviewMetaRow
+              icon={
+                <Calendar
+                  className="h-4 w-4"
+                  aria-hidden
+                />
+              }
+            >
+              {formatAdminEventDate(gigDraft.date, gigDraft.endDate)}
+            </AdminPreviewMetaRow>
           ) : null}
           {location ? (
-            <div className="flex items-start gap-2 text-sm">
-              <LocationIcon
-                className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
-                aria-hidden
-              />
-              <span>{location}</span>
-            </div>
+            <AdminPreviewMetaRow
+              icon={
+                <LocationIcon
+                  className="h-4 w-4"
+                  aria-hidden
+                />
+              }
+            >
+              {location}
+            </AdminPreviewMetaRow>
           ) : null}
           {gigDraft.ticketsUrl ? (
-            <div className="flex items-start gap-2 text-sm">
-              <Ticket
-                className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
-                aria-hidden
-              />
+            <AdminPreviewMetaRow
+              icon={
+                <Ticket
+                  className="h-4 w-4"
+                  aria-hidden
+                />
+              }
+            >
               <a
                 href={gigDraft.ticketsUrl}
                 target="_blank"
@@ -137,18 +147,22 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
               >
                 {gigDraft.ticketsUrl}
               </a>
-            </div>
+            </AdminPreviewMetaRow>
           ) : null}
 
           <div className="space-y-2 border-t border-border pt-2 text-xs text-muted-foreground">
             <p>{sourceLabel}</p>
-            <div className="flex items-center gap-2">
-              <Clock3
-                className="h-3.5 w-3.5"
-                aria-hidden
-              />
-              <span>Created {new Date(gigCandidate.createdAt).toLocaleString()}</span>
-            </div>
+            <AdminPreviewMetaRow
+              className="text-xs"
+              icon={
+                <Clock3
+                  className="h-3.5 w-3.5"
+                  aria-hidden
+                />
+              }
+            >
+              Created {new Date(gigCandidate.createdAt).toLocaleString()}
+            </AdminPreviewMetaRow>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               {gigCandidate.postUrl ? (
                 <a

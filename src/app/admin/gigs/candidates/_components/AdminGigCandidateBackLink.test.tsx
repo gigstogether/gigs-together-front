@@ -8,7 +8,7 @@ describe('AdminGigCandidateBackLink', () => {
   it('should link to the Gig Candidate list', () => {
     render(<AdminGigCandidateBackLink />);
 
-    expect(screen.getByRole('link', { name: 'Gig Candidates' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Gig Candidates/ })).toHaveAttribute(
       'href',
       '/admin/gigs/candidates',
     );

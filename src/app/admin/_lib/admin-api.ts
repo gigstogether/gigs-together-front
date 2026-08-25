@@ -387,7 +387,9 @@ function parseAdminGigFormData(payload: unknown): AdminGigFormData {
 function parseAdminGigCandidatesList(payload: unknown): AdminGigCandidatesList {
   const parsed = v1AdminGigCandidatesListResponseSchema.safeParse(payload);
   if (!parsed.success) {
-    throw new Error(`Invalid admin GigCandidates response: ${JSON.stringify(parsed.error.issues)}`);
+    throw new Error(
+      `Invalid admin Gig Candidates response: ${JSON.stringify(parsed.error.issues)}`,
+    );
   }
   return parsed.data;
 }
@@ -395,7 +397,7 @@ function parseAdminGigCandidatesList(payload: unknown): AdminGigCandidatesList {
 function parseAdminGigCandidate(payload: unknown): AdminGigCandidate {
   const parsed = v1AdminGigCandidateSchema.safeParse(payload);
   if (!parsed.success) {
-    throw new Error(`Invalid admin GigCandidate response: ${JSON.stringify(parsed.error.issues)}`);
+    throw new Error(`Invalid admin Gig Candidate response: ${JSON.stringify(parsed.error.issues)}`);
   }
   return parsed.data;
 }
@@ -404,14 +406,14 @@ function parseAdminGigCandidateLookup(payload: unknown): AdminGigCandidateLookup
   const parsed = v1AdminGigCandidateLookupResponseSchema.safeParse(payload);
   if (!parsed.success) {
     throw new Error(
-      `Invalid admin GigCandidate lookup response: ${JSON.stringify(parsed.error.issues)}`,
+      `Invalid admin Gig Candidate lookup response: ${JSON.stringify(parsed.error.issues)}`,
     );
   }
   if (parsed.data.gigDraft === null) {
     return null;
   }
   if (!parsed.data.gigDraft.date) {
-    throw new Error('GigCandidate lookup did not return a date');
+    throw new Error('Gig Candidate lookup did not return a date');
   }
   return {
     ...parsed.data.gigDraft,
@@ -432,7 +434,7 @@ function normalizeGigCandidateLookupDate(date: string, field: string): string {
     return gigDateToYMD(date);
   } catch {
     throw new Error(
-      `Invalid admin GigCandidate lookup response: "${field}" must be YYYY-MM-DD or ISO`,
+      `Invalid admin Gig Candidate lookup response: "${field}" must be YYYY-MM-DD or ISO`,
     );
   }
 }
@@ -604,10 +606,10 @@ export async function lookupAdminGigCandidateDraft(
   const title = params.title.trim();
   const location = params.location.trim();
   if (!title) {
-    throw new Error('GigCandidate lookup requires title');
+    throw new Error('Gig Candidate lookup requires title');
   }
   if (!location) {
-    throw new Error('GigCandidate lookup requires location');
+    throw new Error('Gig Candidate lookup requires location');
   }
   const raw = await apiClientRequest<unknown>(
     `${V1_ADMIN_API_PREFIX}gig-candidates/lookup`,
