@@ -201,8 +201,10 @@ const v1AdminGigCandidateSchema = z
     gigDraft: v1AdminGigCandidateDraftSchema,
     status: z.nativeEnum(GigCandidateStatusAPI),
     version: z.number().int().nonnegative(),
-    postUrl: z.string().optional(),
-    postDate: z.number().optional(),
+    intakePostUrl: z.string().optional(),
+    intakePostDate: z.number().optional(),
+    moderationPostUrl: z.string().optional(),
+    moderationPostDate: z.number().optional(),
     linkedGigPublicId: z.string().optional(),
     approvedAt: z.string().optional(),
     approvedByUserId: z.string().optional(),
@@ -327,6 +329,11 @@ export interface UpdateAdminGigCandidateDraftParams extends CreateAdminGigCandid
 }
 
 export interface RejectAdminGigCandidateParams {
+  gigCandidateId: string;
+  expectedVersion: number;
+}
+
+export interface SendAdminGigCandidateToModerationParams {
   gigCandidateId: string;
   expectedVersion: number;
 }
@@ -594,6 +601,18 @@ export async function rejectAdminGigCandidate(
   const gigCandidateId = encodeURIComponent(params.gigCandidateId.trim());
   const raw = await apiClientRequest<unknown>(
     `${V1_ADMIN_API_PREFIX}gig-candidates/${gigCandidateId}/reject`,
+    'POST',
+    { expectedVersion: params.expectedVersion },
+  );
+  return parseAdminGigCandidate(raw);
+}
+
+export async function sendAdminGigCandidateToModeration(
+  params: SendAdminGigCandidateToModerationParams,
+): Promise<AdminGigCandidate> {
+  const gigCandidateId = encodeURIComponent(params.gigCandidateId.trim());
+  const raw = await apiClientRequest<unknown>(
+    `${V1_ADMIN_API_PREFIX}gig-candidates/${gigCandidateId}/send-to-moderation`,
     'POST',
     { expectedVersion: params.expectedVersion },
   );

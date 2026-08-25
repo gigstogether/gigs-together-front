@@ -18,6 +18,7 @@ import {
   createAdminGigCandidate,
   lookupAdminGigCandidateDraft,
   rejectAdminGigCandidate,
+  sendAdminGigCandidateToModeration,
   updateAdminGigCandidateDraft,
 } from '@/app/admin/_lib/admin-api';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
@@ -248,8 +249,8 @@ describe('fetchAdminGigCandidates', () => {
       gigCandidates: [
         createGigCandidateApiPayload({
           status: 'New',
-          postUrl: 'https://t.me/c/123/77',
-          postDate: 1_700_000_000_000,
+          intakePostUrl: 'https://t.me/c/123/77',
+          intakePostDate: 1_700_000_000_000,
         }),
       ],
     });
@@ -264,8 +265,8 @@ describe('fetchAdminGigCandidates', () => {
       gigCandidates: [
         expect.objectContaining({
           id: '507f1f77bcf86cd799439099',
-          postUrl: 'https://t.me/c/123/77',
-          postDate: 1_700_000_000_000,
+          intakePostUrl: 'https://t.me/c/123/77',
+          intakePostDate: 1_700_000_000_000,
         }),
       ],
     });
@@ -292,8 +293,10 @@ describe('fetchAdminGigCandidateById', () => {
   it('should request and parse a GigCandidate by encoded id', async () => {
     mockApiRequest.mockResolvedValue({
       ...createGigCandidateApiPayload({ id: 'gigCandidate/id', status: 'Approved' }),
-      postUrl: 'https://t.me/c/123/77',
-      postDate: 1_700_000_000_000,
+      intakePostUrl: 'https://t.me/c/123/77',
+      intakePostDate: 1_700_000_000_000,
+      moderationPostUrl: 'https://t.me/c/124/78',
+      moderationPostDate: 1_700_000_001_000,
       linkedGigPublicId: 'band-2026-08-20',
     });
 
@@ -301,8 +304,10 @@ describe('fetchAdminGigCandidateById', () => {
       fetchAdminGigCandidateById({ gigCandidateId: 'gigCandidate/id' }),
     ).resolves.toEqual(
       expect.objectContaining({
-        postUrl: 'https://t.me/c/123/77',
-        postDate: 1_700_000_000_000,
+        intakePostUrl: 'https://t.me/c/123/77',
+        intakePostDate: 1_700_000_000_000,
+        moderationPostUrl: 'https://t.me/c/124/78',
+        moderationPostDate: 1_700_000_001_000,
         linkedGigPublicId: 'band-2026-08-20',
       }),
     );
@@ -365,6 +370,23 @@ describe('admin GigCandidate commands', () => {
 
     expect(mockApiRequest).toHaveBeenCalledWith(
       'v1/admin/gig-candidates/gigCandidate-42/reject',
+      'POST',
+      { expectedVersion: 7 },
+    );
+  });
+
+  it('should send to moderation with the expected GigCandidate version', async () => {
+    mockApiRequest.mockResolvedValue(
+      createGigCandidateApiPayload({ status: 'Reviewing', version: 8 }),
+    );
+
+    await sendAdminGigCandidateToModeration({
+      gigCandidateId: 'gigCandidate-42',
+      expectedVersion: 7,
+    });
+
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig-candidates/gigCandidate-42/send-to-moderation',
       'POST',
       { expectedVersion: 7 },
     );

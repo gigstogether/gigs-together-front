@@ -2,19 +2,24 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import type { rejectAdminGigCandidate } from '@/app/admin/_lib/admin-api';
+import type {
+  rejectAdminGigCandidate,
+  sendAdminGigCandidateToModeration,
+} from '@/app/admin/_lib/admin-api';
 import AdminGigCandidateCard from '@/app/admin/gigs/candidates/_components/AdminGigCandidateCard';
 import type { AdminGigCandidate } from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
 import { GigCandidateStatusAPI } from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 
-const { rejectGigCandidateMock, toastMock } = vi.hoisted(() => ({
+const { rejectGigCandidateMock, sendGigCandidateToModerationMock, toastMock } = vi.hoisted(() => ({
   rejectGigCandidateMock: vi.fn<typeof rejectAdminGigCandidate>(),
+  sendGigCandidateToModerationMock: vi.fn<typeof sendAdminGigCandidateToModeration>(),
   toastMock: vi.fn(),
 }));
 
 vi.mock('@/app/admin/_lib/admin-api', () => ({
   rejectAdminGigCandidate: rejectGigCandidateMock,
+  sendAdminGigCandidateToModeration: sendGigCandidateToModerationMock,
 }));
 vi.mock('@/hooks/use-toast', () => ({ toast: toastMock }));
 
@@ -30,7 +35,8 @@ const gigCandidate: AdminGigCandidate = {
   },
   status: GigCandidateStatusAPI.Approved,
   version: 3,
-  postUrl: 'https://t.me/c/123/77',
+  intakePostUrl: 'https://t.me/c/123/77',
+  moderationPostUrl: 'https://t.me/c/124/78',
   linkedGigPublicId: 'band-2026-08-20',
   createdAt: '2026-08-01T10:00:00.000Z',
   updatedAt: '2026-08-02T10:00:00.000Z',
@@ -59,9 +65,13 @@ describe('AdminGigCandidateCard', () => {
   it('should show Gig Candidate post and linked gig links', () => {
     renderCard();
 
-    expect(screen.getByRole('link', { name: 'Gig Candidate post' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Intake post' })).toHaveAttribute(
       'href',
-      gigCandidate.postUrl,
+      gigCandidate.intakePostUrl,
+    );
+    expect(screen.getByRole('link', { name: 'Moderation post' })).toHaveAttribute(
+      'href',
+      gigCandidate.moderationPostUrl,
     );
     expect(screen.getByRole('link', { name: 'Open linked gig' })).toHaveAttribute(
       'href',
@@ -107,6 +117,7 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.queryByText('Invalid Date')).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Open' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Send to moderation' })).toBeInTheDocument();
   });
 
   it('should show Edit and reject a Reviewing Gig Candidate with its loaded version', async () => {
