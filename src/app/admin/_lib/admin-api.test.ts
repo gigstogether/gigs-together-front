@@ -283,6 +283,40 @@ describe('fetchAdminGigCandidates', () => {
       'Invalid admin Gig Candidates response',
     );
   });
+
+  it('should parse messenger origin with chatId', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          source: {
+            type: 'user',
+            userId: '42',
+            origin: {
+              type: 'messenger',
+              messenger: 'Telegram',
+              chatId: 'chat-1',
+              messageId: 'message-1',
+            },
+          },
+        }),
+      ],
+    });
+
+    const response = await fetchAdminGigCandidates({
+      status: GigCandidateStatusFilter.New,
+    });
+
+    expect(response.gigCandidates[0]?.source).toEqual({
+      type: 'user',
+      userId: '42',
+      origin: {
+        type: 'messenger',
+        messenger: 'Telegram',
+        chatId: 'chat-1',
+        messageId: 'message-1',
+      },
+    });
+  });
 });
 
 describe('fetchAdminGigCandidateById', () => {

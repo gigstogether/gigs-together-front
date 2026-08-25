@@ -104,7 +104,7 @@ describe('AdminGigCandidateCard', () => {
         origin: {
           type: 'messenger',
           messenger: 'Telegram',
-          conversationId: 'conversation-9',
+          chatId: 'chat-9',
           messageId: 'message-11',
         },
         originalText: 'Unstructured submission',

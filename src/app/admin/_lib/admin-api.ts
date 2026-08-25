@@ -148,7 +148,7 @@ const v1AdminGigCandidateUserOriginSchema = z.discriminatedUnion('type', [
     .object({
       type: z.literal('messenger'),
       messenger: z.literal('Telegram'),
-      conversationId: z.string(),
+      chatId: z.string(),
       messageId: z.string(),
     })
     .strict(),
