@@ -11,7 +11,7 @@ import {
 describe('parseGigCandidateStatusFilter', () => {
   it('should expose every GigCandidate workflow status', () => {
     expect(GIG_CANDIDATE_STATUS_FILTERS).toEqual([
-      GigCandidateStatusFilter.Pending,
+      GigCandidateStatusFilter.New,
       GigCandidateStatusFilter.Reviewing,
       GigCandidateStatusFilter.Approved,
       GigCandidateStatusFilter.Rejected,
@@ -25,13 +25,13 @@ describe('parseGigCandidateStatusFilter', () => {
     },
   );
 
-  it('should fall back to Pending when the GigCandidate status is unknown', () => {
-    expect(parseGigCandidateStatusFilter('unknown')).toBe(GigCandidateStatusFilter.Pending);
+  it('should fall back to New when the GigCandidate status is unknown', () => {
+    expect(parseGigCandidateStatusFilter('unknown')).toBe(GigCandidateStatusFilter.New);
   });
 
-  it('should use the legacy New and Pending colors for Pending and Reviewing', () => {
+  it('should use the established gray and yellow colors for New and Reviewing', () => {
     expect(GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES).toEqual({
-      [GigCandidateStatusAPI.Pending]: 'bg-slate-500',
+      [GigCandidateStatusAPI.New]: 'bg-slate-500',
       [GigCandidateStatusAPI.Reviewing]: 'bg-yellow-500',
       [GigCandidateStatusAPI.Approved]: 'bg-emerald-500',
       [GigCandidateStatusAPI.Rejected]: 'bg-rose-500',

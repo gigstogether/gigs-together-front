@@ -9,11 +9,11 @@ import {
 } from '@/app/admin/gigs/candidates/_lib/admin-gig-candidates-query';
 
 describe('getAdminGigCandidatesQueryStateOrDefaults', () => {
-  it('should return pending and newest created defaults for invalid values', () => {
+  it('should return new and newest created defaults for invalid values', () => {
     const params = new URLSearchParams('status=unknown&sortBy=postDate&sortOrder=sideways');
 
     expect(getAdminGigCandidatesQueryStateOrDefaults(params)).toEqual({
-      filter: GigCandidateStatusFilter.Pending,
+      filter: GigCandidateStatusFilter.New,
       selectedGigCandidateId: null,
       sortBy: AdminGigCandidatesSortBy.CreatedAt,
       sortOrder: AdminGigCandidatesSortOrder.Desc,

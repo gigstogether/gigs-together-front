@@ -46,7 +46,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
   const location = [gigDraft.venue, gigDraft.city, gigDraft.country].filter(Boolean).join(', ');
   const editRoute = buildAdminGigCandidateEditRoute(gigCandidate.id);
   const isEditable = gigCandidate.status === GigCandidateStatusAPI.Reviewing;
-  const isRejectable = gigCandidate.status === GigCandidateStatusAPI.Pending || isEditable;
+  const isRejectable = gigCandidate.status === GigCandidateStatusAPI.New || isEditable;
   const hasRejectAction = isRejectable && isRejectActionVisible;
   const hasActions = isEditable || hasRejectAction;
   const sourceLabel =

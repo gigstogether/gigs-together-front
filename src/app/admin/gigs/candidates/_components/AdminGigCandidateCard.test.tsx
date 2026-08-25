@@ -100,7 +100,7 @@ describe('AdminGigCandidateCard', () => {
         originalText: 'Unstructured submission',
       },
       gigDraft: {},
-      status: GigCandidateStatusAPI.Pending,
+      status: GigCandidateStatusAPI.New,
     });
 
     expect(screen.getByText('Untitled Gig Candidate')).toBeInTheDocument();

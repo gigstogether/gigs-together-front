@@ -56,14 +56,14 @@ describe('adminKeys', () => {
   it('should build gig candidates list key', () => {
     expect(
       adminKeys.gigCandidates(
-        GigCandidateStatusFilter.Pending,
+        GigCandidateStatusFilter.New,
         AdminGigCandidatesSortBy.CreatedAt,
         AdminGigCandidatesSortOrder.Desc,
       ),
     ).toEqual([
       'admin',
       'gigCandidates',
-      GigCandidateStatusFilter.Pending,
+      GigCandidateStatusFilter.New,
       AdminGigCandidatesSortBy.CreatedAt,
       AdminGigCandidatesSortOrder.Desc,
     ]);

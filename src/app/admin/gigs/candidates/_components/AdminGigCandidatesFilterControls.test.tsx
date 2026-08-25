@@ -9,21 +9,23 @@ describe('AdminGigCandidatesFilterControls', () => {
   it('should render status dots with text only for the first two statuses', () => {
     render(
       <AdminGigCandidatesFilterControls
-        filter={GigCandidateStatusFilter.Pending}
+        filter={GigCandidateStatusFilter.New}
         onFilterChange={vi.fn()}
         trailingAction={<button type="button">Create Gig Candidate</button>}
       />,
     );
 
-    const pendingButton = screen.getByRole('button', { name: 'Pending' });
-    const reviewingButton = screen.getByRole('button', { name: 'Reviewing' });
+    const newButton = screen.getByRole('button', { name: 'New' });
+    const reviewingButton = screen.getByRole('button', { name: 'Rev' });
     const approvedButton = screen.getByRole('button', { name: 'Approved' });
     const rejectedButton = screen.getByRole('button', { name: 'Rejected' });
-    expect(pendingButton).toHaveTextContent('Pending');
-    expect(reviewingButton).toHaveTextContent('Reviewing');
+    expect(newButton).toHaveTextContent('New');
+    expect(reviewingButton).toHaveTextContent('Rev');
+    expect(newButton).toHaveAttribute('title', 'New');
+    expect(reviewingButton).toHaveAttribute('title', 'Reviewing');
     expect(approvedButton).not.toHaveTextContent('Approved');
     expect(rejectedButton).not.toHaveTextContent('Rejected');
-    expect(pendingButton.querySelector('span')).toHaveClass('bg-slate-500');
+    expect(newButton.querySelector('span')).toHaveClass('bg-slate-500');
     expect(reviewingButton.querySelector('span')).toHaveClass('bg-yellow-500');
     expect(approvedButton.querySelector('span')).toHaveClass('bg-emerald-500');
     expect(rejectedButton.querySelector('span')).toHaveClass('bg-rose-500');
@@ -36,7 +38,7 @@ describe('AdminGigCandidatesFilterControls', () => {
     const onFilterChange = vi.fn();
     render(
       <AdminGigCandidatesFilterControls
-        filter={GigCandidateStatusFilter.Pending}
+        filter={GigCandidateStatusFilter.New}
         onFilterChange={onFilterChange}
         trailingAction={null}
       />,

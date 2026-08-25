@@ -247,7 +247,7 @@ describe('fetchAdminGigCandidates', () => {
     mockApiRequest.mockResolvedValue({
       gigCandidates: [
         createGigCandidateApiPayload({
-          status: 'Pending',
+          status: 'New',
           postUrl: 'https://t.me/c/123/77',
           postDate: 1_700_000_000_000,
         }),
@@ -256,7 +256,7 @@ describe('fetchAdminGigCandidates', () => {
 
     await expect(
       fetchAdminGigCandidates({
-        status: GigCandidateStatusFilter.Pending,
+        status: GigCandidateStatusFilter.New,
         sortBy: AdminGigCandidatesSortBy.EventDate,
         sortOrder: AdminGigCandidatesSortOrder.Asc,
       }),
@@ -270,7 +270,7 @@ describe('fetchAdminGigCandidates', () => {
       ],
     });
     expect(mockApiRequest).toHaveBeenCalledWith(
-      'v1/admin/gig-candidates?status=pending&sortBy=eventDate&sortOrder=asc',
+      'v1/admin/gig-candidates?status=new&sortBy=eventDate&sortOrder=asc',
       'GET',
     );
   });
@@ -278,9 +278,9 @@ describe('fetchAdminGigCandidates', () => {
   it('should throw when gig candidates list response is invalid', async () => {
     mockApiRequest.mockResolvedValue({ gigCandidates: [{ id: 'gigCandidate' }] });
 
-    await expect(
-      fetchAdminGigCandidates({ status: GigCandidateStatusFilter.Pending }),
-    ).rejects.toThrow('Invalid admin Gig Candidates response');
+    await expect(fetchAdminGigCandidates({ status: GigCandidateStatusFilter.New })).rejects.toThrow(
+      'Invalid admin Gig Candidates response',
+    );
   });
 });
 

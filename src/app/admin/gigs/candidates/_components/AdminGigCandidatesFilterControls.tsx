@@ -20,7 +20,7 @@ interface AdminGigCandidatesFilterControlsProps {
 
 const GIG_CANDIDATE_STATUS_API_BY_FILTER: Record<GigCandidateStatusFilter, GigCandidateStatusAPI> =
   {
-    [GigCandidateStatusFilter.Pending]: GigCandidateStatusAPI.Pending,
+    [GigCandidateStatusFilter.New]: GigCandidateStatusAPI.New,
     [GigCandidateStatusFilter.Reviewing]: GigCandidateStatusAPI.Reviewing,
     [GigCandidateStatusFilter.Approved]: GigCandidateStatusAPI.Approved,
     [GigCandidateStatusFilter.Rejected]: GigCandidateStatusAPI.Rejected,
@@ -40,7 +40,7 @@ export default function AdminGigCandidatesFilterControls(
             const label = GIG_CANDIDATE_STATUS_LABELS[gigCandidateStatus];
             const isActive = props.filter === gigCandidateStatus;
             const hasText =
-              gigCandidateStatus === GigCandidateStatusFilter.Pending ||
+              gigCandidateStatus === GigCandidateStatusFilter.New ||
               gigCandidateStatus === GigCandidateStatusFilter.Reviewing;
             const statusDotClassName =
               GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES[
@@ -55,7 +55,9 @@ export default function AdminGigCandidatesFilterControls(
                 size="sm"
                 aria-label={label}
                 aria-pressed={isActive}
-                title={hasText ? undefined : label}
+                title={
+                  gigCandidateStatus === GigCandidateStatusFilter.Reviewing ? 'Reviewing' : label
+                }
                 onClick={() => props.onFilterChange(gigCandidateStatus)}
                 className={cn(
                   'h-8 min-w-0 rounded-none text-xs font-normal focus-visible:z-10',

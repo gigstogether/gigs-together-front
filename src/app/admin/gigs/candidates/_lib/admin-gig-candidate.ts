@@ -1,12 +1,12 @@
 export enum GigCandidateStatusAPI {
-  Pending = 'Pending',
+  New = 'New',
   Reviewing = 'Reviewing',
   Approved = 'Approved',
   Rejected = 'Rejected',
 }
 
 export enum GigCandidateStatusFilter {
-  Pending = 'pending',
+  New = 'new',
   Reviewing = 'reviewing',
   Approved = 'approved',
   Rejected = 'rejected',
