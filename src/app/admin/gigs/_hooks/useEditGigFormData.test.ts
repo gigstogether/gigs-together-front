@@ -46,6 +46,8 @@ function createAdminGigFormData(overrides: Partial<AdminGigFormData> = {}): Admi
     publicId: 'gig-public-id',
     title: 'Arctic Monkeys',
     status: GigStatusAPI.Pending,
+    isVisible: false,
+    version: 3,
     date: '2026-07-01T20:00:00.000Z',
     endDate: '2026-07-02T22:00:00.000Z',
     city: 'Barcelona',
@@ -112,6 +114,7 @@ describe('useEditGigFormData', () => {
     });
     expect(result.current.editGigData.existingPosterUrl).toBe('https://images.example/poster.png');
     expect(result.current.editGigData.gigStatus).toBe(GigStatusAPI.Pending);
+    expect(result.current.editGigData.gigVersion).toBe(3);
     expect(result.current.form.getValues()).toEqual({
       title: 'Arctic Monkeys',
       date: '2026-07-01',
@@ -134,6 +137,7 @@ describe('useEditGigFormData', () => {
 
     expect(result.current.editGigData.isPrefilled).toBe(false);
     expect(result.current.editGigData.gigStatus).toBe(null);
+    expect(result.current.editGigData.gigVersion).toBe(null);
     expect(toastMock).toHaveBeenCalledWith({
       title: "Couldn't load gig",
       description: 'Request failed',

@@ -37,6 +37,8 @@ describe('formatAdminGigListMeta', () => {
       publicId: 'a',
       title: 'T',
       status: GigStatusAPI.Pending,
+      isVisible: false,
+      version: 3,
       date: '2026-06-12',
       city: 'barcelona',
       country: 'ES',

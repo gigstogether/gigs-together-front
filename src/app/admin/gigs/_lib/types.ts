@@ -31,6 +31,8 @@ export interface AdminGigQueueItem {
   readonly publicId: string;
   readonly title: string;
   readonly status: GigStatusAPI;
+  readonly isVisible: boolean;
+  readonly version: number;
   readonly date: string;
   readonly endDate?: string;
   readonly city: string;
@@ -61,6 +63,8 @@ export interface AdminGigFormData {
   readonly ticketsUrl: string;
   readonly posterUrl?: string;
   readonly status: GigStatusAPI;
+  readonly isVisible: boolean;
+  readonly version: number;
   readonly suggestedBy: AdminGigSuggestedBy;
   readonly publishPostUrl?: string;
   readonly publishPostDate?: number;

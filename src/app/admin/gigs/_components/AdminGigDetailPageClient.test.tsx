@@ -20,6 +20,8 @@ const gigFormData: AdminGigFormData = {
   venue: 'Palau Sant Jordi',
   ticketsUrl: 'https://tickets.example',
   status: GigStatusAPI.Pending,
+  isVisible: false,
+  version: 3,
   suggestedBy: { userId: '42', username: 'mod' },
 };
 

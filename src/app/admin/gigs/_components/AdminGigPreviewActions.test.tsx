@@ -28,6 +28,8 @@ const baseGig: AdminGigDetail = {
   country: 'ES',
   venue: 'Palau Sant Jordi',
   status: GigStatusAPI.Pending,
+  isVisible: false,
+  version: 3,
   suggestedBy: { userId: '42' },
 };
 

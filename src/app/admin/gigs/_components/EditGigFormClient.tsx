@@ -38,10 +38,35 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
     defaultValues: defaultGigFormValues,
   });
 
+  const {
+    existingPosterUrl,
+    gigStatus,
+    gigVersion,
+    isLoadingGig,
+    loadGigError,
+    isPrefilled,
+    retryLoadingGig,
+  } = useEditGigFormData({
+    form,
+    gigPublicId,
+    setPosterFile,
+    setPosterUrl,
+  });
+
   const { isSubmitting, onSubmit } = useGigSubmit({
     posterFile,
     posterUrl,
-    apiCall: ({ gig, poster }) => updateGig({ publicId: gigPublicId, gig, poster }),
+    apiCall: ({ gig, poster }) => {
+      if (gigVersion === null) {
+        return Promise.reject(new Error('Gig version is unavailable. Reload before saving.'));
+      }
+      return updateGig({
+        publicId: gigPublicId,
+        expectedVersion: gigVersion,
+        gig,
+        poster,
+      });
+    },
     onSuccess: (result: GigUpsertResponse) => {
       toast({
         title: 'Updated!',
@@ -55,14 +80,6 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
       }
     },
   });
-
-  const { existingPosterUrl, gigStatus, isLoadingGig, loadGigError, isPrefilled, retryLoadingGig } =
-    useEditGigFormData({
-      form,
-      gigPublicId,
-      setPosterFile,
-      setPosterUrl,
-    });
 
   function clearPoster() {
     setPosterFile(null);

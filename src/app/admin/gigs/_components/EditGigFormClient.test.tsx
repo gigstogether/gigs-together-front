@@ -64,6 +64,7 @@ describe('EditGigFormClient', () => {
     mockUseEditGigFormData.mockReturnValue({
       existingPosterUrl: 'https://images.example/poster.png',
       gigStatus: GigStatusAPI.Published,
+      gigVersion: 4,
       isLoadingGig: false,
       loadGigError: null,
       isPrefilled: true,
@@ -80,6 +81,7 @@ describe('EditGigFormClient', () => {
     mockUseEditGigFormData.mockReturnValue({
       existingPosterUrl: '',
       gigStatus: null,
+      gigVersion: null,
       isLoadingGig: false,
       loadGigError: null,
       isPrefilled: true,

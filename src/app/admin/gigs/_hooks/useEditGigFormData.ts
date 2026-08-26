@@ -19,6 +19,7 @@ interface EditGigFormQueryData {
   readonly formValues: GigFormValues;
   readonly existingPosterUrl: string;
   readonly gigStatus: GigStatus;
+  readonly gigVersion: number;
 }
 
 interface UseEditGigFormDataParams {
@@ -31,6 +32,7 @@ interface UseEditGigFormDataParams {
 interface UseEditGigFormDataResult {
   readonly existingPosterUrl: string;
   readonly gigStatus: GigStatus | null;
+  readonly gigVersion: number | null;
   readonly isLoadingGig: boolean;
   readonly loadGigError: string | null;
   readonly isPrefilled: boolean;
@@ -54,6 +56,7 @@ function buildEditGigFormQueryData(data: AdminGigFormData): EditGigFormQueryData
     },
     existingPosterUrl: data.posterUrl ?? '',
     gigStatus: mapGigStatusFromAPI(data.status),
+    gigVersion: data.version,
   };
 }
 
@@ -169,6 +172,7 @@ export function useEditGigFormData(params: UseEditGigFormDataParams): UseEditGig
   return {
     existingPosterUrl,
     gigStatus: query.data?.gigStatus ?? null,
+    gigVersion: query.data?.gigVersion ?? null,
     isLoadingGig: query.isPending || query.isFetching,
     loadGigError,
     isPrefilled,

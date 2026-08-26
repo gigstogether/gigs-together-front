@@ -30,6 +30,7 @@ export interface GigUpsertApiParams {
 
 export interface UpdateGigParams extends GigUpsertApiParams {
   publicId: string;
+  expectedVersion: number;
 }
 
 export type GigApiDateFieldPath = 'gig.date' | 'gig.endDate';
@@ -55,6 +56,7 @@ type SubmitGigMethod = 'POST' | 'PATCH';
 interface SubmitGigParams extends GigUpsertApiParams {
   endpoint: string;
   method: SubmitGigMethod;
+  expectedVersion?: number;
 }
 
 async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TResponse> {
@@ -75,17 +77,22 @@ async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TRe
     const fd = new FormData();
     fd.append('posterFile', posterFile);
     fd.append('gig', JSON.stringify(gig));
+    if (params.expectedVersion !== undefined) {
+      fd.append('expectedVersion', String(params.expectedVersion));
+    }
     return apiClientRequest<TResponse, FormData>(params.endpoint, params.method, fd);
   }
 
   if (posterUrl) {
     return apiClientRequest<TResponse>(params.endpoint, params.method, {
       gig: { ...gig, posterUrl },
+      ...(params.expectedVersion !== undefined ? { expectedVersion: params.expectedVersion } : {}),
     });
   }
 
   return apiClientRequest<TResponse>(params.endpoint, params.method, {
     gig,
+    ...(params.expectedVersion !== undefined ? { expectedVersion: params.expectedVersion } : {}),
   });
 }
 
@@ -102,6 +109,7 @@ export function updateGig(params: UpdateGigParams): Promise<GigUpsertResponse> {
   return submitGig<GigUpsertResponse>({
     endpoint: `v1/receiver/gig/${encodeURIComponent(params.publicId)}`,
     method: 'PATCH',
+    expectedVersion: params.expectedVersion,
     gig: params.gig,
     poster: params.poster,
   });
