@@ -16,6 +16,7 @@ import {
   fetchAdminGigCandidates,
   fetchAdminGigCandidateById,
   createAdminGigCandidate,
+  approveAdminGigCandidate,
   lookupAdminGigCandidateDraft,
   rejectAdminGigCandidate,
   sendAdminGigCandidateToModeration,
@@ -414,6 +415,23 @@ describe('admin GigCandidate commands', () => {
 
     expect(mockApiRequest).toHaveBeenCalledWith(
       'v1/admin/gig-candidates/gigCandidate-42/reject',
+      'POST',
+      { expectedVersion: 7 },
+    );
+  });
+
+  it('should approve with the expected GigCandidate version', async () => {
+    mockApiRequest.mockResolvedValue(
+      createGigCandidateApiPayload({ status: 'Approved', version: 8 }),
+    );
+
+    await approveAdminGigCandidate({
+      gigCandidateId: 'gigCandidate-42',
+      expectedVersion: 7,
+    });
+
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig-candidates/gigCandidate-42/approve',
       'POST',
       { expectedVersion: 7 },
     );

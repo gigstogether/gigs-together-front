@@ -4,6 +4,7 @@ import { act } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 
 import type {
+  approveAdminGigCandidate,
   rejectAdminGigCandidate,
   sendAdminGigCandidateToModeration,
 } from '@/app/admin/_lib/admin-api';
@@ -12,12 +13,15 @@ import type { AdminGigCandidate } from '@/app/admin/gigs/candidates/_lib/admin-g
 import { GigCandidateStatusAPI } from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 
-const { rejectGigCandidateMock, sendGigCandidateToModerationMock } = vi.hoisted(() => ({
-  rejectGigCandidateMock: vi.fn<typeof rejectAdminGigCandidate>(),
-  sendGigCandidateToModerationMock: vi.fn<typeof sendAdminGigCandidateToModeration>(),
-}));
+const { approveGigCandidateMock, rejectGigCandidateMock, sendGigCandidateToModerationMock } =
+  vi.hoisted(() => ({
+    approveGigCandidateMock: vi.fn<typeof approveAdminGigCandidate>(),
+    rejectGigCandidateMock: vi.fn<typeof rejectAdminGigCandidate>(),
+    sendGigCandidateToModerationMock: vi.fn<typeof sendAdminGigCandidateToModeration>(),
+  }));
 
 vi.mock('@/app/admin/_lib/admin-api', () => ({
+  approveAdminGigCandidate: approveGigCandidateMock,
   rejectAdminGigCandidate: rejectGigCandidateMock,
   sendAdminGigCandidateToModeration: sendGigCandidateToModerationMock,
 }));
@@ -74,6 +78,23 @@ describe('useAdminGigCandidateActions', () => {
 
     await waitFor(() => {
       expect(rejectGigCandidateMock).toHaveBeenCalledWith({
+        gigCandidateId: 'gigCandidate-42',
+        expectedVersion: 7,
+      });
+    });
+  });
+
+  it('should approve the loaded GigCandidate version', async () => {
+    approveGigCandidateMock.mockResolvedValueOnce({
+      ...responseGigCandidate,
+      status: GigCandidateStatusAPI.Approved,
+    });
+    const { result } = renderActions();
+
+    act(() => result.current.approveGigCandidate());
+
+    await waitFor(() => {
+      expect(approveGigCandidateMock).toHaveBeenCalledWith({
         gigCandidateId: 'gigCandidate-42',
         expectedVersion: 7,
       });

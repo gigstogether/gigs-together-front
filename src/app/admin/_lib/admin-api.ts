@@ -337,6 +337,11 @@ export interface RejectAdminGigCandidateParams {
   expectedVersion: number;
 }
 
+export interface ApproveAdminGigCandidateParams {
+  gigCandidateId: string;
+  expectedVersion: number;
+}
+
 export interface SendAdminGigCandidateToModerationParams {
   gigCandidateId: string;
   expectedVersion: number;
@@ -605,6 +610,18 @@ export async function rejectAdminGigCandidate(
   const gigCandidateId = encodeURIComponent(params.gigCandidateId.trim());
   const raw = await apiClientRequest<unknown>(
     `${V1_ADMIN_API_PREFIX}gig-candidates/${gigCandidateId}/reject`,
+    'POST',
+    { expectedVersion: params.expectedVersion },
+  );
+  return parseAdminGigCandidate(raw);
+}
+
+export async function approveAdminGigCandidate(
+  params: ApproveAdminGigCandidateParams,
+): Promise<AdminGigCandidate> {
+  const gigCandidateId = encodeURIComponent(params.gigCandidateId.trim());
+  const raw = await apiClientRequest<unknown>(
+    `${V1_ADMIN_API_PREFIX}gig-candidates/${gigCandidateId}/approve`,
     'POST',
     { expectedVersion: params.expectedVersion },
   );

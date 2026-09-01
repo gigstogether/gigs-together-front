@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, Pencil, Send, SquareArrowOutUpRight, X } from 'lucide-react';
+import { Check, Loader2, Pencil, Send, SquareArrowOutUpRight, X } from 'lucide-react';
 import Link from 'next/link';
 
 import { useAdminGigCandidateActions } from '@/app/admin/gigs/candidates/_hooks/use-admin-gig-candidate-actions';
@@ -25,12 +25,18 @@ export default function AdminGigCandidatePreviewActions(
   const isNew = gigCandidate.status === GigCandidateStatusAPI.New;
   const isReviewing = gigCandidate.status === GigCandidateStatusAPI.Reviewing;
   const hasRejectAction = (isNew || isReviewing) && isRejectActionVisible;
-  const { isRejecting, isSendingToModeration, rejectGigCandidate, sendGigCandidateToModeration } =
-    useAdminGigCandidateActions({
-      gigCandidateId: gigCandidate.id,
-      expectedVersion: gigCandidate.version,
-    });
-  const isMutating = isRejecting || isSendingToModeration;
+  const {
+    approveGigCandidate,
+    isApproving,
+    isRejecting,
+    isSendingToModeration,
+    rejectGigCandidate,
+    sendGigCandidateToModeration,
+  } = useAdminGigCandidateActions({
+    gigCandidateId: gigCandidate.id,
+    expectedVersion: gigCandidate.version,
+  });
+  const isMutating = isApproving || isRejecting || isSendingToModeration;
 
   if (!isNew && !isReviewing) {
     return null;
@@ -59,6 +65,29 @@ export default function AdminGigCandidatePreviewActions(
             />
           )}
           Send to moderation
+        </Button>
+      ) : null}
+      {isReviewing ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className={actionButtonClassName}
+          disabled={isMutating}
+          onClick={approveGigCandidate}
+        >
+          {isApproving ? (
+            <Loader2
+              className="h-4 w-4 animate-spin"
+              aria-hidden
+            />
+          ) : (
+            <Check
+              className="h-4 w-4 shrink-0"
+              aria-hidden
+            />
+          )}
+          Approve
         </Button>
       ) : null}
       {isReviewing ? (

@@ -2,6 +2,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
+  approveAdminGigCandidate,
   rejectAdminGigCandidate,
   sendAdminGigCandidateToModeration,
 } from '@/app/admin/_lib/admin-api';
@@ -15,8 +16,10 @@ interface UseAdminGigCandidateActionsParams {
 }
 
 interface AdminGigCandidateActions {
+  isApproving: boolean;
   isRejecting: boolean;
   isSendingToModeration: boolean;
+  approveGigCandidate: () => void;
   rejectGigCandidate: () => void;
   sendGigCandidateToModeration: () => void;
 }
@@ -74,6 +77,32 @@ export function useAdminGigCandidateActions(
     },
   });
 
+  const approveMutation = useMutation({
+    mutationFn: () =>
+      approveAdminGigCandidate({
+        gigCandidateId,
+        expectedVersion,
+      }),
+    onSuccess: async (gigCandidate) => {
+      await Promise.all([
+        invalidateAdminGigCandidateQueries(queryClient, gigCandidate.id),
+        queryClient.invalidateQueries({ queryKey: adminKeys.gigsRoot() }),
+        queryClient.invalidateQueries({ queryKey: adminKeys.dashboard() }),
+      ]);
+      toast({ title: 'Gig Candidate approved' });
+    },
+    onError: async (e) => {
+      if (await handleConflict(e)) {
+        return;
+      }
+      toast({
+        title: 'Could not approve Gig Candidate',
+        description: 'Review the Gig draft fields and try again.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const rejectMutation = useMutation({
     mutationFn: () =>
       rejectAdminGigCandidate({
@@ -93,8 +122,10 @@ export function useAdminGigCandidateActions(
   });
 
   return {
+    isApproving: approveMutation.isPending,
     isRejecting: rejectMutation.isPending,
     isSendingToModeration: sendToModerationMutation.isPending,
+    approveGigCandidate: () => approveMutation.mutate(),
     rejectGigCandidate: () => rejectMutation.mutate(),
     sendGigCandidateToModeration: () => sendToModerationMutation.mutate(),
   };

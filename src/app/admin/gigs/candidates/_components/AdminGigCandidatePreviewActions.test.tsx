@@ -8,6 +8,8 @@ import { GigCandidateStatusAPI } from '@/app/admin/gigs/candidates/_lib/admin-gi
 
 vi.mock('@/app/admin/gigs/candidates/_hooks/use-admin-gig-candidate-actions', () => ({
   useAdminGigCandidateActions: () => ({
+    approveGigCandidate: vi.fn(),
+    isApproving: false,
     isRejecting: false,
     isSendingToModeration: false,
     rejectGigCandidate: vi.fn(),
@@ -46,7 +48,7 @@ describe('AdminGigCandidatePreviewActions', () => {
       `/admin/gigs/candidates/${gigCandidate.id}/edit`,
     );
     expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
   });
 
   it('should render no actions for terminal status', () => {
