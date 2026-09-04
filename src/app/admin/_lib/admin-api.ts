@@ -160,7 +160,7 @@ const v1AdminGigCandidateSourceSchema = z.discriminatedUnion('type', [
       type: z.literal('provider'),
       provider: z
         .object({
-          name: z.literal('setlistFm'),
+          name: z.string().min(1),
           externalEventId: z.string(),
           externalVersionId: z.string().optional(),
           sourceUrl: z.string(),
@@ -231,7 +231,7 @@ const v1AdminGigSourceSchema = z.discriminatedUnion('type', [
       type: z.literal('provider'),
       provider: z
         .object({
-          name: z.literal('setlistFm'),
+          name: z.string().min(1),
           externalEventId: z.string(),
           externalVersionId: z.string().optional(),
           sourceUrl: z.string(),

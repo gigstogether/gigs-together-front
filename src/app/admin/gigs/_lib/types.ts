@@ -7,7 +7,7 @@ export type AdminGigSource =
   | {
       type: 'provider';
       provider: {
-        name: 'setlistFm';
+        name: string;
         externalEventId: string;
         externalVersionId?: string;
         sourceUrl: string;

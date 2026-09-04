@@ -127,6 +127,44 @@ describe('fetchAdminGigs', () => {
     expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gigs', 'GET');
   });
 
+  it('should parse an arbitrary non-empty Gig provider name', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigs: [
+        {
+          publicId: 'provider-gig',
+          title: 'Provider Gig',
+          isVisible: true,
+          version: 0,
+          source: {
+            type: 'provider',
+            provider: {
+              name: 'exampleProvider',
+              externalEventId: 'event-42',
+              sourceUrl: 'https://provider.example/events/event-42',
+              fetchedAt: '2026-09-01T12:00:00.000Z',
+            },
+          },
+          date: '2026-09-20',
+          city: 'barcelona',
+          country: 'ES',
+          venue: 'Venue',
+        },
+      ],
+    });
+
+    const result = await fetchAdminGigs({});
+
+    expect(result.gigs[0]?.source).toEqual({
+      type: 'provider',
+      provider: {
+        name: 'exampleProvider',
+        externalEventId: 'event-42',
+        sourceUrl: 'https://provider.example/events/event-42',
+        fetchedAt: '2026-09-01T12:00:00.000Z',
+      },
+    });
+  });
+
   it('should parse post dates when publishPostDate and moderationPostDate are present', async () => {
     mockApiRequest.mockResolvedValue({
       gigs: [
@@ -310,6 +348,60 @@ describe('fetchAdminGigCandidates', () => {
         messenger: 'Telegram',
       },
     });
+  });
+
+  it('should parse an arbitrary non-empty GigCandidate provider name', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          source: {
+            type: 'provider',
+            provider: {
+              name: 'exampleProvider',
+              externalEventId: 'event-42',
+              sourceUrl: 'https://provider.example/events/event-42',
+              fetchedAt: '2026-09-01T12:00:00.000Z',
+            },
+          },
+        }),
+      ],
+    });
+
+    const response = await fetchAdminGigCandidates({
+      status: GigCandidateStatusFilter.New,
+    });
+
+    expect(response.gigCandidates[0]?.source).toEqual({
+      type: 'provider',
+      provider: {
+        name: 'exampleProvider',
+        externalEventId: 'event-42',
+        sourceUrl: 'https://provider.example/events/event-42',
+        fetchedAt: '2026-09-01T12:00:00.000Z',
+      },
+    });
+  });
+
+  it('should reject an empty GigCandidate provider name', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          source: {
+            type: 'provider',
+            provider: {
+              name: '',
+              externalEventId: 'event-42',
+              sourceUrl: 'https://provider.example/events/event-42',
+              fetchedAt: '2026-09-01T12:00:00.000Z',
+            },
+          },
+        }),
+      ],
+    });
+
+    await expect(fetchAdminGigCandidates({ status: GigCandidateStatusFilter.New })).rejects.toThrow(
+      'Invalid admin Gig Candidates response',
+    );
   });
 
   it('should reject obsolete messenger origin message identifiers', async () => {

@@ -39,7 +39,7 @@ export interface AdminGigCandidateUserSource {
 }
 
 export interface AdminGigCandidateProviderReference {
-  name: 'setlistFm';
+  name: string;
   externalEventId: string;
   externalVersionId?: string;
   sourceUrl: string;
