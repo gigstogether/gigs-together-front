@@ -30,7 +30,7 @@ describe('updateGig', () => {
     });
 
     expect(apiClientRequestMock).toHaveBeenCalledWith(
-      'v1/receiver/gig/radiohead-2026-06-12',
+      'v1/admin/gigs/radiohead-2026-06-12',
       'PATCH',
       {
         gig: {

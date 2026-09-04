@@ -1,7 +1,11 @@
 import AdminGigCandidateFormPage from '@/app/admin/gigs/candidates/_components/AdminGigCandidateFormPage';
 
+interface AdminGigCandidateEditPageParams {
+  gigCandidateId: string;
+}
+
 interface AdminGigCandidateEditPageProps {
-  params: Promise<{ gigCandidateId: string }>;
+  params: Promise<AdminGigCandidateEditPageParams>;
 }
 
 export default async function AdminGigCandidateEditPage(props: AdminGigCandidateEditPageProps) {

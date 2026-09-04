@@ -1,6 +1,5 @@
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
-import { GigStatusFilter } from '@/app/admin/gigs/_lib/types';
 import {
   AdminGigCandidatesSortBy,
   AdminGigCandidatesSortOrder,
@@ -37,13 +36,10 @@ describe('adminKeys', () => {
     ]);
   });
 
-  it('should build gigs key with filter status and sort options', () => {
-    expect(
-      adminKeys.gigs(GigStatusFilter.Pending, AdminGigsSortBy.CreatedAt, AdminGigsSortOrder.Desc),
-    ).toEqual([
+  it('should build gigs key with sort options', () => {
+    expect(adminKeys.gigs(AdminGigsSortBy.CreatedAt, AdminGigsSortOrder.Desc)).toEqual([
       'admin',
       'gigs',
-      GigStatusFilter.Pending,
       AdminGigsSortBy.CreatedAt,
       AdminGigsSortOrder.Desc,
     ]);

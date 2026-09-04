@@ -3,7 +3,6 @@
 import { render, screen } from '@testing-library/react';
 
 import EditGigFormClient from '@/app/admin/gigs/_components/EditGigFormClient';
-import { GigStatusAPI } from '@/app/admin/gigs/_lib/types';
 
 const mockPush = vi.fn();
 const mockBack = vi.fn();
@@ -60,10 +59,9 @@ describe('EditGigFormClient', () => {
     });
   });
 
-  it('should show gig status in the edit form when data is prefilled', () => {
+  it('should show the edit form without a removed Gig status badge', () => {
     mockUseEditGigFormData.mockReturnValue({
       existingPosterUrl: 'https://images.example/poster.png',
-      gigStatus: GigStatusAPI.Published,
       gigVersion: 4,
       isLoadingGig: false,
       loadGigError: null,
@@ -73,14 +71,13 @@ describe('EditGigFormClient', () => {
 
     renderClient();
 
-    expect(screen.getByLabelText('Status: Published')).toBeInTheDocument();
-    expect(screen.getByText('Published')).toBeInTheDocument();
+    expect(screen.getByText('Edit gig')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Status:/)).not.toBeInTheDocument();
   });
 
   it('should not show gig status while edit data is still unavailable', () => {
     mockUseEditGigFormData.mockReturnValue({
       existingPosterUrl: '',
-      gigStatus: null,
       gigVersion: null,
       isLoadingGig: false,
       loadGigError: null,

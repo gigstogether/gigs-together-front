@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import AdminGigPreviewCard from '@/app/admin/gigs/_components/AdminGigPreviewCard';
-import AdminGigsFilterControls from '@/app/admin/gigs/_components/AdminGigsFilterControls';
 import AdminGigQueueList from '@/app/admin/gigs/_components/AdminGigQueueList';
 import AdminGigsSortControls from '@/app/admin/gigs/_components/AdminGigsSortControls';
 import {
@@ -15,30 +14,25 @@ import {
 } from '@/app/admin/gigs/_lib/admin-gigs-query';
 import type { AdminGigsQueryState } from '@/app/admin/gigs/_lib/admin-gigs-query';
 import type { AdminGigsSortBy } from '@/app/admin/gigs/_lib/admin-gigs-sort';
-import { ADMIN_GIGS_DEFAULT_SORT_BY } from '@/app/admin/gigs/_lib/admin-gigs-sort';
 import { AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
-import type { GigStatusFilter } from '@/app/admin/gigs/_lib/types';
-import { ADMIN_GIGS_NEW_ROUTE } from '@/lib/admin-gig-paths';
 import { fetchAdminGigs } from '@/app/admin/_lib/admin-api';
-import { getGigStatusEmptyMessage } from '@/app/admin/gigs/_lib/admin-gig-status';
 
 export default function AdminGigsPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const { filter, selectedGigPublicId, sortBy, sortOrder }: AdminGigsQueryState =
+  const { selectedGigPublicId, sortBy, sortOrder }: AdminGigsQueryState =
     getAdminGigsQueryStateOrDefaults(searchParams);
 
   const [initialQueryState] = useState<AdminGigsQueryState>(() => ({
-    filter,
     selectedGigPublicId,
     sortBy,
     sortOrder,
   }));
 
   const gigsQuery = useQuery({
-    queryKey: adminKeys.gigs(filter, sortBy, sortOrder),
-    queryFn: () => fetchAdminGigs({ status: filter, sortBy, sortOrder }),
+    queryKey: adminKeys.gigs(sortBy, sortOrder),
+    queryFn: () => fetchAdminGigs({ sortBy, sortOrder }),
   });
 
   const gigs = gigsQuery.data?.gigs ?? [];
@@ -64,22 +58,12 @@ export default function AdminGigsPageClient() {
 
   const selectedGig = gigs.find((g) => g.publicId === effectiveSelectedPublicId) ?? null;
 
-  const handleFilterChange = (next: GigStatusFilter) => {
-    replaceQuery({
-      filter: next,
-      selectedGigPublicId: null,
-      sortBy: ADMIN_GIGS_DEFAULT_SORT_BY,
-      sortOrder,
-    });
-  };
-
   const handleSelectGig = (publicId: string) => {
-    replaceQuery({ filter, selectedGigPublicId: publicId, sortBy, sortOrder });
+    replaceQuery({ selectedGigPublicId: publicId, sortBy, sortOrder });
   };
 
   const handleSortByChange = (nextSortBy: AdminGigsSortBy) => {
     replaceQuery({
-      filter,
       selectedGigPublicId: null,
       sortBy: nextSortBy,
       sortOrder,
@@ -88,7 +72,6 @@ export default function AdminGigsPageClient() {
 
   const handleSortOrderToggle = () => {
     replaceQuery({
-      filter,
       selectedGigPublicId: null,
       sortBy,
       sortOrder:
@@ -100,12 +83,6 @@ export default function AdminGigsPageClient() {
     <div className="grid min-h-0 gap-6 sm:h-[calc(100dvh-var(--header-h)-3rem)] sm:grid-cols-[minmax(0,260px)_minmax(0,1fr)] sm:items-stretch">
       <div className="flex min-h-0 min-w-0 flex-col">
         <div className="flex min-h-0 min-w-0 flex-col rounded-lg border sm:flex-1 sm:overflow-hidden">
-          <AdminGigsFilterControls
-            filter={filter}
-            onFilterChange={handleFilterChange}
-            newGigHref={ADMIN_GIGS_NEW_ROUTE}
-          />
-
           <AdminGigsSortControls
             sortBy={sortBy}
             sortOrder={sortOrder}
@@ -124,7 +101,7 @@ export default function AdminGigsPageClient() {
                 gigs={gigs}
                 selectedPublicId={effectiveSelectedPublicId}
                 onSelect={handleSelectGig}
-                emptyMessage={getGigStatusEmptyMessage(filter)}
+                emptyMessage="No gigs."
               />
             )}
           </div>

@@ -23,8 +23,6 @@ export interface AdminGigCandidateUserAdminOrigin {
 export interface AdminGigCandidateUserMessengerOrigin {
   type: 'messenger';
   messenger: 'Telegram';
-  chatId: string;
-  messageId: string;
 }
 
 export type AdminGigCandidateUserOrigin =

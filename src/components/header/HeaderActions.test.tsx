@@ -167,7 +167,7 @@ describe('HeaderActions', () => {
 
     expect(screen.getByRole('link', { name: 'Suggest a gig' })).toHaveAttribute(
       'href',
-      '/admin/gigs/new',
+      '/admin/gigs/candidates/new',
     );
   });
 

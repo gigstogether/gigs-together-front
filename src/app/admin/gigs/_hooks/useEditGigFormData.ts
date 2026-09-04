@@ -5,20 +5,18 @@ import type { UseFormReturn } from 'react-hook-form';
 import { toast } from '@/hooks/use-toast';
 import { fetchAdminGigByPublicId } from '@/app/admin/_lib/admin-api';
 import { normalizeGigApiDate } from '@/app/admin/gigs/_lib/gig-form-api';
-import type { AdminGigFormData, GigStatus } from '@/app/admin/gigs/_lib/types';
+import type { AdminGigFormData } from '@/app/admin/gigs/_lib/types';
 import { getTelegramInitDataExpiredToastContent } from '@/app/admin/gigs/_lib/telegram-init-data-expired';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { gigFormKeys } from '@/app/admin/gigs/_lib/gigFormKeys';
 
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import { mapGigStatusFromAPI } from '@/app/admin/gigs/_lib/admin-gig-status';
 
 const EDIT_GIG_LOAD_TIMEOUT_MS = 15_000; // 15 seconds
 
 interface EditGigFormQueryData {
   readonly formValues: GigFormValues;
   readonly existingPosterUrl: string;
-  readonly gigStatus: GigStatus;
   readonly gigVersion: number;
 }
 
@@ -31,7 +29,6 @@ interface UseEditGigFormDataParams {
 
 interface UseEditGigFormDataResult {
   readonly existingPosterUrl: string;
-  readonly gigStatus: GigStatus | null;
   readonly gigVersion: number | null;
   readonly isLoadingGig: boolean;
   readonly loadGigError: string | null;
@@ -55,7 +52,6 @@ function buildEditGigFormQueryData(data: AdminGigFormData): EditGigFormQueryData
       ticketsUrl: data.ticketsUrl,
     },
     existingPosterUrl: data.posterUrl ?? '',
-    gigStatus: mapGigStatusFromAPI(data.status),
     gigVersion: data.version,
   };
 }
@@ -171,7 +167,6 @@ export function useEditGigFormData(params: UseEditGigFormDataParams): UseEditGig
 
   return {
     existingPosterUrl,
-    gigStatus: query.data?.gigStatus ?? null,
     gigVersion: query.data?.gigVersion ?? null,
     isLoadingGig: query.isPending || query.isFetching,
     loadGigError,

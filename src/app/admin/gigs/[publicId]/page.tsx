@@ -1,8 +1,12 @@
 import AdminGigDetailBackLink from '@/app/admin/gigs/_components/AdminGigDetailBackLink';
 import AdminGigDetailPageClient from '@/app/admin/gigs/_components/AdminGigDetailPageClient';
 
+interface AdminGigDetailPageParams {
+  publicId: string;
+}
+
 interface AdminGigDetailPageProps {
-  params: Promise<{ publicId: string }>;
+  params: Promise<AdminGigDetailPageParams>;
 }
 
 export default async function AdminGigDetailPage(props: AdminGigDetailPageProps) {

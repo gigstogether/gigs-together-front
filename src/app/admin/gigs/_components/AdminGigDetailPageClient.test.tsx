@@ -3,7 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 
 import AdminGigDetailPageClient from '@/app/admin/gigs/_components/AdminGigDetailPageClient';
 import type { AdminGigFormData } from '@/app/admin/gigs/_lib/types';
-import { GigStatusAPI } from '@/app/admin/gigs/_lib/types';
 
 const mockFetchAdminGigByPublicId = vi.fn();
 
@@ -19,10 +18,9 @@ const gigFormData: AdminGigFormData = {
   country: 'ES',
   venue: 'Palau Sant Jordi',
   ticketsUrl: 'https://tickets.example',
-  status: GigStatusAPI.Pending,
   isVisible: false,
   version: 3,
-  suggestedBy: { userId: '42', username: 'mod' },
+  source: { type: 'user', userId: '42', origin: { type: 'admin' } },
 };
 
 function renderWithQueryClient(publicId: string) {

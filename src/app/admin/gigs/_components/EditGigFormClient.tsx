@@ -17,8 +17,6 @@ import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { useEditGigFormData } from '@/app/admin/gigs/_hooks/useEditGigFormData';
 import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
-import { cn } from '@/lib/utils';
-import { GIG_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gigs/_lib/admin-gig-status';
 
 interface EditGigFormClientProps {
   countries: Country[];
@@ -40,7 +38,6 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
 
   const {
     existingPosterUrl,
-    gigStatus,
     gigVersion,
     isLoadingGig,
     loadGigError,
@@ -116,25 +113,7 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
       ) : (
         <Card className="w-full max-w-md m-auto border-0">
           <CardHeader>
-            <div className="flex items-center justify-between gap-3">
-              <CardTitle>Edit gig</CardTitle>
-              {!!gigStatus && (
-                <div
-                  className="inline-flex h-7 items-center gap-2 rounded-full border border-input bg-muted/30 px-2.5 text-xs text-muted-foreground"
-                  title={`Status: ${gigStatus}`}
-                  aria-label={`Status: ${gigStatus}`}
-                >
-                  <span
-                    className={cn(
-                      'inline-block h-2 w-2 shrink-0 rounded-full',
-                      GIG_STATUS_DOT_CLASS_NAMES[gigStatus],
-                    )}
-                    aria-hidden
-                  />
-                  <span>{gigStatus}</span>
-                </div>
-              )}
-            </div>
+            <CardTitle>Edit gig</CardTitle>
           </CardHeader>
           <CardContent>
             <form

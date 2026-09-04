@@ -1,8 +1,12 @@
 import AdminGigCandidateBackLink from '@/app/admin/gigs/candidates/_components/AdminGigCandidateBackLink';
 import AdminGigCandidateDetailPageClient from '@/app/admin/gigs/candidates/_components/AdminGigCandidateDetailPageClient';
 
+interface AdminGigCandidateDetailPageParams {
+  gigCandidateId: string;
+}
+
 interface AdminGigCandidateDetailPageProps {
-  params: Promise<{ gigCandidateId: string }>;
+  params: Promise<AdminGigCandidateDetailPageParams>;
 }
 
 export default async function AdminGigCandidateDetailPage(props: AdminGigCandidateDetailPageProps) {

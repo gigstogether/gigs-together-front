@@ -1,10 +1,10 @@
 import type { Route } from 'next';
 
-import { formatAdminEventDate, formatAdminSuggestedBy } from '@/app/admin/_lib/admin-event-format';
+import { formatAdminEventDate } from '@/app/admin/_lib/admin-event-format';
 import type {
   AdminGigDetail,
   AdminGigQueueItem,
-  AdminGigSuggestedBy,
+  AdminGigSource,
 } from '@/app/admin/gigs/_lib/types';
 
 export function formatAdminGigEventDate(date: string, endDate?: string): string {
@@ -20,6 +20,8 @@ export function buildAdminGigPublicHref(gig: Pick<AdminGigDetail, 'publicId'>): 
   return `/gigs/${encodeURIComponent(gig.publicId)}` as Route;
 }
 
-export function formatAdminGigSuggestedBy(suggestedBy: AdminGigSuggestedBy): string {
-  return formatAdminSuggestedBy(suggestedBy);
+export function formatAdminGigSource(source: AdminGigSource): string {
+  return source.type === 'user'
+    ? `Source: user ${source.userId} (${source.origin.type})`
+    : `Source: ${source.provider.name}`;
 }

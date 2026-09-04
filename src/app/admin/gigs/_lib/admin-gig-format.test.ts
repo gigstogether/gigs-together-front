@@ -5,7 +5,6 @@ import {
   formatAdminGigEventDate,
   formatAdminGigListMeta,
 } from '@/app/admin/gigs/_lib/admin-gig-format';
-import { GigStatusAPI } from '@/app/admin/gigs/_lib/types';
 import type { AdminGigQueueItem } from '@/app/admin/gigs/_lib/types';
 
 describe('formatAdminGigEventDate', () => {
@@ -36,14 +35,13 @@ describe('formatAdminGigListMeta', () => {
     const gig: AdminGigQueueItem = {
       publicId: 'a',
       title: 'T',
-      status: GigStatusAPI.Pending,
       isVisible: false,
       version: 3,
+      source: { type: 'user', userId: '123', origin: { type: 'admin' } },
       date: '2026-06-12',
       city: 'barcelona',
       country: 'ES',
       venue: 'V',
-      suggestedBy: { userId: '123', name: 'A' },
     };
     expect(formatAdminGigListMeta(gig)).toContain('2026');
     expect(formatAdminGigListMeta(gig)).not.toContain('barcelona');

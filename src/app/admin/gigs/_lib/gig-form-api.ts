@@ -51,12 +51,9 @@ function getPosterUrlOrUndefined(poster: PosterSelection): string | undefined {
   return trimmed;
 }
 
-type SubmitGigMethod = 'POST' | 'PATCH';
-
 interface SubmitGigParams extends GigUpsertApiParams {
   endpoint: string;
-  method: SubmitGigMethod;
-  expectedVersion?: number;
+  expectedVersion: number;
 }
 
 async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TResponse> {
@@ -77,38 +74,26 @@ async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TRe
     const fd = new FormData();
     fd.append('posterFile', posterFile);
     fd.append('gig', JSON.stringify(gig));
-    if (params.expectedVersion !== undefined) {
-      fd.append('expectedVersion', String(params.expectedVersion));
-    }
-    return apiClientRequest<TResponse, FormData>(params.endpoint, params.method, fd);
+    fd.append('expectedVersion', String(params.expectedVersion));
+    return apiClientRequest<TResponse, FormData>(params.endpoint, 'PATCH', fd);
   }
 
   if (posterUrl) {
-    return apiClientRequest<TResponse>(params.endpoint, params.method, {
+    return apiClientRequest<TResponse>(params.endpoint, 'PATCH', {
       gig: { ...gig, posterUrl },
-      ...(params.expectedVersion !== undefined ? { expectedVersion: params.expectedVersion } : {}),
+      expectedVersion: params.expectedVersion,
     });
   }
 
-  return apiClientRequest<TResponse>(params.endpoint, params.method, {
+  return apiClientRequest<TResponse>(params.endpoint, 'PATCH', {
     gig,
-    ...(params.expectedVersion !== undefined ? { expectedVersion: params.expectedVersion } : {}),
-  });
-}
-
-export function createGig(params: GigUpsertApiParams): Promise<GigUpsertResponse> {
-  return submitGig<GigUpsertResponse>({
-    endpoint: 'v1/receiver/gig',
-    method: 'POST',
-    gig: params.gig,
-    poster: params.poster,
+    expectedVersion: params.expectedVersion,
   });
 }
 
 export function updateGig(params: UpdateGigParams): Promise<GigUpsertResponse> {
   return submitGig<GigUpsertResponse>({
-    endpoint: `v1/receiver/gig/${encodeURIComponent(params.publicId)}`,
-    method: 'PATCH',
+    endpoint: `v1/admin/gigs/${encodeURIComponent(params.publicId)}`,
     expectedVersion: params.expectedVersion,
     gig: params.gig,
     poster: params.poster,

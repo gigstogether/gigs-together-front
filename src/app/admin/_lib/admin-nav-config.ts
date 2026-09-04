@@ -25,7 +25,7 @@ export const adminNavItems: readonly AdminNavItem[] = [
   {
     href: ADMIN_GIGS_ROUTE,
     label: 'Gigs',
-    description: 'Create, edit, and moderate gigs',
+    description: 'Review, edit, and manage gig visibility',
     isEnabled: true,
   },
   {

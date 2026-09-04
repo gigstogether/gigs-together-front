@@ -1,11 +1,6 @@
 import { z } from 'zod';
 
-import { GigStatusAPI } from '@/app/admin/gigs/_lib/types';
-import type {
-  AdminGigDetail,
-  AdminGigFormData,
-  GigStatusFilter,
-} from '@/app/admin/gigs/_lib/types';
+import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/_lib/types';
 import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
 import { apiClientRequest } from '@/lib/api-session-client';
 import { isRecord } from '@/lib/is-record';
@@ -24,8 +19,8 @@ const V1_ADMIN_API_PREFIX = 'v1/admin/';
 
 const v1AdminDashboardSummarySchema = z
   .object({
-    pendingGigsCount: z.number().int().nonnegative(),
-    publishedGigsCount: z.number().int().nonnegative(),
+    gigsCount: z.number().int().nonnegative(),
+    visibleGigsCount: z.number().int().nonnegative(),
   })
   .strict();
 
@@ -139,8 +134,6 @@ export interface PatchAdminTranslationActiveBody {
   readonly isActive: boolean;
 }
 
-const v1AdminGigStatusSchema = z.nativeEnum(GigStatusAPI);
-
 const v1AdminGigCandidateUserOriginSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('form') }).strict(),
   z.object({ type: z.literal('admin') }).strict(),
@@ -148,8 +141,6 @@ const v1AdminGigCandidateUserOriginSchema = z.discriminatedUnion('type', [
     .object({
       type: z.literal('messenger'),
       messenger: z.literal('Telegram'),
-      chatId: z.string(),
-      messageId: z.string(),
     })
     .strict(),
 ]);
@@ -227,28 +218,44 @@ const v1AdminGigCandidateLookupResponseSchema = z
   })
   .strict();
 
-const v1AdminGigSuggestedBySchema = z
-  .object({
-    userId: z.string(),
-    username: z.string().optional(),
-    name: z.string().optional(),
-  })
-  .strict();
+const v1AdminGigSourceSchema = z.discriminatedUnion('type', [
+  z
+    .object({
+      type: z.literal('user'),
+      userId: z.string().min(1),
+      origin: z.object({ type: z.enum(['form', 'admin', 'messenger']) }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal('provider'),
+      provider: z
+        .object({
+          name: z.literal('setlistFm'),
+          externalEventId: z.string(),
+          externalVersionId: z.string().optional(),
+          sourceUrl: z.string(),
+          fetchedAt: z.string(),
+          providerUpdatedAt: z.string().optional(),
+        })
+        .strict(),
+    })
+    .strict(),
+]);
 
 const v1AdminGigListItemSchema = z
   .object({
     publicId: z.string(),
     title: z.string(),
-    status: v1AdminGigStatusSchema,
     isVisible: z.boolean(),
     version: z.number().int().nonnegative(),
+    source: v1AdminGigSourceSchema,
     date: z.string(),
     endDate: z.string().optional(),
     city: z.string(),
     country: z.string(),
     venue: z.string(),
     posterUrl: z.string().optional(),
-    suggestedBy: v1AdminGigSuggestedBySchema,
     ticketsUrl: z.string().optional(),
     publishPostUrl: z.string().optional(),
     publishPostDate: z.number().optional(),
@@ -274,14 +281,21 @@ const v1AdminGigFormDataSchema = z
     venue: z.string(),
     ticketsUrl: z.string(),
     posterUrl: z.string().optional(),
-    status: v1AdminGigStatusSchema,
     isVisible: z.boolean(),
     version: z.number().int().nonnegative(),
-    suggestedBy: v1AdminGigSuggestedBySchema,
+    source: v1AdminGigSourceSchema,
     publishPostUrl: z.string().optional(),
     publishPostDate: z.number().optional(),
     moderationPostUrl: z.string().optional(),
     moderationPostDate: z.number().optional(),
+  })
+  .strict();
+
+const v1AdminGigVisibilityPatchResponseSchema = z
+  .object({
+    publicId: z.string(),
+    version: z.number().int().nonnegative(),
+    isVisible: z.boolean(),
   })
   .strict();
 
@@ -290,7 +304,6 @@ export interface AdminGigsList {
 }
 
 export interface FetchAdminGigsParams {
-  readonly status: GigStatusFilter;
   readonly limit?: number;
   readonly sortBy?: AdminGigsSortBy;
   readonly sortOrder?: AdminGigsSortOrder;
@@ -299,6 +312,18 @@ export interface FetchAdminGigsParams {
 export interface FetchAdminGigByPublicIdParams {
   readonly publicId: string;
   readonly signal?: AbortSignal;
+}
+
+export interface PatchAdminGigVisibilityParams {
+  publicId: string;
+  expectedVersion: number;
+  isVisible: boolean;
+}
+
+export interface AdminGigVisibilityPatchResult {
+  publicId: string;
+  version: number;
+  isVisible: boolean;
 }
 
 export interface AdminGigCandidatesList {
@@ -371,7 +396,6 @@ function parseAdminLocalesList(payload: unknown): readonly SupportedLocale[] {
 
 function buildAdminGigsEndpoint(params: FetchAdminGigsParams): string {
   const qs = new URLSearchParams();
-  qs.set('status', params.status);
   if (params.sortBy !== undefined) {
     qs.set('sortBy', params.sortBy);
   }
@@ -381,7 +405,8 @@ function buildAdminGigsEndpoint(params: FetchAdminGigsParams): string {
   if (params.limit !== undefined) {
     qs.set('limit', String(params.limit));
   }
-  return `${V1_ADMIN_API_PREFIX}gigs?${qs.toString()}`;
+  const query = qs.toString();
+  return `${V1_ADMIN_API_PREFIX}gigs${query ? `?${query}` : ''}`;
 }
 
 function parseAdminGigsList(payload: unknown): AdminGigsList {
@@ -396,6 +421,16 @@ function parseAdminGigFormData(payload: unknown): AdminGigFormData {
   const parsed = v1AdminGigFormDataSchema.safeParse(payload);
   if (!parsed.success) {
     throw new Error(`Invalid admin gig response: ${JSON.stringify(parsed.error.issues)}`);
+  }
+  return parsed.data;
+}
+
+function parseAdminGigVisibilityPatchResult(payload: unknown): AdminGigVisibilityPatchResult {
+  const parsed = v1AdminGigVisibilityPatchResponseSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new Error(
+      `Invalid admin Gig visibility response: ${JSON.stringify(parsed.error.issues)}`,
+    );
   }
   return parsed.data;
 }
@@ -531,7 +566,7 @@ export async function fetchAdminGigByPublicId(
 ): Promise<AdminGigFormData> {
   const publicId = encodeURIComponent(params.publicId.trim());
   const raw = await apiClientRequest<unknown>(
-    `${V1_ADMIN_API_PREFIX}gig/${publicId}`,
+    `${V1_ADMIN_API_PREFIX}gigs/${publicId}`,
     'GET',
     undefined,
     {
@@ -736,19 +771,26 @@ export async function patchAdminTranslationActive(
   return parseAdminTranslationRecord(raw);
 }
 
-export function postAdminGigApprove(publicId: string): Promise<void> {
+export function postAdminGigPost(publicId: string, expectedVersion: number): Promise<void> {
   const encodedPublicId = encodeURIComponent(publicId.trim());
-  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/approve`, 'POST');
+  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}gigs/${encodedPublicId}/post`, 'POST', {
+    expectedVersion,
+  });
 }
 
-export function postAdminGigReject(publicId: string): Promise<void> {
-  const encodedPublicId = encodeURIComponent(publicId.trim());
-  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/reject`, 'POST');
-}
-
-export function postAdminGigPost(publicId: string): Promise<void> {
-  const encodedPublicId = encodeURIComponent(publicId.trim());
-  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}gig/${encodedPublicId}/post`, 'POST');
+export async function patchAdminGigVisibility(
+  params: PatchAdminGigVisibilityParams,
+): Promise<AdminGigVisibilityPatchResult> {
+  const encodedPublicId = encodeURIComponent(params.publicId.trim());
+  const raw = await apiClientRequest<unknown>(
+    `${V1_ADMIN_API_PREFIX}gigs/${encodedPublicId}/visibility`,
+    'PATCH',
+    {
+      expectedVersion: params.expectedVersion,
+      isVisible: params.isVisible,
+    },
+  );
+  return parseAdminGigVisibilityPatchResult(raw);
 }
 
 export function postAdminDigestPublish(): Promise<void> {

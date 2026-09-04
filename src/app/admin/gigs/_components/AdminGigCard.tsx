@@ -6,11 +6,9 @@ import { LocationIcon } from '@/components/ui/location-icon';
 import {
   buildAdminGigPublicHref,
   formatAdminGigEventDate,
-  formatAdminGigSuggestedBy,
+  formatAdminGigSource,
 } from '@/app/admin/gigs/_lib/admin-gig-format';
-import { mapGigStatusFromAPI } from '@/app/admin/gigs/_lib/admin-gig-status';
 import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/_lib/types';
-import { GigStatus } from '@/app/admin/gigs/_lib/types';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
 import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
 import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
@@ -24,15 +22,11 @@ interface AdminGigCardProps {
 export default function AdminGigCard(props: AdminGigCardProps) {
   const { gig } = props;
 
-  const status = mapGigStatusFromAPI(gig.status);
-
   const editHref = buildAdminGigEditRoute(gig.publicId);
   const shareHref = buildAdminGigPublicIdPath(gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
   const feedHref = buildAdminGigPublicHref(gig);
-  const hasPublicLinks =
-    (status === GigStatus.Approved || status === GigStatus.Published) &&
-    !!(feedHref || gig.publishPostUrl);
+  const hasPublicLinks = gig.isVisible && !!(feedHref || gig.publishPostUrl);
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -41,7 +35,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
           <AdminGigPreviewTitleRow
             title={gig.title}
             sharePath={shareHref}
-            status={status}
+            isVisible={gig.isVisible}
           />
 
           <AdminPreviewMetaRow
@@ -124,7 +118,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             )}
 
             <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-              <p>{formatAdminGigSuggestedBy(gig.suggestedBy)}</p>
+              <p>{formatAdminGigSource(gig.source)}</p>
 
               {!!gig.moderationPostUrl && (
                 <a
