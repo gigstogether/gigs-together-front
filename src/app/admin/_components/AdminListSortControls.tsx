@@ -50,7 +50,7 @@ export default function AdminListSortControls<TSortBy extends string>(
 
   return (
     <div
-      className="shrink-0 border-b bg-muted/20 px-2 pt-1 pb-2"
+      className="shrink-0 border-b bg-muted/20 px-2 pt-2 pb-2"
       aria-label={ariaLabel}
     >
       <div className="flex min-w-0 w-full">

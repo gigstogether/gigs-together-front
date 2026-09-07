@@ -20,7 +20,7 @@ export default function SuggestAuthGate(props: SuggestAuthGateProps) {
 
   if (isLoadingAuthState) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center py-6">
+      <div className="flex min-h-[50vh] w-full items-center justify-center py-6">
         <span className="text-base text-muted-foreground">Loading…</span>
       </div>
     );
