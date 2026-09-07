@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Clock3, ExternalLink, Ticket } from 'lucide-react';
+import { AlertTriangle, Calendar, Clock3, ExternalLink, Ticket } from 'lucide-react';
 import Link from 'next/link';
 
 import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
@@ -25,10 +25,9 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
   const { gigDraft } = gigCandidate;
   const title = gigDraft.title ?? 'Untitled Gig Candidate';
   const location = [gigDraft.venue, gigDraft.city, gigDraft.country].filter(Boolean).join(', ');
-  const sourceLabel =
-    gigCandidate.source.type === 'user'
-      ? `User source · ${gigCandidate.source.origin.type} · ${gigCandidate.source.userId}`
-      : `Provider source · ${gigCandidate.source.provider.name} · ${gigCandidate.source.provider.externalEventId}`;
+  const isIntakePostExpected = !(
+    gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'
+  );
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -145,6 +144,19 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
               ) : null}
             </div>
           </div>
+
+          {isIntakePostExpected && gigCandidate.intakePostUrl === undefined ? (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-md border border-amber-500/50 bg-amber-500/10 px-2.5 py-2 text-xs text-amber-950 dark:text-amber-200"
+            >
+              <AlertTriangle
+                className="h-4 w-4 shrink-0"
+                aria-hidden
+              />
+              <p className="min-w-0 leading-snug">No intake post linked.</p>
+            </div>
+          ) : null}
         </div>
 
         <div className="p-2 pt-0">
