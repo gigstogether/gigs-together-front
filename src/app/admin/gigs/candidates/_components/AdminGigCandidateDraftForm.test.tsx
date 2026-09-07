@@ -43,7 +43,12 @@ vi.mock('@/app/admin/_lib/admin-api', () => ({
 function createReviewingGigCandidate(): AdminGigCandidate {
   return {
     id: 'gigCandidate-42',
-    source: { type: 'user', userId: 'user-7', origin: { type: 'admin' } },
+    source: {
+      type: 'user',
+      userId: 'user-7',
+      isCurrentlyAdmin: false,
+      origin: { type: 'admin' },
+    },
     gigDraft: { title: 'Existing Band', city: 'Madrid', country: 'ES' },
     status: GigCandidateStatusAPI.Reviewing,
     version: 4,

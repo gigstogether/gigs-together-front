@@ -40,7 +40,12 @@ function renderActions() {
 
 const responseGigCandidate: AdminGigCandidate = {
   id: 'gigCandidate-42',
-  source: { type: 'user', userId: 'user-7', origin: { type: 'admin' } },
+  source: {
+    type: 'user',
+    userId: 'user-7',
+    isCurrentlyAdmin: false,
+    origin: { type: 'admin' },
+  },
   gigDraft: {},
   status: GigCandidateStatusAPI.Reviewing,
   version: 8,

@@ -30,15 +30,18 @@ export type AdminGigCandidateUserOrigin =
   | AdminGigCandidateUserAdminOrigin
   | AdminGigCandidateUserMessengerOrigin;
 
-export interface AdminGigCandidateUserSource {
+export interface GigCandidateSourceUserWithProfile {
   type: 'user';
   userId: string;
+  displayName?: string;
+  isCurrentlyAdmin: boolean;
+  telegramUsername?: string;
   origin: AdminGigCandidateUserOrigin;
   originalText?: string;
   attachments?: Record<string, unknown>[];
 }
 
-export interface AdminGigCandidateProviderReference {
+export interface GigCandidateProviderReference {
   name: string;
   externalEventId: string;
   externalVersionId?: string;
@@ -47,12 +50,14 @@ export interface AdminGigCandidateProviderReference {
   providerUpdatedAt?: string;
 }
 
-export interface AdminGigCandidateProviderSource {
+export interface GigCandidateSourceProvider {
   type: 'provider';
-  provider: AdminGigCandidateProviderReference;
+  provider: GigCandidateProviderReference;
 }
 
-export type AdminGigCandidateSource = AdminGigCandidateUserSource | AdminGigCandidateProviderSource;
+export type GigCandidateSourceForAdminView =
+  | GigCandidateSourceUserWithProfile
+  | GigCandidateSourceProvider;
 
 export interface AdminGigCandidateDraft {
   title?: string;
@@ -67,7 +72,7 @@ export interface AdminGigCandidateDraft {
 
 export interface AdminGigCandidate {
   id: string;
-  source: AdminGigCandidateSource;
+  source: GigCandidateSourceForAdminView;
   gigDraft: AdminGigCandidateDraft;
   status: GigCandidateStatusAPI;
   version: number;

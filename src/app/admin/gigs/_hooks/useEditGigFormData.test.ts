@@ -46,7 +46,12 @@ function createAdminGigFormData(overrides: Partial<AdminGigFormData> = {}): Admi
     title: 'Arctic Monkeys',
     isVisible: false,
     version: 3,
-    source: { type: 'user', userId: '42', origin: { type: 'admin' } },
+    source: {
+      type: 'user',
+      userId: '42',
+      isCurrentlyAdmin: false,
+      origin: { type: 'admin' },
+    },
     date: '2026-07-01T20:00:00.000Z',
     endDate: '2026-07-02T22:00:00.000Z',
     city: 'Barcelona',

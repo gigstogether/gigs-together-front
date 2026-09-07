@@ -150,6 +150,9 @@ const v1AdminGigCandidateSourceSchema = z.discriminatedUnion('type', [
     .object({
       type: z.literal('user'),
       userId: z.string().min(1),
+      displayName: z.string().min(1).optional(),
+      isCurrentlyAdmin: z.boolean(),
+      telegramUsername: z.string().min(1).optional(),
       origin: v1AdminGigCandidateUserOriginSchema,
       originalText: z.string().optional(),
       attachments: z.array(z.record(z.string(), z.unknown())).optional(),
@@ -223,6 +226,9 @@ const v1AdminGigSourceSchema = z.discriminatedUnion('type', [
     .object({
       type: z.literal('user'),
       userId: z.string().min(1),
+      displayName: z.string().min(1).optional(),
+      isCurrentlyAdmin: z.boolean(),
+      telegramUsername: z.string().min(1).optional(),
       origin: z.object({ type: z.enum(['form', 'admin', 'messenger']) }).strict(),
     })
     .strict(),

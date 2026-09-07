@@ -4,7 +4,7 @@ import { formatAdminEventDate } from '@/app/admin/_lib/admin-event-format';
 import type {
   AdminGigDetail,
   AdminGigQueueItem,
-  AdminGigSource,
+  GigSourceForAdminView,
 } from '@/app/admin/gigs/_lib/types';
 
 export function formatAdminGigEventDate(date: string, endDate?: string): string {
@@ -20,8 +20,17 @@ export function buildAdminGigPublicHref(gig: Pick<AdminGigDetail, 'publicId'>): 
   return `/gigs/${encodeURIComponent(gig.publicId)}` as Route;
 }
 
-export function formatAdminGigSource(source: AdminGigSource): string {
-  return source.type === 'user'
-    ? `Source: user ${source.userId} (${source.origin.type})`
-    : `Source: ${source.provider.name}`;
+export function formatAdminGigSource(source: GigSourceForAdminView): string {
+  if (source.type === 'provider') {
+    return `Source: ${source.type}`;
+  }
+
+  return [
+    `Source: ${source.type}`,
+    source.displayName,
+    source.isCurrentlyAdmin ? 'currently admin' : undefined,
+    source.telegramUsername !== undefined ? `TG: @${source.telegramUsername}` : undefined,
+  ]
+    .filter((value): value is string => value !== undefined)
+    .join(' · ');
 }

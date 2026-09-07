@@ -19,7 +19,12 @@ vi.mock('@/app/admin/gigs/candidates/_hooks/use-admin-gig-candidate-actions', ()
 
 const gigCandidate: AdminGigCandidate = {
   id: '507f1f77bcf86cd799439099',
-  source: { type: 'user', userId: '42', origin: { type: 'form' } },
+  source: {
+    type: 'user',
+    userId: '42',
+    isCurrentlyAdmin: false,
+    origin: { type: 'form' },
+  },
   gigDraft: {},
   status: GigCandidateStatusAPI.New,
   version: 3,

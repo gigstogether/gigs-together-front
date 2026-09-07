@@ -25,7 +25,14 @@ vi.mock('@/hooks/use-toast', () => ({ toast: toastMock }));
 
 const gigCandidate: AdminGigCandidate = {
   id: '507f1f77bcf86cd799439099',
-  source: { type: 'user', userId: '42', origin: { type: 'admin' } },
+  source: {
+    type: 'user',
+    userId: '42',
+    displayName: 'Test User',
+    isCurrentlyAdmin: true,
+    telegramUsername: 'test_user',
+    origin: { type: 'admin' },
+  },
   gigDraft: {
     title: 'Band',
     date: '2026-08-20',
@@ -77,7 +84,11 @@ describe('AdminGigCandidateCard', () => {
       'href',
       '/admin/gigs/band-2026-08-20',
     );
-    expect(screen.getByText('User source · admin · 42')).toBeInTheDocument();
+    expect(
+      screen.getByText('Source: user · Test User · currently admin · TG: @test_user'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/42/)).not.toBeInTheDocument();
+    expect(screen.queryByText('No intake post linked.')).not.toBeInTheDocument();
   });
 
   it('should render no actions on a terminal preview', () => {
@@ -101,6 +112,7 @@ describe('AdminGigCandidateCard', () => {
       source: {
         type: 'user',
         userId: 'user-7',
+        isCurrentlyAdmin: false,
         origin: {
           type: 'messenger',
           messenger: 'Telegram',
@@ -113,9 +125,32 @@ describe('AdminGigCandidateCard', () => {
 
     expect(screen.getByText('Untitled Gig Candidate')).toBeInTheDocument();
     expect(screen.queryByText('Invalid Date')).not.toBeInTheDocument();
+    expect(screen.getByText('Source: user')).toBeInTheDocument();
+    expect(screen.queryByText(/user-7/)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Open' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Send to moderation' })).toBeInTheDocument();
+  });
+
+  it('should warn when an expected Intake post is not linked', () => {
+    renderCard({
+      ...gigCandidate,
+      source: {
+        type: 'user',
+        userId: 'user-7',
+        isCurrentlyAdmin: false,
+        origin: { type: 'form' },
+      },
+      intakePostUrl: undefined,
+    });
+
+    expect(screen.getByText('No intake post linked.')).toBeInTheDocument();
+  });
+
+  it('should not warn about Intake for an admin-origin Gig Candidate', () => {
+    renderCard({ ...gigCandidate, intakePostUrl: undefined });
+
+    expect(screen.queryByText('No intake post linked.')).not.toBeInTheDocument();
   });
 
   it('should show Edit and reject a Reviewing Gig Candidate with its loaded version', async () => {

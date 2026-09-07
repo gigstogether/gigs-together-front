@@ -34,6 +34,7 @@ function createGigCandidateApiPayload(overrides: Record<string, unknown> = {}) {
     source: {
       type: 'user',
       userId: '42',
+      isCurrentlyAdmin: false,
       origin: { type: 'admin' },
     },
     gigDraft: {
@@ -98,7 +99,14 @@ describe('fetchAdminGigs', () => {
           title: 'My Gig',
           isVisible: false,
           version: 3,
-          source: { type: 'user', userId: '42', origin: { type: 'admin' } },
+          source: {
+            type: 'user',
+            userId: '42',
+            displayName: 'Test Admin',
+            isCurrentlyAdmin: true,
+            telegramUsername: 'test_admin',
+            origin: { type: 'admin' },
+          },
           date: '2026-06-12',
           city: 'barcelona',
           country: 'ES',
@@ -116,7 +124,14 @@ describe('fetchAdminGigs', () => {
           title: 'My Gig',
           isVisible: false,
           version: 3,
-          source: { type: 'user', userId: '42', origin: { type: 'admin' } },
+          source: {
+            type: 'user',
+            userId: '42',
+            displayName: 'Test Admin',
+            isCurrentlyAdmin: true,
+            telegramUsername: 'test_admin',
+            origin: { type: 'admin' },
+          },
           date: '2026-06-12',
           city: 'barcelona',
           country: 'ES',
@@ -173,7 +188,12 @@ describe('fetchAdminGigs', () => {
           title: 'Published Gig',
           isVisible: true,
           version: 5,
-          source: { type: 'user', userId: '42', origin: { type: 'admin' } },
+          source: {
+            type: 'user',
+            userId: '42',
+            isCurrentlyAdmin: false,
+            origin: { type: 'admin' },
+          },
           date: '2026-06-12',
           city: 'barcelona',
           country: 'ES',
@@ -232,7 +252,12 @@ describe('fetchAdminGigByPublicId', () => {
       title: 'Radiohead',
       isVisible: false,
       version: 3,
-      source: { type: 'user', userId: '9001', origin: { type: 'admin' } },
+      source: {
+        type: 'user',
+        userId: '9001',
+        isCurrentlyAdmin: false,
+        origin: { type: 'admin' },
+      },
       date: '2026-06-12',
       city: 'barcelona',
       country: 'ES',
@@ -249,7 +274,12 @@ describe('fetchAdminGigByPublicId', () => {
       title: 'Radiohead',
       isVisible: false,
       version: 3,
-      source: { type: 'user', userId: '9001', origin: { type: 'admin' } },
+      source: {
+        type: 'user',
+        userId: '9001',
+        isCurrentlyAdmin: false,
+        origin: { type: 'admin' },
+      },
       date: '2026-06-12',
       city: 'barcelona',
       country: 'ES',
@@ -327,6 +357,9 @@ describe('fetchAdminGigCandidates', () => {
           source: {
             type: 'user',
             userId: '42',
+            displayName: 'Test User',
+            isCurrentlyAdmin: false,
+            telegramUsername: 'test_user',
             origin: {
               type: 'messenger',
               messenger: 'Telegram',
@@ -343,6 +376,9 @@ describe('fetchAdminGigCandidates', () => {
     expect(response.gigCandidates[0]?.source).toEqual({
       type: 'user',
       userId: '42',
+      displayName: 'Test User',
+      isCurrentlyAdmin: false,
+      telegramUsername: 'test_user',
       origin: {
         type: 'messenger',
         messenger: 'Telegram',
@@ -411,6 +447,7 @@ describe('fetchAdminGigCandidates', () => {
           source: {
             type: 'user',
             userId: '42',
+            isCurrentlyAdmin: false,
             origin: {
               type: 'messenger',
               messenger: 'Telegram',

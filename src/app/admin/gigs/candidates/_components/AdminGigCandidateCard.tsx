@@ -6,6 +6,7 @@ import Link from 'next/link';
 import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
 import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
 import { formatAdminEventDate } from '@/app/admin/_lib/admin-event-format';
+import { formatAdminGigSource } from '@/app/admin/gigs/_lib/admin-gig-format';
 import AdminGigCandidatePreviewActions from '@/app/admin/gigs/candidates/_components/AdminGigCandidatePreviewActions';
 import { GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate-status';
 import type { AdminGigCandidate } from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
@@ -25,6 +26,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
   const { gigDraft } = gigCandidate;
   const title = gigDraft.title ?? 'Untitled Gig Candidate';
   const location = [gigDraft.venue, gigDraft.city, gigDraft.country].filter(Boolean).join(', ');
+  const sourceLabel = formatAdminGigSource(gigCandidate.source);
   const isIntakePostExpected = !(
     gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'
   );

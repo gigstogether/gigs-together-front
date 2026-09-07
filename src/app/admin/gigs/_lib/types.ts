@@ -1,7 +1,10 @@
-export type AdminGigSource =
+export type GigSourceForAdminView =
   | {
       type: 'user';
       userId: string;
+      displayName?: string;
+      isCurrentlyAdmin: boolean;
+      telegramUsername?: string;
       origin: { type: 'form' | 'admin' | 'messenger' };
     }
   | {
@@ -22,7 +25,7 @@ export interface AdminGigQueueItem {
   readonly title: string;
   readonly isVisible: boolean;
   readonly version: number;
-  readonly source: AdminGigSource;
+  readonly source: GigSourceForAdminView;
   readonly date: string;
   readonly endDate?: string;
   readonly city: string;

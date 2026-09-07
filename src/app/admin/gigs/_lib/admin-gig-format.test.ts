@@ -4,6 +4,7 @@ import {
   buildAdminGigPublicHref,
   formatAdminGigEventDate,
   formatAdminGigListMeta,
+  formatAdminGigSource,
 } from '@/app/admin/gigs/_lib/admin-gig-format';
 import type { AdminGigQueueItem } from '@/app/admin/gigs/_lib/types';
 
@@ -37,7 +38,12 @@ describe('formatAdminGigListMeta', () => {
       title: 'T',
       isVisible: false,
       version: 3,
-      source: { type: 'user', userId: '123', origin: { type: 'admin' } },
+      source: {
+        type: 'user',
+        userId: '123',
+        isCurrentlyAdmin: false,
+        origin: { type: 'admin' },
+      },
       date: '2026-06-12',
       city: 'barcelona',
       country: 'ES',
@@ -45,5 +51,37 @@ describe('formatAdminGigListMeta', () => {
     };
     expect(formatAdminGigListMeta(gig)).toContain('2026');
     expect(formatAdminGigListMeta(gig)).not.toContain('barcelona');
+  });
+});
+
+describe('formatAdminGigSource', () => {
+  it('should show displayName for an admin submitter', () => {
+    expect(
+      formatAdminGigSource(
+        {
+          type: 'user',
+          userId: '123',
+          displayName: 'Test Admin',
+          isCurrentlyAdmin: true,
+          telegramUsername: 'test_admin',
+          origin: { type: 'messenger' },
+        },
+      ),
+    ).toBe('Source: user · Test Admin · currently admin · TG: @test_admin');
+  });
+
+  it('should show the user name and Telegram username without an admin marker', () => {
+    expect(
+      formatAdminGigSource(
+        {
+          type: 'user',
+          userId: '123',
+          displayName: 'Test User',
+          isCurrentlyAdmin: false,
+          telegramUsername: 'test_user',
+          origin: { type: 'form' },
+        },
+      ),
+    ).toBe('Source: user · Test User · TG: @test_user');
   });
 });

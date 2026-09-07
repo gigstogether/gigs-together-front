@@ -19,7 +19,12 @@ const gig: AdminGigDetail = {
   title: 'Gig',
   isVisible: true,
   version: 3,
-  source: { type: 'user', userId: '42', origin: { type: 'admin' } },
+  source: {
+    type: 'user',
+    userId: '42',
+    isCurrentlyAdmin: false,
+    origin: { type: 'admin' },
+  },
   date: '2026-09-17',
   city: 'barcelona',
   country: 'ES',

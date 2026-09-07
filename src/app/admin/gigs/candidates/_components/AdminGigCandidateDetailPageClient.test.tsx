@@ -33,6 +33,7 @@ function createGigCandidate(status: GigCandidateStatusAPI): AdminGigCandidate {
     source: {
       type: 'user',
       userId: 'user-7',
+      isCurrentlyAdmin: false,
       origin: { type: 'form' },
       originalText: 'Original submission',
       attachments: [{ bucketPath: 'gigCandidate/poster.jpg' }],

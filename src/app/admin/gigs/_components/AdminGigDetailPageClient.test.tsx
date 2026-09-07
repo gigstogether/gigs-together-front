@@ -20,7 +20,12 @@ const gigFormData: AdminGigFormData = {
   ticketsUrl: 'https://tickets.example',
   isVisible: false,
   version: 3,
-  source: { type: 'user', userId: '42', origin: { type: 'admin' } },
+  source: {
+    type: 'user',
+    userId: '42',
+    isCurrentlyAdmin: false,
+    origin: { type: 'admin' },
+  },
 };
 
 function renderWithQueryClient(publicId: string) {
