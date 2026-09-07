@@ -2,29 +2,29 @@ import { useMutation } from '@tanstack/react-query';
 
 import { toast } from '@/hooks/use-toast';
 import {
-  postAdminDigestPublish,
+  postAdminDigest,
   postAdminFeedRevalidate,
   postAdminTranslationsRevalidate,
 } from '@/app/admin/_lib/admin-api';
 
 interface UseAdminDashboardActionsResult {
-  readonly isPublishingDigest: boolean;
+  readonly isPostingDigest: boolean;
   readonly isRevalidatingFeed: boolean;
   readonly isRevalidatingTranslations: boolean;
-  readonly publishDigestAsync: () => Promise<void>;
+  readonly postDigestAsync: () => Promise<void>;
   readonly revalidateFeed: () => void;
   readonly revalidateTranslations: () => void;
 }
 
 export function useAdminDashboardActions(): UseAdminDashboardActionsResult {
-  const publishDigestMutation = useMutation({
-    mutationFn: () => postAdminDigestPublish(),
+  const postDigestMutation = useMutation({
+    mutationFn: () => postAdminDigest(),
     onSuccess: () => {
-      toast({ title: 'Digest published' });
+      toast({ title: 'Digest posted' });
     },
     onError: () => {
       toast({
-        title: 'Could not publish digest',
+        title: 'Could not post digest',
         variant: 'destructive',
       });
     },
@@ -57,10 +57,10 @@ export function useAdminDashboardActions(): UseAdminDashboardActionsResult {
   });
 
   return {
-    isPublishingDigest: publishDigestMutation.isPending,
+    isPostingDigest: postDigestMutation.isPending,
     isRevalidatingFeed: revalidateFeedMutation.isPending,
     isRevalidatingTranslations: revalidateTranslationsMutation.isPending,
-    publishDigestAsync: () => publishDigestMutation.mutateAsync(),
+    postDigestAsync: () => postDigestMutation.mutateAsync(),
     revalidateFeed: () => revalidateFeedMutation.mutate(),
     revalidateTranslations: () => revalidateTranslationsMutation.mutate(),
   };

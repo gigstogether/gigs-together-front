@@ -9,7 +9,8 @@ import {
   patchAdminGigVisibility,
   patchAdminLocalesOrder,
   patchAdminTranslationActive,
-  postAdminGigPost,
+  postAdminDigest,
+  postAdminGigMainPost,
   putAdminTranslation,
   isAdminTranslationKind,
   fetchAdminGigCandidates,
@@ -165,12 +166,12 @@ describe('fetchAdminGigs', () => {
     });
   });
 
-  it('should parse post dates when publishPostDate and moderationPostDate are present', async () => {
+  it('should parse post dates when mainPostDate and moderationPostDate are present', async () => {
     mockApiRequest.mockResolvedValue({
       gigs: [
         {
-          publicId: 'published-gig',
-          title: 'Published Gig',
+          publicId: 'visible-gig',
+          title: 'Visible Gig',
           isVisible: true,
           version: 5,
           source: { type: 'user', userId: '42', origin: { type: 'admin' } },
@@ -178,7 +179,7 @@ describe('fetchAdminGigs', () => {
           city: 'barcelona',
           country: 'ES',
           venue: 'Venue',
-          publishPostDate: 1_748_784_000_000,
+          mainPostDate: 1_748_784_000_000,
           moderationPostDate: 1_748_697_600_000,
         },
       ],
@@ -192,8 +193,8 @@ describe('fetchAdminGigs', () => {
     ).resolves.toEqual({
       gigs: [
         expect.objectContaining({
-          publicId: 'published-gig',
-          publishPostDate: 1_748_784_000_000,
+          publicId: 'visible-gig',
+          mainPostDate: 1_748_784_000_000,
           moderationPostDate: 1_748_697_600_000,
         }),
       ],
@@ -238,7 +239,7 @@ describe('fetchAdminGigByPublicId', () => {
       country: 'ES',
       venue: 'Palau Sant Jordi',
       ticketsUrl: 'https://example.com/tickets',
-      publishPostUrl: 'https://t.me/channel/1',
+      mainPostUrl: 'https://t.me/channel/1',
       moderationPostDate: 1_748_697_600_000,
     });
 
@@ -255,7 +256,7 @@ describe('fetchAdminGigByPublicId', () => {
       country: 'ES',
       venue: 'Palau Sant Jordi',
       ticketsUrl: 'https://example.com/tickets',
-      publishPostUrl: 'https://t.me/channel/1',
+      mainPostUrl: 'https://t.me/channel/1',
       moderationPostDate: 1_748_697_600_000,
     });
     expect(mockApiRequest).toHaveBeenCalledWith(
@@ -959,20 +960,32 @@ describe('isAdminTranslationKind', () => {
   });
 });
 
-describe('postAdminGigPost', () => {
+describe('postAdminGigMainPost', () => {
   beforeEach(() => {
     mockApiRequest.mockReset();
   });
 
-  it('should post publish request when response succeeds', async () => {
+  it('should request Main post creation with the expected Gig version', async () => {
     mockApiRequest.mockResolvedValue(undefined);
 
-    await expect(postAdminGigPost('radiohead-barcelona-2026-06-12', 4)).resolves.toBeUndefined();
+    await expect(
+      postAdminGigMainPost('radiohead-barcelona-2026-06-12', 4),
+    ).resolves.toBeUndefined();
     expect(mockApiRequest).toHaveBeenCalledWith(
-      'v1/admin/gigs/radiohead-barcelona-2026-06-12/post',
+      'v1/admin/gigs/radiohead-barcelona-2026-06-12/main-post',
       'POST',
       { expectedVersion: 4 },
     );
+  });
+});
+
+describe('postAdminDigest', () => {
+  it('should request weekly digest post creation', async () => {
+    mockApiRequest.mockResolvedValue(undefined);
+
+    await expect(postAdminDigest()).resolves.toBeUndefined();
+
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/digest/post', 'POST');
   });
 });
 

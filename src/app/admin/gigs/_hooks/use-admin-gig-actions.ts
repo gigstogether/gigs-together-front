@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { patchAdminGigVisibility, postAdminGigPost } from '@/app/admin/_lib/admin-api';
+import { patchAdminGigVisibility, postAdminGigMainPost } from '@/app/admin/_lib/admin-api';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import { toast } from '@/hooks/use-toast';
 import { ApiError } from '@/lib/api-errors';
@@ -45,7 +45,7 @@ async function handleAdminGigActionError(
 export function useAdminGigActions(params: UseAdminGigActionsParams) {
   const queryClient = useQueryClient();
   const postMutation = useMutation({
-    mutationFn: () => postAdminGigPost(params.publicId, params.expectedVersion),
+    mutationFn: () => postAdminGigMainPost(params.publicId, params.expectedVersion),
     onSuccess: async () => {
       await invalidateAdminGigQueries(queryClient, params.publicId);
       toast({ title: `Gig ${params.publicId} posted` });

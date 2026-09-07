@@ -257,8 +257,8 @@ const v1AdminGigListItemSchema = z
     venue: z.string(),
     posterUrl: z.string().optional(),
     ticketsUrl: z.string().optional(),
-    publishPostUrl: z.string().optional(),
-    publishPostDate: z.number().optional(),
+    mainPostUrl: z.string().optional(),
+    mainPostDate: z.number().optional(),
     moderationPostUrl: z.string().optional(),
     moderationPostDate: z.number().optional(),
   })
@@ -284,8 +284,8 @@ const v1AdminGigFormDataSchema = z
     isVisible: z.boolean(),
     version: z.number().int().nonnegative(),
     source: v1AdminGigSourceSchema,
-    publishPostUrl: z.string().optional(),
-    publishPostDate: z.number().optional(),
+    mainPostUrl: z.string().optional(),
+    mainPostDate: z.number().optional(),
     moderationPostUrl: z.string().optional(),
     moderationPostDate: z.number().optional(),
   })
@@ -771,9 +771,9 @@ export async function patchAdminTranslationActive(
   return parseAdminTranslationRecord(raw);
 }
 
-export function postAdminGigPost(publicId: string, expectedVersion: number): Promise<void> {
+export function postAdminGigMainPost(publicId: string, expectedVersion: number): Promise<void> {
   const encodedPublicId = encodeURIComponent(publicId.trim());
-  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}gigs/${encodedPublicId}/post`, 'POST', {
+  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}gigs/${encodedPublicId}/main-post`, 'POST', {
     expectedVersion,
   });
 }
@@ -793,8 +793,8 @@ export async function patchAdminGigVisibility(
   return parseAdminGigVisibilityPatchResult(raw);
 }
 
-export function postAdminDigestPublish(): Promise<void> {
-  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}digest/publish`, 'POST');
+export function postAdminDigest(): Promise<void> {
+  return apiClientRequest<void>(`${V1_ADMIN_API_PREFIX}digest/post`, 'POST');
 }
 
 export function postAdminFeedRevalidate(): Promise<void> {

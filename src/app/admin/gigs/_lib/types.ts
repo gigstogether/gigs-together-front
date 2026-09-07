@@ -34,8 +34,8 @@ export interface AdminGigQueueItem {
 /** Full card shown in the detail panel. */
 export interface AdminGigDetail extends AdminGigQueueItem {
   readonly ticketsUrl?: string;
-  readonly publishPostUrl?: string;
-  readonly publishPostDate?: number;
+  readonly mainPostUrl?: string;
+  readonly mainPostDate?: number;
   readonly moderationPostDate?: number;
   readonly moderationPostUrl?: string;
 }
@@ -43,8 +43,8 @@ export interface AdminGigDetail extends AdminGigQueueItem {
 /** Mirrors the response from GET v1/admin/gigs/:publicId. */
 export interface AdminGigFormData extends AdminGigQueueItem {
   readonly ticketsUrl: string;
-  readonly publishPostUrl?: string;
-  readonly publishPostDate?: number;
+  readonly mainPostUrl?: string;
+  readonly mainPostDate?: number;
   readonly moderationPostDate?: number;
   readonly moderationPostUrl?: string;
 }

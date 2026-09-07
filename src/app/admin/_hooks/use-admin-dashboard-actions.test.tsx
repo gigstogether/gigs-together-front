@@ -6,7 +6,7 @@ import { act } from 'react';
 import { useAdminDashboardActions } from '@/app/admin/_hooks/use-admin-dashboard-actions';
 import { toast } from '@/hooks/use-toast';
 
-const mockPostAdminDigestPublish = vi.fn();
+const mockPostAdminDigest = vi.fn();
 const mockPostAdminFeedRevalidate = vi.fn();
 const mockPostAdminTranslationsRevalidate = vi.fn();
 
@@ -15,7 +15,7 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 vi.mock('@/app/admin/_lib/admin-api', () => ({
-  postAdminDigestPublish: () => mockPostAdminDigestPublish(),
+  postAdminDigest: () => mockPostAdminDigest(),
   postAdminFeedRevalidate: () => mockPostAdminFeedRevalidate(),
   postAdminTranslationsRevalidate: () => mockPostAdminTranslationsRevalidate(),
 }));
@@ -39,26 +39,26 @@ function createWrapper() {
 
 describe('useAdminDashboardActions', () => {
   beforeEach(() => {
-    mockPostAdminDigestPublish.mockReset();
+    mockPostAdminDigest.mockReset();
     mockPostAdminFeedRevalidate.mockReset();
     mockPostAdminTranslationsRevalidate.mockReset();
-    mockPostAdminDigestPublish.mockResolvedValue(undefined);
+    mockPostAdminDigest.mockResolvedValue(undefined);
     mockPostAdminFeedRevalidate.mockResolvedValue(undefined);
     mockPostAdminTranslationsRevalidate.mockResolvedValue(undefined);
     vi.mocked(toast).mockReset();
   });
 
-  it('should call digest publish endpoint when publishDigestAsync is invoked', async () => {
+  it('should call the digest post endpoint when postDigestAsync is invoked', async () => {
     const { result } = renderHook(() => useAdminDashboardActions(), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      await result.current.publishDigestAsync();
+      await result.current.postDigestAsync();
     });
 
-    expect(mockPostAdminDigestPublish).toHaveBeenCalledOnce();
-    expect(toast).toHaveBeenCalledWith({ title: 'Digest published' });
+    expect(mockPostAdminDigest).toHaveBeenCalledOnce();
+    expect(toast).toHaveBeenCalledWith({ title: 'Digest posted' });
   });
 
   it('should call feed revalidate endpoint when revalidateFeed is invoked', async () => {
@@ -91,18 +91,18 @@ describe('useAdminDashboardActions', () => {
     expect(toast).toHaveBeenCalledWith({ title: 'Translations revalidated' });
   });
 
-  it('should show destructive toast when digest publish fails', async () => {
-    mockPostAdminDigestPublish.mockRejectedValue(new Error('fail'));
+  it('should show a destructive toast when digest posting fails', async () => {
+    mockPostAdminDigest.mockRejectedValue(new Error('fail'));
     const { result } = renderHook(() => useAdminDashboardActions(), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      await expect(result.current.publishDigestAsync()).rejects.toThrow('fail');
+      await expect(result.current.postDigestAsync()).rejects.toThrow('fail');
     });
 
     expect(toast).toHaveBeenCalledWith({
-      title: 'Could not publish digest',
+      title: 'Could not post digest',
       variant: 'destructive',
     });
   });

@@ -17,19 +17,19 @@ import {
 export default function AdminDashboardActions() {
   const [isDigestConfirmOpen, setIsDigestConfirmOpen] = useState(false);
   const {
-    isPublishingDigest,
+    isPostingDigest,
     isRevalidatingFeed,
     isRevalidatingTranslations,
-    publishDigestAsync,
+    postDigestAsync,
     revalidateFeed,
     revalidateTranslations,
   } = useAdminDashboardActions();
 
-  const isBusy = isPublishingDigest || isRevalidatingFeed || isRevalidatingTranslations;
+  const isBusy = isPostingDigest || isRevalidatingFeed || isRevalidatingTranslations;
 
-  const confirmPublishDigest = async (): Promise<void> => {
+  const confirmPostDigest = async (): Promise<void> => {
     try {
-      await publishDigestAsync();
+      await postDigestAsync();
       setIsDigestConfirmOpen(false);
     } catch {
       return;
@@ -48,7 +48,7 @@ export default function AdminDashboardActions() {
             setIsDigestConfirmOpen(true);
           }}
         >
-          {isPublishingDigest ? (
+          {isPostingDigest ? (
             <Loader2
               className="h-4 w-4 animate-spin"
               aria-hidden
@@ -59,7 +59,7 @@ export default function AdminDashboardActions() {
               aria-hidden
             />
           )}
-          Publish digest
+          Post digest
         </Button>
         <Button
           type="button"
@@ -105,10 +105,10 @@ export default function AdminDashboardActions() {
         open={isDigestConfirmOpen}
         onOpenChange={setIsDigestConfirmOpen}
       >
-        <DialogTrigger className="hidden">Open digest publish confirm dialog</DialogTrigger>
+        <DialogTrigger className="hidden">Open digest post confirm dialog</DialogTrigger>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Publish weekly digest?</DialogTitle>
+            <DialogTitle>Post weekly digest?</DialogTitle>
             <DialogDescription>
               This posts the digest to Telegram immediately, outside the scheduled Monday run.
             </DialogDescription>
@@ -117,7 +117,7 @@ export default function AdminDashboardActions() {
             <Button
               type="button"
               variant="outline"
-              disabled={isPublishingDigest}
+              disabled={isPostingDigest}
               onClick={() => {
                 setIsDigestConfirmOpen(false);
               }}
@@ -127,18 +127,18 @@ export default function AdminDashboardActions() {
             <Button
               type="button"
               variant="destructive"
-              disabled={isPublishingDigest}
+              disabled={isPostingDigest}
               onClick={() => {
-                void confirmPublishDigest();
+                void confirmPostDigest();
               }}
             >
-              {isPublishingDigest ? (
+              {isPostingDigest ? (
                 <Loader2
                   className="h-4 w-4 animate-spin"
                   aria-hidden
                 />
               ) : null}
-              Yes, publish now
+              Yes, post now
             </Button>
           </div>
         </DialogContent>

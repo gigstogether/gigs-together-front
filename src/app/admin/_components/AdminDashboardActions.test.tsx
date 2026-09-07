@@ -2,16 +2,16 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import AdminDashboardActions from '@/app/admin/_components/AdminDashboardActions';
 
-const mockPublishDigestAsync = vi.fn();
+const mockPostDigestAsync = vi.fn();
 const mockRevalidateFeed = vi.fn();
 const mockRevalidateTranslations = vi.fn();
 
 vi.mock('@/app/admin/_hooks/use-admin-dashboard-actions', () => ({
   useAdminDashboardActions: () => ({
-    isPublishingDigest: false,
+    isPostingDigest: false,
     isRevalidatingFeed: false,
     isRevalidatingTranslations: false,
-    publishDigestAsync: mockPublishDigestAsync,
+    postDigestAsync: mockPostDigestAsync,
     revalidateFeed: mockRevalidateFeed,
     revalidateTranslations: mockRevalidateTranslations,
   }),
@@ -19,10 +19,10 @@ vi.mock('@/app/admin/_hooks/use-admin-dashboard-actions', () => ({
 
 describe('AdminDashboardActions', () => {
   beforeEach(() => {
-    mockPublishDigestAsync.mockReset();
+    mockPostDigestAsync.mockReset();
     mockRevalidateFeed.mockReset();
     mockRevalidateTranslations.mockReset();
-    mockPublishDigestAsync.mockResolvedValue(undefined);
+    mockPostDigestAsync.mockResolvedValue(undefined);
     mockRevalidateFeed.mockResolvedValue(undefined);
     mockRevalidateTranslations.mockResolvedValue(undefined);
   });
@@ -43,56 +43,54 @@ describe('AdminDashboardActions', () => {
     expect(mockRevalidateFeed).toHaveBeenCalledOnce();
   });
 
-  it('should require confirmation before publishing digest', async () => {
+  it('should require confirmation before posting the digest', async () => {
     render(<AdminDashboardActions />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Publish digest' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Post digest' }));
 
-    expect(mockPublishDigestAsync).not.toHaveBeenCalled();
-    expect(screen.getByRole('heading', { name: 'Publish weekly digest?' })).toBeInTheDocument();
+    expect(mockPostDigestAsync).not.toHaveBeenCalled();
+    expect(screen.getByRole('heading', { name: 'Post weekly digest?' })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Yes, publish now' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, post now' }));
 
     await waitFor(() => {
-      expect(mockPublishDigestAsync).toHaveBeenCalledOnce();
+      expect(mockPostDigestAsync).toHaveBeenCalledOnce();
     });
   });
 
-  it('should close confirm dialog after digest publish succeeds', async () => {
+  it('should close the confirmation dialog after digest posting succeeds', async () => {
     render(<AdminDashboardActions />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Publish digest' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Yes, publish now' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Post digest' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, post now' }));
 
     await waitFor(() => {
       expect(
-        screen.queryByRole('heading', { name: 'Publish weekly digest?' }),
+        screen.queryByRole('heading', { name: 'Post weekly digest?' }),
       ).not.toBeInTheDocument();
     });
   });
 
-  it('should keep confirm dialog open when digest publish fails', async () => {
-    mockPublishDigestAsync.mockRejectedValue(new Error('fail'));
+  it('should keep the confirmation dialog open when digest posting fails', async () => {
+    mockPostDigestAsync.mockRejectedValue(new Error('fail'));
     render(<AdminDashboardActions />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Publish digest' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Yes, publish now' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Post digest' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, post now' }));
 
     await waitFor(() => {
-      expect(mockPublishDigestAsync).toHaveBeenCalledOnce();
+      expect(mockPostDigestAsync).toHaveBeenCalledOnce();
     });
-    expect(screen.getByRole('heading', { name: 'Publish weekly digest?' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Post weekly digest?' })).toBeInTheDocument();
   });
 
-  it('should not publish digest when confirmation is cancelled', () => {
+  it('should not post the digest when confirmation is cancelled', () => {
     render(<AdminDashboardActions />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Publish digest' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Post digest' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
-    expect(mockPublishDigestAsync).not.toHaveBeenCalled();
-    expect(
-      screen.queryByRole('heading', { name: 'Publish weekly digest?' }),
-    ).not.toBeInTheDocument();
+    expect(mockPostDigestAsync).not.toHaveBeenCalled();
+    expect(screen.queryByRole('heading', { name: 'Post weekly digest?' })).not.toBeInTheDocument();
   });
 });

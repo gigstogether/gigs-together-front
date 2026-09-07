@@ -3,20 +3,20 @@
 import { act } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 
-import type { patchAdminGigVisibility, postAdminGigPost } from '@/app/admin/_lib/admin-api';
+import type { patchAdminGigVisibility, postAdminGigMainPost } from '@/app/admin/_lib/admin-api';
 import { useAdminGigActions } from '@/app/admin/gigs/_hooks/use-admin-gig-actions';
 import { toast } from '@/hooks/use-toast';
 import { ApiError } from '@/lib/api-errors';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 
-const { patchAdminGigVisibilityMock, postAdminGigPostMock } = vi.hoisted(() => ({
+const { patchAdminGigVisibilityMock, postAdminGigMainPostMock } = vi.hoisted(() => ({
   patchAdminGigVisibilityMock: vi.fn<typeof patchAdminGigVisibility>(),
-  postAdminGigPostMock: vi.fn<typeof postAdminGigPost>(),
+  postAdminGigMainPostMock: vi.fn<typeof postAdminGigMainPost>(),
 }));
 
 vi.mock('@/app/admin/_lib/admin-api', () => ({
   patchAdminGigVisibility: patchAdminGigVisibilityMock,
-  postAdminGigPost: postAdminGigPostMock,
+  postAdminGigMainPost: postAdminGigMainPostMock,
 }));
 vi.mock('@/hooks/use-toast', () => ({ toast: vi.fn() }));
 
@@ -60,7 +60,7 @@ describe('useAdminGigActions', () => {
   });
 
   it('should refresh Gig data and explain a stale version conflict', async () => {
-    postAdminGigPostMock.mockRejectedValueOnce(new ApiError('Conflict', 409));
+    postAdminGigMainPostMock.mockRejectedValueOnce(new ApiError('Conflict', 409));
     const { result, invalidateQueries } = renderActions();
 
     act(() => result.current.post());
