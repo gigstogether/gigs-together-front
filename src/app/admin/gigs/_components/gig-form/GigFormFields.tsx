@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import type { Country } from '@/lib/api-boundary-schemas';
+import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
 import { useT } from '@/providers/I18nProvider';
 
@@ -46,6 +47,7 @@ export default function GigFormFields(props: GigFormFieldsProps) {
             <Input
               {...field}
               id="gig-title"
+              maxLength={GIG_TITLE_MAX_LENGTH}
               aria-invalid={fieldState.invalid}
               placeholder="e.g. Arctic Monkeys"
               value={field.value ?? ''}

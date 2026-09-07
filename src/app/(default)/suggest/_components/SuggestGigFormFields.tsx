@@ -5,6 +5,7 @@ import type { UseFormReturn } from 'react-hook-form';
 
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import { defaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
@@ -37,6 +38,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
             <Input
               {...field}
               id="suggest-gig-title"
+              maxLength={GIG_TITLE_MAX_LENGTH}
               aria-labelledby="suggest-gig-title-label"
               aria-invalid={fieldState.invalid}
               placeholder="e.g. Arctic Monkeys"

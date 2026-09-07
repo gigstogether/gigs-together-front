@@ -21,6 +21,12 @@ function GigFormFieldsTestSubject() {
 }
 
 describe('GigFormFields', () => {
+  it('should limit the title input to 300 characters', () => {
+    render(<GigFormFieldsTestSubject />);
+
+    expect(screen.getByLabelText('Title:')).toHaveAttribute('maxlength', '300');
+  });
+
   it('should render the start and end date fields in the same horizontal row', () => {
     render(<GigFormFieldsTestSubject />);
 

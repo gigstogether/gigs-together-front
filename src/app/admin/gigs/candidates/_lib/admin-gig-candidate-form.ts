@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import type { GigFormValues } from '../../_lib/gig-form.shared';
 import type { AdminGigCandidateDraft } from './admin-gig-candidate';
 
@@ -16,7 +17,12 @@ const optionalUrl = z
 
 export const gigCandidateDraftFormSchema = z
   .object({
-    title: z.string(),
+    title: z
+      .string()
+      .trim()
+      .max(GIG_TITLE_MAX_LENGTH, {
+        message: `Title must be at most ${GIG_TITLE_MAX_LENGTH} characters.`,
+      }),
     date: optionalDate,
     endDate: optionalDate,
     city: z.string(),

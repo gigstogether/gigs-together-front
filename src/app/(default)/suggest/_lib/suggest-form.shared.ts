@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 
 const yyyyMmDdSchema = z
   .string()
@@ -16,9 +17,13 @@ const yyyyMmDdSchema = z
 
 export const suggestGigFormSchema = z
   .object({
-    title: z.string().min(2, {
-      message: 'Title must be at least 2 characters.',
-    }),
+    title: z
+      .string()
+      .trim()
+      .min(1, { message: 'Title is required.' })
+      .max(GIG_TITLE_MAX_LENGTH, {
+        message: `Title must be at most ${GIG_TITLE_MAX_LENGTH} characters.`,
+      }),
     date: yyyyMmDdSchema,
     endDate: z.preprocess(
       (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
