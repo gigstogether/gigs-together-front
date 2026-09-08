@@ -29,7 +29,7 @@ describe('AdminGigCard', () => {
     render(<AdminGigCard gig={gig} />);
     expect(screen.getByLabelText('Hidden')).toBeInTheDocument();
     expect(
-      screen.getByText('Source: user · Test Admin · currently admin · TG: @test_admin'),
+      screen.getByText('Source: user · Test Admin (currently admin) · TG: @test_admin'),
     ).toBeInTheDocument();
     expect(screen.queryByText(/internal-user-id/)).not.toBeInTheDocument();
     expect(screen.queryByText('Public view')).not.toBeInTheDocument();

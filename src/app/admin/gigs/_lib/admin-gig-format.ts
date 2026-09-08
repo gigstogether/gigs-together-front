@@ -25,10 +25,14 @@ export function formatAdminGigSource(source: GigSourceForAdminView): string {
     return `Source: ${source.type}`;
   }
 
+  const displayName =
+    source.displayName !== undefined
+      ? `${source.displayName}${source.isCurrentlyAdmin ? ' (currently admin)' : ''}`
+      : undefined;
+
   return [
     `Source: ${source.type}`,
-    source.displayName,
-    source.isCurrentlyAdmin ? 'currently admin' : undefined,
+    displayName,
     source.telegramUsername !== undefined ? `TG: @${source.telegramUsername}` : undefined,
   ]
     .filter((value): value is string => value !== undefined)

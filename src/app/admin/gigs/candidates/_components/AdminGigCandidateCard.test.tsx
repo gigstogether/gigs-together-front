@@ -85,7 +85,7 @@ describe('AdminGigCandidateCard', () => {
       '/admin/gigs/band-2026-08-20',
     );
     expect(
-      screen.getByText('Source: user · Test User · currently admin · TG: @test_user'),
+      screen.getByText('Source: user · Test User (currently admin) · TG: @test_user'),
     ).toBeInTheDocument();
     expect(screen.queryByText(/42/)).not.toBeInTheDocument();
     expect(screen.queryByText('No intake post linked.')).not.toBeInTheDocument();

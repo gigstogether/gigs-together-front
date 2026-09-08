@@ -57,31 +57,38 @@ describe('formatAdminGigListMeta', () => {
 describe('formatAdminGigSource', () => {
   it('should show displayName for an admin submitter', () => {
     expect(
-      formatAdminGigSource(
-        {
-          type: 'user',
-          userId: '123',
-          displayName: 'Test Admin',
-          isCurrentlyAdmin: true,
-          telegramUsername: 'test_admin',
-          origin: { type: 'messenger' },
-        },
-      ),
-    ).toBe('Source: user · Test Admin · currently admin · TG: @test_admin');
+      formatAdminGigSource({
+        type: 'user',
+        userId: '123',
+        displayName: 'Test Admin',
+        isCurrentlyAdmin: true,
+        telegramUsername: 'test_admin',
+        origin: { type: 'messenger' },
+      }),
+    ).toBe('Source: user · Test Admin (currently admin) · TG: @test_admin');
   });
 
   it('should show the user name and Telegram username without an admin marker', () => {
     expect(
-      formatAdminGigSource(
-        {
-          type: 'user',
-          userId: '123',
-          displayName: 'Test User',
-          isCurrentlyAdmin: false,
-          telegramUsername: 'test_user',
-          origin: { type: 'form' },
-        },
-      ),
+      formatAdminGigSource({
+        type: 'user',
+        userId: '123',
+        displayName: 'Test User',
+        isCurrentlyAdmin: false,
+        telegramUsername: 'test_user',
+        origin: { type: 'form' },
+      }),
     ).toBe('Source: user · Test User · TG: @test_user');
+  });
+
+  it('should omit the user name segment when displayName is unavailable', () => {
+    expect(
+      formatAdminGigSource({
+        type: 'user',
+        userId: '123',
+        isCurrentlyAdmin: false,
+        origin: { type: 'messenger' },
+      }),
+    ).toBe('Source: user');
   });
 });
