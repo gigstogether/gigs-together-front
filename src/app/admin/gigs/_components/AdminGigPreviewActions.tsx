@@ -44,6 +44,18 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
         </Button>
       ) : null}
       <Button
+        variant="outline"
+        size="sm"
+        className={actionButtonClassName}
+        asChild
+      >
+        <Link href={editHref}>
+          <Pencil className="h-4 w-4" />
+          Edit
+          <SquareArrowOutUpRight className="ml-auto h-3 w-3 opacity-60" />
+        </Link>
+      </Button>
+      <Button
         type="button"
         variant="outline"
         size="sm"
@@ -59,18 +71,6 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
           <Eye className="h-4 w-4" />
         )}
         {gig.isVisible ? 'Hide' : 'Show'}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        className={actionButtonClassName}
-        asChild
-      >
-        <Link href={editHref}>
-          <Pencil className="h-4 w-4" />
-          Edit
-          <SquareArrowOutUpRight className="ml-auto h-3 w-3 opacity-60" />
-        </Link>
       </Button>
     </div>
   );

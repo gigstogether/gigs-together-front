@@ -42,10 +42,13 @@ describe('AdminGigCandidatePreviewActions', () => {
   });
 
   it('should show Edit and Reject for Reviewing', () => {
-    render(
+    const view = render(
       <AdminGigCandidatePreviewActions
         gigCandidate={{ ...gigCandidate, status: GigCandidateStatusAPI.Reviewing }}
       />,
+    );
+    const actionLabels = Array.from(view.container.querySelectorAll('button, a')).map((action) =>
+      action.textContent?.trim(),
     );
 
     expect(screen.getByRole('link', { name: 'Edit' })).toHaveAttribute(
@@ -54,6 +57,7 @@ describe('AdminGigCandidatePreviewActions', () => {
     );
     expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
+    expect(actionLabels).toEqual(['Approve', 'Edit', 'Reject']);
   });
 
   it('should render no actions for terminal status', () => {

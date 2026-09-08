@@ -32,8 +32,12 @@ const gig: AdminGigDetail = {
 };
 
 describe('AdminGigPreviewActions', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should offer Post, visibility, and edit actions without approve/reject', () => {
-    render(
+    const view = render(
       <AdminGigPreviewActions
         gig={gig}
         editHref="/admin/gigs/gig-2026-09-17/edit"
@@ -41,8 +45,13 @@ describe('AdminGigPreviewActions', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: /post/i }));
     fireEvent.click(screen.getByRole('button', { name: /hide/i }));
+    const actionLabels = Array.from(view.container.querySelectorAll('button, a')).map((action) =>
+      action.textContent?.trim(),
+    );
+
     expect(post).toHaveBeenCalledOnce();
     expect(toggleVisibility).toHaveBeenCalledOnce();
+    expect(actionLabels).toEqual(['Post', 'Edit', 'Hide']);
     expect(screen.queryByRole('button', { name: /approve|reject/i })).not.toBeInTheDocument();
   });
 });
