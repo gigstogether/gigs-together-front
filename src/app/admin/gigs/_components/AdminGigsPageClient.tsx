@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import AdminGigPreviewCard from '@/app/admin/gigs/_components/AdminGigPreviewCard';
@@ -25,12 +25,6 @@ export default function AdminGigsPageClient() {
   const { selectedGigPublicId, sortBy, sortOrder }: AdminGigsQueryState =
     getAdminGigsQueryStateOrDefaults(searchParams);
 
-  const [initialQueryState] = useState<AdminGigsQueryState>(() => ({
-    selectedGigPublicId,
-    sortBy,
-    sortOrder,
-  }));
-
   const gigsQuery = useQuery({
     queryKey: adminKeys.gigs(sortBy, sortOrder),
     queryFn: () => fetchAdminGigs({ sortBy, sortOrder }),
@@ -51,9 +45,8 @@ export default function AdminGigsPageClient() {
   );
 
   useEffect(() => {
-    replaceQuery(initialQueryState);
-    // Sync query once from URL-derived state on mount; changes go through handlers below.
-  }, [initialQueryState, replaceQuery]);
+    replaceQuery({ selectedGigPublicId, sortBy, sortOrder });
+  }, [replaceQuery, selectedGigPublicId, sortBy, sortOrder]);
 
   const effectiveSelectedPublicId =
     selectedGigPublicId && gigs.some((g) => g.publicId === selectedGigPublicId)

@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 
 import { fetchAdminGigCandidates } from '@/app/admin/_lib/admin-api';
@@ -31,7 +31,6 @@ export default function AdminGigCandidatesPageClient() {
   const currentQuery = searchParams.toString();
   const state = getAdminGigCandidatesQueryStateOrDefaults(searchParams);
   const { filter, selectedGigCandidateId, sortBy, sortOrder } = state;
-  const [initialQueryState] = useState<AdminGigCandidatesQueryState>(() => state);
 
   const gigCandidatesQuery = useQuery({
     queryKey: adminKeys.gigCandidates(filter, sortBy, sortOrder),
@@ -51,8 +50,8 @@ export default function AdminGigCandidatesPageClient() {
   );
 
   useEffect(() => {
-    replaceQuery(initialQueryState);
-  }, [initialQueryState, replaceQuery]);
+    replaceQuery({ filter, selectedGigCandidateId, sortBy, sortOrder });
+  }, [filter, replaceQuery, selectedGigCandidateId, sortBy, sortOrder]);
 
   const effectiveSelectedGigCandidateId =
     selectedGigCandidateId &&

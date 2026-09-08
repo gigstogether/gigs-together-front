@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import AdminGigsPageClient from './AdminGigsPageClient';
 
@@ -14,10 +14,26 @@ vi.mock('next/navigation', () => ({
   useSearchParams: navigationMocks.useSearchParams,
 }));
 vi.mock('@tanstack/react-query', () => ({
-  useQuery: () => ({ data: { gigs: [] }, isError: false, isLoading: false }),
+  useQuery: () => ({
+    data: {
+      gigs: [
+        {
+          publicId: 'first-gig',
+          title: 'First Gig',
+          date: '2026-09-17',
+        },
+        {
+          publicId: 'second-gig',
+          title: 'Second Gig',
+          date: '2026-09-18',
+        },
+      ],
+    },
+    isError: false,
+    isLoading: false,
+  }),
 }));
 vi.mock('./AdminGigPreviewCard', () => ({ default: () => null }));
-vi.mock('./AdminGigQueueList', () => ({ default: () => null }));
 vi.mock('./AdminGigsSortControls', () => ({ default: () => null }));
 
 describe('AdminGigsPageClient query sync', () => {
@@ -44,5 +60,21 @@ describe('AdminGigsPageClient query sync', () => {
     expect(navigationMocks.replace).toHaveBeenCalledWith('?sortBy=createdAt&sortOrder=desc', {
       scroll: false,
     });
+  });
+
+  it('should not restore the initial selection after selecting another Gig', () => {
+    navigationMocks.useSearchParams.mockReturnValue(
+      new URLSearchParams('sortBy=createdAt&sortOrder=desc'),
+    );
+    const view = render(<AdminGigsPageClient />);
+
+    fireEvent.click(screen.getByRole('option', { name: /Second Gig/ }));
+    navigationMocks.replace.mockClear();
+    navigationMocks.useSearchParams.mockReturnValue(
+      new URLSearchParams('sortBy=createdAt&sortOrder=desc&gig=second-gig'),
+    );
+    view.rerender(<AdminGigsPageClient />);
+
+    expect(navigationMocks.replace).not.toHaveBeenCalled();
   });
 });
