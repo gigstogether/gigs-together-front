@@ -20,6 +20,7 @@ import { fetchAdminGigs } from '@/app/admin/_lib/admin-api';
 export default function AdminGigsPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const currentQuery = searchParams.toString();
 
   const { selectedGigPublicId, sortBy, sortOrder }: AdminGigsQueryState =
     getAdminGigsQueryStateOrDefaults(searchParams);
@@ -41,9 +42,12 @@ export default function AdminGigsPageClient() {
     (next: AdminGigsQueryState) => {
       const params = buildAdminGigsSearchParams(next);
       const query = params.toString();
+      if (query === currentQuery) {
+        return;
+      }
       router.replace(`?${query}`, { scroll: false });
     },
-    [router],
+    [currentQuery, router],
   );
 
   useEffect(() => {

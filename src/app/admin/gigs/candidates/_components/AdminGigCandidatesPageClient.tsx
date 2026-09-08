@@ -28,6 +28,7 @@ import { ADMIN_GIG_CANDIDATE_NEW_ROUTE } from '@/lib/admin-gig-candidate-paths';
 export default function AdminGigCandidatesPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const currentQuery = searchParams.toString();
   const state = getAdminGigCandidatesQueryStateOrDefaults(searchParams);
   const { filter, selectedGigCandidateId, sortBy, sortOrder } = state;
   const [initialQueryState] = useState<AdminGigCandidatesQueryState>(() => state);
@@ -41,9 +42,12 @@ export default function AdminGigCandidatesPageClient() {
   const replaceQuery = useCallback(
     (nextState: AdminGigCandidatesQueryState) => {
       const query = buildAdminGigCandidatesSearchParams(nextState).toString();
+      if (query === currentQuery) {
+        return;
+      }
       router.replace(`?${query}`, { scroll: false });
     },
-    [router],
+    [currentQuery, router],
   );
 
   useEffect(() => {
