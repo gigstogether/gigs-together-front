@@ -27,9 +27,11 @@ export default async function AdminGigCandidateFormPage(props: AdminGigCandidate
       translations={i18n.translations}
     >
       <div className="mx-auto w-full max-w-md space-y-4">
-        <AdminGigCandidateBackLink />
         {props.mode === 'create' ? (
-          <AdminGigCandidateDraftForm countries={countries} />
+          <>
+            <AdminGigCandidateBackLink />
+            <AdminGigCandidateDraftForm countries={countries} />
+          </>
         ) : (
           <AdminGigCandidateDetailPageClient
             mode="edit"

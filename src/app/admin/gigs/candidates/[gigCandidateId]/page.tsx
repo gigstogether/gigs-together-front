@@ -1,4 +1,3 @@
-import AdminGigCandidateBackLink from '@/app/admin/gigs/candidates/_components/AdminGigCandidateBackLink';
 import AdminGigCandidateDetailPageClient from '@/app/admin/gigs/candidates/_components/AdminGigCandidateDetailPageClient';
 
 interface AdminGigCandidateDetailPageParams {
@@ -14,7 +13,6 @@ export default async function AdminGigCandidateDetailPage(props: AdminGigCandida
 
   return (
     <div className="mx-auto w-full max-w-md space-y-4">
-      <AdminGigCandidateBackLink />
       <AdminGigCandidateDetailPageClient
         mode="view"
         gigCandidateId={gigCandidateId}

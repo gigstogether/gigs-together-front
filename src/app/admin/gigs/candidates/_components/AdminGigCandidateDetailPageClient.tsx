@@ -1,9 +1,11 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import type { ReactNode } from 'react';
 
 import { fetchAdminGigCandidateById } from '@/app/admin/_lib/admin-api';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
+import AdminGigCandidateBackLink from '@/app/admin/gigs/candidates/_components/AdminGigCandidateBackLink';
 import AdminGigCandidateCard from '@/app/admin/gigs/candidates/_components/AdminGigCandidateCard';
 import AdminGigCandidateDraftForm from '@/app/admin/gigs/candidates/_components/AdminGigCandidateDraftForm';
 import { GigCandidateStatusAPI } from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
@@ -34,31 +36,36 @@ export default function AdminGigCandidateDetailPageClient(
     enabled: gigCandidateId.length > 0,
   });
 
+  let content: ReactNode;
+
   if (!gigCandidateId) {
-    return <p className="text-sm text-destructive">Invalid Gig Candidate id.</p>;
-  }
-  if (gigCandidateQuery.isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading Gig Candidate…</p>;
-  }
-  if (gigCandidateQuery.isError || !gigCandidateQuery.data) {
-    return <p className="text-sm text-destructive">Could not load Gig Candidate.</p>;
-  }
+    content = <p className="text-sm text-destructive">Invalid Gig Candidate id.</p>;
+  } else if (gigCandidateQuery.isLoading) {
+    content = <p className="text-sm text-muted-foreground">Loading Gig Candidate…</p>;
+  } else if (gigCandidateQuery.isError || !gigCandidateQuery.data) {
+    content = <p className="text-sm text-destructive">Could not load Gig Candidate.</p>;
+  } else if (props.mode === 'view') {
+    content = <AdminGigCandidateCard gigCandidate={gigCandidateQuery.data} />;
+  } else if (gigCandidateQuery.data.status !== GigCandidateStatusAPI.Reviewing) {
+    content = (
+      <p className="text-sm text-destructive">Only Reviewing Gig Candidates can be edited.</p>
+    );
+  } else {
+    const gigCandidate = gigCandidateQuery.data;
 
-  const gigCandidate = gigCandidateQuery.data;
-
-  if (props.mode === 'view') {
-    return <AdminGigCandidateCard gigCandidate={gigCandidate} />;
-  }
-
-  if (gigCandidate.status !== GigCandidateStatusAPI.Reviewing) {
-    return <p className="text-sm text-destructive">Only Reviewing Gig Candidates can be edited.</p>;
+    content = (
+      <AdminGigCandidateDraftForm
+        key={`${gigCandidate.id}:${gigCandidate.version}`}
+        countries={props.countries}
+        gigCandidate={gigCandidate}
+      />
+    );
   }
 
   return (
-    <AdminGigCandidateDraftForm
-      key={`${gigCandidate.id}:${gigCandidate.version}`}
-      countries={props.countries}
-      gigCandidate={gigCandidate}
-    />
+    <>
+      <AdminGigCandidateBackLink gigCandidateStatus={gigCandidateQuery.data?.status} />
+      {content}
+    </>
   );
 }

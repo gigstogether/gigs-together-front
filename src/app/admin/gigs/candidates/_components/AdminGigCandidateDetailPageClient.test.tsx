@@ -73,6 +73,10 @@ describe('AdminGigCandidateDetailPageClient', () => {
     renderView(GigCandidateStatusAPI.Reviewing);
 
     expect(await screen.findByTestId('gigCandidate-card')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Gig Candidates/ })).toHaveAttribute(
+      'href',
+      '/admin/gigs/candidates?status=reviewing',
+    );
     expect(screen.queryByTestId('gigCandidate-draft-form')).not.toBeInTheDocument();
   });
 

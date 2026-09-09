@@ -31,6 +31,16 @@ export const GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES: Record<GigCandidateStatusAPI,
   [GigCandidateStatusAPI.Rejected]: 'bg-rose-500',
 };
 
+export const GIG_CANDIDATE_STATUS_FILTER_BY_API: Record<
+  GigCandidateStatusAPI,
+  GigCandidateStatusFilter
+> = {
+  [GigCandidateStatusAPI.New]: GigCandidateStatusFilter.New,
+  [GigCandidateStatusAPI.Reviewing]: GigCandidateStatusFilter.Reviewing,
+  [GigCandidateStatusAPI.Approved]: GigCandidateStatusFilter.Approved,
+  [GigCandidateStatusAPI.Rejected]: GigCandidateStatusFilter.Rejected,
+};
+
 function isGigCandidateStatusFilter(value: string): value is GigCandidateStatusFilter {
   return GIG_CANDIDATE_STATUS_FILTERS.some((gigCandidateStatus) => gigCandidateStatus === value);
 }

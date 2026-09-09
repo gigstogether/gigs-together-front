@@ -1,11 +1,24 @@
 import Link from 'next/link';
 
+import { GIG_CANDIDATE_STATUS_FILTER_BY_API } from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate-status';
+import type { GigCandidateStatusAPI } from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
 import { ADMIN_GIG_CANDIDATES_ROUTE } from '@/lib/admin-gig-candidate-paths';
 
-export default function AdminGigCandidateBackLink() {
+interface AdminGigCandidateBackLinkProps {
+  gigCandidateStatus?: GigCandidateStatusAPI;
+}
+
+export default function AdminGigCandidateBackLink(props: AdminGigCandidateBackLinkProps) {
+  const statusFilter = props.gigCandidateStatus
+    ? GIG_CANDIDATE_STATUS_FILTER_BY_API[props.gigCandidateStatus]
+    : undefined;
+
   return (
     <Link
-      href={ADMIN_GIG_CANDIDATES_ROUTE}
+      href={{
+        pathname: ADMIN_GIG_CANDIDATES_ROUTE,
+        query: statusFilter ? { status: statusFilter } : undefined,
+      }}
       className="inline-block text-sm text-muted-foreground hover:text-foreground"
     >
       ← Gig Candidates
