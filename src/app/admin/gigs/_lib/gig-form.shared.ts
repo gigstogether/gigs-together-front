@@ -1,10 +1,15 @@
 import * as z from 'zod';
 import { gigDateToYMD } from '@/lib/feed/feed.mapper';
+import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 
 export const gigFormSchema = z.object({
-  title: z.string().min(2, {
-    message: 'Title must be at least 2 characters.',
-  }),
+  title: z
+    .string()
+    .trim()
+    .min(1, { message: 'Title is required.' })
+    .max(GIG_TITLE_MAX_LENGTH, {
+      message: `Title must be at most ${GIG_TITLE_MAX_LENGTH} characters.`,
+    }),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
     message: 'Date must be in YYYY-MM-DD format.',
   }),

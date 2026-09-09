@@ -1,6 +1,7 @@
 import type { Route } from 'next';
 
 import { ADMIN_GIGS_ROUTE } from '@/lib/admin-gig-paths';
+import { ADMIN_GIG_CANDIDATES_ROUTE } from '@/lib/admin-gig-candidate-paths';
 
 export interface AdminNavItem {
   readonly href: Route;
@@ -24,7 +25,13 @@ export const adminNavItems: readonly AdminNavItem[] = [
   {
     href: ADMIN_GIGS_ROUTE,
     label: 'Gigs',
-    description: 'Create, edit, and moderate gigs',
+    description: 'Review, edit, and manage gig visibility',
+    isEnabled: true,
+  },
+  {
+    href: ADMIN_GIG_CANDIDATES_ROUTE,
+    label: 'Gig candidates',
+    description: 'Review user-submitted gig candidates',
     isEnabled: true,
   },
   {

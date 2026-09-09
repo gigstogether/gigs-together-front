@@ -27,8 +27,8 @@ describe('AdminPageClient', () => {
     mockFetchAdminDashboard.mockReset();
     mockFetchAdminDashboard.mockResolvedValue({
       summary: {
-        pendingGigsCount: 3,
-        publishedGigsCount: 12,
+        gigsCount: 12,
+        visibleGigsCount: 3,
       },
     });
   });

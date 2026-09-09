@@ -2,17 +2,16 @@
 
 import { ShareButton } from '@/components/ShareButton';
 import { cn } from '@/lib/utils';
-import type { GigStatus } from '@/app/admin/gigs/_lib/types';
-import { GIG_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gigs/_lib/admin-gig-status';
 
 interface AdminGigPreviewTitleRowProps {
   readonly title: string;
   readonly sharePath: string;
-  readonly status: GigStatus;
+  readonly isVisible: boolean;
 }
 
 export default function AdminGigPreviewTitleRow(props: AdminGigPreviewTitleRowProps) {
-  const { title, sharePath, status } = props;
+  const { title, sharePath, isVisible } = props;
+  const visibilityLabel = isVisible ? 'Visible' : 'Hidden';
 
   return (
     <div className="flex min-w-0 items-center gap-2">
@@ -20,10 +19,10 @@ export default function AdminGigPreviewTitleRow(props: AdminGigPreviewTitleRowPr
         <span
           className={cn(
             'inline-block h-1.5 w-1.5 shrink-0 self-center rounded-full',
-            GIG_STATUS_DOT_CLASS_NAMES[status],
+            isVisible ? 'bg-emerald-500' : 'bg-slate-400',
           )}
-          title={status}
-          aria-label={status}
+          title={visibilityLabel}
+          aria-label={visibilityLabel}
         />
         <span className="min-w-0 truncate">{title}</span>
       </h2>

@@ -39,7 +39,7 @@ describe('fetchFeedPage', () => {
       nextCursor: 'next',
     });
     expect(apiPublicRequestMock).toHaveBeenCalledWith(
-      'v1/gig?limit=10&cursor=abc&direction=prev&country=es&city=barcelona',
+      'v1/gigs?limit=10&cursor=abc&direction=prev&country=es&city=barcelona',
       'GET',
       undefined,
       undefined,
@@ -62,7 +62,7 @@ describe('fetchFeedPage', () => {
       },
     });
 
-    expect(apiPublicRequestMock).toHaveBeenCalledWith('v1/gig?limit=10', 'GET', undefined, {
+    expect(apiPublicRequestMock).toHaveBeenCalledWith('v1/gigs?limit=10', 'GET', undefined, {
       next: {
         revalidate: 60,
       },
@@ -87,7 +87,7 @@ describe('fetchFeedPage', () => {
       },
     });
 
-    expect(apiPublicRequestMock).toHaveBeenCalledWith('v1/gig?limit=10', 'GET', undefined, {
+    expect(apiPublicRequestMock).toHaveBeenCalledWith('v1/gigs?limit=10', 'GET', undefined, {
       next: {
         revalidate: 60,
       },
@@ -115,7 +115,7 @@ describe('fetchFeedAvailableDates', () => {
       dates: ['2026-04-21', '2026-05-01'],
     });
     expect(apiPublicRequestMock).toHaveBeenCalledWith(
-      'v1/gig/dates?country=es&city=barcelona',
+      'v1/gigs/dates?country=es&city=barcelona',
       'GET',
       undefined,
       undefined,
@@ -151,7 +151,7 @@ describe('fetchFeedAround', () => {
       nextCursor: 'next',
     });
     expect(apiPublicRequestMock).toHaveBeenCalledWith(
-      'v1/gig/around?anchor=2026-04-21&beforeLimit=10&afterLimit=10&country=es&city=barcelona',
+      'v1/gigs/around?anchor=2026-04-21&beforeLimit=10&afterLimit=10&country=es&city=barcelona',
       'GET',
       undefined,
       undefined,
@@ -171,7 +171,7 @@ describe('fetchFeedAnchorYmdByPublicId', () => {
 
     expect(result).toBe('2026-04-21');
     expect(apiPublicRequestMock).toHaveBeenCalledWith(
-      'v1/gig/date/abc%2Fdef',
+      'v1/gigs/date/abc%2Fdef',
       'GET',
       undefined,
       undefined,

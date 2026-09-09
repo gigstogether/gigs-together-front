@@ -3,16 +3,13 @@
 import { render, screen } from '@testing-library/react';
 
 import EditGigFormClient from '@/app/admin/gigs/_components/EditGigFormClient';
-import { GigStatusAPI } from '@/app/admin/gigs/_lib/types';
 
 const mockPush = vi.fn();
 const mockBack = vi.fn();
-const mockOnLookup = vi.fn<() => Promise<void>>();
 const mockOnSubmit = vi.fn();
 const mockRetryLoadingGig = vi.fn<() => Promise<void>>();
 
 const mockUseEditGigFormData = vi.fn();
-const mockUseGigLookup = vi.fn();
 const mockUseGigSubmit = vi.fn();
 
 vi.mock('next/navigation', () => ({
@@ -31,10 +28,6 @@ vi.mock('@/app/admin/gigs/_hooks/useEditGigFormData', () => ({
     mockUseEditGigFormData(...args),
 }));
 
-vi.mock('@/app/admin/gigs/_hooks/useGigLookup', () => ({
-  useGigLookup: (...args: Parameters<typeof mockUseGigLookup>) => mockUseGigLookup(...args),
-}));
-
 vi.mock('@/app/admin/gigs/_hooks/useGigSubmit', () => ({
   useGigSubmit: (...args: Parameters<typeof mockUseGigSubmit>) => mockUseGigSubmit(...args),
 }));
@@ -43,7 +36,7 @@ vi.mock('@/app/admin/gigs/_components/gig-form/GigFormFields', () => ({
   default: () => <div data-testid="gig-form-fields" />,
 }));
 
-vi.mock('@/app/admin/gigs/_components/gig-form/PosterField', () => ({
+vi.mock('@/components/PosterField', () => ({
   default: () => <div data-testid="poster-field" />,
 }));
 
@@ -60,21 +53,16 @@ describe('EditGigFormClient', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockUseGigLookup.mockReturnValue({
-      isLookingUp: false,
-      onLookup: mockOnLookup,
-    });
-
     mockUseGigSubmit.mockReturnValue({
       isSubmitting: false,
       onSubmit: mockOnSubmit,
     });
   });
 
-  it('should show gig status in the edit form when data is prefilled', () => {
+  it('should show the edit form without a removed Gig status badge', () => {
     mockUseEditGigFormData.mockReturnValue({
       existingPosterUrl: 'https://images.example/poster.png',
-      gigStatus: GigStatusAPI.Published,
+      gigVersion: 4,
       isLoadingGig: false,
       loadGigError: null,
       isPrefilled: true,
@@ -83,14 +71,14 @@ describe('EditGigFormClient', () => {
 
     renderClient();
 
-    expect(screen.getByLabelText('Status: Published')).toBeInTheDocument();
-    expect(screen.getByText('Published')).toBeInTheDocument();
+    expect(screen.getByText('Edit gig')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Status:/)).not.toBeInTheDocument();
   });
 
   it('should not show gig status while edit data is still unavailable', () => {
     mockUseEditGigFormData.mockReturnValue({
       existingPosterUrl: '',
-      gigStatus: null,
+      gigVersion: null,
       isLoadingGig: false,
       loadGigError: null,
       isPrefilled: true,

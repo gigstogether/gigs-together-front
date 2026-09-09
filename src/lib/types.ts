@@ -66,7 +66,7 @@ export interface V1GigAroundGetResponseBody {
   nextCursor?: string;
 }
 
-/** GET v1/gig/date/:publicId — anchor date for hash / deep links */
+/** GET v1/gigs/date/:publicId — anchor date for hash / deep links */
 export interface V1GigByPublicIdGetResponseBody {
   date: string | number;
 }

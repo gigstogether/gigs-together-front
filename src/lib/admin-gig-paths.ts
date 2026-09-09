@@ -2,9 +2,6 @@ import type { Route } from 'next';
 
 export const ADMIN_GIGS_BASE_PATH = '/admin/gigs';
 export const ADMIN_GIGS_ROUTE: Route<'/admin/gigs'> = ADMIN_GIGS_BASE_PATH;
-export const ADMIN_GIGS_NEW_PATH = '/admin/gigs/new';
-export const ADMIN_GIGS_NEW_ROUTE: Route<'/admin/gigs/new'> = ADMIN_GIGS_NEW_PATH;
-
 export type AdminGigPublicIdPath = `/admin/gigs/${string}`;
 export type AdminGigEditPath = `/admin/gigs/${string}/edit`;
 // export type AdminGigsPath = '/admin/gigs' | `/admin/gigs?${string}`;

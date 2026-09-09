@@ -9,6 +9,7 @@ import { gigFormKeys } from '@/app/admin/gigs/_lib/gigFormKeys';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
+import { ApiError } from '@/lib/api-errors';
 
 const { toastMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
@@ -156,5 +157,39 @@ describe('useGigSubmit', () => {
     });
     expect(onSuccess).not.toHaveBeenCalled();
     expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  it('should keep the loaded version stale and show a conflict until explicit reload', async () => {
+    const queryClient = createTestQueryClient();
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
+    const apiCall = vi
+      .fn<(params: GigUpsertApiParams) => Promise<GigUpsertResponse>>()
+      .mockRejectedValueOnce(new ApiError('Gig has a newer version', 409));
+    const onSuccess = vi.fn();
+
+    const { result } = renderHook(
+      () =>
+        useGigSubmit({
+          posterFile: null,
+          posterUrl: '',
+          apiCall,
+          onSuccess,
+        }),
+      {
+        wrapper: createQueryClientWrapper(queryClient),
+      },
+    );
+
+    await act(async () => {
+      await result.current.onSubmit(DEFAULT_SUBMIT_VALUES);
+    });
+
+    expect(toastMock).toHaveBeenCalledWith({
+      title: 'Gig changed',
+      description: 'Reload the latest version before saving again.',
+      variant: 'destructive',
+    });
+    expect(invalidateQueriesSpy).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
   });
 });
