@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils';
 
 interface AdminGigCandidatePreviewActionsProps {
   gigCandidate: AdminGigCandidate;
-  isRejectActionVisible?: boolean;
 }
 
 const actionButtonClassName = 'h-9 min-w-0 flex-1 gap-1 px-2';
@@ -20,11 +19,11 @@ const actionButtonClassName = 'h-9 min-w-0 flex-1 gap-1 px-2';
 export default function AdminGigCandidatePreviewActions(
   props: AdminGigCandidatePreviewActionsProps,
 ) {
-  const { gigCandidate, isRejectActionVisible = true } = props;
+  const { gigCandidate } = props;
 
   const isNew = gigCandidate.status === GigCandidateStatusAPI.New;
   const isReviewing = gigCandidate.status === GigCandidateStatusAPI.Reviewing;
-  const hasRejectAction = (isNew || isReviewing) && isRejectActionVisible;
+  const hasRejectAction = isNew || isReviewing;
   const {
     approveGigCandidate,
     isApproving,

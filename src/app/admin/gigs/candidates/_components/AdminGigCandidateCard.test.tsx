@@ -49,19 +49,10 @@ const gigCandidate: AdminGigCandidate = {
   updatedAt: '2026-08-02T10:00:00.000Z',
 };
 
-function renderCard(
-  gigCandidateToRender: AdminGigCandidate = gigCandidate,
-  isRejectActionVisible = true,
-) {
-  return render(
-    <AdminGigCandidateCard
-      gigCandidate={gigCandidateToRender}
-      isRejectActionVisible={isRejectActionVisible}
-    />,
-    {
-      wrapper: createQueryClientWrapper(createTestQueryClient()),
-    },
-  );
+function renderCard(gigCandidateToRender: AdminGigCandidate = gigCandidate) {
+  return render(<AdminGigCandidateCard gigCandidate={gigCandidateToRender} />, {
+    wrapper: createQueryClientWrapper(createTestQueryClient()),
+  });
 }
 
 describe('AdminGigCandidateCard', () => {
@@ -80,7 +71,7 @@ describe('AdminGigCandidateCard', () => {
       'href',
       gigCandidate.moderationPostUrl,
     );
-    expect(screen.getByRole('link', { name: 'Open linked gig' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Open linked gig in admin' })).toHaveAttribute(
       'href',
       '/admin/gigs/band-2026-08-20',
     );
@@ -98,11 +89,11 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
   });
 
-  it('should hide the duplicate Reject action on a Reviewing detail view', () => {
-    renderCard({ ...gigCandidate, status: GigCandidateStatusAPI.Reviewing }, false);
+  it('should show Reject on a Reviewing detail view', () => {
+    renderCard({ ...gigCandidate, status: GigCandidateStatusAPI.Reviewing });
 
     expect(screen.queryByRole('link', { name: 'Open' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
   });
 

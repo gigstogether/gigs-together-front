@@ -47,12 +47,7 @@ export default function AdminGigCandidateDetailPageClient(
   const gigCandidate = gigCandidateQuery.data;
 
   if (props.mode === 'view') {
-    return (
-      <AdminGigCandidateCard
-        gigCandidate={gigCandidate}
-        isRejectActionVisible={false}
-      />
-    );
+    return <AdminGigCandidateCard gigCandidate={gigCandidate} />;
   }
 
   if (gigCandidate.status !== GigCandidateStatusAPI.Reviewing) {

@@ -18,11 +18,10 @@ import { ShareButton } from '@/components/ShareButton';
 
 interface AdminGigCandidateCardProps {
   gigCandidate: AdminGigCandidate;
-  isRejectActionVisible?: boolean;
 }
 
 export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps) {
-  const { gigCandidate, isRejectActionVisible = true } = props;
+  const { gigCandidate } = props;
   const { gigDraft } = gigCandidate;
   const title = gigDraft.title ?? 'Untitled Gig Candidate';
   const location = [gigDraft.venue, gigDraft.city, gigDraft.country].filter(Boolean).join(', ');
@@ -141,7 +140,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                   href={buildAdminGigPublicIdRoute(gigCandidate.linkedGigPublicId)}
                   className="text-primary underline-offset-4 hover:underline"
                 >
-                  Open linked gig
+                  Open linked gig in admin
                 </Link>
               ) : null}
             </div>
@@ -169,10 +168,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
         </div>
       </div>
 
-      <AdminGigCandidatePreviewActions
-        gigCandidate={gigCandidate}
-        isRejectActionVisible={isRejectActionVisible}
-      />
+      <AdminGigCandidatePreviewActions gigCandidate={gigCandidate} />
     </article>
   );
 }

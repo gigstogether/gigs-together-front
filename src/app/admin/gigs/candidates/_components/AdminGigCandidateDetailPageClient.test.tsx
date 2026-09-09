@@ -19,12 +19,7 @@ vi.mock('@/app/admin/gigs/candidates/_components/AdminGigCandidateDraftForm', ()
   default: () => <div data-testid="gigCandidate-draft-form" />,
 }));
 vi.mock('@/app/admin/gigs/candidates/_components/AdminGigCandidateCard', () => ({
-  default: (props: { isRejectActionVisible?: boolean }) => (
-    <div
-      data-testid="gigCandidate-card"
-      data-show-reject-action={String(props.isRejectActionVisible ?? true)}
-    />
-  ),
+  default: () => <div data-testid="gigCandidate-card" />,
 }));
 
 function createGigCandidate(status: GigCandidateStatusAPI): AdminGigCandidate {
@@ -74,13 +69,10 @@ describe('AdminGigCandidateDetailPageClient', () => {
     vi.clearAllMocks();
   });
 
-  it('should render the card without a duplicate Reject action on the view page', async () => {
+  it('should render the card with its actions on the view page', async () => {
     renderView(GigCandidateStatusAPI.Reviewing);
 
-    expect(await screen.findByTestId('gigCandidate-card')).toHaveAttribute(
-      'data-show-reject-action',
-      'false',
-    );
+    expect(await screen.findByTestId('gigCandidate-card')).toBeInTheDocument();
     expect(screen.queryByTestId('gigCandidate-draft-form')).not.toBeInTheDocument();
   });
 
