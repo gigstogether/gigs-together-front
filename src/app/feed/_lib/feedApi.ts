@@ -81,7 +81,7 @@ export async function fetchFeedPage(params: FetchFeedPageParams): Promise<V1GigG
   appendFeedLocationQuery(qs, params);
 
   const raw = await apiPublicRequest<unknown>(
-    withQuery('v1/gig', qs),
+    withQuery('v1/gigs', qs),
     'GET',
     undefined,
     buildApiPublicRequestInit(params),
@@ -97,7 +97,7 @@ export async function fetchFeedAvailableDates(
   qs.set('city', params.city);
 
   const raw = await apiPublicRequest<unknown>(
-    withQuery('v1/gig/dates', qs),
+    withQuery('v1/gigs/dates', qs),
     'GET',
     undefined,
     buildApiPublicRequestInit(params),
@@ -115,7 +115,7 @@ export async function fetchFeedAround(
   appendFeedLocationQuery(qs, params);
 
   const raw = await apiPublicRequest<unknown>(
-    withQuery('v1/gig/around', qs),
+    withQuery('v1/gigs/around', qs),
     'GET',
     undefined,
     buildApiPublicRequestInit(params),
@@ -127,7 +127,7 @@ export async function fetchFeedAnchorYmdByPublicId(
   params: FetchFeedAnchorYmdByPublicIdParams,
 ): Promise<string> {
   const raw = await apiPublicRequest<unknown>(
-    `v1/gig/date/${encodeURIComponent(params.publicId)}`,
+    `v1/gigs/date/${encodeURIComponent(params.publicId)}`,
     'GET',
     undefined,
     buildApiPublicRequestInit(params),

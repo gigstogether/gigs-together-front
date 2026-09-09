@@ -5,7 +5,6 @@ import type { UseFormReturn } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 
 import type { AdminGigFormData } from '@/app/admin/gigs/_lib/types';
-import { GigStatusAPI } from '@/app/admin/gigs/_lib/types';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { fetchAdminGigByPublicId } from '@/app/admin/_lib/admin-api';
@@ -45,7 +44,14 @@ function createAdminGigFormData(overrides: Partial<AdminGigFormData> = {}): Admi
   return {
     publicId: 'gig-public-id',
     title: 'Arctic Monkeys',
-    status: GigStatusAPI.Pending,
+    isVisible: false,
+    version: 3,
+    source: {
+      type: 'user',
+      userId: '42',
+      isCurrentlyAdmin: false,
+      origin: { type: 'admin' },
+    },
     date: '2026-07-01T20:00:00.000Z',
     endDate: '2026-07-02T22:00:00.000Z',
     city: 'Barcelona',
@@ -53,7 +59,6 @@ function createAdminGigFormData(overrides: Partial<AdminGigFormData> = {}): Admi
     venue: 'Razzmatazz',
     ticketsUrl: 'https://tickets.example/gig',
     posterUrl: 'https://images.example/poster.png',
-    suggestedBy: { userId: '42' },
     ...overrides,
   };
 }
@@ -111,7 +116,7 @@ describe('useEditGigFormData', () => {
       signal: expect.any(AbortSignal),
     });
     expect(result.current.editGigData.existingPosterUrl).toBe('https://images.example/poster.png');
-    expect(result.current.editGigData.gigStatus).toBe(GigStatusAPI.Pending);
+    expect(result.current.editGigData.gigVersion).toBe(3);
     expect(result.current.form.getValues()).toEqual({
       title: 'Arctic Monkeys',
       date: '2026-07-01',
@@ -133,7 +138,7 @@ describe('useEditGigFormData', () => {
     });
 
     expect(result.current.editGigData.isPrefilled).toBe(false);
-    expect(result.current.editGigData.gigStatus).toBe(null);
+    expect(result.current.editGigData.gigVersion).toBe(null);
     expect(toastMock).toHaveBeenCalledWith({
       title: "Couldn't load gig",
       description: 'Request failed',
@@ -162,7 +167,6 @@ describe('useEditGigFormData', () => {
     });
 
     expect(vi.mocked(fetchAdminGigByPublicId)).toHaveBeenCalledTimes(2);
-    expect(result.current.editGigData.gigStatus).toBe(GigStatusAPI.Pending);
     expect(result.current.form.getValues()).toEqual({
       title: 'Arctic Monkeys',
       date: '2026-07-01',

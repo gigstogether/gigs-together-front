@@ -6,16 +6,50 @@ import {
   fetchAdminTranslationNamespaces,
   fetchAdminTranslations,
   patchAdminLocale,
+  patchAdminGigVisibility,
   patchAdminLocalesOrder,
   patchAdminTranslationActive,
-  postAdminGigApprove,
   postAdminGigPost,
-  postAdminGigReject,
   putAdminTranslation,
   isAdminTranslationKind,
+  fetchAdminGigCandidates,
+  fetchAdminGigCandidateById,
+  createAdminGigCandidate,
+  approveAdminGigCandidate,
+  lookupAdminGigCandidateDraft,
+  rejectAdminGigCandidate,
+  sendAdminGigCandidateToModeration,
+  updateAdminGigCandidateDraft,
 } from '@/app/admin/_lib/admin-api';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
-import { GigStatusAPI, GigStatusFilter } from '@/app/admin/gigs/_lib/types';
+import {
+  AdminGigCandidatesSortBy,
+  AdminGigCandidatesSortOrder,
+  GigCandidateStatusFilter,
+} from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
+
+function createGigCandidateApiPayload(overrides: Record<string, unknown> = {}) {
+  return {
+    id: '507f1f77bcf86cd799439099',
+    source: {
+      type: 'user',
+      userId: '42',
+      isCurrentlyAdmin: false,
+      origin: { type: 'admin' },
+    },
+    gigDraft: {
+      title: 'Band',
+      date: '2026-08-20',
+      city: 'Barcelona',
+      country: 'ES',
+    },
+    status: 'Reviewing',
+    version: 0,
+    createdAt: '2026-08-01T10:00:00.000Z',
+    updatedAt: '2026-08-02T10:00:00.000Z',
+    ...overrides,
+  };
+}
 
 const mockApiRequest = vi.fn();
 
@@ -31,15 +65,15 @@ describe('fetchAdminDashboard', () => {
   it('should parse admin dashboard response when payload is valid', async () => {
     mockApiRequest.mockResolvedValue({
       summary: {
-        pendingGigsCount: 2,
-        publishedGigsCount: 10,
+        gigsCount: 12,
+        visibleGigsCount: 10,
       },
     });
 
     await expect(fetchAdminDashboard()).resolves.toEqual({
       summary: {
-        pendingGigsCount: 2,
-        publishedGigsCount: 10,
+        gigsCount: 12,
+        visibleGigsCount: 10,
       },
     });
     expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/dashboard', 'GET');
@@ -63,34 +97,87 @@ describe('fetchAdminGigs', () => {
         {
           publicId: 'my-gig',
           title: 'My Gig',
-          status: 'Pending',
+          isVisible: false,
+          version: 3,
+          source: {
+            type: 'user',
+            userId: '42',
+            displayName: 'Test Admin',
+            isCurrentlyAdmin: true,
+            telegramUsername: 'test_admin',
+            origin: { type: 'admin' },
+          },
           date: '2026-06-12',
           city: 'barcelona',
           country: 'ES',
           venue: 'Venue',
-          suggestedBy: { userId: '42' },
         },
       ],
     });
 
-    const result = await fetchAdminGigs({ status: GigStatusFilter.Pending });
+    const result = await fetchAdminGigs({});
 
     expect(result).toEqual({
       gigs: [
         {
           publicId: 'my-gig',
           title: 'My Gig',
-          status: 'Pending',
+          isVisible: false,
+          version: 3,
+          source: {
+            type: 'user',
+            userId: '42',
+            displayName: 'Test Admin',
+            isCurrentlyAdmin: true,
+            telegramUsername: 'test_admin',
+            origin: { type: 'admin' },
+          },
           date: '2026-06-12',
           city: 'barcelona',
           country: 'ES',
           venue: 'Venue',
-          suggestedBy: { userId: '42' },
         },
       ],
     });
-    expect(result.gigs[0]?.status).toBe(GigStatusAPI.Pending);
-    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gigs?status=pending', 'GET');
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gigs', 'GET');
+  });
+
+  it('should parse an arbitrary non-empty Gig provider name', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigs: [
+        {
+          publicId: 'provider-gig',
+          title: 'Provider Gig',
+          isVisible: true,
+          version: 0,
+          source: {
+            type: 'provider',
+            provider: {
+              name: 'exampleProvider',
+              externalEventId: 'event-42',
+              sourceUrl: 'https://provider.example/events/event-42',
+              fetchedAt: '2026-09-01T12:00:00.000Z',
+            },
+          },
+          date: '2026-09-20',
+          city: 'barcelona',
+          country: 'ES',
+          venue: 'Venue',
+        },
+      ],
+    });
+
+    const result = await fetchAdminGigs({});
+
+    expect(result.gigs[0]?.source).toEqual({
+      type: 'provider',
+      provider: {
+        name: 'exampleProvider',
+        externalEventId: 'event-42',
+        sourceUrl: 'https://provider.example/events/event-42',
+        fetchedAt: '2026-09-01T12:00:00.000Z',
+      },
+    });
   });
 
   it('should parse post dates when publishPostDate and moderationPostDate are present', async () => {
@@ -99,12 +186,18 @@ describe('fetchAdminGigs', () => {
         {
           publicId: 'published-gig',
           title: 'Published Gig',
-          status: 'Published',
+          isVisible: true,
+          version: 5,
+          source: {
+            type: 'user',
+            userId: '42',
+            isCurrentlyAdmin: false,
+            origin: { type: 'admin' },
+          },
           date: '2026-06-12',
           city: 'barcelona',
           country: 'ES',
           venue: 'Venue',
-          suggestedBy: { userId: '42' },
           publishPostDate: 1_748_784_000_000,
           moderationPostDate: 1_748_697_600_000,
         },
@@ -113,7 +206,6 @@ describe('fetchAdminGigs', () => {
 
     await expect(
       fetchAdminGigs({
-        status: GigStatusFilter.Approved,
         sortBy: AdminGigsSortBy.CreatedAt,
         sortOrder: AdminGigsSortOrder.Desc,
       }),
@@ -132,13 +224,12 @@ describe('fetchAdminGigs', () => {
     mockApiRequest.mockResolvedValue({ gigs: [] });
 
     await fetchAdminGigs({
-      status: GigStatusFilter.Approved,
       sortBy: AdminGigsSortBy.EventDate,
       sortOrder: AdminGigsSortOrder.Desc,
     });
 
     expect(mockApiRequest).toHaveBeenCalledWith(
-      'v1/admin/gigs?status=approved&sortBy=eventDate&sortOrder=desc',
+      'v1/admin/gigs?sortBy=eventDate&sortOrder=desc',
       'GET',
     );
   });
@@ -146,9 +237,7 @@ describe('fetchAdminGigs', () => {
   it('should throw when admin gigs response is invalid', async () => {
     mockApiRequest.mockResolvedValue({ gigs: [{}] });
 
-    await expect(fetchAdminGigs({ status: GigStatusFilter.Approved })).rejects.toThrow(
-      'Invalid admin gigs response',
-    );
+    await expect(fetchAdminGigs({})).rejects.toThrow('Invalid admin gigs response');
   });
 });
 
@@ -161,13 +250,19 @@ describe('fetchAdminGigByPublicId', () => {
     mockApiRequest.mockResolvedValue({
       publicId: 'radiohead-barcelona-2026-06-12',
       title: 'Radiohead',
-      status: 'Pending',
+      isVisible: false,
+      version: 3,
+      source: {
+        type: 'user',
+        userId: '9001',
+        isCurrentlyAdmin: false,
+        origin: { type: 'admin' },
+      },
       date: '2026-06-12',
       city: 'barcelona',
       country: 'ES',
       venue: 'Palau Sant Jordi',
       ticketsUrl: 'https://example.com/tickets',
-      suggestedBy: { userId: '9001' },
       publishPostUrl: 'https://t.me/channel/1',
       moderationPostDate: 1_748_697_600_000,
     });
@@ -177,19 +272,24 @@ describe('fetchAdminGigByPublicId', () => {
     expect(result).toEqual({
       publicId: 'radiohead-barcelona-2026-06-12',
       title: 'Radiohead',
-      status: 'Pending',
+      isVisible: false,
+      version: 3,
+      source: {
+        type: 'user',
+        userId: '9001',
+        isCurrentlyAdmin: false,
+        origin: { type: 'admin' },
+      },
       date: '2026-06-12',
       city: 'barcelona',
       country: 'ES',
       venue: 'Palau Sant Jordi',
       ticketsUrl: 'https://example.com/tickets',
-      suggestedBy: { userId: '9001' },
       publishPostUrl: 'https://t.me/channel/1',
       moderationPostDate: 1_748_697_600_000,
     });
-    expect(result.status).toBe(GigStatusAPI.Pending);
     expect(mockApiRequest).toHaveBeenCalledWith(
-      'v1/admin/gig/radiohead-barcelona-2026-06-12',
+      'v1/admin/gigs/radiohead-barcelona-2026-06-12',
       'GET',
       undefined,
       { signal: undefined },
@@ -202,6 +302,327 @@ describe('fetchAdminGigByPublicId', () => {
     await expect(fetchAdminGigByPublicId({ publicId: 'gig-42' })).rejects.toThrow(
       'Invalid admin gig response',
     );
+  });
+});
+
+describe('fetchAdminGigCandidates', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should parse and request sorted gig candidates', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          status: 'New',
+          intakePostUrl: 'https://t.me/c/123/77',
+          intakePostDate: 1_700_000_000_000,
+        }),
+      ],
+    });
+
+    await expect(
+      fetchAdminGigCandidates({
+        status: GigCandidateStatusFilter.New,
+        sortBy: AdminGigCandidatesSortBy.EventDate,
+        sortOrder: AdminGigCandidatesSortOrder.Asc,
+      }),
+    ).resolves.toEqual({
+      gigCandidates: [
+        expect.objectContaining({
+          id: '507f1f77bcf86cd799439099',
+          intakePostUrl: 'https://t.me/c/123/77',
+          intakePostDate: 1_700_000_000_000,
+        }),
+      ],
+    });
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig-candidates?status=new&sortBy=eventDate&sortOrder=asc',
+      'GET',
+    );
+  });
+
+  it('should throw when gig candidates list response is invalid', async () => {
+    mockApiRequest.mockResolvedValue({ gigCandidates: [{ id: 'gigCandidate' }] });
+
+    await expect(fetchAdminGigCandidates({ status: GigCandidateStatusFilter.New })).rejects.toThrow(
+      'Invalid admin Gig Candidates response',
+    );
+  });
+
+  it('should parse messenger origin without message identifiers', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          source: {
+            type: 'user',
+            userId: '42',
+            displayName: 'Test User',
+            isCurrentlyAdmin: false,
+            telegramUsername: 'test_user',
+            origin: {
+              type: 'messenger',
+              messenger: 'Telegram',
+            },
+          },
+        }),
+      ],
+    });
+
+    const response = await fetchAdminGigCandidates({
+      status: GigCandidateStatusFilter.New,
+    });
+
+    expect(response.gigCandidates[0]?.source).toEqual({
+      type: 'user',
+      userId: '42',
+      displayName: 'Test User',
+      isCurrentlyAdmin: false,
+      telegramUsername: 'test_user',
+      origin: {
+        type: 'messenger',
+        messenger: 'Telegram',
+      },
+    });
+  });
+
+  it('should parse an arbitrary non-empty GigCandidate provider name', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          source: {
+            type: 'provider',
+            provider: {
+              name: 'exampleProvider',
+              externalEventId: 'event-42',
+              sourceUrl: 'https://provider.example/events/event-42',
+              fetchedAt: '2026-09-01T12:00:00.000Z',
+            },
+          },
+        }),
+      ],
+    });
+
+    const response = await fetchAdminGigCandidates({
+      status: GigCandidateStatusFilter.New,
+    });
+
+    expect(response.gigCandidates[0]?.source).toEqual({
+      type: 'provider',
+      provider: {
+        name: 'exampleProvider',
+        externalEventId: 'event-42',
+        sourceUrl: 'https://provider.example/events/event-42',
+        fetchedAt: '2026-09-01T12:00:00.000Z',
+      },
+    });
+  });
+
+  it('should reject an empty GigCandidate provider name', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          source: {
+            type: 'provider',
+            provider: {
+              name: '',
+              externalEventId: 'event-42',
+              sourceUrl: 'https://provider.example/events/event-42',
+              fetchedAt: '2026-09-01T12:00:00.000Z',
+            },
+          },
+        }),
+      ],
+    });
+
+    await expect(fetchAdminGigCandidates({ status: GigCandidateStatusFilter.New })).rejects.toThrow(
+      'Invalid admin Gig Candidates response',
+    );
+  });
+
+  it('should reject obsolete messenger origin message identifiers', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          source: {
+            type: 'user',
+            userId: '42',
+            isCurrentlyAdmin: false,
+            origin: {
+              type: 'messenger',
+              messenger: 'Telegram',
+              chatId: 'chat-1',
+              messageId: 'message-1',
+            },
+          },
+        }),
+      ],
+    });
+
+    await expect(fetchAdminGigCandidates({ status: GigCandidateStatusFilter.New })).rejects.toThrow(
+      'Invalid admin Gig Candidates response',
+    );
+  });
+});
+
+describe('fetchAdminGigCandidateById', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should request and parse a GigCandidate by encoded id', async () => {
+    mockApiRequest.mockResolvedValue({
+      ...createGigCandidateApiPayload({ id: 'gigCandidate/id', status: 'Approved' }),
+      intakePostUrl: 'https://t.me/c/123/77',
+      intakePostDate: 1_700_000_000_000,
+      moderationPostUrl: 'https://t.me/c/124/78',
+      moderationPostDate: 1_700_000_001_000,
+      linkedGigPublicId: 'band-2026-08-20',
+    });
+
+    await expect(
+      fetchAdminGigCandidateById({ gigCandidateId: 'gigCandidate/id' }),
+    ).resolves.toEqual(
+      expect.objectContaining({
+        intakePostUrl: 'https://t.me/c/123/77',
+        intakePostDate: 1_700_000_000_000,
+        moderationPostUrl: 'https://t.me/c/124/78',
+        moderationPostDate: 1_700_000_001_000,
+        linkedGigPublicId: 'band-2026-08-20',
+      }),
+    );
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig-candidates/gigCandidate%2Fid',
+      'GET',
+      undefined,
+      { signal: undefined },
+    );
+  });
+
+  it('should throw when GigCandidate response is invalid', async () => {
+    mockApiRequest.mockResolvedValue({ id: 'gigCandidate' });
+
+    await expect(fetchAdminGigCandidateById({ gigCandidateId: 'gigCandidate' })).rejects.toThrow(
+      'Invalid admin Gig Candidate response',
+    );
+  });
+});
+
+describe('admin GigCandidate commands', () => {
+  beforeEach(() => {
+    mockApiRequest.mockReset();
+  });
+
+  it('should create an admin GigCandidate from gigDraft fields', async () => {
+    mockApiRequest.mockResolvedValue(createGigCandidateApiPayload());
+
+    await createAdminGigCandidate({
+      gigDraft: { title: 'Band', country: 'ES' },
+      poster: { file: null, url: '' },
+    });
+
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gig-candidates', 'POST', {
+      gigDraft: { title: 'Band', country: 'ES' },
+    });
+  });
+
+  it('should update only gigDraft with expectedVersion', async () => {
+    mockApiRequest.mockResolvedValue(createGigCandidateApiPayload({ version: 4 }));
+
+    await updateAdminGigCandidateDraft({
+      gigCandidateId: ' gigCandidate/id ',
+      expectedVersion: 3,
+      gigDraft: { venue: 'Razzmatazz' },
+      poster: { file: null, url: '' },
+    });
+
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig-candidates/gigCandidate%2Fid/gig-draft',
+      'PATCH',
+      { gigDraft: { venue: 'Razzmatazz' }, expectedVersion: 3 },
+    );
+  });
+
+  it('should reject with the expected GigCandidate version', async () => {
+    mockApiRequest.mockResolvedValue(createGigCandidateApiPayload({ status: 'Rejected' }));
+
+    await rejectAdminGigCandidate({ gigCandidateId: 'gigCandidate-42', expectedVersion: 7 });
+
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig-candidates/gigCandidate-42/reject',
+      'POST',
+      { expectedVersion: 7 },
+    );
+  });
+
+  it('should approve with the expected GigCandidate version', async () => {
+    mockApiRequest.mockResolvedValue(
+      createGigCandidateApiPayload({ status: 'Approved', version: 8 }),
+    );
+
+    await approveAdminGigCandidate({
+      gigCandidateId: 'gigCandidate-42',
+      expectedVersion: 7,
+    });
+
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig-candidates/gigCandidate-42/approve',
+      'POST',
+      { expectedVersion: 7 },
+    );
+  });
+
+  it('should send to moderation with the expected GigCandidate version', async () => {
+    mockApiRequest.mockResolvedValue(
+      createGigCandidateApiPayload({ status: 'Reviewing', version: 8 }),
+    );
+
+    await sendAdminGigCandidateToModeration({
+      gigCandidateId: 'gigCandidate-42',
+      expectedVersion: 7,
+    });
+
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig-candidates/gigCandidate-42/send-to-moderation',
+      'POST',
+      { expectedVersion: 7 },
+    );
+  });
+
+  it('should send only title and location to lookup and normalize returned dates', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigDraft: {
+        title: 'Band',
+        date: '2026-08-20T00:00:00.000Z',
+        country: 'ES',
+      },
+    });
+
+    await expect(
+      lookupAdminGigCandidateDraft({ title: ' Band ', location: ' Barcelona, ES ' }),
+    ).resolves.toEqual({ title: 'Band', date: '2026-08-20', country: 'ES' });
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/gig-candidates/lookup',
+      'POST',
+      { title: 'Band', location: 'Barcelona, ES' },
+      { signal: undefined },
+    );
+  });
+
+  it('should return null when lookup has no match', async () => {
+    mockApiRequest.mockResolvedValue({ gigDraft: null });
+
+    await expect(
+      lookupAdminGigCandidateDraft({ title: 'Band', location: 'Barcelona, ES' }),
+    ).resolves.toBeNull();
+  });
+
+  it('should reject a lookup response without the required date', async () => {
+    mockApiRequest.mockResolvedValue({ gigDraft: { title: 'Band' } });
+
+    await expect(
+      lookupAdminGigCandidateDraft({ title: 'Band', location: 'Barcelona, ES' }),
+    ).rejects.toThrow('Gig Candidate lookup did not return a date');
   });
 });
 
@@ -575,38 +996,6 @@ describe('isAdminTranslationKind', () => {
   });
 });
 
-describe('postAdminGigApprove', () => {
-  beforeEach(() => {
-    mockApiRequest.mockReset();
-  });
-
-  it('should post approve request when response succeeds', async () => {
-    mockApiRequest.mockResolvedValue(undefined);
-
-    await expect(postAdminGigApprove('radiohead-barcelona-2026-06-12')).resolves.toBeUndefined();
-    expect(mockApiRequest).toHaveBeenCalledWith(
-      'v1/admin/gig/radiohead-barcelona-2026-06-12/approve',
-      'POST',
-    );
-  });
-});
-
-describe('postAdminGigReject', () => {
-  beforeEach(() => {
-    mockApiRequest.mockReset();
-  });
-
-  it('should post reject request when response succeeds', async () => {
-    mockApiRequest.mockResolvedValue(undefined);
-
-    await expect(postAdminGigReject('radiohead-barcelona-2026-06-12')).resolves.toBeUndefined();
-    expect(mockApiRequest).toHaveBeenCalledWith(
-      'v1/admin/gig/radiohead-barcelona-2026-06-12/reject',
-      'POST',
-    );
-  });
-});
-
 describe('postAdminGigPost', () => {
   beforeEach(() => {
     mockApiRequest.mockReset();
@@ -615,10 +1004,41 @@ describe('postAdminGigPost', () => {
   it('should post publish request when response succeeds', async () => {
     mockApiRequest.mockResolvedValue(undefined);
 
-    await expect(postAdminGigPost('radiohead-barcelona-2026-06-12')).resolves.toBeUndefined();
+    await expect(postAdminGigPost('radiohead-barcelona-2026-06-12', 4)).resolves.toBeUndefined();
     expect(mockApiRequest).toHaveBeenCalledWith(
-      'v1/admin/gig/radiohead-barcelona-2026-06-12/post',
+      'v1/admin/gigs/radiohead-barcelona-2026-06-12/post',
       'POST',
+      { expectedVersion: 4 },
     );
+  });
+});
+
+describe('patchAdminGigVisibility', () => {
+  it('should send a conditional visibility update', async () => {
+    mockApiRequest.mockResolvedValue({ publicId: 'gig-id', version: 5, isVisible: false });
+
+    const result = await patchAdminGigVisibility({
+      publicId: 'gig-id',
+      expectedVersion: 4,
+      isVisible: false,
+    });
+
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gigs/gig-id/visibility', 'PATCH', {
+      expectedVersion: 4,
+      isVisible: false,
+    });
+    expect(result).toEqual({ publicId: 'gig-id', version: 5, isVisible: false });
+  });
+
+  it('should reject an invalid visibility response', async () => {
+    mockApiRequest.mockResolvedValue({ publicId: 'gig-id', isVisible: false });
+
+    const result = patchAdminGigVisibility({
+      publicId: 'gig-id',
+      expectedVersion: 4,
+      isVisible: false,
+    });
+
+    await expect(result).rejects.toThrow('Invalid admin Gig visibility response');
   });
 });

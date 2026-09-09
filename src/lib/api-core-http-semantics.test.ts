@@ -66,7 +66,7 @@ describe('fetchApiJson HTTP semantics', () => {
 
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig', 'GET', undefined, PUBLIC_REQUEST_OPTIONS);
+    const action = fetchApiJson('v1/gigs', 'GET', undefined, PUBLIC_REQUEST_OPTIONS);
 
     await expect(action).rejects.toMatchObject({
       name: 'ApiError',
@@ -88,7 +88,7 @@ describe('fetchApiJson HTTP semantics', () => {
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await expect(
-      fetchApiJson<void>('v1/admin/gig/demo/approve', 'POST', undefined, PUBLIC_REQUEST_OPTIONS),
+      fetchApiJson<void>('v1/admin/gigs/demo/post', 'POST', undefined, PUBLIC_REQUEST_OPTIONS),
     ).resolves.toBeUndefined();
   });
 
