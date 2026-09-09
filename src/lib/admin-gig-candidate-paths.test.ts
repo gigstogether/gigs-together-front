@@ -8,19 +8,19 @@ import {
 
 describe('admin gig candidate paths', () => {
   it('should expose the GigCandidate collection and create routes', () => {
-    expect(ADMIN_GIG_CANDIDATES_ROUTE).toBe('/admin/gigs/candidates');
-    expect(ADMIN_GIG_CANDIDATE_NEW_ROUTE).toBe('/admin/gigs/candidates/new');
+    expect(ADMIN_GIG_CANDIDATES_ROUTE).toBe('/admin/gig-candidates');
+    expect(ADMIN_GIG_CANDIDATE_NEW_ROUTE).toBe('/admin/gig-candidates/new');
   });
 
   it('should build an encoded GigCandidate detail route', () => {
     expect(buildAdminGigCandidateRoute('gigCandidate/id')).toBe(
-      '/admin/gigs/candidates/gigCandidate%2Fid',
+      '/admin/gig-candidates/gigCandidate%2Fid',
     );
   });
 
   it('should build an encoded GigCandidate edit route', () => {
     expect(buildAdminGigCandidateEditRoute('gigCandidate/id')).toBe(
-      '/admin/gigs/candidates/gigCandidate%2Fid/edit',
+      '/admin/gig-candidates/gigCandidate%2Fid/edit',
     );
   });
 

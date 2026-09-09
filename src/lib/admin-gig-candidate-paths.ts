@@ -1,11 +1,11 @@
 import type { Route } from 'next';
 
-export const ADMIN_GIG_CANDIDATES_BASE_PATH = '/admin/gigs/candidates';
-export const ADMIN_GIG_CANDIDATES_ROUTE: Route<'/admin/gigs/candidates'> =
+export const ADMIN_GIG_CANDIDATES_BASE_PATH = '/admin/gig-candidates';
+export const ADMIN_GIG_CANDIDATES_ROUTE: Route<'/admin/gig-candidates'> =
   ADMIN_GIG_CANDIDATES_BASE_PATH;
 
-export type AdminGigCandidatePath = `/admin/gigs/candidates/${string}`;
-export type AdminGigCandidateEditPath = `/admin/gigs/candidates/${string}/edit`;
+export type AdminGigCandidatePath = `/admin/gig-candidates/${string}`;
+export type AdminGigCandidateEditPath = `/admin/gig-candidates/${string}/edit`;
 
 export function buildAdminGigCandidatePath(gigCandidateId: string): AdminGigCandidatePath {
   const id = gigCandidateId.trim();
@@ -29,5 +29,5 @@ export function buildAdminGigCandidateEditRoute(gigCandidateId: string): Route {
   return buildAdminGigCandidateEditPath(gigCandidateId) as Route;
 }
 
-export const ADMIN_GIG_CANDIDATE_NEW_ROUTE: Route<'/admin/gigs/candidates/new'> =
-  '/admin/gigs/candidates/new';
+export const ADMIN_GIG_CANDIDATE_NEW_ROUTE: Route<'/admin/gig-candidates/new'> =
+  '/admin/gig-candidates/new';

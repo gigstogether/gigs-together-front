@@ -4,7 +4,7 @@ import {
   AdminGigCandidatesSortBy,
   AdminGigCandidatesSortOrder,
   GigCandidateStatusFilter,
-} from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
+} from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 
 describe('adminKeys', () => {
   it('should build root admin key', () => {

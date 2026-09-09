@@ -4,7 +4,7 @@ import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/_lib/typ
 import type { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
 import { apiClientRequest } from '@/lib/api-session-client';
 import { isRecord } from '@/lib/is-record';
-import { GigCandidateStatusAPI } from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
+import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import type {
   AdminGigCandidate,
   AdminGigCandidateDraft,
@@ -12,7 +12,7 @@ import type {
   AdminGigCandidatesSortBy,
   AdminGigCandidatesSortOrder,
   GigCandidateStatusFilter,
-} from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
+} from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { gigDateToYMD } from '@/lib/feed/feed.mapper';
 
 const V1_ADMIN_API_PREFIX = 'v1/admin/';

@@ -3,7 +3,7 @@ import type {
   AdminGigCandidatesSortBy,
   AdminGigCandidatesSortOrder,
   GigCandidateStatusFilter,
-} from '@/app/admin/gigs/candidates/_lib/admin-gig-candidate';
+} from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 
 /** Sentinel for "no filter" in admin translation dropdowns; not a valid domain value. */
 export const ADMIN_FILTER_ALL = '__all__' as const;
