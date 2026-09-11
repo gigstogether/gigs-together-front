@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { getTelegramStartParam } from '@/lib/telegram/telegram-webapp';
 import { resolveSuggestLaunchPath } from '@/app/(default)/suggest/_lib/suggest-launch';
 
 export default function SuggestLaunchClient() {
@@ -16,8 +15,7 @@ export default function SuggestLaunchClient() {
       return;
     }
 
-    const startParam = getTelegramStartParam().trim() || undefined;
-    const nextPath = resolveSuggestLaunchPath(authState?.isAdmin === true, startParam);
+    const nextPath = resolveSuggestLaunchPath(authState?.isAdmin === true);
     router.replace(nextPath);
   }, [authState?.isAdmin, isLoadingAuthState, router]);
 
