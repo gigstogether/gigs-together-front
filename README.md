@@ -83,7 +83,7 @@ The frontend and backend mirror this launch-action enum contract:
 | `TelegramMiniAppStartAction.EditGig`          | `editGig-<publicId>`                | `/admin/gigs/:publicId/edit`                 |
 | `TelegramMiniAppStartAction.EditGigCandidate` | `editGigCandidate-<gigCandidateId>` | `/admin/gig-candidates/:gigCandidateId/edit` |
 
-The action separator is a hyphen. The `/admin/telegram` parser removes the exact known action prefix and validates the remaining identifier, so hyphens inside a Gig `publicId` are preserved. Missing, malformed, and unknown actions send the administrator to the new GigCandidate form. `/suggest/launch` does not process edit actions: it sends an administrator to the new GigCandidate form and a non-admin user to `/suggest`.
+The action separator is a hyphen. The `/admin/telegram` parser removes the exact known action prefix and validates the remaining identifier, so hyphens inside a Gig `publicId` are preserved. Missing, malformed, untyped, and unknown actions show an explicit destructive notification and then return the administrator to `/admin`. `/suggest/launch` does not process edit actions: it sends an administrator to the new GigCandidate form and a non-admin user to `/suggest`.
 
 ## Running the app locally
 

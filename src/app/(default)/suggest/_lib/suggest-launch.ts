@@ -16,14 +16,28 @@ export enum TelegramMiniAppStartAction {
   EditGigCandidate = 'editGigCandidate',
 }
 
+export interface ResolvedAdminTelegramLaunch {
+  kind: 'resolved';
+  route: Route;
+}
+
+export interface FailedAdminTelegramLaunch {
+  kind: 'failed';
+  reason: 'missingAction' | 'invalidAction';
+}
+
+export type AdminTelegramLaunchResolution = ResolvedAdminTelegramLaunch | FailedAdminTelegramLaunch;
+
 function getTelegramMiniAppStartActionPrefix(action: TelegramMiniAppStartAction): string {
   return `${action}${TELEGRAM_MINI_APP_START_ACTION_SEPARATOR}`;
 }
 
-export function resolveAdminGigLaunchPath(startParam: string | undefined): Route {
+export function resolveAdminTelegramLaunch(
+  startParam: string | undefined,
+): AdminTelegramLaunchResolution {
   const trimmedStartParam = startParam?.trim();
   if (!trimmedStartParam) {
-    return ADMIN_GIG_CANDIDATE_NEW_ROUTE;
+    return { kind: 'failed', reason: 'missingAction' };
   }
 
   const editGigCandidatePrefix = getTelegramMiniAppStartActionPrefix(
@@ -32,23 +46,26 @@ export function resolveAdminGigLaunchPath(startParam: string | undefined): Route
   if (trimmedStartParam.startsWith(editGigCandidatePrefix)) {
     const gigCandidateId = trimmedStartParam.slice(editGigCandidatePrefix.length);
     if (GIG_CANDIDATE_ID_PATTERN.test(gigCandidateId)) {
-      return buildAdminGigCandidateEditRoute(gigCandidateId);
+      return {
+        kind: 'resolved',
+        route: buildAdminGigCandidateEditRoute(gigCandidateId),
+      };
     }
 
-    return ADMIN_GIG_CANDIDATE_NEW_ROUTE;
+    return { kind: 'failed', reason: 'invalidAction' };
   }
 
   const editGigPrefix = getTelegramMiniAppStartActionPrefix(TelegramMiniAppStartAction.EditGig);
   if (trimmedStartParam.startsWith(editGigPrefix)) {
     const publicId = trimmedStartParam.slice(editGigPrefix.length);
     if (GIG_FORM_START_PARAM_PATTERN.test(publicId)) {
-      return buildAdminGigEditRoute(publicId);
+      return { kind: 'resolved', route: buildAdminGigEditRoute(publicId) };
     }
 
-    return ADMIN_GIG_CANDIDATE_NEW_ROUTE;
+    return { kind: 'failed', reason: 'invalidAction' };
   }
 
-  return ADMIN_GIG_CANDIDATE_NEW_ROUTE;
+  return { kind: 'failed', reason: 'invalidAction' };
 }
 
 export function resolveSuggestLaunchPath(isAdmin: boolean): Route {
