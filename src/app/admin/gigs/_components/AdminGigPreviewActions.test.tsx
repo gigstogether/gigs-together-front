@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
+import { buildAdminGigEditRoute } from '@/lib/admin-gig-paths';
+
 import AdminGigPreviewActions from './AdminGigPreviewActions';
 import type { AdminGigDetail } from '../_lib/types';
 
@@ -40,7 +42,7 @@ describe('AdminGigPreviewActions', () => {
     const view = render(
       <AdminGigPreviewActions
         gig={gig}
-        editHref="/admin/gigs/gig-2026-09-17/edit"
+        editHref={buildAdminGigEditRoute(gig.publicId)}
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: /post/i }));
