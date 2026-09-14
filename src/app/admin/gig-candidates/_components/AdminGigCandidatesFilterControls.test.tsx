@@ -6,7 +6,7 @@ import AdminGigCandidatesFilterControls from '@/app/admin/gig-candidates/_compon
 import { GigCandidateStatusFilter } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 
 describe('AdminGigCandidatesFilterControls', () => {
-  it('should render status dots with text only for the first two statuses', () => {
+  it('should show every short label on mobile and retain compact desktop filters', () => {
     render(
       <AdminGigCandidatesFilterControls
         filter={GigCandidateStatusFilter.New}
@@ -16,15 +16,25 @@ describe('AdminGigCandidatesFilterControls', () => {
     );
 
     const newButton = screen.getByRole('button', { name: 'New' });
-    const reviewingButton = screen.getByRole('button', { name: 'Rev' });
+    const reviewingButton = screen.getByRole('button', { name: 'Reviewing' });
     const approvedButton = screen.getByRole('button', { name: 'Approved' });
     const rejectedButton = screen.getByRole('button', { name: 'Rejected' });
     expect(newButton).toHaveTextContent('New');
     expect(reviewingButton).toHaveTextContent('Rev');
+    expect(approvedButton).toHaveTextContent('App');
+    expect(rejectedButton).toHaveTextContent('Rej');
+    expect(screen.getByText('App')).toHaveClass('sm:hidden');
+    expect(screen.getByText('Rej')).toHaveClass('sm:hidden');
+    expect(screen.getByText('New')).not.toHaveClass('sm:hidden');
+    expect(screen.getByText('Rev')).not.toHaveClass('sm:hidden');
+    expect(newButton).toHaveClass('sm:flex-1', 'sm:px-1');
+    expect(reviewingButton).toHaveClass('sm:flex-1', 'sm:px-1');
+    expect(approvedButton).toHaveClass('sm:w-8', 'sm:flex-none', 'sm:px-0');
+    expect(rejectedButton).toHaveClass('sm:w-8', 'sm:flex-none', 'sm:px-0');
     expect(newButton).toHaveAttribute('title', 'New');
     expect(reviewingButton).toHaveAttribute('title', 'Reviewing');
-    expect(approvedButton).not.toHaveTextContent('Approved');
-    expect(rejectedButton).not.toHaveTextContent('Rejected');
+    expect(approvedButton).toHaveAttribute('title', 'Approved');
+    expect(rejectedButton).toHaveAttribute('title', 'Rejected');
     expect(newButton.querySelector('span')).toHaveClass('bg-slate-500');
     expect(reviewingButton.querySelector('span')).toHaveClass('bg-yellow-500');
     expect(approvedButton.querySelector('span')).toHaveClass('bg-emerald-500');

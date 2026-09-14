@@ -12,9 +12,16 @@ export const GIG_CANDIDATE_STATUS_FILTERS: readonly GigCandidateStatusFilter[] =
 
 export const GIG_CANDIDATE_STATUS_LABELS: Record<GigCandidateStatusFilter, string> = {
   [GigCandidateStatusFilter.New]: 'New',
-  [GigCandidateStatusFilter.Reviewing]: 'Rev',
+  [GigCandidateStatusFilter.Reviewing]: 'Reviewing',
   [GigCandidateStatusFilter.Approved]: 'Approved',
   [GigCandidateStatusFilter.Rejected]: 'Rejected',
+};
+
+export const GIG_CANDIDATE_STATUS_SHORT_LABELS: Record<GigCandidateStatusFilter, string> = {
+  [GigCandidateStatusFilter.New]: 'New',
+  [GigCandidateStatusFilter.Reviewing]: 'Rev',
+  [GigCandidateStatusFilter.Approved]: 'App',
+  [GigCandidateStatusFilter.Rejected]: 'Rej',
 };
 
 export const GIG_CANDIDATE_EMPTY_MESSAGES: Record<GigCandidateStatusFilter, string> = {

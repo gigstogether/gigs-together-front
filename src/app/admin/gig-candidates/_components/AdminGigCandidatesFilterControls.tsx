@@ -4,6 +4,7 @@ import {
   GIG_CANDIDATE_STATUS_FILTERS,
   GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES,
   GIG_CANDIDATE_STATUS_LABELS,
+  GIG_CANDIDATE_STATUS_SHORT_LABELS,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-status';
 import {
   GigCandidateStatusAPI,
@@ -38,8 +39,9 @@ export default function AdminGigCandidatesFilterControls(
         <div className="flex min-w-0 flex-1">
           {GIG_CANDIDATE_STATUS_FILTERS.map((gigCandidateStatus, index) => {
             const label = GIG_CANDIDATE_STATUS_LABELS[gigCandidateStatus];
+            const shortLabel = GIG_CANDIDATE_STATUS_SHORT_LABELS[gigCandidateStatus];
             const isActive = props.filter === gigCandidateStatus;
-            const hasText =
+            const hasDesktopLabel =
               gigCandidateStatus === GigCandidateStatusFilter.New ||
               gigCandidateStatus === GigCandidateStatusFilter.Reviewing;
             const statusDotClassName =
@@ -55,13 +57,11 @@ export default function AdminGigCandidatesFilterControls(
                 size="sm"
                 aria-label={label}
                 aria-pressed={isActive}
-                title={
-                  gigCandidateStatus === GigCandidateStatusFilter.Reviewing ? 'Reviewing' : label
-                }
+                title={label}
                 onClick={() => props.onFilterChange(gigCandidateStatus)}
                 className={cn(
-                  'h-8 min-w-0 rounded-none text-xs font-normal focus-visible:z-10',
-                  hasText ? 'flex-1 px-1' : 'w-8 shrink-0 px-0',
+                  'h-8 min-w-0 flex-1 rounded-none px-1 text-xs font-normal focus-visible:z-10',
+                  hasDesktopLabel ? 'sm:flex-1 sm:px-1' : 'sm:w-8 sm:flex-none sm:px-0',
                   index === 0 && 'rounded-l-md',
                   index > 0 && '-ml-px',
                   index === GIG_CANDIDATE_STATUS_FILTERS.length - 1 && 'rounded-r-md',
@@ -72,7 +72,7 @@ export default function AdminGigCandidatesFilterControls(
                   aria-hidden
                   className={cn('inline-block h-1.5 w-1.5 rounded-full', statusDotClassName)}
                 />
-                {hasText ? label : null}
+                <span className={cn(!hasDesktopLabel && 'sm:hidden')}>{shortLabel}</span>
               </Button>
             );
           })}
