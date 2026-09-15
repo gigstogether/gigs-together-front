@@ -1,37 +1,19 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { AlertTriangle, Calendar, ExternalLink, Rss, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import { LocationIcon } from '@/components/ui/location-icon';
 import {
   buildAdminGigPublicHref,
   formatAdminGigEventDate,
-  formatAdminGigSuggestedBy,
+  formatAdminGigSource,
 } from '@/app/admin/gigs/_lib/admin-gig-format';
-import { mapGigStatusFromAPI } from '@/app/admin/gigs/_lib/admin-gig-status';
 import type { AdminGigDetail, AdminGigFormData } from '@/app/admin/gigs/_lib/types';
-import { GigStatus } from '@/app/admin/gigs/_lib/types';
-import { cn } from '@/lib/utils';
 import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreviewActions';
-import AdminGigPreviewPoster from '@/app/admin/gigs/_components/AdminGigPreviewPoster';
+import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
+import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
 import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPreviewTitleRow';
 import { buildAdminGigEditRoute, buildAdminGigPublicIdPath } from '@/lib/admin-gig-paths';
-
-interface MetaRowProps {
-  readonly icon: ReactNode;
-  readonly children: ReactNode;
-  readonly className?: string;
-}
-
-function MetaRow(props: MetaRowProps) {
-  return (
-    <div className={cn('flex min-w-0 items-start gap-2 text-sm', props.className)}>
-      <span className="mt-0.5 shrink-0 text-muted-foreground">{props.icon}</span>
-      <span className="min-w-0 flex-1 leading-snug">{props.children}</span>
-    </div>
-  );
-}
 
 interface AdminGigCardProps {
   readonly gig: AdminGigDetail | AdminGigFormData;
@@ -40,15 +22,11 @@ interface AdminGigCardProps {
 export default function AdminGigCard(props: AdminGigCardProps) {
   const { gig } = props;
 
-  const status = mapGigStatusFromAPI(gig.status);
-
   const editHref = buildAdminGigEditRoute(gig.publicId);
   const shareHref = buildAdminGigPublicIdPath(gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
   const feedHref = buildAdminGigPublicHref(gig);
-  const hasPublicLinks =
-    (status === GigStatus.Approved || status === GigStatus.Published) &&
-    !!(feedHref || gig.publishPostUrl);
+  const hasPublicLinks = gig.isVisible && !!(feedHref || gig.publishPostUrl);
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -57,10 +35,10 @@ export default function AdminGigCard(props: AdminGigCardProps) {
           <AdminGigPreviewTitleRow
             title={gig.title}
             sharePath={shareHref}
-            status={status}
+            isVisible={gig.isVisible}
           />
 
-          <MetaRow
+          <AdminPreviewMetaRow
             icon={
               <Calendar
                 className="h-4 w-4"
@@ -69,8 +47,8 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             }
           >
             {dateLabel}
-          </MetaRow>
-          <MetaRow
+          </AdminPreviewMetaRow>
+          <AdminPreviewMetaRow
             icon={
               <LocationIcon
                 className="h-4 w-4"
@@ -79,9 +57,9 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             }
           >
             {gig.venue}
-          </MetaRow>
+          </AdminPreviewMetaRow>
           {gig.ticketsUrl ? (
-            <MetaRow
+            <AdminPreviewMetaRow
               icon={
                 <Ticket
                   className="h-4 w-4"
@@ -97,7 +75,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
               >
                 {gig.ticketsUrl}
               </a>
-            </MetaRow>
+            </AdminPreviewMetaRow>
           ) : null}
 
           <div className="border-t border-border pt-2 pb-1 space-y-2">
@@ -140,7 +118,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             )}
 
             <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-              <p>{formatAdminGigSuggestedBy(gig.suggestedBy)}</p>
+              <p>{formatAdminGigSource(gig.source)}</p>
 
               {!!gig.moderationPostUrl && (
                 <a
@@ -175,7 +153,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
         </div>
 
         <div className="p-2 pt-0">
-          <AdminGigPreviewPoster
+          <AdminPreviewPoster
             posterUrl={gig.posterUrl}
             title={gig.title}
           />

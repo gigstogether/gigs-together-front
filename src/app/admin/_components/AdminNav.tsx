@@ -17,9 +17,16 @@ function isNavItemActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function getActiveNavHref(pathname: string): string | undefined {
+  return adminNavItems
+    .filter((item) => isNavItemActive(pathname, item.href))
+    .sort((left, right) => right.href.length - left.href.length)[0]?.href;
+}
+
 export default function AdminNav(props: AdminNavProps) {
   const { onNavigate } = props;
   const pathname = usePathname() ?? '/admin';
+  const activeHref = getActiveNavHref(pathname);
 
   return (
     <nav
@@ -27,7 +34,7 @@ export default function AdminNav(props: AdminNavProps) {
       aria-label="Admin navigation"
     >
       {adminNavItems.map((item) => {
-        const isActive = isNavItemActive(pathname, item.href);
+        const isActive = item.href === activeHref;
         return (
           <Link
             key={item.href}

@@ -4,8 +4,8 @@ import {
   buildAdminGigPublicHref,
   formatAdminGigEventDate,
   formatAdminGigListMeta,
+  formatAdminGigSource,
 } from '@/app/admin/gigs/_lib/admin-gig-format';
-import { GigStatusAPI } from '@/app/admin/gigs/_lib/types';
 import type { AdminGigQueueItem } from '@/app/admin/gigs/_lib/types';
 
 describe('formatAdminGigEventDate', () => {
@@ -36,14 +36,59 @@ describe('formatAdminGigListMeta', () => {
     const gig: AdminGigQueueItem = {
       publicId: 'a',
       title: 'T',
-      status: GigStatusAPI.Pending,
+      isVisible: false,
+      version: 3,
+      source: {
+        type: 'user',
+        userId: '123',
+        isCurrentlyAdmin: false,
+        origin: { type: 'admin' },
+      },
       date: '2026-06-12',
       city: 'barcelona',
       country: 'ES',
       venue: 'V',
-      suggestedBy: { userId: '123', name: 'A' },
     };
     expect(formatAdminGigListMeta(gig)).toContain('2026');
     expect(formatAdminGigListMeta(gig)).not.toContain('barcelona');
+  });
+});
+
+describe('formatAdminGigSource', () => {
+  it('should show displayName for an admin submitter', () => {
+    expect(
+      formatAdminGigSource({
+        type: 'user',
+        userId: '123',
+        displayName: 'Test Admin',
+        isCurrentlyAdmin: true,
+        telegramUsername: 'test_admin',
+        origin: { type: 'messenger' },
+      }),
+    ).toBe('Source: user · Test Admin (currently admin) · TG: @test_admin');
+  });
+
+  it('should show the user name and Telegram username without an admin marker', () => {
+    expect(
+      formatAdminGigSource({
+        type: 'user',
+        userId: '123',
+        displayName: 'Test User',
+        isCurrentlyAdmin: false,
+        telegramUsername: 'test_user',
+        origin: { type: 'form' },
+      }),
+    ).toBe('Source: user · Test User · TG: @test_user');
+  });
+
+  it('should omit the user name segment when displayName is unavailable', () => {
+    expect(
+      formatAdminGigSource({
+        type: 'user',
+        userId: '123',
+        isCurrentlyAdmin: false,
+        origin: { type: 'messenger' },
+      }),
+    ).toBe('Source: user');
   });
 });

@@ -1,6 +1,10 @@
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
-import { GigStatusFilter } from '@/app/admin/gigs/_lib/types';
+import {
+  AdminGigCandidatesSortBy,
+  AdminGigCandidatesSortOrder,
+  GigCandidateStatusFilter,
+} from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 
 describe('adminKeys', () => {
   it('should build root admin key', () => {
@@ -32,13 +36,10 @@ describe('adminKeys', () => {
     ]);
   });
 
-  it('should build gigs key with filter status and sort options', () => {
-    expect(
-      adminKeys.gigs(GigStatusFilter.Pending, AdminGigsSortBy.CreatedAt, AdminGigsSortOrder.Desc),
-    ).toEqual([
+  it('should build gigs key with sort options', () => {
+    expect(adminKeys.gigs(AdminGigsSortBy.CreatedAt, AdminGigsSortOrder.Desc)).toEqual([
       'admin',
       'gigs',
-      GigStatusFilter.Pending,
       AdminGigsSortBy.CreatedAt,
       AdminGigsSortOrder.Desc,
     ]);
@@ -46,5 +47,33 @@ describe('adminKeys', () => {
 
   it('should build gigs root key for partial invalidation', () => {
     expect(adminKeys.gigsRoot()).toEqual(['admin', 'gigs']);
+  });
+
+  it('should build gig candidates list key', () => {
+    expect(
+      adminKeys.gigCandidates(
+        GigCandidateStatusFilter.New,
+        AdminGigCandidatesSortBy.CreatedAt,
+        AdminGigCandidatesSortOrder.Desc,
+      ),
+    ).toEqual([
+      'admin',
+      'gigCandidates',
+      GigCandidateStatusFilter.New,
+      AdminGigCandidatesSortBy.CreatedAt,
+      AdminGigCandidatesSortOrder.Desc,
+    ]);
+  });
+
+  it('should build GigCandidate root key for partial invalidation', () => {
+    expect(adminKeys.gigCandidatesRoot()).toEqual(['admin', 'gigCandidates']);
+  });
+
+  it('should trim GigCandidate id in detail key', () => {
+    expect(adminKeys.gigCandidateById(' gigCandidate-42 ')).toEqual([
+      'admin',
+      'gigCandidate',
+      'gigCandidate-42',
+    ]);
   });
 });

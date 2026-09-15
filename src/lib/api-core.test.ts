@@ -209,7 +209,7 @@ describe('fetchApiJson', () => {
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await fetchApiJson<{ ok: boolean }>(
-      'v1/gig/lookup',
+      'v1/admin/gig-candidates/lookup',
       'POST',
       { name: 'test' },
       INCLUDE_CREDENTIALS,
@@ -226,7 +226,7 @@ describe('fetchApiJson', () => {
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await fetchApiJson<{ ok: boolean }>(
-      'v1/gig/lookup',
+      'v1/admin/gig-candidates/lookup',
       'POST',
       { name: 'test' },
       {
@@ -249,7 +249,12 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/gig/lookup', 'POST', { name: 'x' }, INCLUDE_CREDENTIALS);
+    const action = fetchApiJson(
+      'v1/admin/gig-candidates/lookup',
+      'POST',
+      { title: 'x', location: 'y' },
+      INCLUDE_CREDENTIALS,
+    );
 
     await expect(action).rejects.toThrow('Something went wrong');
   });

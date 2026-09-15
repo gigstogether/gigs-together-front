@@ -1,4 +1,4 @@
-import { dateToYMD } from '@/app/admin/gigs/_lib/gig-form.shared';
+import { dateToYMD, gigFormSchema } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { toLocalYMD } from '@/lib/utils';
 
 describe('dateToYMD', () => {
@@ -21,5 +21,25 @@ describe('dateToYMD', () => {
 
   it('should return undefined when date is empty', () => {
     expect(dateToYMD('   ')).toBeUndefined();
+  });
+});
+
+describe('gigFormSchema', () => {
+  const validGig = {
+    title: 'Band',
+    date: '2026-04-21',
+    endDate: '',
+    city: 'Barcelona',
+    country: 'ES',
+    venue: 'Venue',
+    ticketsUrl: 'https://tickets.example/gig',
+  };
+
+  it('should accept a one-character title', () => {
+    expect(gigFormSchema.parse({ ...validGig, title: 'B' }).title).toBe('B');
+  });
+
+  it('should reject a title longer than 300 characters', () => {
+    expect(gigFormSchema.safeParse({ ...validGig, title: 'A'.repeat(301) }).success).toBe(false);
   });
 });

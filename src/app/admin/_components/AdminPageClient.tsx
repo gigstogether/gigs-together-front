@@ -8,8 +8,6 @@ import AdminPageHeader from '@/app/admin/_components/AdminPageHeader';
 import { adminNavItems } from '@/app/admin/_lib/admin-nav-config';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import { ADMIN_GIGS_BASE_PATH } from '@/lib/admin-gig-paths';
-import { ADMIN_GIGS_QUERY_STATUS } from '@/app/admin/gigs/_lib/admin-gigs-query';
-import { GigStatusFilter } from '@/app/admin/gigs/_lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { fetchAdminDashboard } from '@/app/admin/_lib/admin-api';
 
@@ -27,32 +25,22 @@ export default function AdminPageClient() {
       <AdminPageHeader title="Dashboard" />
       <AdminDashboardActions />
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
-        <Link
-          href={{
-            pathname: ADMIN_GIGS_BASE_PATH,
-            query: { [ADMIN_GIGS_QUERY_STATUS]: GigStatusFilter.Pending },
-          }}
-        >
+        <Link href={ADMIN_GIGS_BASE_PATH}>
           <Card className="border shadow-sm">
             <CardHeader className="min-h-24 justify-center">
-              <CardDescription>Pending gigs</CardDescription>
+              <CardDescription>All gigs</CardDescription>
               <CardTitle className="text-3xl tabular-nums">
-                {dashboardQuery.isLoading ? '—' : (summary?.pendingGigsCount ?? 0)}
+                {dashboardQuery.isLoading ? '—' : (summary?.gigsCount ?? 0)}
               </CardTitle>
             </CardHeader>
           </Card>
         </Link>
-        <Link
-          href={{
-            pathname: ADMIN_GIGS_BASE_PATH,
-            query: { [ADMIN_GIGS_QUERY_STATUS]: GigStatusFilter.Approved },
-          }}
-        >
+        <Link href={ADMIN_GIGS_BASE_PATH}>
           <Card className="border shadow-sm">
             <CardHeader className="min-h-24 justify-center">
-              <CardDescription>Approved gigs</CardDescription>
+              <CardDescription>Visible gigs</CardDescription>
               <CardTitle className="text-3xl tabular-nums">
-                {dashboardQuery.isLoading ? '—' : (summary?.publishedGigsCount ?? 0)}
+                {dashboardQuery.isLoading ? '—' : (summary?.visibleGigsCount ?? 0)}
               </CardTitle>
             </CardHeader>
           </Card>

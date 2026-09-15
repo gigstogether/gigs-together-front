@@ -1,152 +1,75 @@
-import { apiClientRequest } from '@/lib/api-session-client';
-import { lookupGig } from '@/app/admin/gigs/_lib/gig-form-api';
+// @vitest-environment jsdom
+
+import { updateGig } from '@/app/admin/gigs/_lib/gig-form-api';
+
+const apiClientRequestMock = vi.fn();
 
 vi.mock('@/lib/api-session-client', () => ({
-  apiClientRequest: vi.fn(),
+  apiClientRequest: (...args: unknown[]) => apiClientRequestMock(...args),
 }));
 
-describe('lookupGig', () => {
+describe('updateGig', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    apiClientRequestMock.mockReset();
+    apiClientRequestMock.mockResolvedValue({ publicId: 'radiohead-2026-06-12' });
   });
 
-  it('should call lookup endpoint with trimmed name and location when request is valid', async () => {
-    vi.mocked(apiClientRequest).mockResolvedValueOnce({
-      gig: null,
-    });
-
-    await lookupGig({
-      name: '  Arctic Monkeys  ',
-      location: '  Barcelona, ES  ',
-    });
-
-    expect(vi.mocked(apiClientRequest)).toHaveBeenCalledWith(
-      'v1/gig/lookup',
-      'POST',
-      {
-        name: 'Arctic Monkeys',
-        location: 'Barcelona, ES',
+  it('should send expectedVersion with a JSON edit', async () => {
+    await updateGig({
+      publicId: 'radiohead-2026-06-12',
+      expectedVersion: 4,
+      gig: {
+        title: 'Radiohead',
+        date: '2026-06-12',
+        city: 'Barcelona',
+        country: 'ES',
+        venue: 'Palau Sant Jordi',
+        ticketsUrl: 'https://tickets.example/radiohead',
       },
-      { signal: undefined },
+      poster: { mode: 'url', file: null, url: '' },
+    });
+
+    expect(apiClientRequestMock).toHaveBeenCalledWith(
+      'v1/admin/gigs/radiohead-2026-06-12',
+      'PATCH',
+      {
+        gig: {
+          title: 'Radiohead',
+          date: '2026-06-12',
+          endDate: undefined,
+          city: 'Barcelona',
+          country: 'ES',
+          venue: 'Palau Sant Jordi',
+          ticketsUrl: 'https://tickets.example/radiohead',
+        },
+        expectedVersion: 4,
+      },
     );
   });
 
-  it('should return normalized lookup dates when API returns a matching gig', async () => {
-    vi.mocked(apiClientRequest).mockResolvedValueOnce({
+  it('should send expectedVersion with a multipart edit', async () => {
+    const posterFile = new File(['poster'], 'poster.png', { type: 'image/png' });
+
+    await updateGig({
+      publicId: 'radiohead-2026-06-12',
+      expectedVersion: 7,
       gig: {
-        title: 'Arctic Monkeys',
-        date: '2026-07-01T20:00:00.000Z',
-        endDate: '2026-07-02T22:00:00.000Z',
+        title: 'Radiohead',
+        date: '2026-06-12',
         city: 'Barcelona',
-        country: 'es',
-        venue: 'Razzmatazz',
-        ticketsUrl: 'https://tickets.example/gig',
-        posterUrl: 'https://images.example/poster.png',
+        country: 'ES',
+        venue: 'Palau Sant Jordi',
+        ticketsUrl: 'https://tickets.example/radiohead',
       },
+      poster: { mode: 'upload', file: posterFile, url: '' },
     });
 
-    const result = await lookupGig({
-      name: 'Arctic Monkeys',
-      location: 'Barcelona, ES',
-    });
-
-    expect(result).toEqual({
-      title: 'Arctic Monkeys',
-      date: '2026-07-01',
-      endDate: '2026-07-02',
-      city: 'Barcelona',
-      country: 'es',
-      venue: 'Razzmatazz',
-      ticketsUrl: 'https://tickets.example/gig',
-      posterUrl: 'https://images.example/poster.png',
-    });
-  });
-
-  it('should return null when API reports no matching gig', async () => {
-    vi.mocked(apiClientRequest).mockResolvedValueOnce({
-      gig: null,
-    });
-
-    const result = await lookupGig({
-      name: 'Arctic Monkeys',
-      location: 'Barcelona, ES',
-    });
-
-    expect(result).toBeNull();
-  });
-
-  it('should throw when API returns a matching gig without date', async () => {
-    vi.mocked(apiClientRequest).mockResolvedValueOnce({
-      gig: {
-        title: 'Arctic Monkeys',
-      },
-    });
-
-    const action = lookupGig({
-      name: 'Arctic Monkeys',
-      location: 'Barcelona, ES',
-    });
-
-    await expect(action).rejects.toBeInstanceOf(Error);
-    await expect(action).rejects.toMatchObject({
-      message: 'Lookup did not return a date',
-    });
-  });
-
-  it('should throw when API returns an invalid lookup date', async () => {
-    vi.mocked(apiClientRequest).mockResolvedValueOnce({
-      gig: {
-        title: 'Arctic Monkeys',
-        date: 'not-a-date',
-      },
-    });
-
-    const action = lookupGig({
-      name: 'Arctic Monkeys',
-      location: 'Barcelona, ES',
-    });
-
-    await expect(action).rejects.toBeInstanceOf(Error);
-    await expect(action).rejects.toMatchObject({
-      message: 'Invalid API response: "gig.date" must be YYYY-MM-DD (or ISO)',
-    });
-  });
-
-  it('should throw when name is blank after trimming', async () => {
-    const action = lookupGig({
-      name: '   ',
-      location: 'Barcelona, ES',
-    });
-
-    await expect(action).rejects.toBeInstanceOf(Error);
-    await expect(action).rejects.toMatchObject({
-      message: 'Invalid lookup request: "name" is required',
-    });
-  });
-
-  it('should throw when location is blank after trimming', async () => {
-    const action = lookupGig({
-      name: 'Arctic Monkeys',
-      location: '   ',
-    });
-
-    await expect(action).rejects.toBeInstanceOf(Error);
-    await expect(action).rejects.toMatchObject({
-      message: 'Invalid lookup request: "location" is required',
-    });
-  });
-
-  it('should throw when API response omits gig field', async () => {
-    vi.mocked(apiClientRequest).mockResolvedValueOnce({});
-
-    const action = lookupGig({
-      name: 'Arctic Monkeys',
-      location: 'Barcelona, ES',
-    });
-
-    await expect(action).rejects.toBeInstanceOf(Error);
-    await expect(action).rejects.toMatchObject({
-      message: 'Invalid API response: "gig" is required (use null when there is no match)',
-    });
+    const body = apiClientRequestMock.mock.calls[0]?.[2];
+    expect(body).toBeInstanceOf(FormData);
+    if (!(body instanceof FormData)) {
+      throw new Error('Expected multipart Gig edit body');
+    }
+    expect(body.get('expectedVersion')).toBe('7');
+    expect(body.get('posterFile')).toBe(posterFile);
   });
 });

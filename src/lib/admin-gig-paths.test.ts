@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   ADMIN_GIGS_BASE_PATH,
-  ADMIN_GIGS_NEW_ROUTE,
   buildAdminGigEditRoute,
   buildAdminGigEditPath,
   buildAdminGigPublicIdPath,
@@ -47,11 +46,5 @@ describe('buildAdminGigsRoute', () => {
     expect(buildAdminGigsRoute(new URLSearchParams('status=pending'))).toBe(
       '/admin/gigs?status=pending',
     );
-  });
-});
-
-describe('ADMIN_GIGS_NEW_ROUTE', () => {
-  it('should expose the typed create route', () => {
-    expect(ADMIN_GIGS_NEW_ROUTE).toBe('/admin/gigs/new');
   });
 });

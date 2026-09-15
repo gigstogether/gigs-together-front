@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { FaBars, FaGithub, FaRegLightbulb, FaTelegramPlane } from 'react-icons/fa';
 import HeaderAuthActions from '@/components/header/HeaderAuthActions';
-import { ADMIN_GIGS_NEW_ROUTE } from '@/lib/admin-gig-paths';
+import { ADMIN_GIG_CANDIDATE_NEW_ROUTE } from '@/lib/admin-gig-candidate-paths';
 import { SUGGEST_ROUTE } from '@/lib/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { clientEnv } from '@/env/client-env';
@@ -61,7 +61,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const telegramOidcClientId = clientEnv.telegramOidcClientId;
   const isAdmin = authState?.isAdmin === true;
   const suggestGigHref = isAdmin
-    ? ADMIN_GIGS_NEW_ROUTE
+    ? ADMIN_GIG_CANDIDATE_NEW_ROUTE
     : clientEnv.isPublicSuggestGigEnabled
       ? SUGGEST_ROUTE
       : undefined;
