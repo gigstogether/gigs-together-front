@@ -34,10 +34,17 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
               htmlFor="suggest-gig-title"
             >
               Title:
+              <span
+                aria-hidden="true"
+                className="text-destructive"
+              >
+                *
+              </span>
             </FieldLabel>
             <Input
               {...field}
               id="suggest-gig-title"
+              required
               maxLength={GIG_TITLE_MAX_LENGTH}
               aria-labelledby="suggest-gig-title-label"
               aria-invalid={fieldState.invalid}
@@ -60,10 +67,17 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 htmlFor="suggest-gig-country"
               >
                 Country:
+                <span
+                  aria-hidden="true"
+                  className="text-destructive"
+                >
+                  *
+                </span>
               </FieldLabel>
               <select
                 {...field}
                 id="suggest-gig-country"
+                required
                 aria-labelledby="suggest-gig-country-label"
                 aria-invalid={fieldState.invalid}
                 value={field.value ?? defaultSuggestGigFormValues.country}
@@ -93,10 +107,17 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 htmlFor="suggest-gig-city"
               >
                 City:
+                <span
+                  aria-hidden="true"
+                  className="text-destructive"
+                >
+                  *
+                </span>
               </FieldLabel>
               <Input
                 {...field}
                 id="suggest-gig-city"
+                required
                 aria-labelledby="suggest-gig-city-label"
                 aria-invalid={fieldState.invalid}
                 placeholder="e.g. Barcelona"
@@ -122,10 +143,17 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 htmlFor="suggest-gig-date"
               >
                 Date:
+                <span
+                  aria-hidden="true"
+                  className="text-destructive"
+                >
+                  *
+                </span>
               </FieldLabel>
               <Input
                 {...field}
                 id="suggest-gig-date"
+                required
                 type="date"
                 aria-labelledby="suggest-gig-date-label"
                 aria-invalid={fieldState.invalid}
