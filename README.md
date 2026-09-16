@@ -47,25 +47,25 @@ You can also use `.env`, but `.env.local` is the safer default for machine-speci
 
 What they are used for:
 
-| Variable                                          | Required?                        | Purpose                                                                                                                                          |
-| ------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_APP_API_BASE_URL`                    | Required                         | Base URL for backend API requests. Without it, direct API calls throw at runtime.                                                                |
-| `NEXT_PUBLIC_APP_BASE_URL`                        | Optional\*                       | Public site base URL used for metadata, sitemap, and robots. \*Recommended; required at runtime for `/sitemap.xml` and `/robots.txt`.            |
-| `NEXT_PUBLIC_GITHUB_URL`                          | Optional                         | GitHub link rendered in the header.                                                                                                              |
-| `NEXT_PUBLIC_TELEGRAM_URL`                        | Optional                         | Telegram link used in the header and as a fallback on gig cards.                                                                                 |
-| `NEXT_PUBLIC_AUTH_ENABLED`                        | Optional                         | Shows/hides auth menu button. Parsed as boolean. Default: `false`.                                                                               |
-| `NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID`             | Required\*                       | Public Telegram Login Client ID from BotFather. Must be a positive integer. \*Required when `NEXT_PUBLIC_AUTH_ENABLED` is `true`.                |
-| `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` | Optional                         | localStorage key for the cached Telegram display profile. Default: `gt_tg_client_profile`.                                                       |
-| `NEXT_PUBLIC_FEED_PAGE_SIZE`                      | Optional                         | Feed page size. Must be a positive integer. Default is `10`.                                                                                     |
-| `NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS`   | Optional                         | Calendar dates query stale time in milliseconds. Must be a positive integer. Default is `600000` (10 minutes).                                   |
-| `NEXT_PUBLIC_SUGGEST_GIG_ENABLED`                 | Optional                         | Shows/hides the public "Suggest a gig" header action. Parsed as boolean. Default: `false`. Admins always see the button when signed in.          |
-| `SITE_PREVIEW_TITLE`                              | Optional                         | SEO/social preview title. Defaults to `Gigs Together!`.                                                                                          |
-| `SITE_PREVIEW_DESCRIPTION`                        | Optional                         | SEO/social preview description. Defaults to a short product blurb.                                                                               |
-| `BRAND_NAME`                                      | Optional                         | Brand name used in metadata. Defaults to `Gigs Together`.                                                                                        |
-| `ALLOWED_DEV_ORIGINS`                             | Optional                         | Comma-separated list of allowed development origins for Next.js `allowedDevOrigins` (for example `http://localhost:3000,http://127.0.0.1:3000`). |
-| `FEED_REVALIDATE_SECRET`                          | Required for revalidation routes | Secret checked by `/api/revalidate/feed`.                                                                                                        |
-| `TRANSLATIONS_REVALIDATE_SECRET`                  | Required for revalidation routes | Secret checked by `/api/revalidate/translations` (`x-translations-revalidate-secret`).                                                           |
-| `TRANSLATIONS_REVALIDATE_SECONDS`                 | Optional                         | Server-side cache revalidation period for translation fetching. Positive integer in seconds, default `3600`.                                     |
+| Variable                                          | Required?                        | Purpose                                                                                                                                             |
+| ------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_APP_API_BASE_URL`                    | Required                         | Base URL for backend API requests. Without it, direct API calls throw at runtime.                                                                   |
+| `NEXT_PUBLIC_APP_BASE_URL`                        | Optional\*                       | Public site base URL used for metadata, sitemap, and robots. \*Recommended; required at runtime for `/sitemap.xml` and `/robots.txt`.               |
+| `NEXT_PUBLIC_GITHUB_URL`                          | Optional                         | GitHub link rendered in the header.                                                                                                                 |
+| `NEXT_PUBLIC_TELEGRAM_URL`                        | Optional                         | Telegram link used in the header and as a fallback on gig cards.                                                                                    |
+| `NEXT_PUBLIC_AUTH_ENABLED`                        | Optional                         | Shows/hides auth menu button. Parsed as boolean. Default: `false`.                                                                                  |
+| `NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID`             | Required\*                       | Public Telegram Login Client ID from BotFather. Must be a positive integer. \*Required when `NEXT_PUBLIC_AUTH_ENABLED` is `true`.                   |
+| `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` | Optional                         | localStorage key for the cached Telegram display profile. Default: `gt_tg_client_profile`.                                                          |
+| `NEXT_PUBLIC_FEED_PAGE_SIZE`                      | Optional                         | Feed page size. Must be a positive integer. Default is `10`.                                                                                        |
+| `NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS`   | Optional                         | Calendar dates query stale time in milliseconds. Must be a positive integer. Default is `600000` (10 minutes).                                      |
+| `NEXT_PUBLIC_SUGGEST_GIG_ENABLED`                 | Optional                         | Shows/hides the public "Suggest a gig" header action. Parsed as boolean. Default: `false`. Admins always see the button when signed in.             |
+| `SITE_PREVIEW_TITLE`                              | Optional                         | SEO/social preview title. Defaults to `Gigs Together!`.                                                                                             |
+| `SITE_PREVIEW_DESCRIPTION`                        | Optional                         | SEO/social preview description. Defaults to a short product blurb.                                                                                  |
+| `BRAND_NAME`                                      | Optional                         | Brand name used in metadata. Defaults to `Gigs Together`.                                                                                           |
+| `ALLOWED_DEV_ORIGINS`                             | Optional                         | Comma-separated development hostnames allowed by Next.js `allowedDevOrigins`, without a protocol or port (for example `dev.example.com,localhost`). |
+| `FEED_REVALIDATE_SECRET`                          | Required for revalidation routes | Secret checked by `/api/revalidate/feed`.                                                                                                           |
+| `TRANSLATIONS_REVALIDATE_SECRET`                  | Required for revalidation routes | Secret checked by `/api/revalidate/translations` (`x-translations-revalidate-secret`).                                                              |
+| `TRANSLATIONS_REVALIDATE_SECONDS`                 | Optional                         | Server-side cache revalidation period for translation fetching. Positive integer in seconds, default `3600`.                                        |
 
 ## Telegram Mini App setup
 
@@ -93,6 +93,13 @@ Start the development server:
 
 ```bash
 npm run dev
+```
+
+This uses Webpack for a conservative development setup with reliable Hot Module Replacement.
+Turbopack remains available for comparison or troubleshooting:
+
+```bash
+npm run dev:turbo
 ```
 
 By default, Next.js serves the app on:
@@ -240,13 +247,35 @@ npm run build
 
 ### Telegram Mini App behaves strangely
 
-If the Mini App UI behaves inconsistently, buttons do not react, or the page looks out of sync after frontend changes, first try a hard refresh without cache.
+Use the same route in three places to identify which development layer is stale:
+
+1. Open `http://localhost:3000/<route>` in a regular browser.
+2. Open the same route through the public tunnel hostname in a regular browser.
+3. Open the route in the Telegram Mini App.
+
+After saving a source file, wait for a successful compilation in the development-server
+terminal. If it is not obvious whether a functional change worked, make a temporary visible
+marker change alongside it, such as a unique label, and remove the marker after the check.
+
+- If the marker is missing on `localhost`, the development server did not compile or serve the
+  current source. Check the terminal error and confirm that the server was started from this
+  repository.
+- If `localhost` is current but the public tunnel URL is stale, check the tunnel and make sure its
+  hostname, without `https://` or a port, is present in `ALLOWED_DEV_ORIGINS`. Restart the
+  development server after changing this variable.
+- If the public tunnel URL is current in the regular browser but Telegram is stale, the remaining
+  state is inside Telegram's WebView. Close and reopen only the Mini App before restarting the
+  entire Telegram client.
+
+Do not delete `.next` as part of the normal feedback loop. Stop the development server and remove
+`.next` only when both `localhost` and the tunnel remain stale after a successful compilation and a
+server restart.
+
+For a one-off browser check, a hard refresh without cache is:
 
 ```text
 Ctrl/Cmd+Shift+R
 ```
-
-This is the first thing to try before debugging tunnel, HMR, or Telegram-specific issues.
 
 ### `Missing NEXT_PUBLIC_APP_API_BASE_URL for direct API calls`
 
