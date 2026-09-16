@@ -80,12 +80,18 @@ describe('AdminGigCandidateDraftForm', () => {
     createGigCandidateMock.mockResolvedValueOnce(createReviewingGigCandidate());
     renderForm();
 
-    fireEvent.change(screen.getByLabelText('Title:'), { target: { value: 'New Band' } });
+    fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'New Band' } });
+    fireEvent.change(screen.getByLabelText('Date:*'), { target: { value: '2026-09-30' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create Gig Candidate' }));
 
     await waitFor(() => {
       expect(createGigCandidateMock).toHaveBeenCalledWith({
-        gigDraft: { title: 'New Band', city: 'Barcelona', country: 'ES' },
+        gigDraft: {
+          title: 'New Band',
+          date: '2026-09-30',
+          city: 'Barcelona',
+          country: 'ES',
+        },
         poster: { file: null, url: '' },
       });
     });
@@ -146,7 +152,7 @@ describe('AdminGigCandidateDraftForm', () => {
     });
     renderForm();
 
-    fireEvent.change(screen.getByLabelText('Title:'), { target: { value: 'Band' } });
+    fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Band' } });
     fireEvent.click(screen.getByRole('button', { name: 'Find info with AI' }));
 
     expect(await screen.findByDisplayValue('Looked-up Band')).toBeInTheDocument();
@@ -165,7 +171,7 @@ describe('AdminGigCandidateDraftForm', () => {
     lookupGigCandidateDraftMock.mockRejectedValueOnce(new Error('AI unavailable'));
     renderForm();
 
-    fireEvent.change(screen.getByLabelText('Title:'), { target: { value: 'Band' } });
+    fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Band' } });
     fireEvent.click(screen.getByRole('button', { name: 'Find info with AI' }));
 
     await waitFor(() => {

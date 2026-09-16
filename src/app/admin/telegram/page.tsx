@@ -26,13 +26,13 @@ export default function AdminTelegramPage() {
         ? {
             title: 'Telegram action is missing',
             description:
-              'This admin Mini App link requires an edit action. Open it from a Gig or GigCandidate Edit button.',
+              'This admin Mini App link requires an admin action. Open it from a Gig or GigCandidate admin link.',
             variant: 'destructive',
           }
         : {
             title: 'Invalid Telegram action',
             description:
-              'This admin Mini App link contains an unsupported or malformed action. Open it from a Gig or GigCandidate Edit button.',
+              'This admin Mini App link contains an unsupported or malformed action. Open it from a Gig or GigCandidate admin link.',
             variant: 'destructive',
           },
     );

@@ -1,11 +1,12 @@
 import {
+  createGigCandidateDraftFormSchema,
   gigCandidateDraftFormSchema,
   mapGigCandidateDraftToFormValues,
   mapGigCandidateFormValuesToDraft,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
 
 describe('GigCandidate draft form mapping', () => {
-  it('should allow an empty or one-character title but reject more than 300 characters', () => {
+  it('should allow an empty draft but reject a title longer than 300 characters', () => {
     const emptyDraft = {
       title: '',
       date: '',
@@ -24,6 +25,29 @@ describe('GigCandidate draft form mapping', () => {
         title: 'A'.repeat(301),
       }).success,
     ).toBe(false);
+  });
+
+  it('should require core fields when creating a Gig Candidate', () => {
+    const emptyCandidate = {
+      title: '',
+      date: '',
+      endDate: '',
+      city: '',
+      country: '',
+      venue: '',
+      ticketsUrl: '',
+    };
+
+    expect(createGigCandidateDraftFormSchema.safeParse(emptyCandidate).success).toBe(false);
+    expect(
+      createGigCandidateDraftFormSchema.safeParse({
+        ...emptyCandidate,
+        title: 'Band',
+        date: '2026-09-30',
+        city: 'Barcelona',
+        country: 'ES',
+      }).success,
+    ).toBe(true);
   });
 
   it('should map a partial gigDraft to safe empty form values', () => {

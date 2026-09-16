@@ -1,9 +1,10 @@
 import type { Route } from 'next';
 
-import { buildAdminGigEditRoute } from '@/lib/admin-gig-paths';
+import { buildAdminGigEditRoute, buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import {
   ADMIN_GIG_CANDIDATE_NEW_ROUTE,
   buildAdminGigCandidateEditRoute,
+  buildAdminGigCandidateRoute,
 } from '@/lib/admin-gig-candidate-paths';
 import { SUGGEST_ROUTE } from '@/lib/suggest-paths';
 
@@ -14,6 +15,8 @@ const TELEGRAM_MINI_APP_START_ACTION_SEPARATOR = '-';
 export enum TelegramMiniAppStartAction {
   EditGig = 'editGig',
   EditGigCandidate = 'editGigCandidate',
+  OpenGig = 'openGig',
+  OpenGigCandidate = 'openGigCandidate',
 }
 
 export interface ResolvedAdminTelegramLaunch {
@@ -55,11 +58,36 @@ export function resolveAdminTelegramLaunch(
     return { kind: 'failed', reason: 'invalidAction' };
   }
 
+  const openGigCandidatePrefix = getTelegramMiniAppStartActionPrefix(
+    TelegramMiniAppStartAction.OpenGigCandidate,
+  );
+  if (trimmedStartParam.startsWith(openGigCandidatePrefix)) {
+    const gigCandidateId = trimmedStartParam.slice(openGigCandidatePrefix.length);
+    if (GIG_CANDIDATE_ID_PATTERN.test(gigCandidateId)) {
+      return {
+        kind: 'resolved',
+        route: buildAdminGigCandidateRoute(gigCandidateId),
+      };
+    }
+
+    return { kind: 'failed', reason: 'invalidAction' };
+  }
+
   const editGigPrefix = getTelegramMiniAppStartActionPrefix(TelegramMiniAppStartAction.EditGig);
   if (trimmedStartParam.startsWith(editGigPrefix)) {
     const publicId = trimmedStartParam.slice(editGigPrefix.length);
     if (GIG_FORM_START_PARAM_PATTERN.test(publicId)) {
       return { kind: 'resolved', route: buildAdminGigEditRoute(publicId) };
+    }
+
+    return { kind: 'failed', reason: 'invalidAction' };
+  }
+
+  const openGigPrefix = getTelegramMiniAppStartActionPrefix(TelegramMiniAppStartAction.OpenGig);
+  if (trimmedStartParam.startsWith(openGigPrefix)) {
+    const publicId = trimmedStartParam.slice(openGigPrefix.length);
+    if (GIG_FORM_START_PARAM_PATTERN.test(publicId)) {
+      return { kind: 'resolved', route: buildAdminGigPublicIdRoute(publicId) };
     }
 
     return { kind: 'failed', reason: 'invalidAction' };

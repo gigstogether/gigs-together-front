@@ -26,6 +26,34 @@ describe('resolveAdminTelegramLaunch', () => {
     });
   });
 
+  it('should route to Gig detail page when its open start param is valid', () => {
+    expect(resolveAdminTelegramLaunch('openGig-dev-stub-qwe-new-2026-06-29')).toEqual({
+      kind: 'resolved',
+      route: '/admin/gigs/dev-stub-qwe-new-2026-06-29',
+    });
+  });
+
+  it('should route to GigCandidate detail page when its open start param is valid', () => {
+    expect(resolveAdminTelegramLaunch('openGigCandidate-507f1f77bcf86cd799439099')).toEqual({
+      kind: 'resolved',
+      route: '/admin/gig-candidates/507f1f77bcf86cd799439099',
+    });
+  });
+
+  it('should return an invalid-action failure when an open GigCandidate action is malformed', () => {
+    expect(resolveAdminTelegramLaunch('openGigCandidate-invalid')).toEqual({
+      kind: 'failed',
+      reason: 'invalidAction',
+    });
+  });
+
+  it('should return an invalid-action failure when an open Gig action is malformed', () => {
+    expect(resolveAdminTelegramLaunch('openGig-bad/value')).toEqual({
+      kind: 'failed',
+      reason: 'invalidAction',
+    });
+  });
+
   it('should return an invalid-action failure when a GigCandidate action is malformed', () => {
     expect(resolveAdminTelegramLaunch('editGigCandidate-invalid')).toEqual({
       kind: 'failed',

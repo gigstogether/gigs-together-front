@@ -60,6 +60,32 @@ describe('AdminTelegramPage', () => {
     });
   });
 
+  it('should route an open Gig action to its admin detail page', async () => {
+    telegramMocks.getStartParam.mockReturnValue('openGig-radiohead-barcelona-2026-06-12');
+
+    render(<AdminTelegramPage />);
+
+    await waitFor(() => {
+      expect(navigationMocks.replace).toHaveBeenCalledWith(
+        '/admin/gigs/radiohead-barcelona-2026-06-12',
+      );
+      expect(toastMocks.toast).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should route an open GigCandidate action to its admin detail page', async () => {
+    telegramMocks.getStartParam.mockReturnValue('openGigCandidate-507f1f77bcf86cd799439099');
+
+    render(<AdminTelegramPage />);
+
+    await waitFor(() => {
+      expect(navigationMocks.replace).toHaveBeenCalledWith(
+        '/admin/gig-candidates/507f1f77bcf86cd799439099',
+      );
+      expect(toastMocks.toast).not.toHaveBeenCalled();
+    });
+  });
+
   it('should report a missing action before routing to admin', async () => {
     telegramMocks.getStartParam.mockReturnValue('');
 
@@ -69,7 +95,7 @@ describe('AdminTelegramPage', () => {
       expect(toastMocks.toast).toHaveBeenCalledWith({
         title: 'Telegram action is missing',
         description:
-          'This admin Mini App link requires an edit action. Open it from a Gig or GigCandidate Edit button.',
+          'This admin Mini App link requires an admin action. Open it from a Gig or GigCandidate admin link.',
         variant: 'destructive',
       });
       expect(navigationMocks.replace).toHaveBeenCalledWith('/admin');
@@ -85,7 +111,7 @@ describe('AdminTelegramPage', () => {
       expect(toastMocks.toast).toHaveBeenCalledWith({
         title: 'Invalid Telegram action',
         description:
-          'This admin Mini App link contains an unsupported or malformed action. Open it from a Gig or GigCandidate Edit button.',
+          'This admin Mini App link contains an unsupported or malformed action. Open it from a Gig or GigCandidate admin link.',
         variant: 'destructive',
       });
       expect(navigationMocks.replace).toHaveBeenCalledWith('/admin');

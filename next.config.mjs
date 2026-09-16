@@ -7,6 +7,9 @@ const nextConfig = {
   typedRoutes: true, // prevents from adding a wrong href to Link in routes
   reactCompiler: true,
   allowedDevOrigins,
+  logging: {
+    browserToTerminal: false,
+  },
   async rewrites() {
     return [
       {
