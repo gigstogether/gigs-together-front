@@ -26,7 +26,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
   const shareHref = buildAdminGigPublicIdPath(gig.publicId);
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
   const feedHref = buildAdminGigPublicHref(gig);
-  const hasPublicLinks = gig.isVisible && !!(feedHref || gig.publishPostUrl);
+  const hasPublicLinks = gig.isVisible && !!(feedHref || gig.mainPostUrl);
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -92,7 +92,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
                   Public view
                 </Link>
 
-                {!!gig.publishPostUrl && (
+                {!!gig.mainPostUrl && (
                   <>
                     <span
                       className="text-muted-foreground"
@@ -101,7 +101,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
                       |
                     </span>
                     <a
-                      href={gig.publishPostUrl}
+                      href={gig.mainPostUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex min-w-0 items-center gap-1.5 text-primary underline-offset-4 hover:underline"

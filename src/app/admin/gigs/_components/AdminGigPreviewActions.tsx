@@ -26,7 +26,7 @@ export default function AdminGigPreviewActions(props: AdminGigPreviewActionsProp
 
   return (
     <div className="flex gap-2 border-t p-2">
-      {!gig.publishPostUrl ? (
+      {!gig.mainPostUrl ? (
         <Button
           type="button"
           variant="outline"
