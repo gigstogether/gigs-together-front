@@ -4,7 +4,9 @@ import { Controller } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import DateInput from '@/components/DateInput';
 import { Input } from '@/components/ui/input';
+import NativeSelect from '@/components/NativeSelect';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import { defaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
@@ -74,14 +76,13 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                   *
                 </span>
               </FieldLabel>
-              <select
+              <NativeSelect
                 {...field}
                 id="suggest-gig-country"
                 required
                 aria-labelledby="suggest-gig-country-label"
                 aria-invalid={fieldState.invalid}
                 value={field.value ?? defaultSuggestGigFormValues.country}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               >
                 {countries.map((country) => (
                   <option
@@ -91,7 +92,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                     {t('country', countryIsoToTranslationKey(country.iso))}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
@@ -129,7 +130,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
         />
       </div>
 
-      <div className="grid min-w-0 grid-cols-2 gap-4">
+      <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
         <Controller
           control={form.control}
           name="date"
@@ -150,11 +151,12 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                   *
                 </span>
               </FieldLabel>
-              <Input
+              <DateInput
                 {...field}
                 id="suggest-gig-date"
                 required
-                type="date"
+                clearLabel="Clear Date"
+                onClear={() => field.onChange('')}
                 aria-labelledby="suggest-gig-date-label"
                 aria-invalid={fieldState.invalid}
                 value={field.value ?? ''}
@@ -178,10 +180,11 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
               >
                 End Date: (optional)
               </FieldLabel>
-              <Input
+              <DateInput
                 {...field}
                 id="suggest-gig-end-date"
-                type="date"
+                clearLabel="Clear End Date"
+                onClear={() => field.onChange('')}
                 aria-labelledby="suggest-gig-end-date-label"
                 aria-invalid={fieldState.invalid}
                 value={field.value ?? ''}

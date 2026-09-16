@@ -124,6 +124,7 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
                 form={form}
                 countries={countries}
                 isSubmitting={isSubmitting}
+                validationMode="completeGig"
                 isLoading={isLoadingGig}
               />
 

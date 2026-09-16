@@ -20,6 +20,7 @@ import type {
   AdminGigCandidateLookupResult,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import {
+  createGigCandidateDraftFormSchema,
   defaultGigCandidateDraftFormValues,
   gigCandidateDraftFormSchema,
   mapGigCandidateDraftToFormValues,
@@ -138,7 +139,9 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
   const [posterUrl, setPosterUrl] = useState('');
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
   const form = useForm<GigFormValues>({
-    resolver: zodResolver(gigCandidateDraftFormSchema),
+    resolver: zodResolver(
+      gigCandidate ? gigCandidateDraftFormSchema : createGigCandidateDraftFormSchema,
+    ),
     defaultValues: gigCandidate
       ? mapGigCandidateDraftToFormValues(gigCandidate.gigDraft)
       : defaultGigCandidateDraftFormValues,
@@ -214,6 +217,7 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
             form={form}
             countries={countries}
             isSubmitting={saveMutation.isPending}
+            validationMode={gigCandidate ? 'candidateDraft' : 'candidateCreate'}
             allowEmptyCountry
             isLookingUp={isLookingUp}
             onLookup={lookupGigCandidateDraft}

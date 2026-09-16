@@ -3,9 +3,13 @@ import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import type { GigFormValues } from '../../gigs/_lib/gig-form.shared';
 import type { AdminGigCandidateDraft } from './admin-gig-candidate';
 
+const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+  message: 'Date must be in YYYY-MM-DD format.',
+});
+
 const optionalDate = z
   .string()
-  .refine((value) => value === '' || /^\d{4}-\d{2}-\d{2}$/.test(value), {
+  .refine((value) => value === '' || dateSchema.safeParse(value).success, {
     message: 'Date must be in YYYY-MM-DD format.',
   });
 
@@ -15,30 +19,53 @@ const optionalUrl = z
     message: 'Please enter a valid URL.',
   });
 
+const optionalTitleSchema = z
+  .string()
+  .trim()
+  .max(GIG_TITLE_MAX_LENGTH, {
+    message: `Title must be at most ${GIG_TITLE_MAX_LENGTH} characters.`,
+  });
+
+const requiredTitleSchema = optionalTitleSchema.min(1, { message: 'Title is required.' });
+
+const optionalDraftFields = {
+  endDate: optionalDate,
+  venue: z.string(),
+  ticketsUrl: optionalUrl,
+};
+
+function validateDateOrder(
+  values: { date: string; endDate: string },
+  context: z.RefinementCtx,
+): void {
+  if (values.date && values.endDate && values.endDate < values.date) {
+    context.addIssue({
+      code: 'custom',
+      path: ['endDate'],
+      message: 'End Date must be on or after Date.',
+    });
+  }
+}
+
 export const gigCandidateDraftFormSchema = z
   .object({
-    title: z
-      .string()
-      .trim()
-      .max(GIG_TITLE_MAX_LENGTH, {
-        message: `Title must be at most ${GIG_TITLE_MAX_LENGTH} characters.`,
-      }),
+    title: optionalTitleSchema,
     date: optionalDate,
-    endDate: optionalDate,
     city: z.string(),
     country: z.string(),
-    venue: z.string(),
-    ticketsUrl: optionalUrl,
+    ...optionalDraftFields,
   })
-  .superRefine((values, context) => {
-    if (values.date && values.endDate && values.endDate < values.date) {
-      context.addIssue({
-        code: 'custom',
-        path: ['endDate'],
-        message: 'End Date must be on or after Date.',
-      });
-    }
-  });
+  .superRefine(validateDateOrder);
+
+export const createGigCandidateDraftFormSchema = z
+  .object({
+    title: requiredTitleSchema,
+    date: dateSchema,
+    city: z.string().min(1, { message: 'City is required.' }),
+    country: z.string().min(1, { message: 'Country is required.' }),
+    ...optionalDraftFields,
+  })
+  .superRefine(validateDateOrder);
 
 export const defaultGigCandidateDraftFormValues: GigFormValues = {
   title: '',

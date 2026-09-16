@@ -4,8 +4,10 @@ import { Controller } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
+import DateInput from '@/components/DateInput';
 import { Field, FieldError, FieldLabel, FieldSeparator } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import NativeSelect from '@/components/NativeSelect';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import type { Country } from '@/lib/api-boundary-schemas';
@@ -17,6 +19,7 @@ interface GigFormFieldsProps {
   form: UseFormReturn<GigFormValues>;
   countries: Country[];
   isSubmitting: boolean;
+  validationMode: 'completeGig' | 'candidateCreate' | 'candidateDraft';
   isLoading?: boolean;
   allowEmptyCountry?: boolean;
   isLookingUp?: boolean;
@@ -28,6 +31,7 @@ export default function GigFormFields(props: GigFormFieldsProps) {
     form,
     countries,
     isSubmitting,
+    validationMode,
     isLoading,
     allowEmptyCountry = false,
     isLookingUp = false,
@@ -35,6 +39,17 @@ export default function GigFormFields(props: GigFormFieldsProps) {
   } = props;
 
   const t = useT();
+  const isCompleteGig = validationMode === 'completeGig';
+  const areCoreFieldsRequired = validationMode !== 'candidateDraft';
+  const coreRequiredIndicator = areCoreFieldsRequired ? (
+    <span
+      aria-hidden="true"
+      className="text-destructive"
+    >
+      *
+    </span>
+  ) : null;
+  const completeGigRequiredIndicator = isCompleteGig ? coreRequiredIndicator : null;
 
   return (
     <>
@@ -43,10 +58,11 @@ export default function GigFormFields(props: GigFormFieldsProps) {
         name="title"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="gig-title">Title:</FieldLabel>
+            <FieldLabel htmlFor="gig-title">Title:{coreRequiredIndicator}</FieldLabel>
             <Input
               {...field}
               id="gig-title"
+              required={areCoreFieldsRequired}
               maxLength={GIG_TITLE_MAX_LENGTH}
               aria-invalid={fieldState.invalid}
               placeholder="e.g. Arctic Monkeys"
@@ -63,13 +79,13 @@ export default function GigFormFields(props: GigFormFieldsProps) {
           name="country"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="gig-country">Country:</FieldLabel>
-              <select
+              <FieldLabel htmlFor="gig-country">Country:{coreRequiredIndicator}</FieldLabel>
+              <NativeSelect
                 {...field}
                 id="gig-country"
+                required={areCoreFieldsRequired}
                 aria-invalid={fieldState.invalid}
                 value={field.value ?? defaultGigFormValues.country}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               >
                 {allowEmptyCountry ? <option value="">Not set</option> : null}
                 {countries.map((country) => (
@@ -80,7 +96,7 @@ export default function GigFormFields(props: GigFormFieldsProps) {
                     {t('country', countryIsoToTranslationKey(country.iso))}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
@@ -91,10 +107,11 @@ export default function GigFormFields(props: GigFormFieldsProps) {
           name="city"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="gig-city">City:</FieldLabel>
+              <FieldLabel htmlFor="gig-city">City:{coreRequiredIndicator}</FieldLabel>
               <Input
                 {...field}
                 id="gig-city"
+                required={areCoreFieldsRequired}
                 aria-invalid={fieldState.invalid}
                 placeholder="e.g. Barcelona"
                 value={field.value ?? ''}
@@ -122,7 +139,7 @@ export default function GigFormFields(props: GigFormFieldsProps) {
         </div>
       ) : null}
 
-      <div className="grid min-w-0 grid-cols-2 gap-4">
+      <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
         <Controller
           control={form.control}
           name="date"
@@ -131,11 +148,13 @@ export default function GigFormFields(props: GigFormFieldsProps) {
               className="min-w-0"
               data-invalid={fieldState.invalid}
             >
-              <FieldLabel htmlFor="gig-date">Date:</FieldLabel>
-              <Input
+              <FieldLabel htmlFor="gig-date">Date:{coreRequiredIndicator}</FieldLabel>
+              <DateInput
                 {...field}
                 id="gig-date"
-                type="date"
+                required={areCoreFieldsRequired}
+                clearLabel="Clear Date"
+                onClear={() => field.onChange('')}
                 aria-invalid={fieldState.invalid}
                 value={field.value ?? ''}
               />
@@ -153,10 +172,11 @@ export default function GigFormFields(props: GigFormFieldsProps) {
               data-invalid={fieldState.invalid}
             >
               <FieldLabel htmlFor="gig-end-date">End Date: (optional)</FieldLabel>
-              <Input
+              <DateInput
                 {...field}
                 id="gig-end-date"
-                type="date"
+                clearLabel="Clear End Date"
+                onClear={() => field.onChange('')}
                 aria-invalid={fieldState.invalid}
                 value={field.value ?? ''}
               />
@@ -171,10 +191,11 @@ export default function GigFormFields(props: GigFormFieldsProps) {
         name="venue"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="gig-venue">Venue:</FieldLabel>
+            <FieldLabel htmlFor="gig-venue">Venue:{completeGigRequiredIndicator}</FieldLabel>
             <Input
               {...field}
               id="gig-venue"
+              required={isCompleteGig}
               aria-invalid={fieldState.invalid}
               placeholder="e.g. Razzmatazz"
               value={field.value ?? ''}
@@ -189,10 +210,13 @@ export default function GigFormFields(props: GigFormFieldsProps) {
         name="ticketsUrl"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="gig-tickets-url">Tickets URL:</FieldLabel>
+            <FieldLabel htmlFor="gig-tickets-url">
+              Tickets URL:{completeGigRequiredIndicator}
+            </FieldLabel>
             <Input
               {...field}
               id="gig-tickets-url"
+              required={isCompleteGig}
               aria-invalid={fieldState.invalid}
               placeholder="e.g. https://www.ticketmaster.es/event/..."
               value={field.value ?? ''}

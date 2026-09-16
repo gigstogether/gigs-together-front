@@ -42,6 +42,34 @@ a {
   text-decoration: none;
 }
 
+.date-input-native {
+  padding-inline: 0.75rem;
+}
+
+.date-input-native::-webkit-date-and-time-value {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-inline: 0 2rem;
+  text-align: start;
+}
+
+.date-input-native[data-has-clear-button='true']::-webkit-calendar-picker-indicator {
+  margin-inline-end: 2rem;
+}
+
+/* Keep padding off the native control only on iOS, where it causes width overflow. */
+@supports (-webkit-touch-callout: none) {
+  .date-input-native {
+    padding-inline: 0;
+  }
+
+  .date-input-native::-webkit-date-and-time-value {
+    padding-inline: 0.75rem 2.75rem;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

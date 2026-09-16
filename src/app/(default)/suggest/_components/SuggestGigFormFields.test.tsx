@@ -39,15 +39,21 @@ describe('SuggestGigFormFields', () => {
     expect(screen.getByLabelText('Tickets URL: (optional)')).not.toBeRequired();
   });
 
-  it('should render the start and end date fields in the same horizontal row', () => {
+  it('should stack date fields on mobile and align them horizontally on larger screens', () => {
     render(<SuggestGigFormFieldsTestSubject />);
 
-    const dateField = screen.getByLabelText('Date:*').closest('[data-slot="field"]');
+    const dateInput = screen.getByLabelText('Date:*');
+    const dateField = dateInput.closest('[data-slot="field"]');
     const endDateField = screen
       .getByLabelText('End Date: (optional)')
       .closest('[data-slot="field"]');
 
     expect(dateField?.parentElement).toBe(endDateField?.parentElement);
-    expect(dateField?.parentElement).toHaveClass('grid-cols-2');
+    expect(dateField?.parentElement).toHaveClass('grid-cols-1', 'sm:grid-cols-2');
+    expect(dateInput.closest('[data-slot="date-input-frame"]')).toHaveClass(
+      'h-9',
+      'max-w-full',
+      'overflow-hidden',
+    );
   });
 });
