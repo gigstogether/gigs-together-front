@@ -88,6 +88,6 @@ describe('EditGigFormClient', () => {
     renderClient();
 
     expect(screen.queryByLabelText(/Status:/)).not.toBeInTheDocument();
-    expect(screen.queryByText('Published')).not.toBeInTheDocument();
+    expect(screen.queryByText('Status')).not.toBeInTheDocument();
   });
 });

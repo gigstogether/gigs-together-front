@@ -88,7 +88,7 @@ describe('fetchApiJson HTTP semantics', () => {
     const { fetchApiJson } = await import('@/lib/api-core');
 
     await expect(
-      fetchApiJson<void>('v1/admin/gigs/demo/post', 'POST', undefined, PUBLIC_REQUEST_OPTIONS),
+      fetchApiJson<void>('v1/admin/gigs/demo/main-post', 'POST', undefined, PUBLIC_REQUEST_OPTIONS),
     ).resolves.toBeUndefined();
   });
 
