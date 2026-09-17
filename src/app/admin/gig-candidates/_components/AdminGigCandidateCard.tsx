@@ -158,6 +158,18 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
               <p className="min-w-0 leading-snug">No intake post linked.</p>
             </div>
           ) : null}
+          {gigCandidate.moderationPostUrl === undefined ? (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-md border border-amber-500/50 bg-amber-500/10 px-2.5 py-2 text-xs text-amber-950 dark:text-amber-200"
+            >
+              <AlertTriangle
+                className="h-4 w-4 shrink-0"
+                aria-hidden
+              />
+              <p className="min-w-0 leading-snug">No moderation post linked.</p>
+            </div>
+          ) : null}
         </div>
 
         <div className="p-2 pt-0">

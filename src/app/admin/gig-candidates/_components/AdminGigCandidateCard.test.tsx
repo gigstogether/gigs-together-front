@@ -80,6 +80,7 @@ describe('AdminGigCandidateCard', () => {
     ).toBeInTheDocument();
     expect(screen.queryByText(/42/)).not.toBeInTheDocument();
     expect(screen.queryByText('No intake post linked.')).not.toBeInTheDocument();
+    expect(screen.queryByText('No moderation post linked.')).not.toBeInTheDocument();
   });
 
   it('should render no actions on a terminal preview', () => {
@@ -123,7 +124,7 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.getByRole('button', { name: 'Send to moderation' })).toBeInTheDocument();
   });
 
-  it('should warn when an expected Intake post is not linked', () => {
+  it('should warn about both missing posts when neither expected post is linked', () => {
     renderCard({
       ...gigCandidate,
       source: {
@@ -133,9 +134,11 @@ describe('AdminGigCandidateCard', () => {
         origin: { type: 'form' },
       },
       intakePostUrl: undefined,
+      moderationPostUrl: undefined,
     });
 
     expect(screen.getByText('No intake post linked.')).toBeInTheDocument();
+    expect(screen.getByText('No moderation post linked.')).toBeInTheDocument();
   });
 
   it('should not warn about Intake for an admin-origin Gig Candidate', () => {
