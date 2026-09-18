@@ -191,5 +191,6 @@ describe('useGigSubmit', () => {
     });
     expect(invalidateQueriesSpy).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 });

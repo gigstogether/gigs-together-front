@@ -37,7 +37,8 @@ function toErrorMeta(error: unknown): LogMeta {
   if (error instanceof ApiNetworkError) {
     return {
       name: error.name,
-      message: error.message,
+      message: error.diagnosticMessage,
+      userMessage: error.message,
       method: error.method,
       url: error.url,
       cause: toErrorMeta(error.cause),
@@ -107,7 +108,12 @@ function writeBrowserLog(level: LogLevel, message: string, meta?: LogMeta): void
 
 function writeBrowserErrorFromUnknown(message: string, error: unknown, meta?: LogMeta): void {
   const formattedMessage = formatBrowserMessage(message);
-  const errorMessage = error instanceof Error ? error.message.trim() : '';
+  const errorMessage =
+    error instanceof ApiNetworkError
+      ? error.diagnosticMessage
+      : error instanceof Error
+        ? error.message.trim()
+        : '';
   const httpStatus = error instanceof ApiError ? ` (HTTP ${error.statusCode})` : '';
   const summary = errorMessage
     ? `${formattedMessage}${httpStatus}: ${errorMessage}`

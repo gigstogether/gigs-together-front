@@ -27,6 +27,25 @@ describe('logger', () => {
     });
   });
 
+  it('should log network diagnostics instead of the user-facing message', async () => {
+    vi.stubGlobal('window', {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { ApiNetworkError } = await import('@/lib/api-errors');
+    const { logger } = await import('@/lib/logger');
+    const networkError = new ApiNetworkError({
+      method: 'POST',
+      url: 'https://api.example.com/v1/gig-candidates',
+      cause: new TypeError('Failed to fetch'),
+    });
+
+    logger.errorFromUnknown('api_client_request_failed', networkError);
+
+    expect(consoleError).toHaveBeenCalledWith(
+      'API client request failed: No HTTP response received for POST https://api.example.com/v1/gig-candidates. Check that the API is running and the URL is correct. If it is, inspect the browser Network or Console panels for CORS, TLS, or mixed-content errors.',
+      { error: networkError },
+    );
+  });
+
   it('should write a readable error with HTTP status on the development server', async () => {
     vi.stubEnv('NODE_ENV', 'development');
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);

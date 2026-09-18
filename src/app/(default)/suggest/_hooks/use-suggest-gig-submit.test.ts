@@ -10,6 +10,7 @@ import type {
 import { defaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
+import { ApiNetworkError } from '@/lib/api-errors';
 
 const { toastMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
@@ -146,5 +147,40 @@ describe('useSuggestGigSubmit', () => {
       variant: 'destructive',
     });
     expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it('should hide network diagnostics from the error toast', async () => {
+    const queryClient = createTestQueryClient();
+    createGigCandidateMock.mockRejectedValueOnce(
+      new ApiNetworkError({
+        method: 'POST',
+        url: 'https://api.example.com/v1/gig-candidates',
+        cause: new TypeError('Failed to fetch'),
+      }),
+    );
+    const onSuccess = vi.fn();
+
+    const { result } = renderHook(
+      () =>
+        useSuggestGigSubmit({
+          posterFile: null,
+          posterUrl: '',
+          onSuccess,
+        }),
+      {
+        wrapper: createQueryClientWrapper(queryClient),
+      },
+    );
+
+    await act(async () => {
+      await result.current.onSubmit(DEFAULT_SUBMIT_VALUES);
+    });
+
+    expect(toastMock).toHaveBeenCalledWith({
+      title: "Couldn't submit",
+      description: 'Unable to reach the server. Please try again later.',
+      variant: 'destructive',
+    });
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 });

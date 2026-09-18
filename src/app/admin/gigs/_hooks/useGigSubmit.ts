@@ -3,7 +3,7 @@ import { toast } from '@/hooks/use-toast';
 import { feedKeys } from '@/lib/feed/feedKeys';
 import { gigFormKeys } from '@/app/admin/gigs/_lib/gigFormKeys';
 import { toastTelegramInitDataExpired } from '@/app/admin/gigs/_lib/telegram-init-data-expired';
-import { ApiError } from '@/lib/api-errors';
+import { ApiError, isApiTransportError } from '@/lib/api-errors';
 
 import type {
   GigUpsertApiParams,
@@ -105,7 +105,6 @@ export function useGigSubmit(params: UseGigSubmitParams): UseGigSubmitResult {
       });
     } catch (e) {
       if (toastTelegramInitDataExpired(e)) {
-        console.error(e);
         return;
       }
 
@@ -115,7 +114,6 @@ export function useGigSubmit(params: UseGigSubmitParams): UseGigSubmitResult {
           description: 'Reload the latest version before saving again.',
           variant: 'destructive',
         });
-        console.error(e);
         return;
       }
 
@@ -131,7 +129,9 @@ export function useGigSubmit(params: UseGigSubmitParams): UseGigSubmitResult {
         description: message,
         variant: 'destructive',
       });
-      console.error(e);
+      if (!isApiTransportError(e)) {
+        console.error(e);
+      }
     }
   }
 

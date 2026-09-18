@@ -146,7 +146,8 @@ describe('fetchApiJson', () => {
 
     await expect(action).rejects.toMatchObject({
       name: 'ApiNetworkError',
-      message:
+      message: 'Unable to reach the server. Please try again later.',
+      diagnosticMessage:
         'No HTTP response received for POST https://api.example.com/v1/admin/gig-candidates. ' +
         'Check that the API is running and the URL is correct. ' +
         'If it is, inspect the browser Network or Console panels for CORS, TLS, or mixed-content errors.',

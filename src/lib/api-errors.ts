@@ -12,6 +12,33 @@ export class ApiError extends Error {
 
 export type ApiHttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
+export interface ApiNetworkErrorParams {
+  method: ApiHttpMethod;
+  url: string;
+  cause: unknown;
+}
+
+export class ApiNetworkError extends Error {
+  method: ApiHttpMethod;
+  url: string;
+  cause: unknown;
+  diagnosticMessage: string;
+
+  constructor(params: ApiNetworkErrorParams) {
+    const { method, url, cause } = params;
+
+    super('Unable to reach the server. Please try again later.');
+    this.name = 'ApiNetworkError';
+    this.method = method;
+    this.url = url;
+    this.cause = cause;
+    this.diagnosticMessage =
+      `No HTTP response received for ${method} ${url}. ` +
+      'Check that the API is running and the URL is correct. ' +
+      'If it is, inspect the browser Network or Console panels for CORS, TLS, or mixed-content errors.';
+  }
+}
+
 export interface ApiRequestErrorParams {
   endpointOrUrl: string;
   method: ApiHttpMethod;
@@ -27,40 +54,18 @@ export class ApiRequestError extends Error {
     const { endpointOrUrl, method, error } = params;
     const statusCode = error instanceof ApiError ? error.statusCode : undefined;
     const statusPrefix = statusCode === undefined ? '' : `HTTP ${statusCode} `;
-    const causeMessage =
-      error instanceof Error && error.message.trim() ? error.message : 'Something went wrong';
+    const errorMessage =
+      error instanceof ApiNetworkError
+        ? error.diagnosticMessage
+        : error instanceof Error && error.message.trim()
+          ? error.message
+          : 'Something went wrong';
 
-    super(`${statusPrefix}${method} ${endpointOrUrl}: ${causeMessage}`);
+    super(`${statusPrefix}${method} ${endpointOrUrl}: ${errorMessage}`);
     this.name = 'ApiRequestError';
     this.endpointOrUrl = endpointOrUrl;
     this.method = method;
     this.statusCode = statusCode;
-  }
-}
-
-export interface ApiNetworkErrorParams {
-  method: ApiHttpMethod;
-  url: string;
-  cause: unknown;
-}
-
-export class ApiNetworkError extends Error {
-  method: ApiHttpMethod;
-  url: string;
-  cause: unknown;
-
-  constructor(params: ApiNetworkErrorParams) {
-    const { method, url, cause } = params;
-
-    super(
-      `No HTTP response received for ${method} ${url}. ` +
-        'Check that the API is running and the URL is correct. ' +
-        'If it is, inspect the browser Network or Console panels for CORS, TLS, or mixed-content errors.',
-    );
-    this.name = 'ApiNetworkError';
-    this.method = method;
-    this.url = url;
-    this.cause = cause;
   }
 }
 
@@ -73,4 +78,8 @@ export function isTelegramInitDataExpiredError(e: unknown): boolean {
 
 export function isAbortError(e: unknown): boolean {
   return typeof e === 'object' && e !== null && 'name' in e && e.name === 'AbortError';
+}
+
+export function isApiTransportError(e: unknown): e is ApiError | ApiNetworkError {
+  return e instanceof ApiError || e instanceof ApiNetworkError;
 }
