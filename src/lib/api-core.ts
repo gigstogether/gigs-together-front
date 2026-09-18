@@ -1,8 +1,7 @@
-import { ApiError } from '@/lib/api-errors';
+import { ApiError, ApiNetworkError, isAbortError } from '@/lib/api-errors';
+import type { ApiHttpMethod } from '@/lib/api-errors';
 import { clientEnv } from '@/env/client-env';
 import { isRecord } from '@/lib/is-record';
-
-type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 const API_BASE_URL = clientEnv.appApiBaseUrl;
 
@@ -50,13 +49,35 @@ function isJsonContentType(contentType: string): boolean {
   return mediaType === 'application/json' || mediaType?.endsWith('+json') === true;
 }
 
-function hasNoResponseBody(method: HttpMethod, response: Response): boolean {
+function hasNoResponseBody(method: ApiHttpMethod, response: Response): boolean {
   return method === 'HEAD' || response.status === 204 || response.status === 205;
+}
+
+function getHttpErrorMessage(result: unknown): string {
+  if (isRecord(result)) {
+    const message = result.message;
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+    if (
+      Array.isArray(message) &&
+      message.length > 0 &&
+      message.every((item) => typeof item === 'string' && item.trim())
+    ) {
+      return message.join('; ');
+    }
+  }
+
+  if (typeof result === 'string' && result.trim()) {
+    return result;
+  }
+
+  return 'Something went wrong';
 }
 
 export async function fetchApiJson<TResponse>(
   endpointOrUrl: string,
-  method: HttpMethod,
+  method: ApiHttpMethod,
   data: unknown | undefined,
   init: FetchApiJsonOptions,
 ): Promise<TResponse> {
@@ -75,14 +96,24 @@ export async function fetchApiJson<TResponse>(
   }
 
   const body = hasRequestBody ? (isFormData ? data : JSON.stringify(data)) : undefined;
+  const requestUrl = buildUrl(endpointOrUrl);
 
-  const response = await fetch(buildUrl(endpointOrUrl), {
-    ...fetchInit,
-    method,
-    headers,
-    body,
-    credentials,
-  });
+  let response: Response;
+  try {
+    response = await fetch(requestUrl, {
+      ...fetchInit,
+      method,
+      headers,
+      body,
+      credentials,
+    });
+  } catch (e) {
+    if (isAbortError(e)) {
+      throw e;
+    }
+
+    throw new ApiNetworkError({ method, url: requestUrl, cause: e });
+  }
 
   const contentType = response.headers.get('Content-Type') ?? '';
   const result = hasNoResponseBody(method, response)
@@ -92,14 +123,8 @@ export async function fetchApiJson<TResponse>(
       : await response.text();
 
   if (!response.ok) {
-    if (isRecord(result)) {
-      const r = result;
-      const msg =
-        typeof r.message === 'string' && r.message.trim() ? r.message : 'Something went wrong';
-      const code = typeof r.code === 'string' ? r.code : undefined;
-      throw new ApiError(msg, response.status, code);
-    }
-    throw new Error(typeof result === 'string' && result ? result : 'Something went wrong');
+    const code = isRecord(result) && typeof result.code === 'string' ? result.code : undefined;
+    throw new ApiError(getHttpErrorMessage(result), response.status, code);
   }
 
   return result as TResponse;
