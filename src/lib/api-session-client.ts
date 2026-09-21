@@ -1,4 +1,6 @@
 import type { FetchApiJsonOptions } from '@/lib/api-core';
+import { isAbortError } from '@/lib/api-errors';
+import type { ApiHttpMethod } from '@/lib/api-errors';
 import { fetchApiJsonWithSessionRecovery } from '@/lib/api-session-recovery';
 import { logger } from '@/lib/logger';
 import {
@@ -6,8 +8,6 @@ import {
   requestTelegramSignIn,
 } from '@/lib/telegram/telegram-auth';
 import { isTelegramMiniApp } from '@/lib/telegram/telegram-webapp';
-
-type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 type ApiClientRequestInit = Omit<FetchApiJsonOptions, 'credentials'>;
 
@@ -24,7 +24,7 @@ export function handleApiClientSessionUnauthorized(): void {
  */
 export async function apiClientRequest<TResponse = unknown, TBody = unknown>(
   endpointOrUrl: string,
-  method: HttpMethod,
+  method: ApiHttpMethod,
   data?: TBody,
   init?: ApiClientRequestInit,
 ): Promise<TResponse> {
@@ -38,7 +38,9 @@ export async function apiClientRequest<TResponse = unknown, TBody = unknown>(
       onUnauthorized: handleApiClientSessionUnauthorized,
     });
   } catch (e) {
-    logger.errorFromUnknown('api_client_request_failed', e, { endpointOrUrl, method });
+    if (!isAbortError(e)) {
+      logger.errorFromUnknown('api_client_request_failed', e, { endpointOrUrl, method });
+    }
     throw e;
   }
 }

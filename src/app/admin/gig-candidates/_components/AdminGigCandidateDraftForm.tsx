@@ -217,7 +217,7 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
             form={form}
             countries={countries}
             isSubmitting={saveMutation.isPending}
-            validationMode={gigCandidate ? 'candidateDraft' : 'candidateCreate'}
+            validationMode={gigCandidate ? 'gigCandidateDraft' : 'gigCandidateCreate'}
             allowEmptyCountry
             isLookingUp={isLookingUp}
             onLookup={lookupGigCandidateDraft}

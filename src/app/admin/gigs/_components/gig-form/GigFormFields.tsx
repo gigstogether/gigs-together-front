@@ -19,7 +19,7 @@ interface GigFormFieldsProps {
   form: UseFormReturn<GigFormValues>;
   countries: Country[];
   isSubmitting: boolean;
-  validationMode: 'completeGig' | 'candidateCreate' | 'candidateDraft';
+  validationMode: 'completeGig' | 'gigCandidateCreate' | 'gigCandidateDraft';
   isLoading?: boolean;
   allowEmptyCountry?: boolean;
   isLookingUp?: boolean;
@@ -40,7 +40,7 @@ export default function GigFormFields(props: GigFormFieldsProps) {
 
   const t = useT();
   const isCompleteGig = validationMode === 'completeGig';
-  const areCoreFieldsRequired = validationMode !== 'candidateDraft';
+  const areCoreFieldsRequired = validationMode !== 'gigCandidateDraft';
   const coreRequiredIndicator = areCoreFieldsRequired ? (
     <span
       aria-hidden="true"

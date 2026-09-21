@@ -6,6 +6,7 @@ import type {
   GigCandidateUpsertPayload,
 } from '@/app/(default)/suggest/_lib/gig-candidate-api';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
+import { isApiTransportError } from '@/lib/api-errors';
 
 interface UseSuggestGigSubmitParams {
   posterFile: File | null;
@@ -100,7 +101,9 @@ export function useSuggestGigSubmit(params: UseSuggestGigSubmitParams): UseSugge
         description: message,
         variant: 'destructive',
       });
-      console.error(e);
+      if (!isApiTransportError(e)) {
+        console.error(e);
+      }
     }
   }
 

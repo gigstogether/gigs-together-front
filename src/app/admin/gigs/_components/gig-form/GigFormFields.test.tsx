@@ -8,7 +8,7 @@ import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 
 interface GigFormFieldsTestSubjectProps {
-  validationMode?: 'completeGig' | 'candidateCreate' | 'candidateDraft';
+  validationMode?: 'completeGig' | 'gigCandidateCreate' | 'gigCandidateDraft';
 }
 
 function GigFormFieldsTestSubject(props: GigFormFieldsTestSubjectProps) {
@@ -21,7 +21,7 @@ function GigFormFieldsTestSubject(props: GigFormFieldsTestSubjectProps) {
       countries={[]}
       isSubmitting={false}
       validationMode={validationMode}
-      allowEmptyCountry={validationMode === 'candidateDraft'}
+      allowEmptyCountry={validationMode === 'gigCandidateDraft'}
     />
   );
 }
@@ -46,7 +46,7 @@ describe('GigFormFields', () => {
   });
 
   it('should leave fields optional for the Gig Candidate draft schema', () => {
-    render(<GigFormFieldsTestSubject validationMode="candidateDraft" />);
+    render(<GigFormFieldsTestSubject validationMode="gigCandidateDraft" />);
 
     expect(screen.getByLabelText('Title:')).not.toBeRequired();
     expect(screen.getByLabelText('Country:')).not.toBeRequired();
@@ -58,7 +58,7 @@ describe('GigFormFields', () => {
   });
 
   it('should mark core fields required when creating a Gig Candidate', () => {
-    render(<GigFormFieldsTestSubject validationMode="candidateCreate" />);
+    render(<GigFormFieldsTestSubject validationMode="gigCandidateCreate" />);
 
     expect(screen.getByLabelText('Title:*')).toBeRequired();
     expect(screen.getByLabelText('Country:*')).toBeRequired();

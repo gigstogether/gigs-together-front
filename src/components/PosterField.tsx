@@ -7,6 +7,15 @@ import { GigPoster } from '@/components/GigPoster';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { toast } from '@/hooks/use-toast';
+
+const SVG_IMAGE_MIME_TYPE = 'image/svg+xml';
+
+function isSvgPosterFile(file: File): boolean {
+  const normalizedMimeType = file.type.split(';', 1)[0].trim().toLowerCase();
+
+  return normalizedMimeType === SVG_IMAGE_MIME_TYPE || /\.svgz?$/i.test(file.name);
+}
 
 interface PosterFieldProps {
   posterFile: File | null;
@@ -62,6 +71,23 @@ export default function PosterField(props: PosterFieldProps) {
 
   const isPosterSelected = !!posterFile || !!posterUrl?.trim();
 
+  function rejectSvgPosterFile(file: File): boolean {
+    if (!isSvgPosterFile(file)) {
+      return false;
+    }
+
+    toast({
+      title: 'SVG posters are not supported',
+      description: 'Please use a raster image instead.',
+      variant: 'destructive',
+    });
+    if (posterFileInputRef.current) {
+      posterFileInputRef.current.value = '';
+    }
+
+    return true;
+  }
+
   function handlePaste(event: ClipboardEvent<HTMLDivElement | HTMLInputElement>) {
     const items = event.clipboardData?.items;
     if (!items) {
@@ -77,6 +103,10 @@ export default function PosterField(props: PosterFieldProps) {
         }
 
         event.preventDefault();
+        if (rejectSvgPosterFile(file)) {
+          break;
+        }
+
         onPosterUrlChange('');
         onPosterFileChange(file);
         if (posterFileInputRef.current) {
@@ -89,6 +119,10 @@ export default function PosterField(props: PosterFieldProps) {
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
+    if (file && rejectSvgPosterFile(file)) {
+      return;
+    }
+
     onPosterFileChange(file);
     if (file) {
       onPosterUrlChange('');
@@ -97,9 +131,9 @@ export default function PosterField(props: PosterFieldProps) {
 
   const description = isUrlInputEnabled
     ? isEdit
-      ? 'Upload a new image file, paste URL, or paste image from clipboard (optional).'
-      : 'Upload an image file (max 10MB), paste URL, or paste image from clipboard.'
-    : 'Upload an image file (max 10MB).';
+      ? 'Upload a new image file, paste URL, or paste image from clipboard (optional). SVG is not supported.'
+      : 'Upload an image file (max 10MB), paste URL, or paste image from clipboard. SVG is not supported.'
+    : 'Upload an image file (max 10MB). SVG is not supported.';
 
   return (
     <Field>

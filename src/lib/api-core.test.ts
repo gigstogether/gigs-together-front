@@ -131,6 +131,43 @@ describe('fetchApiJson', () => {
     });
   });
 
+  it('should describe how to diagnose a request that receives no HTTP response', async () => {
+    const cause = new TypeError('Failed to fetch');
+    const fetchMock = vi.fn<typeof fetch>().mockRejectedValueOnce(cause);
+    vi.stubGlobal('fetch', fetchMock);
+    const { fetchApiJson } = await import('@/lib/api-core');
+
+    const action = fetchApiJson(
+      'v1/admin/gig-candidates',
+      'POST',
+      { title: 'Test gig' },
+      INCLUDE_CREDENTIALS,
+    );
+
+    await expect(action).rejects.toMatchObject({
+      name: 'ApiNetworkError',
+      message: 'Unable to reach the server. Please try again later.',
+      diagnosticMessage:
+        'No HTTP response received for POST https://api.example.com/v1/admin/gig-candidates. ' +
+        'Check that the API is running and the URL is correct. ' +
+        'If it is, inspect the browser Network or Console panels for CORS, TLS, or mixed-content errors.',
+      method: 'POST',
+      url: 'https://api.example.com/v1/admin/gig-candidates',
+      cause,
+    });
+  });
+
+  it('should preserve an aborted request without wrapping it as a network failure', async () => {
+    const abortError = new DOMException('This operation was aborted', 'AbortError');
+    const fetchMock = vi.fn<typeof fetch>().mockRejectedValueOnce(abortError);
+    vi.stubGlobal('fetch', fetchMock);
+    const { fetchApiJson } = await import('@/lib/api-core');
+
+    const action = fetchApiJson('v1/gig', 'GET', undefined, OMIT_CREDENTIALS);
+
+    await expect(action).rejects.toBe(abortError);
+  });
+
   it('should use plain text response body as error message when response is non-json', async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(
       new Response('bad gateway', {
@@ -242,7 +279,7 @@ describe('fetchApiJson', () => {
     expect(headers.get('Content-Type')).toBe('application/merge-patch+json');
   });
 
-  it('should throw fallback message when json error payload has empty message', async () => {
+  it('should retain HTTP status when json error payload has empty message', async () => {
     const fetchMock = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(jsonResponse({ message: '' }, 400));
@@ -256,10 +293,14 @@ describe('fetchApiJson', () => {
       INCLUDE_CREDENTIALS,
     );
 
-    await expect(action).rejects.toThrow('Something went wrong');
+    await expect(action).rejects.toMatchObject({
+      name: 'ApiError',
+      message: 'Something went wrong',
+      statusCode: 400,
+    });
   });
 
-  it('should throw default error message when json body is primitive value', async () => {
+  it('should retain HTTP status when json body is a primitive value', async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(
       new Response('42', {
         status: 500,
@@ -273,7 +314,32 @@ describe('fetchApiJson', () => {
 
     const action = fetchApiJson('v1/gig', 'GET', undefined, OMIT_CREDENTIALS);
 
-    await expect(action).rejects.toThrow('Something went wrong');
+    await expect(action).rejects.toMatchObject({
+      name: 'ApiError',
+      message: 'Something went wrong',
+      statusCode: 500,
+    });
+  });
+
+  it('should combine validation messages returned as an array', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(
+      jsonResponse(
+        {
+          message: ['namespace must not be empty', 'namespace has invalid format'],
+        },
+        400,
+      ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const { fetchApiJson } = await import('@/lib/api-core');
+
+    const action = fetchApiJson('v1/locale/translations', 'GET', undefined, OMIT_CREDENTIALS);
+
+    await expect(action).rejects.toMatchObject({
+      name: 'ApiError',
+      message: 'namespace must not be empty; namespace has invalid format',
+      statusCode: 400,
+    });
   });
 });
 
