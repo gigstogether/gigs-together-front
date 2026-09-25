@@ -13,6 +13,7 @@ import {
   updateAdminGigCandidateDraft,
 } from '@/app/admin/_lib/admin-api';
 import type { LookupAdminGigCandidateDraftParams } from '@/app/admin/_lib/admin-api';
+import { buildVersionedAdminPosterUrl } from '@/app/admin/_lib/admin-poster-url';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import GigFormFields from '@/app/admin/gigs/_components/gig-form/GigFormFields';
 import type {
@@ -151,6 +152,10 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
     setPosterFile,
     setPosterUrl,
   );
+  let existingPosterUrl = gigCandidate?.gigDraft.posterUrl;
+  if (existingPosterUrl !== undefined && gigCandidate !== undefined) {
+    existingPosterUrl = buildVersionedAdminPosterUrl(existingPosterUrl, gigCandidate.version);
+  }
 
   const saveMutation = useMutation({
     mutationFn: async (values: GigFormValues) => {
@@ -230,7 +235,7 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
             onPosterUrlChange={setPosterUrl}
             onClearPoster={clearPoster}
             posterFileInputRef={posterFileInputRef}
-            existingPosterUrl={gigCandidate?.gigDraft.posterUrl}
+            existingPosterUrl={existingPosterUrl}
           />
           <Button
             type="submit"

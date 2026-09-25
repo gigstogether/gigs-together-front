@@ -124,6 +124,20 @@ describe('AdminGigCandidateDraftForm', () => {
     expect(pushMock).toHaveBeenCalledWith('/admin/gig-candidates/gigCandidate-42');
   });
 
+  it('should version the existing poster URL in edit mode', () => {
+    const gigCandidate = createReviewingGigCandidate();
+    gigCandidate.gigDraft.posterUrl = 'https://posters.example/gig-candidate.jpg?size=large';
+
+    renderForm(gigCandidate);
+
+    const versionedPosterUrl = 'https://posters.example/gig-candidate.jpg?size=large&v=4';
+    expect(screen.getByRole('img', { name: 'Poster preview' })).toHaveAttribute(
+      'src',
+      versionedPosterUrl,
+    );
+    expect(screen.getByRole('link', { name: 'open' })).toHaveAttribute('href', versionedPosterUrl);
+  });
+
   it('should report a stale GigCandidate version conflict', async () => {
     updateGigCandidateDraftMock.mockRejectedValueOnce(
       new ApiError('Version conflict', 409, 'GIG_CANDIDATE_CONFLICT'),

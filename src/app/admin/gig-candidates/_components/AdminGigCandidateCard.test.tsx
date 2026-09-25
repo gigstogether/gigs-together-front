@@ -90,6 +90,21 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
   });
 
+  it('should version the poster URL with the GigCandidate version', () => {
+    renderCard({
+      ...gigCandidate,
+      gigDraft: {
+        ...gigCandidate.gigDraft,
+        posterUrl: 'https://posters.example/gig-candidate.jpg?size=large',
+      },
+    });
+
+    expect(screen.getByRole('img', { name: 'Band' })).toHaveAttribute(
+      'src',
+      'https://posters.example/gig-candidate.jpg?size=large&v=3',
+    );
+  });
+
   it('should show Reject on a Reviewing detail view', () => {
     renderCard({ ...gigCandidate, status: GigCandidateStatusAPI.Reviewing });
 
