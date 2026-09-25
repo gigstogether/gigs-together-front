@@ -115,7 +115,9 @@ describe('useEditGigFormData', () => {
       publicId: 'gig-public-id',
       signal: expect.any(AbortSignal),
     });
-    expect(result.current.editGigData.existingPosterUrl).toBe('https://images.example/poster.png');
+    expect(result.current.editGigData.existingPosterUrl).toBe(
+      'https://images.example/poster.png?v=3',
+    );
     expect(result.current.editGigData.gigVersion).toBe(3);
     expect(result.current.form.getValues()).toEqual({
       title: 'Arctic Monkeys',

@@ -4,6 +4,7 @@ import type { UseFormReturn } from 'react-hook-form';
 
 import { toast } from '@/hooks/use-toast';
 import { fetchAdminGigByPublicId } from '@/app/admin/_lib/admin-api';
+import { buildVersionedAdminPosterUrl } from '@/app/admin/_lib/admin-poster-url';
 import { normalizeGigApiDate } from '@/app/admin/gigs/_lib/gig-form-api';
 import type { AdminGigFormData } from '@/app/admin/gigs/_lib/types';
 import { getTelegramInitDataExpiredToastContent } from '@/app/admin/gigs/_lib/telegram-init-data-expired';
@@ -39,6 +40,9 @@ interface UseEditGigFormDataResult {
 function buildEditGigFormQueryData(data: AdminGigFormData): EditGigFormQueryData {
   const date = normalizeGigApiDate(data.date, 'gig.date');
   const endDate = data.endDate ? normalizeGigApiDate(data.endDate, 'gig.endDate') : undefined;
+  const existingPosterUrl = data.posterUrl
+    ? buildVersionedAdminPosterUrl(data.posterUrl, data.version)
+    : '';
 
   return {
     formValues: {
@@ -51,7 +55,7 @@ function buildEditGigFormQueryData(data: AdminGigFormData): EditGigFormQueryData
       venue: data.venue,
       ticketsUrl: data.ticketsUrl,
     },
-    existingPosterUrl: data.posterUrl ?? '',
+    existingPosterUrl,
     gigVersion: data.version,
   };
 }

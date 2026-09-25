@@ -1,4 +1,5 @@
 import { GigPoster } from '@/components/GigPoster';
+import { buildVersionedAdminPosterUrl } from '@/app/admin/_lib/admin-poster-url';
 
 interface AdminPreviewPosterProps {
   posterUrl?: string;
@@ -20,10 +21,7 @@ export default function AdminPreviewPoster(props: AdminPreviewPosterProps) {
 
   let resolvedPosterUrl = posterUrl;
   if (posterVersion !== undefined) {
-    // Bucket object keys stay stable, so the Gig version makes replaced bytes a new browser URL.
-    const versionedPosterUrl = new URL(posterUrl);
-    versionedPosterUrl.searchParams.set('v', String(posterVersion));
-    resolvedPosterUrl = versionedPosterUrl.toString();
+    resolvedPosterUrl = buildVersionedAdminPosterUrl(posterUrl, posterVersion);
   }
 
   return (
