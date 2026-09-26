@@ -10,6 +10,7 @@ import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 import { ApiError } from '@/lib/api-errors';
+import { adminKeys } from '@/app/admin/_lib/adminKeys';
 
 const { toastMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
@@ -49,7 +50,7 @@ describe('useGigSubmit', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it('should call submit API and invalidate feed and gig-form queries when submission succeeds', async () => {
+  it('should call submit API and invalidate affected queries when submission succeeds', async () => {
     const queryClient = createTestQueryClient();
     const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
     const apiCall = vi
@@ -92,6 +93,10 @@ describe('useGigSubmit', () => {
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: feedKeys.all() });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: gigFormKeys.all() });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: adminKeys.gigsRoot() });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: adminKeys.gigByPublicId('arctic-monkeys-2026-07-01'),
+    });
     expect(onSuccess).toHaveBeenCalledWith({ publicId: 'arctic-monkeys-2026-07-01' });
   });
 

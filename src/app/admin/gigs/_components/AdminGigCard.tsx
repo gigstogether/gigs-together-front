@@ -155,6 +155,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
         <div className="p-2 pt-0">
           <AdminPreviewPoster
             posterUrl={gig.posterUrl}
+            posterVersion={gig.version}
             title={gig.title}
           />
         </div>

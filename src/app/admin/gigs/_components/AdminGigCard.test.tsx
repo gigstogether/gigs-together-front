@@ -54,4 +54,20 @@ describe('AdminGigCard', () => {
     expect(screen.getByText('Source: user · Test User')).toBeInTheDocument();
     expect(screen.queryByText(/internal-user-id/)).not.toBeInTheDocument();
   });
+
+  it('should version the poster URL with the Gig version', () => {
+    render(
+      <AdminGigCard
+        gig={{
+          ...gig,
+          posterUrl: 'https://posters.example/gig.jpg?size=large',
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('img', { name: 'Gig' })).toHaveAttribute(
+      'src',
+      'https://posters.example/gig.jpg?size=large&v=3',
+    );
+  });
 });

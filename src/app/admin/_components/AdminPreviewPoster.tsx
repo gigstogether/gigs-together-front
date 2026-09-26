@@ -1,12 +1,14 @@
 import { GigPoster } from '@/components/GigPoster';
+import { buildVersionedAdminPosterUrl } from '@/app/admin/_lib/admin-poster-url';
 
 interface AdminPreviewPosterProps {
   posterUrl?: string;
+  posterVersion?: number;
   title: string;
 }
 
 export default function AdminPreviewPoster(props: AdminPreviewPosterProps) {
-  const { posterUrl, title } = props;
+  const { posterUrl, posterVersion, title } = props;
 
   if (!posterUrl) {
     return (
@@ -17,9 +19,14 @@ export default function AdminPreviewPoster(props: AdminPreviewPosterProps) {
     );
   }
 
+  let resolvedPosterUrl = posterUrl;
+  if (posterVersion !== undefined) {
+    resolvedPosterUrl = buildVersionedAdminPosterUrl(posterUrl, posterVersion);
+  }
+
   return (
     <GigPoster
-      poster={posterUrl}
+      poster={resolvedPosterUrl}
       title={title}
     />
   );
