@@ -56,12 +56,12 @@ describe('apiPublicRequest', () => {
     fetchApiJsonMock.mockRejectedValue(responseError);
     const { apiPublicRequest } = await import('@/lib/api-public');
 
-    const request = apiPublicRequest('/v1/location/countries', 'GET');
+    const request = apiPublicRequest('/v1/countries', 'GET');
 
     await expect(request).rejects.toMatchObject({
       name: 'ApiRequestError',
-      message: 'HTTP 502 GET /v1/location/countries: Something went wrong',
-      endpointOrUrl: '/v1/location/countries',
+      message: 'HTTP 502 GET /v1/countries: Something went wrong',
+      endpointOrUrl: '/v1/countries',
       method: 'GET',
       statusCode: 502,
     });
@@ -72,7 +72,7 @@ describe('apiPublicRequest', () => {
     fetchApiJsonMock.mockRejectedValue(new ApiError('Something went wrong', 502));
     const { apiPublicRequest } = await import('@/lib/api-public');
 
-    const request = apiPublicRequest('/v1/location/countries', 'GET');
+    const request = apiPublicRequest('/v1/countries', 'GET');
 
     await expect(request).rejects.not.toHaveProperty('cause');
   });

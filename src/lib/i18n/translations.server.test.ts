@@ -55,7 +55,7 @@ describe('getTranslations', () => {
     await getTranslations('en', ['about', 'country']);
 
     expect(getTranslationsApiPublicRequestMock).toHaveBeenCalledWith(
-      '/v1/locale/translations?namespaces=about%2Ccountry',
+      '/v1/translations?namespaces=about%2Ccountry',
       'GET',
       undefined,
       expect.objectContaining({
@@ -73,7 +73,7 @@ describe('getTranslations', () => {
     await getTranslations('en', ['about', 'about']);
 
     expect(getTranslationsApiPublicRequestMock).toHaveBeenCalledWith(
-      '/v1/locale/translations?namespaces=about',
+      '/v1/translations?namespaces=about',
       'GET',
       undefined,
       expect.objectContaining({
