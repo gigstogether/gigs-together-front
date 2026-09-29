@@ -127,7 +127,7 @@ export async function fetchFeedAnchorYmdByPublicId(
   params: FetchFeedAnchorYmdByPublicIdParams,
 ): Promise<string> {
   const raw = await apiPublicRequest<unknown>(
-    `v1/gigs/date/${encodeURIComponent(params.publicId)}`,
+    `v1/gigs/${encodeURIComponent(params.publicId)}/date`,
     'GET',
     undefined,
     buildApiPublicRequestInit(params),
