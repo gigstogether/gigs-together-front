@@ -3,7 +3,7 @@
 import AdminTranslationFormDialogBody from '@/app/admin/translations/_components/AdminTranslationFormDialogBody';
 import type { AdminTranslationFormValues } from '@/app/admin/translations/_lib/admin-translation-form.types';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import type { PutAdminTranslationBody, SupportedLocale } from '@/app/admin/_lib/admin-api';
+import type { PutAdminTranslationParams, SupportedLocale } from '@/app/admin/_lib/admin-api';
 
 interface AdminTranslationFormDialogProps {
   readonly mode: 'create' | 'edit';
@@ -13,7 +13,7 @@ interface AdminTranslationFormDialogProps {
   readonly locales: readonly SupportedLocale[];
   readonly isSaving: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  readonly onSubmit: (body: PutAdminTranslationBody) => Promise<void>;
+  readonly onSubmit: (params: PutAdminTranslationParams) => Promise<void>;
 }
 
 export default function AdminTranslationFormDialog(props: AdminTranslationFormDialogProps) {
