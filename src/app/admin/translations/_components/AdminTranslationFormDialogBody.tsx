@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import type { PutAdminTranslationBody, SupportedLocale } from '@/app/admin/_lib/admin-api';
+import type { PutAdminTranslationParams, SupportedLocale } from '@/app/admin/_lib/admin-api';
 import { cn } from '@/lib/utils';
 import { isValidTranslationKey } from '@/lib/i18n/translation-identifiers';
 
@@ -23,7 +23,7 @@ interface AdminTranslationFormDialogBodyProps {
   readonly locales: readonly SupportedLocale[];
   readonly isSaving: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  readonly onSubmit: (body: PutAdminTranslationBody) => Promise<void>;
+  readonly onSubmit: (params: PutAdminTranslationParams) => Promise<void>;
 }
 
 export default function AdminTranslationFormDialogBody(props: AdminTranslationFormDialogBodyProps) {

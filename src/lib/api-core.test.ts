@@ -25,9 +25,7 @@ describe('buildUrl', () => {
   it('should normalize a leading slash on v1 endpoint', async () => {
     const { buildUrl } = await import('@/lib/api-core');
 
-    expect(buildUrl('/v1/location/countries')).toBe(
-      'https://api.example.com/v1/location/countries',
-    );
+    expect(buildUrl('/v1/countries')).toBe('https://api.example.com/v1/countries');
   });
 
   it('should throw when endpoint is an absolute URL', async () => {
@@ -333,7 +331,7 @@ describe('fetchApiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
     const { fetchApiJson } = await import('@/lib/api-core');
 
-    const action = fetchApiJson('v1/locale/translations', 'GET', undefined, OMIT_CREDENTIALS);
+    const action = fetchApiJson('v1/translations', 'GET', undefined, OMIT_CREDENTIALS);
 
     await expect(action).rejects.toMatchObject({
       name: 'ApiError',

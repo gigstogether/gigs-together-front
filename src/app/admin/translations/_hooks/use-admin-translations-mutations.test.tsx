@@ -6,7 +6,7 @@ import * as adminApi from '@/app/admin/_lib/admin-api';
 import { useAdminTranslationsMutations } from '@/app/admin/translations/_hooks/use-admin-translations-mutations';
 
 const mockPutAdminTranslation =
-  vi.fn<(body: adminApi.PutAdminTranslationBody) => Promise<adminApi.AdminTranslationRecord>>();
+  vi.fn<(params: adminApi.PutAdminTranslationParams) => Promise<void>>();
 const mockPatchAdminTranslationActive =
   vi.fn<
     (
@@ -33,16 +33,7 @@ describe('useAdminTranslationsMutations', () => {
     mockPutAdminTranslation.mockReset();
     mockPatchAdminTranslationActive.mockReset();
 
-    mockPutAdminTranslation.mockResolvedValue({
-      id: '64f1a2b3c4d5e6f7a8b9c0d1',
-      namespace: 'about',
-      locale: 'en',
-      key: 'title',
-      value: 'About us',
-      format: 'plain',
-      kind: 'text',
-      isActive: true,
-    });
+    mockPutAdminTranslation.mockResolvedValue(undefined);
     mockPatchAdminTranslationActive.mockResolvedValue({
       id: '64f1a2b3c4d5e6f7a8b9c0d1',
       namespace: 'about',

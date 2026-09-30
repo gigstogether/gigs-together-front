@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import type { AdminTranslationNamespaceFilter } from '@/app/admin/translations/_lib/admin-translations-filters';
 import { patchAdminTranslationActive, putAdminTranslation } from '@/app/admin/_lib/admin-api';
-import type { AdminTranslationRecord, PutAdminTranslationBody } from '@/app/admin/_lib/admin-api';
+import type { PutAdminTranslationParams } from '@/app/admin/_lib/admin-api';
 
 export interface UseAdminTranslationsMutationsParams {
   readonly namespaceFilter: AdminTranslationNamespaceFilter;
@@ -26,8 +26,8 @@ interface InvalidateAdminTranslationsQueriesParams {
 interface UseAdminTranslationsMutationsResult {
   readonly isSaving: boolean;
   readonly saveErrorMessage: string | null;
-  readonly upsert: (body: PutAdminTranslationBody) => void;
-  readonly upsertAsync: (body: PutAdminTranslationBody) => Promise<AdminTranslationRecord>;
+  readonly upsert: (params: PutAdminTranslationParams) => void;
+  readonly upsertAsync: (params: PutAdminTranslationParams) => Promise<void>;
   readonly setActive: (params: SetAdminTranslationActiveMutationParams) => void;
 }
 
@@ -51,7 +51,7 @@ export function useAdminTranslationsMutations(
   const queryClient = useQueryClient();
 
   const upsertMutation = useMutation({
-    mutationFn: (body: PutAdminTranslationBody) => putAdminTranslation(body),
+    mutationFn: (putParams: PutAdminTranslationParams) => putAdminTranslation(putParams),
     onSuccess: async () => {
       await invalidateAdminTranslationsQueries({
         queryClient,

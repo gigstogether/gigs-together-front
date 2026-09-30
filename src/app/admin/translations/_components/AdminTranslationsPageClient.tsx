@@ -30,7 +30,7 @@ import {
 import type {
   AdminTranslationKind,
   AdminTranslationRecord,
-  PutAdminTranslationBody,
+  PutAdminTranslationParams,
 } from '@/app/admin/_lib/admin-api';
 import { isValidTranslationNamespace } from '@/lib/i18n/translation-identifiers';
 
@@ -166,8 +166,8 @@ export default function AdminTranslationsPageClient() {
     });
   };
 
-  const handleDialogSubmit = async (body: PutAdminTranslationBody) => {
-    await upsertAsync(body);
+  const handleDialogSubmit = async (params: PutAdminTranslationParams) => {
+    await upsertAsync(params);
     setDialogState(null);
   };
 

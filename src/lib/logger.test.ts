@@ -54,14 +54,14 @@ describe('logger', () => {
     const responseError = new ApiError('Something went wrong', 500);
 
     logger.errorFromUnknown('api_public_request_failed', responseError, {
-      endpointOrUrl: '/v1/locale/translations?namespaces=country',
+      endpointOrUrl: '/v1/translations?namespaces=country',
       method: 'GET',
     });
 
     expect(consoleError).toHaveBeenCalledWith(
       'API public request failed (HTTP 500): Something went wrong',
       {
-        endpointOrUrl: '/v1/locale/translations?namespaces=country',
+        endpointOrUrl: '/v1/translations?namespaces=country',
         method: 'GET',
         error: responseError,
       },

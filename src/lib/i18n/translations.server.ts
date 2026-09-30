@@ -65,7 +65,7 @@ export async function getTranslations(
 
   const nsQuery = namespacesList.join(',');
 
-  const url = `/v1/locale/translations?namespaces=${encodeURIComponent(nsQuery)}`;
+  const url = `/v1/translations?namespaces=${encodeURIComponent(nsQuery)}`;
 
   const raw = await apiPublicRequest<unknown>(url, 'GET', undefined, {
     headers: { 'accept-language': locale },

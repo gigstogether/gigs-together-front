@@ -171,7 +171,7 @@ describe('fetchFeedAnchorYmdByPublicId', () => {
 
     expect(result).toBe('2026-04-21');
     expect(apiPublicRequestMock).toHaveBeenCalledWith(
-      'v1/gigs/date/abc%2Fdef',
+      'v1/gigs/abc%2Fdef/date',
       'GET',
       undefined,
       undefined,

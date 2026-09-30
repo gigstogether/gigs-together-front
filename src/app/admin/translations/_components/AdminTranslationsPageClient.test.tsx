@@ -64,16 +64,7 @@ describe('AdminTranslationsPageClient', () => {
         isActive: true,
       },
     ]);
-    adminApiMocks.putAdminTranslation.mockResolvedValue({
-      id: '64f1a2b3c4d5e6f7a8b9c0d1',
-      namespace: 'about',
-      locale: 'en',
-      key: 'title',
-      value: 'About us',
-      format: 'plain',
-      kind: 'text',
-      isActive: true,
-    });
+    adminApiMocks.putAdminTranslation.mockResolvedValue(undefined);
     adminApiMocks.patchAdminTranslationActive.mockResolvedValue({
       id: '64f1a2b3c4d5e6f7a8b9c0d1',
       namespace: 'about',

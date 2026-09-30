@@ -120,7 +120,7 @@ export interface FetchAdminTranslationsParams {
   readonly locale?: string;
 }
 
-export interface PutAdminTranslationBody {
+export interface PutAdminTranslationParams {
   readonly namespace: string;
   readonly locale: string;
   readonly key: string;
@@ -758,11 +758,20 @@ export async function fetchAdminTranslations(
   return parseAdminTranslationsList(raw);
 }
 
-export async function putAdminTranslation(
-  body: PutAdminTranslationBody,
-): Promise<AdminTranslationRecord> {
-  const raw = await apiClientRequest<unknown>(`${V1_ADMIN_API_PREFIX}translations`, 'PUT', body);
-  return parseAdminTranslationRecord(raw);
+export async function putAdminTranslation(params: PutAdminTranslationParams): Promise<void> {
+  const namespace = encodeURIComponent(params.namespace.trim());
+  const locale = encodeURIComponent(params.locale.trim().toLowerCase());
+  const key = encodeURIComponent(params.key.trim());
+  await apiClientRequest<void>(
+    `${V1_ADMIN_API_PREFIX}translations/${namespace}/${locale}/${key}`,
+    'PUT',
+    {
+      value: params.value,
+      format: params.format,
+      kind: params.kind,
+      isActive: params.isActive,
+    },
+  );
 }
 
 export async function patchAdminTranslationActive(

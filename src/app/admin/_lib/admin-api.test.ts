@@ -905,17 +905,8 @@ describe('putAdminTranslation', () => {
     mockApiRequest.mockReset();
   });
 
-  it('should parse admin translation upsert response when payload is valid', async () => {
-    mockApiRequest.mockResolvedValue({
-      id: '64f1a2b3c4d5e6f7a8b9c0d1',
-      namespace: 'about',
-      locale: 'en',
-      key: 'title',
-      value: 'About us',
-      format: 'plain',
-      kind: 'text',
-      isActive: true,
-    });
+  it('should send translation content to its resource URI', async () => {
+    mockApiRequest.mockResolvedValue(undefined);
 
     await expect(
       putAdminTranslation({
@@ -927,25 +918,38 @@ describe('putAdminTranslation', () => {
         kind: 'text',
         isActive: true,
       }),
-    ).resolves.toEqual({
-      id: '64f1a2b3c4d5e6f7a8b9c0d1',
-      namespace: 'about',
-      locale: 'en',
-      key: 'title',
+    ).resolves.toBeUndefined();
+    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/translations/about/en/title', 'PUT', {
       value: 'About us',
       format: 'plain',
       kind: 'text',
       isActive: true,
     });
-    expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/translations', 'PUT', {
-      namespace: 'about',
-      locale: 'en',
-      key: 'title',
+  });
+
+  it('should normalize the translation identity in the resource URI', async () => {
+    mockApiRequest.mockResolvedValue(undefined);
+
+    await putAdminTranslation({
+      namespace: ' aboutPage ',
+      locale: ' EN ',
+      key: ' hero.title ',
       value: 'About us',
       format: 'plain',
       kind: 'text',
       isActive: true,
     });
+
+    expect(mockApiRequest).toHaveBeenCalledWith(
+      'v1/admin/translations/aboutPage/en/hero.title',
+      'PUT',
+      {
+        value: 'About us',
+        format: 'plain',
+        kind: 'text',
+        isActive: true,
+      },
+    );
   });
 });
 
