@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import FeedClient from '../../_components/FeedClient';
 import { clientEnv } from '@/env/client-env';
@@ -7,6 +8,7 @@ import { getFeed } from '@/app/feed/_lib/feed.server';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
 import {
   DEFAULT_FEED_ROUTE,
+  buildFeedPath,
   normalizeSegment,
   SUPPORTED_FEED_LOCATIONS,
 } from '@/lib/feed/feed.routes';
@@ -32,6 +34,16 @@ interface FeedCityRouteParams {
 
 interface FeedCityPageProps {
   readonly params: Promise<FeedCityRouteParams>;
+}
+
+export async function generateMetadata(props: FeedCityPageProps): Promise<Metadata> {
+  const { country, city } = await props.params;
+
+  return {
+    alternates: {
+      canonical: buildFeedPath({ country, city }),
+    },
+  };
 }
 
 export default async function Page(props: FeedCityPageProps) {
