@@ -30,18 +30,12 @@ describe('sitemap', () => {
     expect(result).toEqual([]);
   });
 
-  it('should return public urls on production', () => {
+  it('should return only canonical public urls on production', () => {
     const result = sitemap();
 
-    expect(result).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ url: 'https://gigstogether.example' }),
-        expect.objectContaining({ url: 'https://gigstogether.example/feed' }),
-        expect.objectContaining({ url: 'https://gigstogether.example/about' }),
-        expect.objectContaining({
-          url: 'https://gigstogether.example/feed/es/barcelona',
-        }),
-      ]),
-    );
+    expect(result.map(({ url }) => url)).toEqual([
+      'https://gigstogether.example/about',
+      'https://gigstogether.example/feed/es/barcelona',
+    ]);
   });
 });

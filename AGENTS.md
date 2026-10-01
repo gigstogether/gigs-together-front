@@ -11,8 +11,9 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Prefer correctness and maintainability over implementation speed.
 - Prefer explicit, strict typing. Keep types narrow and avoid widening to `string | number | ...` when the domain is known.
 - Comments must be in English using the Latin alphabet only. Do not write comments in Cyrillic.
+- Do not remove existing comments during refactoring unless they are factually outdated or the documented behavior is intentionally removed. When moving code, move its relevant comments with it. If a comment becomes inaccurate, update it instead of silently deleting it.
 - Do not remove `TODO` comments (for example `// TODO: ...`) unless you are explicitly completing that TODO as part of the current task. Leave unrelated TODOs untouched.
-- Remove a TODO only when it explicitly describes the work you are doing now — not when it uses vague wording such as "refactor", "fix" or similar. Do not assume your change satisfies a TODO unless the comment clearly and specifically matches the task at hand; a generic TODO may refer to different work.
+- Remove a TODO only when it explicitly describes the work you are doing now — not when it uses vague wording such as "refactor", "fix", "cleanup", or similar. Do not assume your change satisfies a TODO unless the comment clearly and specifically matches the task at hand; a generic TODO may refer to different work.
 - For numeric constants in seconds or milliseconds (for example `604_800`, `86_400`), add a short comment with human-readable equivalents (at least days or hours, and minutes when useful).
 - Boolean variables and flags should preferably start with `is`/`has`/`can`, for example `isActive`, `isAdmin`, `isValid`.
 - In `catch` clauses, bind the caught value as `e`, not `error`, when a binding is needed (for example `catch (e) { ... }`).
@@ -24,13 +25,20 @@ Apply these rules to the whole repository unless a more specific instruction exi
 - Always create new files with `LF` line endings (not `CRLF`). Prefer editor or Git settings that default new files to `LF`.
 - Keep line endings as `LF` in tracked files. If you hit formatter errors caused by `CRLF`, convert the file to `LF` and reformat.
 
+## Naming
+
+- Do not use `publish`, `publication`, or any words from the same word family (for example `published`, `publisher`, or `publishing`) in repository names or identifiers. These terms are ambiguous in this project and cause confusion.
+- The prohibition applies to file and directory names, classes, interfaces, types, methods, functions, variables, constants, DTOs, events, route segments, database field names, and translation namespaces or keys.
+- Choose a concrete domain action instead, such as `post`, `send` or another term that precisely describes the behavior.
+- Do not use existing legacy occurrences as naming precedent. When code containing such an identifier is changed meaningfully, rename it within the same task when that rename is safe and in scope; otherwise call out the remaining legacy name explicitly.
+
 ## Execution Rules
 
 - Do not run `build`, `dev`, or start watchers or servers unless the user explicitly asks.
 - If command execution is needed to validate a change, ask first instead of running it proactively.
 - After source code changes (`*.ts`, `*.tsx`, `*.js`, `*.jsx`, `*.json`), run `npm run lint:fix` and `npx tsc --noEmit` before finishing the task without asking the user.
 - If necessary for the task, it's allowed to run relevant tests without asking the user.
-- Do not run lint or `tsc` after documentation-only changes (for example `*.md`).
+- Do not run lint or `tsc` after documentation-only or comment-only changes (for example `*.md`).
 
 ## Secrets Access Policy
 
@@ -208,6 +216,7 @@ src/
 - Do not use snake_case or kebab-case in namespaces or keys (for example `main_gig_post`, `weekly-digest`).
 - Post template keys name the post type without a redundant `Post` suffix (for example `mainGig`, `weeklyDigest`, not `mainGigPost`); namespace `telegram` already scopes channel post text.
 - **Locale** values stay lowercase ISO 639-1 codes (for example `en`, `es`); locale is not camelCase.
+- Preserve namespace casing in storage and API responses; do not normalize namespaces to lowercase.
 - Pass namespaces to `t(namespace, key, params)` using the same camelCase spelling returned by the API.
 - UI text uses `kind: text`; Telegram/post layouts with `{placeholders}` use `kind: template` under namespace `telegram`.
 

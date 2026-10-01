@@ -76,9 +76,6 @@ export const metadata: Metadata = serverEnv.isProductionSite
   ? {
       ...sharedMetadata,
       ...socialMetadata,
-      alternates: {
-        canonical: '/',
-      },
     }
   : {
       ...sharedMetadata,
