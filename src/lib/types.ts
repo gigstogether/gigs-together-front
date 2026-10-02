@@ -1,6 +1,6 @@
 export interface TelegramLoginOptions {
   client_id: number;
-  scope: ['profile'];
+  scope: ['profile', 'write'];
 }
 
 export interface TelegramLoginResult {
