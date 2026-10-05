@@ -202,6 +202,18 @@ export function hasExplicitTelegramSignIn(): boolean {
   }
 }
 
+export function clearExplicitTelegramSignIn(): void {
+  if (typeof localStorage === 'undefined') {
+    return;
+  }
+
+  try {
+    localStorage.removeItem(TELEGRAM_EXPLICIT_SIGN_IN_STORAGE_KEY);
+  } catch (e: unknown) {
+    console.error('Failed to clear explicit Telegram sign-in state.', e);
+  }
+}
+
 function persistExplicitTelegramSignIn(): void {
   if (typeof localStorage === 'undefined') {
     return;

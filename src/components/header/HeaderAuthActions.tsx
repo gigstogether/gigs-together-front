@@ -42,7 +42,7 @@ export default function HeaderAuthActions() {
   }
 
   const showSignInButton = !authState && isTelegramSignInAvailable;
-  const showSignOutButton = authState && miniAppEnv !== 'mini';
+  const showSignOutButton = Boolean(authState);
 
   return (
     <>

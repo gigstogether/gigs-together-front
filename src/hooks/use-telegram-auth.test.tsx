@@ -6,7 +6,10 @@ const { getTelegramLaunchParamsSnapshotMock, hookMocks, miniAppEnvMock, mockClie
     getTelegramLaunchParamsSnapshotMock:
       vi.fn<() => { initData?: string; startParam?: string } | undefined>(),
     hookMocks: {
+      clearExplicitTelegramSignIn: vi.fn(),
+      clearStoredTelegramClientProfile: vi.fn(),
       signInWithTelegram: vi.fn<() => Promise<void>>(),
+      signOutTelegramAuthOnServer: vi.fn<() => Promise<void>>(),
     },
     miniAppEnvMock: vi.fn<() => 'browser' | 'mini' | 'unknown'>(),
     mockClientEnv: {
@@ -29,10 +32,11 @@ vi.mock('@/lib/telegram/telegram-webapp', () => ({
 }));
 
 vi.mock('@/lib/telegram/telegram-auth', () => ({
-  clearStoredTelegramClientProfile: vi.fn(),
+  clearExplicitTelegramSignIn: hookMocks.clearExplicitTelegramSignIn,
+  clearStoredTelegramClientProfile: hookMocks.clearStoredTelegramClientProfile,
   getTelegramClientProfileSnapshot: () => null,
   signInWithTelegram: hookMocks.signInWithTelegram,
-  signOutTelegramAuthOnServer: vi.fn(),
+  signOutTelegramAuthOnServer: hookMocks.signOutTelegramAuthOnServer,
   subscribeTelegramClientProfile: () => () => undefined,
 }));
 
@@ -43,8 +47,12 @@ describe('useTelegramAuth', () => {
     miniAppEnvMock.mockReset();
     miniAppEnvMock.mockReturnValue('browser');
     getTelegramLaunchParamsSnapshotMock.mockReset();
+    hookMocks.clearExplicitTelegramSignIn.mockReset();
+    hookMocks.clearStoredTelegramClientProfile.mockReset();
     hookMocks.signInWithTelegram.mockReset();
     hookMocks.signInWithTelegram.mockResolvedValue();
+    hookMocks.signOutTelegramAuthOnServer.mockReset();
+    hookMocks.signOutTelegramAuthOnServer.mockResolvedValue();
   });
 
   it('should keep a guest signed out without starting Mini App authentication', () => {
@@ -90,5 +98,15 @@ describe('useTelegramAuth', () => {
     await act(() => result.current.signIn());
 
     expect(hookMocks.signInWithTelegram).toHaveBeenCalledTimes(1);
+  });
+
+  it('should clear explicit sign-in state and the cached profile on logout', async () => {
+    const { result } = renderHook(() => useTelegramAuth());
+
+    await act(() => result.current.signOut());
+
+    expect(hookMocks.clearExplicitTelegramSignIn).toHaveBeenCalledTimes(1);
+    expect(hookMocks.clearStoredTelegramClientProfile).toHaveBeenCalledTimes(1);
+    expect(hookMocks.signOutTelegramAuthOnServer).toHaveBeenCalledTimes(1);
   });
 });

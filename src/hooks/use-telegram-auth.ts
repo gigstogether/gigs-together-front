@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 import { clientEnv } from '@/env/client-env';
 import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import {
+  clearExplicitTelegramSignIn,
   clearStoredTelegramClientProfile,
   getTelegramClientProfileSnapshot,
   signInWithTelegram,
@@ -52,9 +53,10 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     };
   }, [profileSnapshot]);
 
-  const signOut = useCallback(async () => {
-    await signOutTelegramAuthOnServer();
+  const signOut = useCallback(async (): Promise<void> => {
+    clearExplicitTelegramSignIn();
     clearStoredTelegramClientProfile();
+    await signOutTelegramAuthOnServer();
   }, []);
 
   const isTelegramSignInAvailable =

@@ -24,6 +24,7 @@ vi.mock('@/lib/telegram/telegram-webapp', () => ({
 }));
 
 import {
+  clearExplicitTelegramSignIn,
   exchangeTelegramAuthFromOidc,
   exchangeTelegramAuthFromWebApp,
   hasExplicitTelegramSignIn,
@@ -106,6 +107,14 @@ describe('explicit Telegram sign-in state', () => {
 
   it('should not persist explicit sign-in state for a low-level Mini App exchange', async () => {
     await exchangeTelegramAuthFromWebApp('init-data');
+
+    expect(hasExplicitTelegramSignIn()).toBe(false);
+  });
+
+  it('should clear explicit sign-in state on logout', async () => {
+    await exchangeTelegramAuthFromOidc({ idToken: 'id-token' });
+
+    clearExplicitTelegramSignIn();
 
     expect(hasExplicitTelegramSignIn()).toBe(false);
   });

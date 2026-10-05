@@ -79,4 +79,22 @@ describe('HeaderAuthActions', () => {
 
     expect(screen.queryByRole('button', { name: 'Sign in' })).toBeNull();
   });
+
+  it('should allow an authenticated Mini App user to sign out', () => {
+    const signOut = vi.fn<() => Promise<void>>().mockResolvedValue();
+    miniAppEnvMock.mockReturnValue('mini');
+    vi.mocked(useTelegramAuth).mockReturnValue({
+      authState: { displayLabel: '@user', isAdmin: false },
+      isLoadingAuthState: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn: vi.fn(),
+      signOut,
+    });
+
+    render(<HeaderAuthActions />);
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+
+    expect(signOut).toHaveBeenCalledTimes(1);
+  });
 });
