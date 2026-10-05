@@ -1,11 +1,15 @@
-import { useCallback, useMemo, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import { clientEnv } from '@/env/client-env';
+import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import {
   clearStoredTelegramClientProfile,
   getTelegramClientProfileSnapshot,
+  signInWithTelegram,
   signOutTelegramAuthOnServer,
   subscribeTelegramClientProfile,
 } from '@/lib/telegram/telegram-auth';
 import type { TelegramAuthState } from '@/lib/telegram/telegram-auth.types';
+import { getTelegramLaunchParamsSnapshot } from '@/lib/telegram/telegram-webapp';
 
 function subscribeNoop(): () => void {
   return () => undefined;
@@ -14,6 +18,9 @@ function subscribeNoop(): () => void {
 export interface UseTelegramAuthResult {
   readonly authState: TelegramAuthState | null;
   readonly isLoadingAuthState: boolean;
+  readonly isSigningIn: boolean;
+  readonly isTelegramSignInAvailable: boolean;
+  readonly signIn: () => Promise<void>;
   readonly signOut: () => Promise<void>;
 }
 
@@ -32,6 +39,8 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     getTelegramClientProfileSnapshot,
     () => null,
   );
+  const miniAppEnv = useTelegramMiniAppEnv();
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const authState = useMemo((): TelegramAuthState | null => {
     if (!profileSnapshot) {
       return null;
@@ -48,9 +57,31 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     clearStoredTelegramClientProfile();
   }, []);
 
+  const isTelegramSignInAvailable =
+    clientEnv.isAuthEnabled &&
+    (miniAppEnv === 'mini'
+      ? Boolean(getTelegramLaunchParamsSnapshot()?.initData)
+      : miniAppEnv === 'browser' && Boolean(clientEnv.telegramOidcClientId));
+
+  const signIn = useCallback(async (): Promise<void> => {
+    if (!isTelegramSignInAvailable) {
+      throw new Error('Telegram sign-in is not available in this environment.');
+    }
+
+    setIsSigningIn(true);
+    try {
+      await signInWithTelegram();
+    } finally {
+      setIsSigningIn(false);
+    }
+  }, [isTelegramSignInAvailable]);
+
   return {
     authState,
     isLoadingAuthState: !isHydrated,
+    isSigningIn,
+    isTelegramSignInAvailable,
+    signIn,
     signOut,
   };
 }

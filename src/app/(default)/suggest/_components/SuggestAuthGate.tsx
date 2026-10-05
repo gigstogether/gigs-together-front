@@ -4,9 +4,8 @@ import type { ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { clientEnv } from '@/env/client-env';
-import { requestTelegramSignIn } from '@/lib/telegram/telegram-auth';
 
 interface SuggestAuthGateProps {
   children: ReactNode;
@@ -15,8 +14,20 @@ interface SuggestAuthGateProps {
 export default function SuggestAuthGate(props: SuggestAuthGateProps) {
   const { children } = props;
 
-  const { authState, isLoadingAuthState } = useTelegramAuth();
-  const isTelegramSignInAvailable = Boolean(clientEnv.telegramOidcClientId);
+  const { authState, isLoadingAuthState, isSigningIn, isTelegramSignInAvailable, signIn } =
+    useTelegramAuth();
+
+  const handleSignIn = async (): Promise<void> => {
+    try {
+      await signIn();
+    } catch (e) {
+      toast({
+        title: 'Sign in failed',
+        description: e instanceof Error ? e.message : 'Could not complete Telegram sign-in.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   if (isLoadingAuthState) {
     return (
@@ -41,13 +52,17 @@ export default function SuggestAuthGate(props: SuggestAuthGateProps) {
               <Button
                 type="button"
                 className="w-full"
-                onClick={() => requestTelegramSignIn()}
+                disabled={isSigningIn}
+                onClick={() => {
+                  void handleSignIn();
+                }}
               >
-                Sign in
+                {isSigningIn ? 'Signing in…' : 'Sign in'}
               </Button>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Sign-in is not configured on this deployment, so suggestions cannot be submitted.
+                Telegram sign-in is not available in this session, so suggestions cannot be
+                submitted.
               </p>
             )}
           </CardContent>

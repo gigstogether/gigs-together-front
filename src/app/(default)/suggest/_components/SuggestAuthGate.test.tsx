@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import SuggestAuthGate from '@/app/(default)/suggest/_components/SuggestAuthGate';
 
@@ -13,10 +13,17 @@ vi.mock('@/hooks/use-telegram-auth', () => ({
 }));
 
 describe('SuggestAuthGate', () => {
+  beforeEach(() => {
+    useTelegramAuthMock.mockReset();
+  });
+
   it('should center the loading state across the available route width', () => {
     useTelegramAuthMock.mockReturnValue({
-      authState: undefined,
+      authState: null,
       isLoadingAuthState: true,
+      isSigningIn: false,
+      isTelegramSignInAvailable: false,
+      signIn: vi.fn(),
     });
 
     render(
@@ -26,5 +33,44 @@ describe('SuggestAuthGate', () => {
     );
 
     expect(screen.getByText('Loading…').parentElement).toHaveClass('w-full', 'justify-center');
+  });
+
+  it('should keep the form hidden and start sign-in when a guest clicks Sign in', () => {
+    const signIn = vi.fn<() => Promise<void>>().mockResolvedValue();
+    useTelegramAuthMock.mockReturnValue({
+      authState: null,
+      isLoadingAuthState: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn,
+    });
+
+    render(
+      <SuggestAuthGate>
+        <div>Form</div>
+      </SuggestAuthGate>,
+    );
+
+    expect(screen.queryByText('Form')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    expect(signIn).toHaveBeenCalledTimes(1);
+  });
+
+  it('should render the form after authentication', () => {
+    useTelegramAuthMock.mockReturnValue({
+      authState: { displayLabel: '@user', isAdmin: false },
+      isLoadingAuthState: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn: vi.fn(),
+    });
+
+    render(
+      <SuggestAuthGate>
+        <div>Form</div>
+      </SuggestAuthGate>,
+    );
+
+    expect(screen.getByText('Form')).toBeInTheDocument();
   });
 });

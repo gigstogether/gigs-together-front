@@ -8,7 +8,6 @@ const { mockClientEnv, miniAppEnvMock } = vi.hoisted(() => ({
     githubUrl: undefined,
     isPublicSuggestGigEnabled: false,
     telegramOidcClientId: 123456,
-    isAuthEnabled: true,
   },
   miniAppEnvMock: vi.fn<() => 'browser' | 'mini' | 'unknown'>(),
 }));
@@ -52,13 +51,15 @@ import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 
 describe('HeaderActions', () => {
   beforeEach(() => {
-    mockClientEnv.isAuthEnabled = true;
     mockClientEnv.isPublicSuggestGigEnabled = false;
     miniAppEnvMock.mockReset();
     miniAppEnvMock.mockReturnValue('browser');
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: null,
       isLoadingAuthState: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn: vi.fn(),
       signOut: vi.fn(),
     });
   });
@@ -85,6 +86,9 @@ describe('HeaderActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: { displayLabel: '@admin', isAdmin: true },
       isLoadingAuthState: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 
@@ -111,6 +115,9 @@ describe('HeaderActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: { displayLabel: '@only', isAdmin: false },
       isLoadingAuthState: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 
@@ -129,8 +136,15 @@ describe('HeaderActions', () => {
     });
   });
 
-  it('should hide Sign in in menu when auth is disabled for guests', async () => {
-    mockClientEnv.isAuthEnabled = false;
+  it('should hide Sign in in menu when sign-in is unavailable for guests', async () => {
+    vi.mocked(useTelegramAuth).mockReturnValue({
+      authState: null,
+      isLoadingAuthState: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: false,
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+    });
 
     render(
       <HeaderActions
@@ -151,6 +165,9 @@ describe('HeaderActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: { displayLabel: '@admin', isAdmin: true },
       isLoadingAuthState: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 

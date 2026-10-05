@@ -1,6 +1,7 @@
 import { fetchApiJson } from '@/lib/api-core';
 import { clientEnv } from '@/env/client-env';
 import { isRecord } from '@/lib/is-record';
+import { getTelegramInitData, isTelegramMiniApp } from '@/lib/telegram/telegram-webapp';
 import type { TelegramAuthExchangeResponse } from '@/lib/telegram/telegram-auth-exchange-response.types';
 import type { TelegramStoredClientProfile } from '@/lib/telegram/telegram-client-profile.types';
 
@@ -11,6 +12,9 @@ export interface TelegramOidcCredentials {
 }
 
 const TELEGRAM_SIGN_IN_REQUIRED_EVENT = 'gt:telegram-sign-in-required';
+const TELEGRAM_EXPLICIT_SIGN_IN_STORAGE_KEY = 'gt_tg_explicit_sign_in';
+const TELEGRAM_EXPLICIT_SIGN_IN_STORAGE_VALUE = '1';
+let telegramMiniAppSignInPromise: Promise<void> | null = null;
 
 /**
  * localStorage key for the cached Telegram profile (`NEXT_PUBLIC_*` is inlined at build time).
@@ -145,8 +149,8 @@ export function setStoredTelegramClientProfile(profile: TelegramStoredClientProf
   try {
     localStorage.setItem(getTelegramClientProfileStorageKey(), JSON.stringify(profile));
     notifyTelegramClientProfileListeners();
-  } catch {
-    /* quota / private mode */
+  } catch (e: unknown) {
+    console.error('Failed to persist Telegram client profile.', e);
   }
 }
 
@@ -154,8 +158,8 @@ export function clearStoredTelegramClientProfile(): void {
   if (typeof localStorage === 'undefined') return;
   try {
     localStorage.removeItem(getTelegramClientProfileStorageKey());
-  } catch {
-    /* ignore */
+  } catch (e: unknown) {
+    console.error('Failed to clear Telegram client profile.', e);
   }
   notifyTelegramClientProfileListeners();
 }
@@ -182,14 +186,45 @@ export function subscribeTelegramSignInRequest(listener: () => void): () => void
   };
 }
 
+export function hasExplicitTelegramSignIn(): boolean {
+  if (typeof localStorage === 'undefined') {
+    return false;
+  }
+
+  try {
+    return (
+      localStorage.getItem(TELEGRAM_EXPLICIT_SIGN_IN_STORAGE_KEY) ===
+      TELEGRAM_EXPLICIT_SIGN_IN_STORAGE_VALUE
+    );
+  } catch (e: unknown) {
+    console.error('Failed to read explicit Telegram sign-in state.', e);
+    return false;
+  }
+}
+
+function persistExplicitTelegramSignIn(): void {
+  if (typeof localStorage === 'undefined') {
+    return;
+  }
+
+  try {
+    localStorage.setItem(
+      TELEGRAM_EXPLICIT_SIGN_IN_STORAGE_KEY,
+      TELEGRAM_EXPLICIT_SIGN_IN_STORAGE_VALUE,
+    );
+  } catch (e: unknown) {
+    console.error('Failed to persist explicit Telegram sign-in state.', e);
+  }
+}
+
 /** Clears HttpOnly session cookies on the server (best-effort). */
 export async function signOutTelegramAuthOnServer(): Promise<void> {
   try {
     await fetchApiJson<unknown>('v1/auth/logout', 'POST', undefined, {
       credentials: 'include',
     });
-  } catch {
-    /* best-effort: still clear local profile */
+  } catch (e: unknown) {
+    console.error('Failed to clear Telegram authentication cookies on the server.', e);
   }
 }
 
@@ -206,6 +241,27 @@ export async function exchangeTelegramAuthFromWebApp(initData: string): Promise<
   setStoredTelegramClientProfile(profile);
 }
 
+export function signInWithTelegram(): Promise<void> {
+  if (!isTelegramMiniApp()) {
+    requestTelegramSignIn();
+    return Promise.resolve();
+  }
+
+  if (!telegramMiniAppSignInPromise) {
+    telegramMiniAppSignInPromise = (async () => {
+      try {
+        const initData = getTelegramInitData();
+        await exchangeTelegramAuthFromWebApp(initData);
+        persistExplicitTelegramSignIn();
+      } finally {
+        telegramMiniAppSignInPromise = null;
+      }
+    })();
+  }
+
+  return telegramMiniAppSignInPromise;
+}
+
 export async function exchangeTelegramAuthFromOidc(
   credentials: TelegramOidcCredentials,
 ): Promise<TelegramAuthExchangeResponse> {
@@ -214,5 +270,6 @@ export async function exchangeTelegramAuthFromOidc(
   });
   const response = parseAuthExchangeResponse(raw);
   setStoredTelegramClientProfile(response.profile);
+  persistExplicitTelegramSignIn();
   return response;
 }
