@@ -11,9 +11,9 @@ const { postAuthRefreshMock } = vi.hoisted(() => ({
   postAuthRefreshMock: vi.fn<() => Promise<boolean>>(),
 }));
 
-const { isTelegramMiniAppMock, waitForTelegramInitDataMock } = vi.hoisted(() => ({
+const { getTelegramInitDataMock, isTelegramMiniAppMock } = vi.hoisted(() => ({
+  getTelegramInitDataMock: vi.fn<() => string>(),
   isTelegramMiniAppMock: vi.fn<() => boolean>(),
-  waitForTelegramInitDataMock: vi.fn<() => Promise<string>>(),
 }));
 
 const { exchangeTelegramAuthFromWebAppMock } = vi.hoisted(() => ({
@@ -25,8 +25,8 @@ vi.mock('@/lib/auth-refresh', () => ({
 }));
 
 vi.mock('@/lib/telegram/telegram-webapp', () => ({
+  getTelegramInitData: getTelegramInitDataMock,
   isTelegramMiniApp: isTelegramMiniAppMock,
-  waitForTelegramInitData: waitForTelegramInitDataMock,
 }));
 
 vi.mock('@/lib/telegram/telegram-auth', () => ({
@@ -41,7 +41,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
     postAuthRefreshMock.mockResolvedValue(false);
     isTelegramMiniAppMock.mockReset();
     isTelegramMiniAppMock.mockReturnValue(false);
-    waitForTelegramInitDataMock.mockReset();
+    getTelegramInitDataMock.mockReset();
     exchangeTelegramAuthFromWebAppMock.mockReset();
     exchangeTelegramAuthFromWebAppMock.mockResolvedValue();
   });
@@ -139,7 +139,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
   it('should retry request after Telegram Mini App re-auth succeeds when token refresh fails', async () => {
     postAuthRefreshMock.mockResolvedValue(false);
     isTelegramMiniAppMock.mockReturnValue(true);
-    waitForTelegramInitDataMock.mockResolvedValue('init-data');
+    getTelegramInitDataMock.mockReturnValue('init-data');
 
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -161,7 +161,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
     expect(result).toEqual({ gigs: [] });
     expect(postAuthRefreshMock).toHaveBeenCalledTimes(1);
     expect(isTelegramMiniAppMock).toHaveBeenCalledTimes(1);
-    expect(waitForTelegramInitDataMock).toHaveBeenCalledTimes(1);
+    expect(getTelegramInitDataMock).toHaveBeenCalledTimes(1);
     expect(exchangeTelegramAuthFromWebAppMock).toHaveBeenCalledWith('init-data');
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
@@ -169,7 +169,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
   it('should finish unauthorized flow when Telegram Mini App re-auth fails', async () => {
     const onUnauthorized = vi.fn();
     isTelegramMiniAppMock.mockReturnValue(true);
-    waitForTelegramInitDataMock.mockResolvedValue('init-data');
+    getTelegramInitDataMock.mockReturnValue('init-data');
     exchangeTelegramAuthFromWebAppMock.mockRejectedValue(new Error('invalid initData'));
 
     const fetchMock = vi
@@ -197,7 +197,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
   it('should not repeat recovery after request stays unauthorized following Mini App re-auth', async () => {
     const onUnauthorized = vi.fn();
     isTelegramMiniAppMock.mockReturnValue(true);
-    waitForTelegramInitDataMock.mockResolvedValue('init-data');
+    getTelegramInitDataMock.mockReturnValue('init-data');
 
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -237,7 +237,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
     vi.stubGlobal('fetch', fetchMock);
     vi.stubGlobal('window', {});
     isTelegramMiniAppMock.mockReturnValue(true);
-    waitForTelegramInitDataMock.mockResolvedValue('init-data');
+    getTelegramInitDataMock.mockReturnValue('init-data');
 
     const { fetchApiJsonWithSessionRecovery } = await import('@/lib/api-session-recovery');
 
@@ -251,7 +251,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
     await expect(action).rejects.toThrow();
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
     expect(isTelegramMiniAppMock).not.toHaveBeenCalled();
-    expect(waitForTelegramInitDataMock).not.toHaveBeenCalled();
+    expect(getTelegramInitDataMock).not.toHaveBeenCalled();
   });
 
   it('should not call onUnauthorized when response status is not 401', async () => {

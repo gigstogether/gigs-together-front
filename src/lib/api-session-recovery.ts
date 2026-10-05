@@ -50,14 +50,14 @@ async function postTelegramMiniAppReauth(): Promise<boolean> {
   if (!telegramMiniAppReauthPromise) {
     telegramMiniAppReauthPromise = (async () => {
       try {
-        const { isTelegramMiniApp, waitForTelegramInitData } = await import(
+        const { getTelegramInitData, isTelegramMiniApp } = await import(
           '@/lib/telegram/telegram-webapp'
         );
         if (!isTelegramMiniApp()) {
           return false;
         }
 
-        const initData = await waitForTelegramInitData();
+        const initData = getTelegramInitData();
         await exchangeTelegramAuthFromWebApp(initData);
         return true;
       } catch {

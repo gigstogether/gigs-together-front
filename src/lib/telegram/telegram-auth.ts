@@ -241,13 +241,13 @@ export async function bootstrapTelegramAuthFromWebApp(): Promise<void> {
     setTelegramMiniAppBootstrapPending(true);
     telegramMiniAppBootstrapPromise = (async () => {
       try {
-        const { isTelegramMiniApp, waitForTelegramInitData } = await import(
+        const { getTelegramInitData, isTelegramMiniApp } = await import(
           '@/lib/telegram/telegram-webapp'
         );
         if (!isTelegramMiniApp()) {
           return;
         }
-        const initData = await waitForTelegramInitData();
+        const initData = getTelegramInitData();
         await exchangeTelegramAuthFromWebApp(initData);
       } finally {
         telegramMiniAppBootstrapPromise = null;

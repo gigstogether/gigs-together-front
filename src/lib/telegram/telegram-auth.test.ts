@@ -1,9 +1,9 @@
 export {};
 
-const { bootstrapIsTelegramMiniAppMock, bootstrapWaitForTelegramInitDataMock, fetchApiJsonMock } =
+const { bootstrapGetTelegramInitDataMock, bootstrapIsTelegramMiniAppMock, fetchApiJsonMock } =
   vi.hoisted(() => ({
+    bootstrapGetTelegramInitDataMock: vi.fn<() => string>(),
     bootstrapIsTelegramMiniAppMock: vi.fn<() => boolean>(),
-    bootstrapWaitForTelegramInitDataMock: vi.fn<() => Promise<string>>(),
     fetchApiJsonMock: vi.fn(),
   }));
 
@@ -19,16 +19,18 @@ vi.mock('@/env/client-env', () => ({
 }));
 
 vi.mock('@/lib/telegram/telegram-webapp', () => ({
+  getTelegramInitData: bootstrapGetTelegramInitDataMock,
   isTelegramMiniApp: bootstrapIsTelegramMiniAppMock,
-  waitForTelegramInitData: bootstrapWaitForTelegramInitDataMock,
 }));
 
 describe('bootstrapTelegramAuthFromWebApp', () => {
   beforeEach(() => {
     bootstrapIsTelegramMiniAppMock.mockReset();
     bootstrapIsTelegramMiniAppMock.mockReturnValue(true);
-    bootstrapWaitForTelegramInitDataMock.mockReset();
-    bootstrapWaitForTelegramInitDataMock.mockRejectedValue(new Error('initData unavailable'));
+    bootstrapGetTelegramInitDataMock.mockReset();
+    bootstrapGetTelegramInitDataMock.mockImplementation(() => {
+      throw new Error('initData unavailable');
+    });
     vi.stubGlobal('window', {});
   });
 

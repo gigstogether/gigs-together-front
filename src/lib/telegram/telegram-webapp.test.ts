@@ -198,7 +198,9 @@ describe('getTelegramInitData', () => {
       '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
     );
 
-    expect(getTelegramInitData()).toBe('');
+    expect(() => getTelegramInitData()).toThrow(
+      'Telegram initData is not available. Open this page from inside Telegram (Mini App).',
+    );
   });
 });
 

@@ -57,7 +57,14 @@ export function captureTelegramLaunchParamsFromUrl(): void {
 }
 
 export function getTelegramInitData(): string {
-  return getTelegramLaunchParamsSnapshot()?.initData ?? '';
+  const initData = getTelegramLaunchParamsSnapshot()?.initData;
+  if (!initData) {
+    throw new Error(
+      'Telegram initData is not available. Open this page from inside Telegram (Mini App).',
+    );
+  }
+
+  return initData;
 }
 
 /**
@@ -240,34 +247,4 @@ function isTelegramLaunchParamsSnapshot(value: unknown): value is TelegramLaunch
   }
 
   return Object.keys(value).every((key) => key === 'initData' || key === 'startParam');
-}
-
-export interface WaitForTelegramInitDataOptions {
-  readonly signal?: AbortSignal;
-  readonly timeoutMs?: number;
-  readonly intervalMs?: number;
-}
-
-export async function waitForTelegramInitData(
-  options?: WaitForTelegramInitDataOptions,
-): Promise<string> {
-  // 10_000 ms = 10 s poll budget for Mini App initData
-  const timeoutMs = options?.timeoutMs ?? 10_000;
-  // 100 ms between polls
-  const intervalMs = options?.intervalMs ?? 100;
-
-  const start = Date.now();
-
-  while (Date.now() - start <= timeoutMs) {
-    if (options?.signal?.aborted) {
-      throw new DOMException('Aborted', 'AbortError');
-    }
-    const initData = getTelegramInitData();
-    if (initData) return initData;
-    await new Promise((r) => setTimeout(r, intervalMs));
-  }
-
-  throw new Error(
-    'Telegram initData is not available. Open this page from inside Telegram (Mini App).',
-  );
 }
