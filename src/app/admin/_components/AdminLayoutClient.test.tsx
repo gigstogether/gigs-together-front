@@ -28,7 +28,7 @@ describe('AdminLayoutClient', () => {
     vi.mocked(requestTelegramSignIn).mockReset();
   });
 
-  it('should show a loading state when auth bootstrap is not finished', () => {
+  it('should show a loading state before client auth state hydration finishes', () => {
     mockUseModeratorTelegramSession.mockReturnValue(
       buildModeratorTelegramSessionMock({
         isLoadingAuthState: true,
@@ -62,25 +62,6 @@ describe('AdminLayoutClient', () => {
     expect(screen.getByText('Restricted area')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
     expect(screen.queryByTestId('admin-shell')).not.toBeInTheDocument();
-  });
-
-  it('should explain how to recover when Telegram Mini App authentication fails', () => {
-    mockUseModeratorTelegramSession.mockReturnValue(
-      buildModeratorTelegramSessionMock({
-        authState: null,
-        hasTelegramMiniAppAuthError: true,
-      }),
-    );
-
-    render(
-      <AdminLayoutClient>
-        <div data-testid="admin-child" />
-      </AdminLayoutClient>,
-    );
-
-    expect(screen.getByText('Telegram sign-in failed')).toBeInTheDocument();
-    expect(screen.getByText(/Fully close Telegram, reopen it/)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Sign in' })).not.toBeInTheDocument();
   });
 
   it('should open shared sign-in modal when guest clicks Sign in', () => {

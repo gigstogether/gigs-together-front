@@ -9,14 +9,13 @@ import type { TelegramAuthState } from '@/lib/telegram/telegram-auth.types';
 export interface UseModeratorTelegramSessionResult {
   readonly authState: TelegramAuthState | null;
   readonly isLoadingAuthState: boolean;
-  readonly hasTelegramMiniAppAuthError: boolean;
   readonly isTelegramSignInAvailable: boolean;
   readonly miniAppEnv: TelegramMiniAppEnv;
   readonly handleSignOut: () => Promise<void>;
 }
 
 export function useModeratorTelegramSession(): UseModeratorTelegramSessionResult {
-  const { authState, isLoadingAuthState, hasTelegramMiniAppAuthError, signOut } = useTelegramAuth();
+  const { authState, isLoadingAuthState, signOut } = useTelegramAuth();
 
   const isTelegramSignInAvailable = Boolean(clientEnv.telegramOidcClientId);
   const miniAppEnv = useTelegramMiniAppEnv();
@@ -32,7 +31,6 @@ export function useModeratorTelegramSession(): UseModeratorTelegramSessionResult
   return {
     authState,
     isLoadingAuthState,
-    hasTelegramMiniAppAuthError,
     isTelegramSignInAvailable,
     miniAppEnv,
     handleSignOut,

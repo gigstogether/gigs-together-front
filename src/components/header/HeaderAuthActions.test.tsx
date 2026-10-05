@@ -28,7 +28,6 @@ vi.mock('@/hooks/use-telegram-auth', () => ({
   useTelegramAuth: vi.fn(() => ({
     authState: null,
     isLoadingAuthState: false,
-    hasTelegramMiniAppAuthError: false,
     signOut: vi.fn(),
   })),
 }));
@@ -44,7 +43,6 @@ describe('HeaderAuthActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: null,
       isLoadingAuthState: false,
-      hasTelegramMiniAppAuthError: false,
       signOut: vi.fn(),
     });
 
@@ -58,7 +56,6 @@ describe('HeaderAuthActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: null,
       isLoadingAuthState: false,
-      hasTelegramMiniAppAuthError: false,
       signOut: vi.fn(),
     });
 

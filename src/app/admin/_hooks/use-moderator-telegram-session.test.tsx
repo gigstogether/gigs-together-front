@@ -15,7 +15,6 @@ vi.mock('@/hooks/use-telegram-auth', () => ({
   useTelegramAuth: () => ({
     authState: null,
     isLoadingAuthState: false,
-    hasTelegramMiniAppAuthError: false,
     signOut: vi.fn(),
   }),
 }));

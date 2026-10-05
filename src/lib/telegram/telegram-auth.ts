@@ -11,9 +11,6 @@ export interface TelegramOidcCredentials {
 }
 
 const TELEGRAM_SIGN_IN_REQUIRED_EVENT = 'gt:telegram-sign-in-required';
-const telegramMiniAppBootstrapListeners = new Set<() => void>();
-let telegramMiniAppBootstrapPromise: Promise<void> | null = null;
-let isTelegramMiniAppBootstrapPending = false;
 
 /**
  * localStorage key for the cached Telegram profile (`NEXT_PUBLIC_*` is inlined at build time).
@@ -28,18 +25,6 @@ let isCrossTabStorageListenerAttached = false;
 
 function notifyTelegramClientProfileListeners(): void {
   telegramClientProfileListeners.forEach((listener) => listener());
-}
-
-function notifyTelegramMiniAppBootstrapListeners(): void {
-  telegramMiniAppBootstrapListeners.forEach((listener) => listener());
-}
-
-function setTelegramMiniAppBootstrapPending(next: boolean): void {
-  if (isTelegramMiniAppBootstrapPending === next) {
-    return;
-  }
-  isTelegramMiniAppBootstrapPending = next;
-  notifyTelegramMiniAppBootstrapListeners();
 }
 
 /** `storage` fires for other tabs; same-tab updates call {@link notifyTelegramClientProfileListeners} explicitly. */
@@ -61,17 +46,6 @@ export function subscribeTelegramClientProfile(listener: () => void): () => void
   return () => {
     telegramClientProfileListeners.delete(listener);
   };
-}
-
-export function subscribeTelegramMiniAppBootstrap(listener: () => void): () => void {
-  telegramMiniAppBootstrapListeners.add(listener);
-  return () => {
-    telegramMiniAppBootstrapListeners.delete(listener);
-  };
-}
-
-export function getTelegramMiniAppBootstrapSnapshot(): boolean {
-  return isTelegramMiniAppBootstrapPending;
 }
 
 /**
@@ -230,33 +204,6 @@ export async function exchangeTelegramAuthFromWebApp(initData: string): Promise<
   );
   const { profile } = parseAuthExchangeResponse(raw);
   setStoredTelegramClientProfile(profile);
-}
-
-export async function bootstrapTelegramAuthFromWebApp(): Promise<void> {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  if (!telegramMiniAppBootstrapPromise) {
-    setTelegramMiniAppBootstrapPending(true);
-    telegramMiniAppBootstrapPromise = (async () => {
-      try {
-        const { getTelegramInitData, isTelegramMiniApp } = await import(
-          '@/lib/telegram/telegram-webapp'
-        );
-        if (!isTelegramMiniApp()) {
-          return;
-        }
-        const initData = getTelegramInitData();
-        await exchangeTelegramAuthFromWebApp(initData);
-      } finally {
-        telegramMiniAppBootstrapPromise = null;
-        setTelegramMiniAppBootstrapPending(false);
-      }
-    })();
-  }
-
-  return telegramMiniAppBootstrapPromise;
 }
 
 export async function exchangeTelegramAuthFromOidc(
