@@ -16,15 +16,6 @@ declare global {
   interface Window {
     Telegram?: {
       Login?: TelegramLoginSdk;
-      WebApp?: {
-        initData: string;
-        initDataUnsafe?: {
-          start_param?: string;
-          user?: {
-            id: number;
-          };
-        };
-      };
     };
   }
 }

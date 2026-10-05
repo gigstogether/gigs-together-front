@@ -13,9 +13,6 @@ import {
 
 beforeEach(() => {
   sessionStorage.clear();
-  if (window.Telegram) {
-    delete window.Telegram.WebApp;
-  }
   window.history.replaceState(null, '', '/');
 });
 
@@ -188,12 +185,8 @@ describe('isTelegramMiniApp', () => {
 });
 
 describe('getTelegramInitData', () => {
-  it('should prefer captured initData over the Web App SDK value', () => {
+  it('should return captured initData from sessionStorage', () => {
     sessionStorage.setItem('gt_tg_launch_params', JSON.stringify({ initData: 'user=captured' }));
-    window.Telegram = {
-      ...window.Telegram,
-      WebApp: { initData: 'user=sdk' },
-    };
 
     expect(getTelegramInitData()).toBe('user=captured');
   });

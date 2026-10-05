@@ -3,7 +3,6 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
 import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
-import TelegramWebAppScript from '@/components/TelegramWebAppScript';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
 
@@ -100,7 +99,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body>
         <PlausibleAnalyticsProvider>
           <QueryProvider>
-            <TelegramWebAppScript />
             {jsonLd ? (
               <script
                 type="application/ld+json"

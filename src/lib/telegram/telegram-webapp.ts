@@ -57,7 +57,7 @@ export function captureTelegramLaunchParamsFromUrl(): void {
 }
 
 export function getTelegramInitData(): string {
-  return getTelegramInitDataFromSnapshot() ?? window.Telegram?.WebApp?.initData ?? '';
+  return getTelegramLaunchParamsSnapshot()?.initData ?? '';
 }
 
 /**
@@ -105,32 +105,14 @@ export function clearTelegramLaunchParamsFromUrl(): boolean {
 }
 
 /**
- * Whether the app runs inside Telegram (Mini App). Uses captured launch params and
- * Web App SDK data while the SDK remains enabled. Call only on the client.
+ * Whether the app runs inside Telegram (Mini App). Uses launch params captured before hydration.
  */
 export function isTelegramMiniApp(): boolean {
-  if (typeof window === 'undefined') return false;
-  if (getTelegramLaunchParamsSnapshot()) {
-    return true;
-  }
-
-  if (window.Telegram?.WebApp?.initData) return true;
-  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  return typeof user?.id === 'number';
-}
-
-function getTelegramInitDataFromSnapshot(): string | undefined {
-  return getTelegramLaunchParamsSnapshot()?.initData;
+  return getTelegramLaunchParamsSnapshot() !== undefined;
 }
 
 export function getTelegramStartParam(): string {
-  const fromSnapshot = getTelegramLaunchParamsSnapshot()?.startParam;
-  if (fromSnapshot) {
-    return fromSnapshot;
-  }
-
-  const raw = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
-  return (raw ?? '').toString();
+  return getTelegramLaunchParamsSnapshot()?.startParam ?? '';
 }
 
 function readTelegramLaunchParamsFromUrl(): TelegramLaunchParamsFromUrl {
