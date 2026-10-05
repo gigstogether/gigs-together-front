@@ -27,8 +27,6 @@ interface TelegramLaunchParamsFromUrl {
   snapshot?: TelegramLaunchParamsSnapshot;
 }
 
-const TELEGRAM_MINI_APP_STORAGE_KEY = 'gt_tg_is_mini_app';
-const TELEGRAM_MINI_APP_STORAGE_VALUE = '1';
 const TELEGRAM_LAUNCH_PARAMS_STORAGE_KEY = 'gt_tg_launch_params';
 
 export function getTelegramLaunchParamsSnapshot(): TelegramLaunchParamsSnapshot | undefined {
@@ -53,17 +51,13 @@ export function captureTelegramLaunchParamsFromUrl(): void {
     if (launchParams.hasLaunchParams) {
       replaceTelegramLaunchParamsSnapshot(launchParams.snapshot);
     }
-
-    if (launchParams.snapshot) {
-      persistTelegramMiniAppMarker();
-    }
   } finally {
     clearTelegramLaunchParamsFromUrl();
   }
 }
 
 export function getTelegramInitData(): string {
-  return window.Telegram?.WebApp?.initData ?? getTelegramInitDataFromLocation() ?? '';
+  return getTelegramInitDataFromSnapshot() ?? window.Telegram?.WebApp?.initData ?? '';
 }
 
 /**
@@ -111,38 +105,22 @@ export function clearTelegramLaunchParamsFromUrl(): boolean {
 }
 
 /**
- * Whether the app runs inside Telegram (Mini App). Uses initData / URL fallbacks and
- * `initDataUnsafe.user` when the Web App script has run. Call only on the client.
+ * Whether the app runs inside Telegram (Mini App). Uses captured launch params and
+ * Web App SDK data while the SDK remains enabled. Call only on the client.
  */
 export function isTelegramMiniApp(): boolean {
   if (typeof window === 'undefined') return false;
-  if (hasPersistedTelegramMiniAppMarker()) return true;
-  if (getTelegramInitData()) {
-    persistTelegramMiniAppMarker();
+  if (getTelegramLaunchParamsSnapshot()) {
     return true;
   }
+
+  if (window.Telegram?.WebApp?.initData) return true;
   const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  if (typeof user?.id === 'number') {
-    persistTelegramMiniAppMarker();
-    return true;
-  }
-  return false;
+  return typeof user?.id === 'number';
 }
 
-function getTelegramInitDataFromLocation(): string | undefined {
-  const snapshot = getTelegramLaunchParamsSnapshot();
-  if (snapshot?.initData) {
-    return snapshot.initData;
-  }
-
-  const hash = (window.location.hash ?? '').replace(/^#/, '');
-  const fromHash = hash ? new URLSearchParams(hash).get('tgWebAppData') : null;
-  if (fromHash) return fromHash;
-
-  const fromSearch = new URLSearchParams(window.location.search).get('tgWebAppData');
-  if (fromSearch) return fromSearch;
-
-  return undefined;
+function getTelegramInitDataFromSnapshot(): string | undefined {
+  return getTelegramLaunchParamsSnapshot()?.initData;
 }
 
 export function getTelegramStartParam(): string {
@@ -151,10 +129,7 @@ export function getTelegramStartParam(): string {
     return fromSnapshot;
   }
 
-  const raw =
-    window.Telegram?.WebApp?.initDataUnsafe?.start_param ||
-    new URLSearchParams(window.location.search).get('tgWebAppStartParam') ||
-    new URLSearchParams(window.location.search).get('startapp');
+  const raw = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
   return (raw ?? '').toString();
 }
 
@@ -283,31 +258,6 @@ function isTelegramLaunchParamsSnapshot(value: unknown): value is TelegramLaunch
   }
 
   return Object.keys(value).every((key) => key === 'initData' || key === 'startParam');
-}
-
-function hasPersistedTelegramMiniAppMarker(): boolean {
-  if (typeof localStorage === 'undefined') {
-    return false;
-  }
-
-  try {
-    return localStorage.getItem(TELEGRAM_MINI_APP_STORAGE_KEY) === TELEGRAM_MINI_APP_STORAGE_VALUE;
-  } catch (error: unknown) {
-    console.error('Failed to read Telegram Mini App marker from localStorage.', error);
-    return false;
-  }
-}
-
-function persistTelegramMiniAppMarker(): void {
-  if (typeof localStorage === 'undefined') {
-    return;
-  }
-
-  try {
-    localStorage.setItem(TELEGRAM_MINI_APP_STORAGE_KEY, TELEGRAM_MINI_APP_STORAGE_VALUE);
-  } catch (error: unknown) {
-    console.error('Failed to persist Telegram Mini App marker in localStorage.', error);
-  }
 }
 
 export interface WaitForTelegramInitDataOptions {

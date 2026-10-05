@@ -12,8 +12,10 @@ import {
 } from './telegram-webapp';
 
 beforeEach(() => {
-  localStorage.clear();
   sessionStorage.clear();
+  if (window.Telegram) {
+    delete window.Telegram.WebApp;
+  }
   window.history.replaceState(null, '', '/');
 });
 
@@ -56,6 +58,19 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
     captureTelegramLaunchParamsFromUrl();
 
     expect(getTelegramLaunchParamsSnapshot()).toEqual({ initData: 'user=new' });
+  });
+
+  it('should remove a stored snapshot when a fresh launch has no usable data', () => {
+    sessionStorage.setItem('gt_tg_launch_params', JSON.stringify({ initData: 'user=old' }));
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppVersion=9.1&tgWebAppPlatform=tdesktop',
+    );
+
+    captureTelegramLaunchParamsFromUrl();
+
+    expect(getTelegramLaunchParamsSnapshot()).toBeUndefined();
   });
 
   it('should keep the stored snapshot unchanged when capture runs again', () => {
@@ -164,10 +179,40 @@ describe('clearTelegramLaunchParamsFromUrl', () => {
 });
 
 describe('isTelegramMiniApp', () => {
-  it('should return true from localStorage marker after the url no longer has telegram params', () => {
-    localStorage.setItem('gt_tg_is_mini_app', '1');
+  it('should return true from the captured launch snapshot', () => {
+    sessionStorage.setItem('gt_tg_launch_params', JSON.stringify({ initData: 'user=test' }));
     window.history.replaceState(null, '', '/feed/es/barcelona');
 
     expect(isTelegramMiniApp()).toBe(true);
+  });
+});
+
+describe('getTelegramInitData', () => {
+  it('should prefer captured initData over the Web App SDK value', () => {
+    sessionStorage.setItem('gt_tg_launch_params', JSON.stringify({ initData: 'user=captured' }));
+    window.Telegram = {
+      ...window.Telegram,
+      WebApp: { initData: 'user=sdk' },
+    };
+
+    expect(getTelegramInitData()).toBe('user=captured');
+  });
+
+  it('should not read initData directly from an uncaptured url', () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
+    );
+
+    expect(getTelegramInitData()).toBe('');
+  });
+});
+
+describe('getTelegramStartParam', () => {
+  it('should not read startParam directly from an uncaptured url', () => {
+    window.history.replaceState(null, '', '/admin/telegram?startapp=edit-token');
+
+    expect(getTelegramStartParam()).toBe('');
   });
 });
