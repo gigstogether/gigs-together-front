@@ -2,7 +2,11 @@ import { ApiError } from '@/lib/api-errors';
 import { fetchApiJson } from '@/lib/api-core';
 import type { FetchApiJsonOptions } from '@/lib/api-core';
 import { postAuthRefresh } from '@/lib/auth-refresh';
-import { exchangeTelegramAuthFromWebApp } from '@/lib/telegram/telegram-auth';
+import { logger } from '@/lib/logger';
+import {
+  exchangeTelegramAuthFromWebApp,
+  hasExplicitTelegramSignIn,
+} from '@/lib/telegram/telegram-auth';
 
 type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -43,7 +47,7 @@ async function postAuthRefreshSingleFlight(): Promise<boolean> {
 }
 
 async function postTelegramMiniAppReauth(): Promise<boolean> {
-  if (typeof window === 'undefined') {
+  if (typeof window === 'undefined' || !hasExplicitTelegramSignIn()) {
     return false;
   }
 
@@ -60,7 +64,8 @@ async function postTelegramMiniAppReauth(): Promise<boolean> {
         const initData = getTelegramInitData();
         await exchangeTelegramAuthFromWebApp(initData);
         return true;
-      } catch {
+      } catch (e) {
+        logger.errorFromUnknown('telegram_mini_app_reauth_failed', e);
         return false;
       } finally {
         telegramMiniAppReauthPromise = null;
