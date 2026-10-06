@@ -1,5 +1,6 @@
 import { fetchApiJson } from '@/lib/api-core';
 import { clientEnv } from '@/env/client-env';
+import { ApiError, isTelegramInitDataExpiredError } from '@/lib/api-errors';
 import { isRecord } from '@/lib/is-record';
 import { getTelegramInitData, isTelegramMiniApp } from '@/lib/telegram/telegram-webapp';
 import type { TelegramAuthExchangeResponse } from '@/lib/telegram/telegram-auth-exchange-response.types';
@@ -14,6 +15,8 @@ export interface TelegramOidcCredentials {
 const TELEGRAM_SIGN_IN_REQUIRED_EVENT = 'gt:telegram-sign-in-required';
 const TELEGRAM_EXPLICIT_SIGN_IN_STORAGE_KEY = 'gt_tg_explicit_sign_in';
 const TELEGRAM_EXPLICIT_SIGN_IN_STORAGE_VALUE = '1';
+const TELEGRAM_INIT_DATA_EXPIRED_MESSAGE =
+  'Telegram data has expired. Close and reopen the Mini App, then try again.';
 let telegramMiniAppSignInPromise: Promise<void> | null = null;
 
 /**
@@ -241,14 +244,22 @@ export async function signOutTelegramAuthOnServer(): Promise<void> {
 }
 
 export async function exchangeTelegramAuthFromWebApp(initData: string): Promise<void> {
-  const raw = await fetchApiJson<unknown>(
-    'v1/auth/telegram/web-app',
-    'POST',
-    {
-      initData,
-    },
-    { credentials: 'include' },
-  );
+  let raw: unknown;
+  try {
+    raw = await fetchApiJson<unknown>(
+      'v1/auth/telegram/web-app',
+      'POST',
+      {
+        initData,
+      },
+      { credentials: 'include' },
+    );
+  } catch (e) {
+    if (isTelegramInitDataExpiredError(e)) {
+      throw new ApiError(TELEGRAM_INIT_DATA_EXPIRED_MESSAGE, e.statusCode, e.code);
+    }
+    throw e;
+  }
   const { profile } = parseAuthExchangeResponse(raw);
   setStoredTelegramClientProfile(profile);
 }

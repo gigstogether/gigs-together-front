@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import HeaderAuthActions from '@/components/header/HeaderAuthActions';
+import { toast } from '@/hooks/use-toast';
 
 const { miniAppEnvMock } = vi.hoisted(() => ({
   miniAppEnvMock: vi.fn<() => 'browser' | 'mini' | 'unknown'>(),
@@ -30,6 +31,7 @@ describe('HeaderAuthActions', () => {
   beforeEach(() => {
     miniAppEnvMock.mockReset();
     miniAppEnvMock.mockReturnValue('browser');
+    vi.mocked(toast).mockReset();
   });
 
   it('should show Sign in for unauthenticated guests in browser', () => {
@@ -63,6 +65,34 @@ describe('HeaderAuthActions', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
     expect(signIn).toHaveBeenCalledTimes(1);
+  });
+
+  it('should ask the user to reopen the Mini App when sign-in data has expired', async () => {
+    const signIn = vi
+      .fn<() => Promise<void>>()
+      .mockRejectedValue(
+        new Error('Telegram data has expired. Close and reopen the Mini App, then try again.'),
+      );
+    miniAppEnvMock.mockReturnValue('mini');
+    vi.mocked(useTelegramAuth).mockReturnValue({
+      authState: null,
+      isLoadingAuthState: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn,
+      signOut: vi.fn(),
+    });
+
+    render(<HeaderAuthActions />);
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith({
+        title: 'Sign in failed',
+        description: 'Telegram data has expired. Close and reopen the Mini App, then try again.',
+        variant: 'destructive',
+      }),
+    );
   });
 
   it('should hide Sign in when sign-in is unavailable', () => {

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ApiError, TELEGRAM_INIT_DATA_EXPIRED_CODE } from '@/lib/api-errors';
 
 const { fetchApiJsonMock, getTelegramInitDataMock, isTelegramMiniAppMock } = vi.hoisted(() => ({
   fetchApiJsonMock: vi.fn(),
@@ -89,6 +90,25 @@ describe('signInWithTelegram', () => {
 
     expect(fetchApiJsonMock).toHaveBeenCalledTimes(2);
     expect(hasExplicitTelegramSignIn()).toBe(true);
+  });
+
+  it('should replace the technical expired initData error with reopening instructions', async () => {
+    isTelegramMiniAppMock.mockReturnValue(true);
+    fetchApiJsonMock.mockRejectedValueOnce(
+      new ApiError(
+        'Telegram initData auth_date is outside the allowed window',
+        403,
+        TELEGRAM_INIT_DATA_EXPIRED_CODE,
+      ),
+    );
+
+    await expect(signInWithTelegram()).rejects.toMatchObject({
+      name: 'ApiError',
+      message: 'Telegram data has expired. Close and reopen the Mini App, then try again.',
+      statusCode: 403,
+      code: TELEGRAM_INIT_DATA_EXPIRED_CODE,
+    });
+    expect(hasExplicitTelegramSignIn()).toBe(false);
   });
 });
 

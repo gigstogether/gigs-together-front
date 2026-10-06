@@ -23,10 +23,6 @@ vi.mock('@/hooks/use-toast', () => ({
   toast: toastMock,
 }));
 
-vi.mock('@/app/admin/gigs/_lib/telegram-init-data-expired', () => ({
-  getTelegramInitDataExpiredToastContent: vi.fn(() => null),
-}));
-
 vi.mock('@/app/admin/_lib/admin-api', async () => {
   const actual = await vi.importActual('@/app/admin/_lib/admin-api');
   return {
@@ -144,6 +140,24 @@ describe('useEditGigFormData', () => {
     expect(toastMock).toHaveBeenCalledWith({
       title: "Couldn't load gig",
       description: 'Request failed',
+      variant: 'destructive',
+    });
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  it('should show the propagated authentication error', async () => {
+    vi.mocked(fetchAdminGigByPublicId).mockRejectedValueOnce(new Error('Telegram data expired'));
+
+    const { result } = renderUseEditGigFormData();
+
+    await waitFor(() => {
+      expect(result.current.editGigData.isLoadingGig).toBe(false);
+    });
+
+    expect(result.current.editGigData.loadGigError).toBe('Telegram data expired');
+    expect(toastMock).toHaveBeenCalledWith({
+      title: "Couldn't load gig",
+      description: 'Telegram data expired',
       variant: 'destructive',
     });
     expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(Error));

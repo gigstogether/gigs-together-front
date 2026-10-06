@@ -215,6 +215,43 @@ describe('fetchApiJsonWithSessionRecovery', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('should surface expired initData after Mini App re-auth and finish the session', async () => {
+    const { ApiError, TELEGRAM_INIT_DATA_EXPIRED_CODE } = await import('@/lib/api-errors');
+    const onUnauthorized = vi.fn();
+    hasExplicitTelegramSignInMock.mockReturnValue(true);
+    isTelegramMiniAppMock.mockReturnValue(true);
+    getTelegramInitDataMock.mockReturnValue('expired-init-data');
+    exchangeTelegramAuthFromWebAppMock.mockRejectedValue(
+      new ApiError(
+        'Telegram data has expired. Close and reopen the Mini App, then try again.',
+        403,
+        TELEGRAM_INIT_DATA_EXPIRED_CODE,
+      ),
+    );
+
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ message: 'unauthorized' }, 401));
+
+    vi.stubGlobal('fetch', fetchMock);
+    vi.stubGlobal('window', {});
+
+    const { fetchApiJsonWithSessionRecovery } = await import('@/lib/api-session-recovery');
+
+    const action = fetchApiJsonWithSessionRecovery('v1/admin/dashboard', 'GET', undefined, {
+      onUnauthorized,
+    });
+
+    await expect(action).rejects.toMatchObject({
+      name: 'ApiError',
+      message: 'Telegram data has expired. Close and reopen the Mini App, then try again.',
+      statusCode: 403,
+      code: TELEGRAM_INIT_DATA_EXPIRED_CODE,
+    });
+    expect(onUnauthorized).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('should not repeat recovery after request stays unauthorized following Mini App re-auth', async () => {
     const onUnauthorized = vi.fn();
     hasExplicitTelegramSignInMock.mockReturnValue(true);

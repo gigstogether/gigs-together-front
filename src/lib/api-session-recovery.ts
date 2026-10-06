@@ -1,4 +1,4 @@
-import { ApiError } from '@/lib/api-errors';
+import { ApiError, isTelegramInitDataExpiredError } from '@/lib/api-errors';
 import { fetchApiJson } from '@/lib/api-core';
 import type { FetchApiJsonOptions } from '@/lib/api-core';
 import { postAuthRefresh } from '@/lib/auth-refresh';
@@ -66,6 +66,9 @@ async function postTelegramMiniAppReauth(): Promise<boolean> {
         return true;
       } catch (e) {
         logger.errorFromUnknown('telegram_mini_app_reauth_failed', e);
+        if (isTelegramInitDataExpiredError(e)) {
+          throw e;
+        }
         return false;
       } finally {
         telegramMiniAppReauthPromise = null;
@@ -114,7 +117,13 @@ export async function fetchApiJsonWithSessionRecovery<TResponse>(
       !isAuthRefreshEndpoint(endpointOrUrl) &&
       !isTelegramWebAppAuthEndpoint(endpointOrUrl)
     ) {
-      const isReauthenticated = await postTelegramMiniAppReauth();
+      let isReauthenticated: boolean;
+      try {
+        isReauthenticated = await postTelegramMiniAppReauth();
+      } catch (e) {
+        onUnauthorized?.();
+        throw e;
+      }
       if (isReauthenticated) {
         return fetchApiJsonWithSessionRecovery<TResponse>(endpointOrUrl, method, data, {
           init,
