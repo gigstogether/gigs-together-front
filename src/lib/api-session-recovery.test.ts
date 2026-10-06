@@ -8,7 +8,7 @@ function jsonResponse(body: unknown, status: number): Response {
 }
 
 const { postAuthRefreshMock } = vi.hoisted(() => ({
-  postAuthRefreshMock: vi.fn<() => Promise<boolean>>(),
+  postAuthRefreshMock: vi.fn<() => Promise<void>>(),
 }));
 
 const { loggerErrorFromUnknownMock } = vi.hoisted(() => ({
@@ -46,11 +46,12 @@ vi.mock('@/lib/telegram/telegram-auth', () => ({
 }));
 
 describe('fetchApiJsonWithSessionRecovery', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     process.env.NEXT_PUBLIC_APP_API_BASE_URL = 'https://api.example.com';
     vi.resetModules();
+    const { ApiError } = await import('@/lib/api-errors');
     postAuthRefreshMock.mockReset();
-    postAuthRefreshMock.mockResolvedValue(false);
+    postAuthRefreshMock.mockRejectedValue(new ApiError('unauthorized', 401));
     loggerErrorFromUnknownMock.mockReset();
     isTelegramMiniAppMock.mockReset();
     isTelegramMiniAppMock.mockReturnValue(false);
@@ -67,7 +68,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
   });
 
   it('should retry request once when refresh succeeds after 401', async () => {
-    postAuthRefreshMock.mockResolvedValue(true);
+    postAuthRefreshMock.mockResolvedValue();
 
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -90,7 +91,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
   });
 
   it('should throw ApiError with 401 status when request is still unauthorized after refresh retry', async () => {
-    postAuthRefreshMock.mockResolvedValue(true);
+    postAuthRefreshMock.mockResolvedValue();
 
     const onUnauthorized = vi.fn();
     const fetchMock = vi
@@ -113,7 +114,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
   });
 
   it('should call onUnauthorized once when second request is still unauthorized', async () => {
-    postAuthRefreshMock.mockResolvedValue(true);
+    postAuthRefreshMock.mockResolvedValue();
 
     const onUnauthorized = vi.fn();
     const fetchMock = vi
@@ -133,7 +134,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
   });
 
   it('should not trigger refresh flow when endpoint is auth refresh itself', async () => {
-    postAuthRefreshMock.mockResolvedValue(true);
+    postAuthRefreshMock.mockResolvedValue();
 
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -151,8 +152,7 @@ describe('fetchApiJsonWithSessionRecovery', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should retry request after Telegram Mini App re-auth succeeds when token refresh fails', async () => {
-    postAuthRefreshMock.mockResolvedValue(false);
+  it('should retry request after Telegram Mini App re-auth succeeds when refresh is unauthorized', async () => {
     hasExplicitTelegramSignInMock.mockReturnValue(true);
     isTelegramMiniAppMock.mockReturnValue(true);
     getTelegramInitDataMock.mockReturnValue('init-data');
@@ -180,6 +180,35 @@ describe('fetchApiJsonWithSessionRecovery', () => {
     expect(getTelegramInitDataMock).toHaveBeenCalledTimes(1);
     expect(exchangeTelegramAuthFromWebAppMock).toHaveBeenCalledWith('init-data');
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('should not re-authenticate or clear the user when token refresh fails', async () => {
+    const onUnauthorized = vi.fn();
+    const refreshFailure = new TypeError('network unavailable');
+    postAuthRefreshMock.mockRejectedValue(refreshFailure);
+    hasExplicitTelegramSignInMock.mockReturnValue(true);
+    isTelegramMiniAppMock.mockReturnValue(true);
+    getTelegramInitDataMock.mockReturnValue('init-data');
+
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ message: 'unauthorized' }, 401));
+
+    vi.stubGlobal('fetch', fetchMock);
+    vi.stubGlobal('window', {});
+
+    const { fetchApiJsonWithSessionRecovery } = await import('@/lib/api-session-recovery');
+
+    const action = fetchApiJsonWithSessionRecovery('v1/admin/dashboard', 'GET', undefined, {
+      onUnauthorized,
+    });
+
+    await expect(action).rejects.toBe(refreshFailure);
+    expect(isTelegramMiniAppMock).not.toHaveBeenCalled();
+    expect(getTelegramInitDataMock).not.toHaveBeenCalled();
+    expect(exchangeTelegramAuthFromWebAppMock).not.toHaveBeenCalled();
+    expect(onUnauthorized).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('should finish unauthorized flow when Telegram Mini App re-auth fails', async () => {

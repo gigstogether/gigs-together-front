@@ -44,6 +44,22 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
     expect(snapshot).toEqual({ initData: 'user=test' });
   });
 
+  it('should expose captured launch params to a fresh module instance', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
+    );
+    captureTelegramLaunchParamsFromUrl();
+    vi.resetModules();
+
+    const freshTelegramWebAppModule = await import('./telegram-webapp');
+
+    expect(freshTelegramWebAppModule.getTelegramLaunchParamsSnapshot()).toEqual({
+      initData: 'user=test',
+    });
+  });
+
   it('should replace a stored snapshot when fresh launch params are available', () => {
     sessionStorage.setItem('gt_tg_launch_params', JSON.stringify({ initData: 'user=old' }));
     window.history.replaceState(

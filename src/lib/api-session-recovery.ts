@@ -29,10 +29,10 @@ function isTelegramWebAppAuthEndpoint(endpointOrUrl: string): boolean {
   return endpointOrUrl.includes('v1/auth/telegram/web-app');
 }
 
-let authRefreshPromise: Promise<boolean> | null = null;
+let authRefreshPromise: Promise<void> | null = null;
 let telegramMiniAppReauthPromise: Promise<boolean> | null = null;
 
-async function postAuthRefreshSingleFlight(): Promise<boolean> {
+async function postAuthRefreshSingleFlight(): Promise<void> {
   if (!authRefreshPromise) {
     authRefreshPromise = (async () => {
       try {
@@ -99,8 +99,8 @@ export async function fetchApiJsonWithSessionRecovery<TResponse>(
     }
 
     if (!hasAttemptedTokenRefresh && !isAuthRefreshEndpoint(endpointOrUrl)) {
-      const refreshed = await postAuthRefreshSingleFlight();
-      if (refreshed) {
+      try {
+        await postAuthRefreshSingleFlight();
         return fetchApiJsonWithSessionRecovery<TResponse>(endpointOrUrl, method, data, {
           init,
           onUnauthorized,
@@ -109,6 +109,10 @@ export async function fetchApiJsonWithSessionRecovery<TResponse>(
             hasAttemptedTokenRefresh: true,
           },
         });
+      } catch (refreshError) {
+        if (!(refreshError instanceof ApiError) || refreshError.statusCode !== 401) {
+          throw refreshError;
+        }
       }
     }
 
