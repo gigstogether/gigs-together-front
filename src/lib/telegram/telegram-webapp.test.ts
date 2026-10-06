@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   captureTelegramLaunchParamsFromUrl,
@@ -9,27 +9,125 @@ import {
   getTelegramLaunchParamsSnapshot,
   getTelegramStartParam,
   isTelegramMiniApp,
-  resetTelegramLaunchParamsCaptureForTests,
 } from './telegram-webapp';
 
-describe('captureTelegramLaunchParamsFromUrl', () => {
-  afterEach(() => {
-    resetTelegramLaunchParamsCaptureForTests();
-  });
+beforeEach(() => {
+  sessionStorage.clear();
+  window.history.replaceState(null, '', '/');
+});
 
-  it('should store initData in memory and clear telegram hash from the url', () => {
+describe('captureTelegramLaunchParamsFromUrl', () => {
+  it('should store initData in sessionStorage and clear telegram hash from the url', () => {
     window.history.replaceState(
       null,
       '',
       '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
     );
 
-    const changed = captureTelegramLaunchParamsFromUrl();
+    captureTelegramLaunchParamsFromUrl();
 
-    expect(changed).toBe(true);
     expect(window.location.hash).toBe('');
     expect(getTelegramLaunchParamsSnapshot()?.initData).toBe('user=test');
     expect(getTelegramInitData()).toBe('user=test');
+  });
+
+  it('should restore launch params from sessionStorage after the url is cleared', () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
+    );
+    captureTelegramLaunchParamsFromUrl();
+
+    const snapshot = getTelegramLaunchParamsSnapshot();
+
+    expect(snapshot).toEqual({ initData: 'user=test' });
+  });
+
+  it('should expose captured launch params to a fresh module instance', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
+    );
+    captureTelegramLaunchParamsFromUrl();
+    vi.resetModules();
+
+    const freshTelegramWebAppModule = await import('./telegram-webapp');
+
+    expect(freshTelegramWebAppModule.getTelegramLaunchParamsSnapshot()).toEqual({
+      initData: 'user=test',
+    });
+  });
+
+  it('should replace a stored snapshot when fresh launch params are available', () => {
+    sessionStorage.setItem('gt_tg_launch_params', JSON.stringify({ initData: 'user=old' }));
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppData=user%3Dnew&tgWebAppPlatform=tdesktop',
+    );
+
+    captureTelegramLaunchParamsFromUrl();
+
+    expect(getTelegramLaunchParamsSnapshot()).toEqual({ initData: 'user=new' });
+  });
+
+  it('should remove a stored snapshot when a fresh launch has no usable data', () => {
+    sessionStorage.setItem('gt_tg_launch_params', JSON.stringify({ initData: 'user=old' }));
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppVersion=9.1&tgWebAppPlatform=tdesktop',
+    );
+
+    captureTelegramLaunchParamsFromUrl();
+
+    expect(getTelegramLaunchParamsSnapshot()).toBeUndefined();
+  });
+
+  it('should keep the stored snapshot unchanged when capture runs again', () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
+    );
+    captureTelegramLaunchParamsFromUrl();
+    window.history.replaceState(null, '', '/feed/es/barcelona#khjkh');
+
+    captureTelegramLaunchParamsFromUrl();
+
+    expect(window.location.hash).toBe('#khjkh');
+    expect(getTelegramLaunchParamsSnapshot()).toEqual({ initData: 'user=test' });
+  });
+
+  it('should clear telegram hash when sessionStorage persistence fails', () => {
+    const storageFailure = new DOMException('Storage is unavailable.', 'SecurityError');
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw storageFailure;
+    });
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
+    );
+
+    expect(() => captureTelegramLaunchParamsFromUrl()).toThrow(
+      'Failed to persist Telegram launch params in sessionStorage.',
+    );
+    expect(window.location.hash).toBe('');
+  });
+
+  it('should reject an invalid snapshot stored in sessionStorage', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    sessionStorage.setItem('gt_tg_launch_params', JSON.stringify({ initData: 123 }));
+
+    const snapshot = getTelegramLaunchParamsSnapshot();
+
+    expect(snapshot).toBeUndefined();
+    expect(consoleError).toHaveBeenCalledWith(
+      'Invalid Telegram launch params snapshot in sessionStorage.',
+    );
   });
 
   it('should keep gig deep-link hash and not treat it as telegram launch data', () => {
@@ -39,6 +137,18 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
 
     expect(window.location.hash).toBe('#khjkh');
     expect(getTelegramLaunchParamsSnapshot()).toBeUndefined();
+  });
+
+  it('should preserve unrelated query params and the gig hash when clearing launch data', () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona?view=calendar&tgWebAppData=user%3Dtest#khjkh',
+    );
+
+    captureTelegramLaunchParamsFromUrl();
+
+    expect(`${window.location.search}${window.location.hash}`).toBe('?view=calendar#khjkh');
   });
 
   it('should keep returning true after telegram launch params were cleared from the url', () => {
@@ -57,10 +167,6 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
 });
 
 describe('clearTelegramLaunchParamsFromUrl', () => {
-  afterEach(() => {
-    resetTelegramLaunchParamsCaptureForTests();
-  });
-
   it('should clear hash when it only contains telegram launch params', () => {
     window.history.replaceState(
       null,
@@ -74,7 +180,7 @@ describe('clearTelegramLaunchParamsFromUrl', () => {
     expect(window.location.hash).toBe('');
   });
 
-  it('should store startapp query param in memory when captured early', () => {
+  it('should store startapp query param in the launch snapshot when captured early', () => {
     window.history.replaceState(null, '', '/admin/gigs/new?startapp=edit-token');
 
     captureTelegramLaunchParamsFromUrl();
@@ -86,14 +192,38 @@ describe('clearTelegramLaunchParamsFromUrl', () => {
 });
 
 describe('isTelegramMiniApp', () => {
-  afterEach(() => {
-    resetTelegramLaunchParamsCaptureForTests();
-  });
-
-  it('should return true from localStorage marker after the url no longer has telegram params', () => {
-    localStorage.setItem('gt_tg_is_mini_app', '1');
+  it('should return true from the captured launch snapshot', () => {
+    sessionStorage.setItem('gt_tg_launch_params', JSON.stringify({ initData: 'user=test' }));
     window.history.replaceState(null, '', '/feed/es/barcelona');
 
     expect(isTelegramMiniApp()).toBe(true);
+  });
+});
+
+describe('getTelegramInitData', () => {
+  it('should return captured initData from sessionStorage', () => {
+    sessionStorage.setItem('gt_tg_launch_params', JSON.stringify({ initData: 'user=captured' }));
+
+    expect(getTelegramInitData()).toBe('user=captured');
+  });
+
+  it('should not read initData directly from an uncaptured url', () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
+    );
+
+    expect(() => getTelegramInitData()).toThrow(
+      'Telegram initData is not available. Open this page from inside Telegram (Mini App).',
+    );
+  });
+});
+
+describe('getTelegramStartParam', () => {
+  it('should not read startParam directly from an uncaptured url', () => {
+    window.history.replaceState(null, '', '/admin/telegram?startapp=edit-token');
+
+    expect(getTelegramStartParam()).toBe('');
   });
 });

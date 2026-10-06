@@ -7,7 +7,6 @@ import { fetchAdminGigByPublicId } from '@/app/admin/_lib/admin-api';
 import { buildVersionedAdminPosterUrl } from '@/app/admin/_lib/admin-poster-url';
 import { normalizeGigApiDate } from '@/app/admin/gigs/_lib/gig-form-api';
 import type { AdminGigFormData } from '@/app/admin/gigs/_lib/types';
-import { getTelegramInitDataExpiredToastContent } from '@/app/admin/gigs/_lib/telegram-init-data-expired';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { gigFormKeys } from '@/app/admin/gigs/_lib/gigFormKeys';
 
@@ -61,11 +60,6 @@ function buildEditGigFormQueryData(data: AdminGigFormData): EditGigFormQueryData
 }
 
 function getLoadGigErrorMessage(error: unknown): string {
-  const expiredContent = getTelegramInitDataExpiredToastContent(error);
-  if (expiredContent) {
-    return expiredContent.description;
-  }
-
   return error instanceof Error
     ? error.message
     : 'There was an error loading gig data for editing.';
@@ -144,18 +138,13 @@ export function useEditGigFormData(params: UseEditGigFormDataParams): UseEditGig
     handledErrorUpdatedAtRef.current = query.errorUpdatedAt;
     setIsPrefilled(false);
 
-    const expiredContent = getTelegramInitDataExpiredToastContent(query.error);
     const message = getLoadGigErrorMessage(query.error);
 
-    toast(
-      expiredContent
-        ? { ...expiredContent, variant: 'destructive' }
-        : {
-            title: "Couldn't load gig",
-            description: message,
-            variant: 'destructive',
-          },
-    );
+    toast({
+      title: "Couldn't load gig",
+      description: message,
+      variant: 'destructive',
+    });
     console.error(query.error);
   }, [query.error, query.errorUpdatedAt, query.isFetching, trimmedGigPublicId]);
 

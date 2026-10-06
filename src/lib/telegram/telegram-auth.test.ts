@@ -1,11 +1,13 @@
-export {};
+// @vitest-environment jsdom
 
-const { bootstrapIsTelegramMiniAppMock, bootstrapWaitForTelegramInitDataMock, fetchApiJsonMock } =
-  vi.hoisted(() => ({
-    bootstrapIsTelegramMiniAppMock: vi.fn<() => boolean>(),
-    bootstrapWaitForTelegramInitDataMock: vi.fn<() => Promise<string>>(),
-    fetchApiJsonMock: vi.fn(),
-  }));
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ApiError, TELEGRAM_INIT_DATA_EXPIRED_CODE } from '@/lib/api-errors';
+
+const { fetchApiJsonMock, getTelegramInitDataMock, isTelegramMiniAppMock } = vi.hoisted(() => ({
+  fetchApiJsonMock: vi.fn(),
+  getTelegramInitDataMock: vi.fn<() => string>(),
+  isTelegramMiniAppMock: vi.fn<() => boolean>(),
+}));
 
 vi.mock('@/lib/api-core', () => ({
   fetchApiJson: fetchApiJsonMock,
@@ -13,32 +15,127 @@ vi.mock('@/lib/api-core', () => ({
 
 vi.mock('@/env/client-env', () => ({
   clientEnv: {
-    appApiBaseUrl: 'https://api.example.com',
     telegramClientProfileStorageKey: 'gt_test_profile',
   },
 }));
 
 vi.mock('@/lib/telegram/telegram-webapp', () => ({
-  isTelegramMiniApp: bootstrapIsTelegramMiniAppMock,
-  waitForTelegramInitData: bootstrapWaitForTelegramInitDataMock,
+  getTelegramInitData: getTelegramInitDataMock,
+  isTelegramMiniApp: isTelegramMiniAppMock,
 }));
 
-describe('bootstrapTelegramAuthFromWebApp', () => {
+import {
+  clearExplicitTelegramSignIn,
+  exchangeTelegramAuthFromOidc,
+  exchangeTelegramAuthFromWebApp,
+  hasExplicitTelegramSignIn,
+  signInWithTelegram,
+  subscribeTelegramSignInRequest,
+} from '@/lib/telegram/telegram-auth';
+
+const authExchangeResponse = {
+  profile: {
+    displayLabel: '@user',
+    isAdmin: false,
+  },
+};
+
+describe('signInWithTelegram', () => {
   beforeEach(() => {
-    bootstrapIsTelegramMiniAppMock.mockReset();
-    bootstrapIsTelegramMiniAppMock.mockReturnValue(true);
-    bootstrapWaitForTelegramInitDataMock.mockReset();
-    bootstrapWaitForTelegramInitDataMock.mockRejectedValue(new Error('initData unavailable'));
-    vi.stubGlobal('window', {});
+    localStorage.clear();
+    fetchApiJsonMock.mockReset();
+    fetchApiJsonMock.mockResolvedValue(authExchangeResponse);
+    getTelegramInitDataMock.mockReset();
+    getTelegramInitDataMock.mockReturnValue('init-data');
+    isTelegramMiniAppMock.mockReset();
   });
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
+  it('should exchange captured initData once for concurrent explicit Mini App sign-ins', async () => {
+    isTelegramMiniAppMock.mockReturnValue(true);
+
+    await Promise.all([signInWithTelegram(), signInWithTelegram()]);
+
+    expect(fetchApiJsonMock).toHaveBeenCalledTimes(1);
+    expect(fetchApiJsonMock).toHaveBeenCalledWith(
+      'v1/auth/telegram/web-app',
+      'POST',
+      { initData: 'init-data' },
+      { credentials: 'include' },
+    );
+    expect(hasExplicitTelegramSignIn()).toBe(true);
   });
 
-  it('should propagate error when Mini App bootstrap fails', async () => {
-    const { bootstrapTelegramAuthFromWebApp } = await import('@/lib/telegram/telegram-auth');
+  it('should request the browser flow without exchanging Mini App initData', async () => {
+    isTelegramMiniAppMock.mockReturnValue(false);
+    const listener = vi.fn();
+    const unsubscribe = subscribeTelegramSignInRequest(listener);
 
-    await expect(bootstrapTelegramAuthFromWebApp()).rejects.toThrow('initData unavailable');
+    await signInWithTelegram();
+    unsubscribe();
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(fetchApiJsonMock).not.toHaveBeenCalled();
+    expect(hasExplicitTelegramSignIn()).toBe(false);
+  });
+
+  it('should allow retry and keep explicit sign-in state unset after a failed Mini App exchange', async () => {
+    isTelegramMiniAppMock.mockReturnValue(true);
+    fetchApiJsonMock.mockRejectedValueOnce(new Error('Exchange failed'));
+
+    await expect(signInWithTelegram()).rejects.toThrow('Exchange failed');
+
+    expect(hasExplicitTelegramSignIn()).toBe(false);
+
+    await signInWithTelegram();
+
+    expect(fetchApiJsonMock).toHaveBeenCalledTimes(2);
+    expect(hasExplicitTelegramSignIn()).toBe(true);
+  });
+
+  it('should replace the technical expired initData error with reopening instructions', async () => {
+    isTelegramMiniAppMock.mockReturnValue(true);
+    fetchApiJsonMock.mockRejectedValueOnce(
+      new ApiError(
+        'Telegram initData auth_date is outside the allowed window',
+        403,
+        TELEGRAM_INIT_DATA_EXPIRED_CODE,
+      ),
+    );
+
+    await expect(signInWithTelegram()).rejects.toMatchObject({
+      name: 'ApiError',
+      message: 'Telegram data has expired. Close and reopen the Mini App, then try again.',
+      statusCode: 403,
+      code: TELEGRAM_INIT_DATA_EXPIRED_CODE,
+    });
+    expect(hasExplicitTelegramSignIn()).toBe(false);
+  });
+});
+
+describe('explicit Telegram sign-in state', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    fetchApiJsonMock.mockReset();
+    fetchApiJsonMock.mockResolvedValue(authExchangeResponse);
+  });
+
+  it('should persist explicit sign-in state after a successful browser exchange', async () => {
+    await exchangeTelegramAuthFromOidc({ idToken: 'id-token' });
+
+    expect(hasExplicitTelegramSignIn()).toBe(true);
+  });
+
+  it('should not persist explicit sign-in state for a low-level Mini App exchange', async () => {
+    await exchangeTelegramAuthFromWebApp('init-data');
+
+    expect(hasExplicitTelegramSignIn()).toBe(false);
+  });
+
+  it('should clear explicit sign-in state on logout', async () => {
+    await exchangeTelegramAuthFromOidc({ idToken: 'id-token' });
+
+    clearExplicitTelegramSignIn();
+
+    expect(hasExplicitTelegramSignIn()).toBe(false);
   });
 });

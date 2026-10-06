@@ -7,14 +7,13 @@ import AdminShell from '@/app/admin/_components/AdminShell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useModeratorTelegramSession } from '@/app/admin/_hooks/use-moderator-telegram-session';
-import { requestTelegramSignIn } from '@/lib/telegram/telegram-auth';
 
 interface AdminLayoutClientProps {
   children: ReactNode;
 }
 
 export default function AdminLayoutClient({ children }: AdminLayoutClientProps) {
-  const { authState, isLoadingAuthState, hasTelegramMiniAppAuthError, isTelegramSignInAvailable } =
+  const { authState, handleSignIn, isLoadingAuthState, isSigningIn, isTelegramSignInAvailable } =
     useModeratorTelegramSession();
 
   if (isLoadingAuthState) {
@@ -26,22 +25,6 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
   }
 
   if (!authState) {
-    if (hasTelegramMiniAppAuthError) {
-      return (
-        <div className="flex min-h-[50vh] items-center justify-center py-6 px-4">
-          <Card className="w-full max-w-md border-0">
-            <CardHeader>
-              <CardTitle>Telegram sign-in failed</CardTitle>
-              <CardDescription>
-                Could not authenticate this Mini App session. Fully close Telegram, reopen it, and
-                try again.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
-      );
-    }
-
     return (
       <div className="flex min-h-[50vh] items-center justify-center py-6 px-4">
         <Card className="w-full max-w-md border-0">
@@ -56,13 +39,16 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
               <Button
                 type="button"
                 className="w-full"
-                onClick={() => requestTelegramSignIn()}
+                disabled={isSigningIn}
+                onClick={() => {
+                  void handleSignIn();
+                }}
               >
-                Sign in
+                {isSigningIn ? 'Signing in…' : 'Sign in'}
               </Button>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Sign-in is not configured on this deployment, so this page cannot be used.
+                Telegram sign-in is not available in this session, so this page cannot be used.
               </p>
             )}
           </CardContent>

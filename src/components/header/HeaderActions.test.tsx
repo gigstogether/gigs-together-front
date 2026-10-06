@@ -2,15 +2,13 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import HeaderActions from '@/components/header/HeaderActions';
 
-const { mockClientEnv, miniAppEnvMock } = vi.hoisted(() => ({
+const { mockClientEnv } = vi.hoisted(() => ({
   mockClientEnv: {
     telegramUrl: undefined,
     githubUrl: undefined,
     isPublicSuggestGigEnabled: false,
     telegramOidcClientId: 123456,
-    isAuthEnabled: true,
   },
-  miniAppEnvMock: vi.fn<() => 'browser' | 'mini' | 'unknown'>(),
 }));
 
 vi.mock('@/components/header/HeaderSignInModal', () => ({
@@ -44,22 +42,17 @@ vi.mock('@/hooks/use-telegram-auth', () => ({
   useTelegramAuth: vi.fn(),
 }));
 
-vi.mock('@/hooks/use-telegram-mini-app-env', () => ({
-  useTelegramMiniAppEnv: miniAppEnvMock,
-}));
-
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 
 describe('HeaderActions', () => {
   beforeEach(() => {
-    mockClientEnv.isAuthEnabled = true;
     mockClientEnv.isPublicSuggestGigEnabled = false;
-    miniAppEnvMock.mockReset();
-    miniAppEnvMock.mockReturnValue('browser');
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: null,
       isLoadingAuthState: false,
-      hasTelegramMiniAppAuthError: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn: vi.fn(),
       signOut: vi.fn(),
     });
   });
@@ -68,25 +61,19 @@ describe('HeaderActions', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Menu' })[0]!);
   }
 
-  it('should load sign-in modal in a regular browser', async () => {
+  it('should load the shared sign-in modal', async () => {
     render(<HeaderActions />);
 
     expect(await screen.findByTestId('header-sign-in-modal')).toBeInTheDocument();
-  });
-
-  it('should not load sign-in modal in Telegram Mini App', () => {
-    miniAppEnvMock.mockReturnValue('mini');
-
-    render(<HeaderActions />);
-
-    expect(screen.queryByTestId('header-sign-in-modal')).not.toBeInTheDocument();
   });
 
   it('should show Admin panel in menu below auth when user is admin', async () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: { displayLabel: '@admin', isAdmin: true },
       isLoadingAuthState: false,
-      hasTelegramMiniAppAuthError: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 
@@ -113,7 +100,9 @@ describe('HeaderActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: { displayLabel: '@only', isAdmin: false },
       isLoadingAuthState: false,
-      hasTelegramMiniAppAuthError: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 
@@ -132,8 +121,15 @@ describe('HeaderActions', () => {
     });
   });
 
-  it('should hide Sign in in menu when auth is disabled for guests', async () => {
-    mockClientEnv.isAuthEnabled = false;
+  it('should hide Sign in in menu when sign-in is unavailable for guests', async () => {
+    vi.mocked(useTelegramAuth).mockReturnValue({
+      authState: null,
+      isLoadingAuthState: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: false,
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+    });
 
     render(
       <HeaderActions
@@ -154,7 +150,9 @@ describe('HeaderActions', () => {
     vi.mocked(useTelegramAuth).mockReturnValue({
       authState: { displayLabel: '@admin', isAdmin: true },
       isLoadingAuthState: false,
-      hasTelegramMiniAppAuthError: false,
+      isSigningIn: false,
+      isTelegramSignInAvailable: true,
+      signIn: vi.fn(),
       signOut: vi.fn(),
     });
 

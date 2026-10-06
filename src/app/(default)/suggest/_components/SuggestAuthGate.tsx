@@ -5,7 +5,6 @@ import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { clientEnv } from '@/env/client-env';
 import { requestTelegramSignIn } from '@/lib/telegram/telegram-auth';
 
 interface SuggestAuthGateProps {
@@ -15,8 +14,7 @@ interface SuggestAuthGateProps {
 export default function SuggestAuthGate(props: SuggestAuthGateProps) {
   const { children } = props;
 
-  const { authState, isLoadingAuthState } = useTelegramAuth();
-  const isTelegramSignInAvailable = Boolean(clientEnv.telegramOidcClientId);
+  const { authState, isLoadingAuthState, isTelegramSignInAvailable } = useTelegramAuth();
 
   if (isLoadingAuthState) {
     return (
@@ -41,13 +39,14 @@ export default function SuggestAuthGate(props: SuggestAuthGateProps) {
               <Button
                 type="button"
                 className="w-full"
-                onClick={() => requestTelegramSignIn()}
+                onClick={requestTelegramSignIn}
               >
                 Sign in
               </Button>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Sign-in is not configured on this deployment, so suggestions cannot be submitted.
+                Telegram sign-in is not available in this session, so suggestions cannot be
+                submitted.
               </p>
             )}
           </CardContent>

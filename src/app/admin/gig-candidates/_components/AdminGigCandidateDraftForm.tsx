@@ -28,7 +28,6 @@ import {
   mapGigCandidateFormValuesToDraft,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import { toastTelegramInitDataExpired } from '@/app/admin/gigs/_lib/telegram-init-data-expired';
 import PosterField from '@/components/PosterField';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -116,13 +115,11 @@ function useGigCandidateLookup(
         description: 'Fields were updated from lookup results.',
       });
     } catch (e) {
-      if (!toastTelegramInitDataExpired(e)) {
-        toast({
-          title: 'Error',
-          description: 'Failed to start AI lookup.',
-          variant: 'destructive',
-        });
-      }
+      toast({
+        title: 'Error',
+        description: e instanceof Error ? e.message : 'Failed to start AI lookup.',
+        variant: 'destructive',
+      });
     }
   }
 

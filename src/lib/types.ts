@@ -1,6 +1,6 @@
 export interface TelegramLoginOptions {
   client_id: number;
-  scope: ['profile'];
+  scope: ['profile', 'write'];
 }
 
 export interface TelegramLoginResult {
@@ -16,15 +16,6 @@ declare global {
   interface Window {
     Telegram?: {
       Login?: TelegramLoginSdk;
-      WebApp?: {
-        initData: string;
-        initDataUnsafe?: {
-          start_param?: string;
-          user?: {
-            id: number;
-          };
-        };
-      };
     };
   }
 }

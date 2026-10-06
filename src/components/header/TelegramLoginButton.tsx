@@ -6,7 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import type { TelegramOidcCredentials } from '@/lib/telegram/telegram-auth';
 import type { TelegramLoginResult } from '@/lib/types';
 
-const TELEGRAM_LOGIN_SCRIPT_SRC = 'https://oauth.telegram.org/js/telegram-login.js?3';
+const TELEGRAM_LOGIN_SCRIPT_SRC = 'https://oauth.telegram.org/js/telegram-login.js?6';
 
 export interface TelegramLoginButtonProps {
   clientId: number;
@@ -97,7 +97,7 @@ export default function TelegramLoginButton(props: TelegramLoginButtonProps) {
     }
 
     setIsPending(true);
-    login.auth({ client_id: clientId, scope: ['profile'] }, (result) => {
+    login.auth({ client_id: clientId, scope: ['profile', 'write'] }, (result) => {
       void handleLoginResult(result);
     });
   };

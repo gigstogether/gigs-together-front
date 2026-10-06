@@ -2,9 +2,7 @@
 
 import { LogIn, LogOut } from 'lucide-react';
 import { useCallback } from 'react';
-import { clientEnv } from '@/env/client-env';
 import { toast } from '@/hooks/use-toast';
-import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { requestTelegramSignIn } from '@/lib/telegram/telegram-auth';
 
@@ -12,10 +10,7 @@ const menuRowClass =
   'flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted';
 
 export default function HeaderAuthActions() {
-  const { authState, signOut } = useTelegramAuth();
-  const isAuthEnabled = clientEnv.isAuthEnabled;
-  const telegramOidcClientId = clientEnv.telegramOidcClientId;
-  const miniAppEnv = useTelegramMiniAppEnv();
+  const { authState, isTelegramSignInAvailable, signOut } = useTelegramAuth();
 
   const handleSignOut = useCallback(async () => {
     const label = authState?.displayLabel;
@@ -26,13 +21,12 @@ export default function HeaderAuthActions() {
     });
   }, [authState, signOut]);
 
-  if (!authState && (!isAuthEnabled || !telegramOidcClientId)) {
+  if (!authState && !isTelegramSignInAvailable) {
     return null;
   }
 
-  const showSignInButton =
-    !authState && isAuthEnabled && Boolean(telegramOidcClientId) && miniAppEnv === 'browser';
-  const showSignOutButton = authState && miniAppEnv !== 'mini';
+  const showSignInButton = !authState && isTelegramSignInAvailable;
+  const showSignOutButton = Boolean(authState);
 
   return (
     <>
@@ -79,7 +73,7 @@ export default function HeaderAuthActions() {
         <button
           type="button"
           className={menuRowClass}
-          onClick={() => requestTelegramSignIn()}
+          onClick={requestTelegramSignIn}
           aria-label="Sign in"
         >
           <LogIn

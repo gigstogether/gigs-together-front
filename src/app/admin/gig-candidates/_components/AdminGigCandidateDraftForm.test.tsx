@@ -31,9 +31,6 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: pushMock }),
 }));
 vi.mock('@/hooks/use-toast', () => ({ toast: toastMock }));
-vi.mock('@/app/admin/gigs/_lib/telegram-init-data-expired', () => ({
-  toastTelegramInitDataExpired: vi.fn(() => false),
-}));
 vi.mock('@/app/admin/_lib/admin-api', () => ({
   createAdminGigCandidate: createGigCandidateMock,
   lookupAdminGigCandidateDraft: lookupGigCandidateDraftMock,
@@ -191,11 +188,28 @@ describe('AdminGigCandidateDraftForm', () => {
     await waitFor(() => {
       expect(toastMock).toHaveBeenCalledWith({
         title: 'Error',
-        description: 'Failed to start AI lookup.',
+        description: 'AI unavailable',
         variant: 'destructive',
       });
     });
     expect(createGigCandidateMock).not.toHaveBeenCalled();
     expect(updateGigCandidateDraftMock).not.toHaveBeenCalled();
+  });
+
+  it('should show the propagated authentication error', async () => {
+    lookupGigCandidateDraftMock.mockRejectedValueOnce(new Error('Telegram data expired'));
+    renderForm();
+
+    fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Band' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Find info with AI' }));
+
+    await waitFor(() => {
+      expect(lookupGigCandidateDraftMock).toHaveBeenCalledTimes(1);
+    });
+    expect(toastMock).toHaveBeenCalledWith({
+      title: 'Error',
+      description: 'Telegram data expired',
+      variant: 'destructive',
+    });
   });
 });

@@ -17,7 +17,7 @@ describe('TelegramLoginButton', () => {
     delete window.Telegram?.Login;
   });
 
-  it('should pass OIDC credentials when Telegram login succeeds', async () => {
+  it('should request bot write access and pass OIDC credentials when Telegram login succeeds', async () => {
     const onAuth = vi.fn();
     const auth: NonNullable<NonNullable<Window['Telegram']>['Login']>['auth'] = vi.fn(
       (_options, callback) => callback({ id_token: 'signed-id-token' }),
@@ -33,7 +33,7 @@ describe('TelegramLoginButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Log in with Telegram' }));
 
     expect(auth).toHaveBeenCalledWith(
-      { client_id: 123456, scope: ['profile'] },
+      { client_id: 123456, scope: ['profile', 'write'] },
       expect.any(Function),
     );
     await waitFor(() =>

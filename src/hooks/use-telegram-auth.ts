@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import { clientEnv } from '@/env/client-env';
+import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import {
-  bootstrapTelegramAuthFromWebApp,
+  clearExplicitTelegramSignIn,
   clearStoredTelegramClientProfile,
-  getTelegramMiniAppBootstrapSnapshot,
   getTelegramClientProfileSnapshot,
+  signInWithTelegram,
   signOutTelegramAuthOnServer,
-  subscribeTelegramMiniAppBootstrap,
   subscribeTelegramClientProfile,
 } from '@/lib/telegram/telegram-auth';
 import type { TelegramAuthState } from '@/lib/telegram/telegram-auth.types';
-import { logger } from '@/lib/logger';
+import { getTelegramLaunchParamsSnapshot } from '@/lib/telegram/telegram-webapp';
 
 function subscribeNoop(): () => void {
   return () => undefined;
@@ -18,7 +19,9 @@ function subscribeNoop(): () => void {
 export interface UseTelegramAuthResult {
   readonly authState: TelegramAuthState | null;
   readonly isLoadingAuthState: boolean;
-  readonly hasTelegramMiniAppAuthError: boolean;
+  readonly isSigningIn: boolean;
+  readonly isTelegramSignInAvailable: boolean;
+  readonly signIn: () => Promise<void>;
   readonly signOut: () => Promise<void>;
 }
 
@@ -37,14 +40,8 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     getTelegramClientProfileSnapshot,
     () => null,
   );
-  const isTelegramMiniAppBootstrapPending = useSyncExternalStore(
-    subscribeTelegramMiniAppBootstrap,
-    getTelegramMiniAppBootstrapSnapshot,
-    () => false,
-  );
-  const hasAttemptedMiniAppBootstrapRef = useRef(false);
-  const [hasTelegramMiniAppAuthError, setHasTelegramMiniAppAuthError] = useState(false);
-
+  const miniAppEnv = useTelegramMiniAppEnv();
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const authState = useMemo((): TelegramAuthState | null => {
     if (!profileSnapshot) {
       return null;
@@ -56,34 +53,37 @@ export function useTelegramAuth(): UseTelegramAuthResult {
     };
   }, [profileSnapshot]);
 
-  const signOut = useCallback(async () => {
-    await signOutTelegramAuthOnServer();
+  const signOut = useCallback(async (): Promise<void> => {
+    clearExplicitTelegramSignIn();
     clearStoredTelegramClientProfile();
+    await signOutTelegramAuthOnServer();
   }, []);
 
-  useEffect(() => {
-    if (!isHydrated || authState || hasAttemptedMiniAppBootstrapRef.current) {
-      return;
+  const isTelegramSignInAvailable =
+    clientEnv.isAuthEnabled &&
+    (miniAppEnv === 'mini'
+      ? Boolean(getTelegramLaunchParamsSnapshot()?.initData)
+      : miniAppEnv === 'browser' && Boolean(clientEnv.telegramOidcClientId));
+
+  const signIn = useCallback(async (): Promise<void> => {
+    if (!isTelegramSignInAvailable) {
+      throw new Error('Telegram sign-in is not available in this environment.');
     }
 
-    const bootstrap = async (): Promise<void> => {
-      hasAttemptedMiniAppBootstrapRef.current = true;
-      try {
-        await bootstrapTelegramAuthFromWebApp();
-        setHasTelegramMiniAppAuthError(false);
-      } catch (e) {
-        logger.errorFromUnknown('telegram_mini_app_bootstrap_failed', e);
-        setHasTelegramMiniAppAuthError(true);
-      }
-    };
-
-    void bootstrap();
-  }, [authState, isHydrated]);
+    setIsSigningIn(true);
+    try {
+      await signInWithTelegram();
+    } finally {
+      setIsSigningIn(false);
+    }
+  }, [isTelegramSignInAvailable]);
 
   return {
     authState,
-    isLoadingAuthState: !isHydrated || isTelegramMiniAppBootstrapPending,
-    hasTelegramMiniAppAuthError,
+    isLoadingAuthState: !isHydrated,
+    isSigningIn,
+    isTelegramSignInAvailable,
+    signIn,
     signOut,
   };
 }

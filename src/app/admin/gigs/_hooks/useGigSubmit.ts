@@ -3,7 +3,6 @@ import { toast } from '@/hooks/use-toast';
 import { feedKeys } from '@/lib/feed/feedKeys';
 import { gigFormKeys } from '@/app/admin/gigs/_lib/gigFormKeys';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
-import { toastTelegramInitDataExpired } from '@/app/admin/gigs/_lib/telegram-init-data-expired';
 import { ApiError, isApiTransportError } from '@/lib/api-errors';
 
 import type {
@@ -107,10 +106,6 @@ export function useGigSubmit(params: UseGigSubmitParams): UseGigSubmitResult {
         posterUrl,
       });
     } catch (e) {
-      if (toastTelegramInitDataExpired(e)) {
-        return;
-      }
-
       if (e instanceof ApiError && e.statusCode === 409) {
         toast({
           title: 'Gig changed',

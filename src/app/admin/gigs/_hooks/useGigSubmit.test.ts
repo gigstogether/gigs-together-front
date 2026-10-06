@@ -16,16 +16,8 @@ const { toastMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
 }));
 
-const { toastTelegramInitDataExpiredMock } = vi.hoisted(() => ({
-  toastTelegramInitDataExpiredMock: vi.fn(() => false),
-}));
-
 vi.mock('@/hooks/use-toast', () => ({
   toast: toastMock,
-}));
-
-vi.mock('@/app/admin/gigs/_lib/telegram-init-data-expired', () => ({
-  toastTelegramInitDataExpired: toastTelegramInitDataExpiredMock,
 }));
 
 const DEFAULT_SUBMIT_VALUES: GigFormValues = {
@@ -162,6 +154,38 @@ describe('useGigSubmit', () => {
     });
     expect(onSuccess).not.toHaveBeenCalled();
     expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  it('should show the propagated authentication error', async () => {
+    const queryClient = createTestQueryClient();
+    const apiCall = vi
+      .fn<(params: GigUpsertApiParams) => Promise<GigUpsertResponse>>()
+      .mockRejectedValueOnce(new Error('Telegram data expired'));
+    const onSuccess = vi.fn();
+
+    const { result } = renderHook(
+      () =>
+        useGigSubmit({
+          posterFile: null,
+          posterUrl: '',
+          apiCall,
+          onSuccess,
+        }),
+      {
+        wrapper: createQueryClientWrapper(queryClient),
+      },
+    );
+
+    await act(async () => {
+      await result.current.onSubmit(DEFAULT_SUBMIT_VALUES);
+    });
+
+    expect(toastMock).toHaveBeenCalledWith({
+      title: "Couldn't submit",
+      description: 'Telegram data expired',
+      variant: 'destructive',
+    });
+    expect(onSuccess).not.toHaveBeenCalled();
   });
 
   it('should keep the loaded version stale and show a conflict until explicit reload', async () => {

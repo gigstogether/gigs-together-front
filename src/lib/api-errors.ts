@@ -72,7 +72,7 @@ export class ApiRequestError extends Error {
 /** Backend sends this when WebApp initData `auth_date` is outside the allowed window. */
 export const TELEGRAM_INIT_DATA_EXPIRED_CODE = 'TELEGRAM_INIT_DATA_EXPIRED' as const;
 
-export function isTelegramInitDataExpiredError(e: unknown): boolean {
+export function isTelegramInitDataExpiredError(e: unknown): e is ApiError {
   return e instanceof ApiError && e.code === TELEGRAM_INIT_DATA_EXPIRED_CODE;
 }
 

@@ -149,6 +149,35 @@ describe('useSuggestGigSubmit', () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
+  it('should show the propagated authentication error', async () => {
+    const queryClient = createTestQueryClient();
+    createGigCandidateMock.mockRejectedValueOnce(new Error('Telegram data expired'));
+    const onSuccess = vi.fn();
+
+    const { result } = renderHook(
+      () =>
+        useSuggestGigSubmit({
+          posterFile: null,
+          posterUrl: '',
+          onSuccess,
+        }),
+      {
+        wrapper: createQueryClientWrapper(queryClient),
+      },
+    );
+
+    await act(async () => {
+      await result.current.onSubmit(DEFAULT_SUBMIT_VALUES);
+    });
+
+    expect(toastMock).toHaveBeenCalledWith({
+      title: "Couldn't submit",
+      description: 'Telegram data expired',
+      variant: 'destructive',
+    });
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
   it('should hide network diagnostics from the error toast', async () => {
     const queryClient = createTestQueryClient();
     createGigCandidateMock.mockRejectedValueOnce(

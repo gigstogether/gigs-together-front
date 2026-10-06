@@ -1,56 +1,112 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 
-const hookMocks = vi.hoisted(() => ({
-  bootstrapTelegramAuthFromWebApp: vi.fn<() => Promise<void>>(),
-  loggerErrorFromUnknown: vi.fn(),
+const { getTelegramLaunchParamsSnapshotMock, hookMocks, miniAppEnvMock, mockClientEnv } =
+  vi.hoisted(() => ({
+    getTelegramLaunchParamsSnapshotMock:
+      vi.fn<() => { initData?: string; startParam?: string } | undefined>(),
+    hookMocks: {
+      clearExplicitTelegramSignIn: vi.fn(),
+      clearStoredTelegramClientProfile: vi.fn(),
+      signInWithTelegram: vi.fn<() => Promise<void>>(),
+      signOutTelegramAuthOnServer: vi.fn<() => Promise<void>>(),
+    },
+    miniAppEnvMock: vi.fn<() => 'browser' | 'mini' | 'unknown'>(),
+    mockClientEnv: {
+      isAuthEnabled: true,
+      telegramClientProfileStorageKey: 'gt_test_profile',
+      telegramOidcClientId: 123456,
+    },
+  }));
+
+vi.mock('@/env/client-env', () => ({
+  clientEnv: mockClientEnv,
 }));
 
-vi.mock('@/lib/logger', () => ({
-  logger: {
-    errorFromUnknown: hookMocks.loggerErrorFromUnknown,
-  },
+vi.mock('@/hooks/use-telegram-mini-app-env', () => ({
+  useTelegramMiniAppEnv: miniAppEnvMock,
+}));
+
+vi.mock('@/lib/telegram/telegram-webapp', () => ({
+  getTelegramLaunchParamsSnapshot: getTelegramLaunchParamsSnapshotMock,
 }));
 
 vi.mock('@/lib/telegram/telegram-auth', () => ({
-  bootstrapTelegramAuthFromWebApp: hookMocks.bootstrapTelegramAuthFromWebApp,
-  clearStoredTelegramClientProfile: vi.fn(),
-  getTelegramMiniAppBootstrapSnapshot: () => false,
+  clearExplicitTelegramSignIn: hookMocks.clearExplicitTelegramSignIn,
+  clearStoredTelegramClientProfile: hookMocks.clearStoredTelegramClientProfile,
   getTelegramClientProfileSnapshot: () => null,
-  signOutTelegramAuthOnServer: vi.fn(),
-  subscribeTelegramMiniAppBootstrap: () => () => undefined,
+  signInWithTelegram: hookMocks.signInWithTelegram,
+  signOutTelegramAuthOnServer: hookMocks.signOutTelegramAuthOnServer,
   subscribeTelegramClientProfile: () => () => undefined,
 }));
 
 describe('useTelegramAuth', () => {
   beforeEach(() => {
-    hookMocks.bootstrapTelegramAuthFromWebApp.mockReset();
-    hookMocks.bootstrapTelegramAuthFromWebApp.mockResolvedValue();
-    hookMocks.loggerErrorFromUnknown.mockReset();
+    mockClientEnv.isAuthEnabled = true;
+    mockClientEnv.telegramOidcClientId = 123456;
+    miniAppEnvMock.mockReset();
+    miniAppEnvMock.mockReturnValue('browser');
+    getTelegramLaunchParamsSnapshotMock.mockReset();
+    hookMocks.clearExplicitTelegramSignIn.mockReset();
+    hookMocks.clearStoredTelegramClientProfile.mockReset();
+    hookMocks.signInWithTelegram.mockReset();
+    hookMocks.signInWithTelegram.mockResolvedValue();
+    hookMocks.signOutTelegramAuthOnServer.mockReset();
+    hookMocks.signOutTelegramAuthOnServer.mockResolvedValue();
   });
 
-  it('should expose and log Mini App bootstrap failure', async () => {
-    const bootstrapError = new Error('initData unavailable');
-    hookMocks.bootstrapTelegramAuthFromWebApp.mockRejectedValue(bootstrapError);
+  it('should keep a guest signed out without starting Mini App authentication', () => {
+    const { result } = renderHook(() => useTelegramAuth());
+
+    expect(result.current.authState).toBeNull();
+    expect(result.current.isLoadingAuthState).toBe(false);
+    expect(hookMocks.signInWithTelegram).not.toHaveBeenCalled();
+  });
+
+  it('should make Mini App sign-in available without an OIDC client id when initData exists', () => {
+    mockClientEnv.telegramOidcClientId = 0;
+    miniAppEnvMock.mockReturnValue('mini');
+    getTelegramLaunchParamsSnapshotMock.mockReturnValue({ initData: 'user=test' });
 
     const { result } = renderHook(() => useTelegramAuth());
 
-    await waitFor(() => {
-      expect(result.current.hasTelegramMiniAppAuthError).toBe(true);
-    });
-    expect(hookMocks.loggerErrorFromUnknown).toHaveBeenCalledWith(
-      'telegram_mini_app_bootstrap_failed',
-      bootstrapError,
-    );
+    expect(result.current.isTelegramSignInAvailable).toBe(true);
   });
 
-  it('should keep Mini App bootstrap error clear after successful bootstrap', async () => {
+  it('should keep Mini App sign-in unavailable when captured initData is missing', () => {
+    miniAppEnvMock.mockReturnValue('mini');
+    getTelegramLaunchParamsSnapshotMock.mockReturnValue({ startParam: 'edit-token' });
+
     const { result } = renderHook(() => useTelegramAuth());
 
-    await waitFor(() => {
-      expect(hookMocks.bootstrapTelegramAuthFromWebApp).toHaveBeenCalledTimes(1);
-    });
-    expect(result.current.hasTelegramMiniAppAuthError).toBe(false);
-    expect(hookMocks.loggerErrorFromUnknown).not.toHaveBeenCalled();
+    expect(result.current.isTelegramSignInAvailable).toBe(false);
+  });
+
+  it('should keep sign-in unavailable when authentication is disabled', () => {
+    mockClientEnv.isAuthEnabled = false;
+
+    const { result } = renderHook(() => useTelegramAuth());
+
+    expect(result.current.isTelegramSignInAvailable).toBe(false);
+  });
+
+  it('should authenticate only after the explicit sign-in action', async () => {
+    miniAppEnvMock.mockReturnValue('mini');
+    getTelegramLaunchParamsSnapshotMock.mockReturnValue({ initData: 'user=test' });
+    const { result } = renderHook(() => useTelegramAuth());
+
+    await act(() => result.current.signIn());
+
+    expect(hookMocks.signInWithTelegram).toHaveBeenCalledTimes(1);
+  });
+
+  it('should clear explicit sign-in state and the cached profile on logout', async () => {
+    const { result } = renderHook(() => useTelegramAuth());
+
+    await act(() => result.current.signOut());
+
+    expect(hookMocks.clearExplicitTelegramSignIn).toHaveBeenCalledTimes(1);
+    expect(hookMocks.clearStoredTelegramClientProfile).toHaveBeenCalledTimes(1);
+    expect(hookMocks.signOutTelegramAuthOnServer).toHaveBeenCalledTimes(1);
   });
 });

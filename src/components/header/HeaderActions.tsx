@@ -11,7 +11,6 @@ import { ADMIN_GIG_CANDIDATE_NEW_ROUTE } from '@/lib/admin-gig-candidate-paths';
 import { SUGGEST_ROUTE } from '@/lib/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { clientEnv } from '@/env/client-env';
-import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { normalizeLocationTitle } from '@/lib/utils';
 import LocationPopover from '@/components/header/LocationPopover';
@@ -50,23 +49,19 @@ export default function HeaderActions(props: HeaderActionsProps) {
     : undefined;
   const telegramUrl = clientEnv.telegramUrl;
   const githubUrl = clientEnv.githubUrl;
-  const isAuthEnabled = clientEnv.isAuthEnabled;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
 
-  const { authState } = useTelegramAuth();
-  const miniAppEnv = useTelegramMiniAppEnv();
+  const { authState, isTelegramSignInAvailable } = useTelegramAuth();
 
-  const telegramOidcClientId = clientEnv.telegramOidcClientId;
   const isAdmin = authState?.isAdmin === true;
   const suggestGigHref = isAdmin
     ? ADMIN_GIG_CANDIDATE_NEW_ROUTE
     : clientEnv.isPublicSuggestGigEnabled
       ? SUGGEST_ROUTE
       : undefined;
-  const isSignInShownInMenu =
-    isAuthEnabled && Boolean(telegramOidcClientId) && miniAppEnv === 'browser';
+  const isSignInShownInMenu = isTelegramSignInAvailable;
   const hasVisibleAuthState = Boolean(authState);
 
   /** Profile / Sign in row is visible — same predicates as HeaderAuthActions non-empty UX. */
@@ -251,7 +246,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
           </PopoverContent>
         </Popover>
       </div>
-      {miniAppEnv === 'browser' ? <HeaderSignInModal /> : null}
+      <HeaderSignInModal />
     </div>
   );
 }

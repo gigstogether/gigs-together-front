@@ -1,8 +1,12 @@
-import { ApiError } from '@/lib/api-errors';
+import { ApiError, isTelegramInitDataExpiredError } from '@/lib/api-errors';
 import { fetchApiJson } from '@/lib/api-core';
 import type { FetchApiJsonOptions } from '@/lib/api-core';
 import { postAuthRefresh } from '@/lib/auth-refresh';
-import { exchangeTelegramAuthFromWebApp } from '@/lib/telegram/telegram-auth';
+import { logger } from '@/lib/logger';
+import {
+  exchangeTelegramAuthFromWebApp,
+  hasExplicitTelegramSignIn,
+} from '@/lib/telegram/telegram-auth';
 
 type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -25,10 +29,10 @@ function isTelegramWebAppAuthEndpoint(endpointOrUrl: string): boolean {
   return endpointOrUrl.includes('v1/auth/telegram/web-app');
 }
 
-let authRefreshPromise: Promise<boolean> | null = null;
+let authRefreshPromise: Promise<void> | null = null;
 let telegramMiniAppReauthPromise: Promise<boolean> | null = null;
 
-async function postAuthRefreshSingleFlight(): Promise<boolean> {
+async function postAuthRefreshSingleFlight(): Promise<void> {
   if (!authRefreshPromise) {
     authRefreshPromise = (async () => {
       try {
@@ -43,24 +47,28 @@ async function postAuthRefreshSingleFlight(): Promise<boolean> {
 }
 
 async function postTelegramMiniAppReauth(): Promise<boolean> {
-  if (typeof window === 'undefined') {
+  if (typeof window === 'undefined' || !hasExplicitTelegramSignIn()) {
     return false;
   }
 
   if (!telegramMiniAppReauthPromise) {
     telegramMiniAppReauthPromise = (async () => {
       try {
-        const { isTelegramMiniApp, waitForTelegramInitData } = await import(
+        const { getTelegramInitData, isTelegramMiniApp } = await import(
           '@/lib/telegram/telegram-webapp'
         );
         if (!isTelegramMiniApp()) {
           return false;
         }
 
-        const initData = await waitForTelegramInitData();
+        const initData = getTelegramInitData();
         await exchangeTelegramAuthFromWebApp(initData);
         return true;
-      } catch {
+      } catch (e) {
+        logger.errorFromUnknown('telegram_mini_app_reauth_failed', e);
+        if (isTelegramInitDataExpiredError(e)) {
+          throw e;
+        }
         return false;
       } finally {
         telegramMiniAppReauthPromise = null;
@@ -91,8 +99,8 @@ export async function fetchApiJsonWithSessionRecovery<TResponse>(
     }
 
     if (!hasAttemptedTokenRefresh && !isAuthRefreshEndpoint(endpointOrUrl)) {
-      const refreshed = await postAuthRefreshSingleFlight();
-      if (refreshed) {
+      try {
+        await postAuthRefreshSingleFlight();
         return fetchApiJsonWithSessionRecovery<TResponse>(endpointOrUrl, method, data, {
           init,
           onUnauthorized,
@@ -101,6 +109,10 @@ export async function fetchApiJsonWithSessionRecovery<TResponse>(
             hasAttemptedTokenRefresh: true,
           },
         });
+      } catch (refreshError) {
+        if (!(refreshError instanceof ApiError) || refreshError.statusCode !== 401) {
+          throw refreshError;
+        }
       }
     }
 
@@ -109,7 +121,13 @@ export async function fetchApiJsonWithSessionRecovery<TResponse>(
       !isAuthRefreshEndpoint(endpointOrUrl) &&
       !isTelegramWebAppAuthEndpoint(endpointOrUrl)
     ) {
-      const isReauthenticated = await postTelegramMiniAppReauth();
+      let isReauthenticated: boolean;
+      try {
+        isReauthenticated = await postTelegramMiniAppReauth();
+      } catch (e) {
+        onUnauthorized?.();
+        throw e;
+      }
       if (isReauthenticated) {
         return fetchApiJsonWithSessionRecovery<TResponse>(endpointOrUrl, method, data, {
           init,

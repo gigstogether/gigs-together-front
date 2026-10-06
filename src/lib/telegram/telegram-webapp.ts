@@ -22,66 +22,49 @@ export interface TelegramLaunchParamsSnapshot {
   readonly startParam?: string;
 }
 
-const TELEGRAM_MINI_APP_STORAGE_KEY = 'gt_tg_is_mini_app';
-const TELEGRAM_MINI_APP_STORAGE_VALUE = '1';
-
-let launchParamsSnapshot: TelegramLaunchParamsSnapshot | undefined;
-let didCaptureLaunchParams = false;
-
-export function resetTelegramLaunchParamsCaptureForTests(): void {
-  launchParamsSnapshot = undefined;
-  didCaptureLaunchParams = false;
-  try {
-    localStorage.removeItem(TELEGRAM_MINI_APP_STORAGE_KEY);
-  } catch {
-    /* ignore test cleanup failures */
-  }
+interface TelegramLaunchParamsFromUrl {
+  hasLaunchParams: boolean;
+  snapshot?: TelegramLaunchParamsSnapshot;
 }
 
+const TELEGRAM_LAUNCH_PARAMS_STORAGE_KEY = 'gt_tg_launch_params';
+
 export function getTelegramLaunchParamsSnapshot(): TelegramLaunchParamsSnapshot | undefined {
-  return launchParamsSnapshot;
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  return readTelegramLaunchParamsSnapshotFromSessionStorage();
 }
 
 /**
- * Reads Telegram launch params from the current URL into memory and clears them from the address bar.
+ * Saves Telegram launch params from the current URL in sessionStorage and clears the address bar.
  * Call as early as possible (see `instrumentation-client.ts`). Safe to call more than once.
  */
-export function captureTelegramLaunchParamsFromUrl(): boolean {
+export function captureTelegramLaunchParamsFromUrl(): void {
   if (typeof window === 'undefined') {
-    return false;
+    return;
   }
 
-  if (!didCaptureLaunchParams) {
-    didCaptureLaunchParams = true;
-
-    const searchParams = new URLSearchParams(window.location.search);
-    const hashFragment = window.location.hash.startsWith('#')
-      ? window.location.hash.slice(1)
-      : window.location.hash;
-    const hashParams = hashFragment ? new URLSearchParams(hashFragment) : null;
-
-    const initData =
-      hashParams?.get('tgWebAppData') ?? searchParams.get('tgWebAppData') ?? undefined;
-    const startParam =
-      hashParams?.get('tgWebAppStartParam') ??
-      searchParams.get('tgWebAppStartParam') ??
-      searchParams.get('startapp') ??
-      undefined;
-
-    if (initData ?? startParam) {
-      launchParamsSnapshot = {
-        ...(initData ? { initData } : {}),
-        ...(startParam ? { startParam } : {}),
-      };
-      persistTelegramMiniAppMarker();
+  try {
+    const launchParams = readTelegramLaunchParamsFromUrl();
+    if (launchParams.hasLaunchParams) {
+      replaceTelegramLaunchParamsSnapshot(launchParams.snapshot);
     }
+  } finally {
+    clearTelegramLaunchParamsFromUrl();
   }
-
-  return clearTelegramLaunchParamsFromUrl();
 }
 
 export function getTelegramInitData(): string {
-  return window.Telegram?.WebApp?.initData ?? getTelegramInitDataFromLocation() ?? '';
+  const initData = getTelegramLaunchParamsSnapshot()?.initData;
+  if (!initData) {
+    throw new Error(
+      'Telegram initData is not available. Open this page from inside Telegram (Mini App).',
+    );
+  }
+
+  return initData;
 }
 
 /**
@@ -129,107 +112,139 @@ export function clearTelegramLaunchParamsFromUrl(): boolean {
 }
 
 /**
- * Whether the app runs inside Telegram (Mini App). Uses initData / URL fallbacks and
- * `initDataUnsafe.user` when the Web App script has run. Call only on the client.
+ * Whether the app runs inside Telegram (Mini App). Uses launch params captured before hydration.
  */
 export function isTelegramMiniApp(): boolean {
-  if (typeof window === 'undefined') return false;
-  if (hasPersistedTelegramMiniAppMarker()) return true;
-  if (getTelegramInitData()) {
-    persistTelegramMiniAppMarker();
-    return true;
-  }
-  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  if (typeof user?.id === 'number') {
-    persistTelegramMiniAppMarker();
-    return true;
-  }
-  return false;
-}
-
-function getTelegramInitDataFromLocation(): string | undefined {
-  if (launchParamsSnapshot?.initData) {
-    return launchParamsSnapshot.initData;
-  }
-
-  if (didCaptureLaunchParams) {
-    return undefined;
-  }
-
-  const hash = (window.location.hash ?? '').replace(/^#/, '');
-  const fromHash = hash ? new URLSearchParams(hash).get('tgWebAppData') : null;
-  if (fromHash) return fromHash;
-
-  const fromSearch = new URLSearchParams(window.location.search).get('tgWebAppData');
-  if (fromSearch) return fromSearch;
-
-  return undefined;
+  return getTelegramLaunchParamsSnapshot() !== undefined;
 }
 
 export function getTelegramStartParam(): string {
-  const fromSnapshot = launchParamsSnapshot?.startParam;
-  if (fromSnapshot) {
-    return fromSnapshot;
-  }
-
-  const raw =
-    window.Telegram?.WebApp?.initDataUnsafe?.start_param ||
-    new URLSearchParams(window.location.search).get('tgWebAppStartParam') ||
-    new URLSearchParams(window.location.search).get('startapp');
-  return (raw ?? '').toString();
+  return getTelegramLaunchParamsSnapshot()?.startParam ?? '';
 }
 
-function hasPersistedTelegramMiniAppMarker(): boolean {
-  if (typeof localStorage === 'undefined') {
-    return false;
+function readTelegramLaunchParamsFromUrl(): TelegramLaunchParamsFromUrl {
+  const searchParams = new URLSearchParams(window.location.search);
+  const hashFragment = window.location.hash.startsWith('#')
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const hashParams = hashFragment ? new URLSearchParams(hashFragment) : null;
+  const hasLaunchParams =
+    TELEGRAM_LAUNCH_SEARCH_PARAM_KEYS.some((key) => searchParams.has(key)) ||
+    TELEGRAM_LAUNCH_HASH_PARAM_KEYS.some((key) => hashParams?.has(key) ?? false);
+
+  const initData = hashParams?.get('tgWebAppData') ?? searchParams.get('tgWebAppData') ?? undefined;
+  const startParam =
+    hashParams?.get('tgWebAppStartParam') ??
+    searchParams.get('tgWebAppStartParam') ??
+    searchParams.get('startapp') ??
+    undefined;
+
+  if (!initData && !startParam) {
+    return { hasLaunchParams };
+  }
+
+  return {
+    hasLaunchParams,
+    snapshot: {
+      ...(initData ? { initData } : {}),
+      ...(startParam ? { startParam } : {}),
+    },
+  };
+}
+
+function replaceTelegramLaunchParamsSnapshot(
+  snapshot: TelegramLaunchParamsSnapshot | undefined,
+): void {
+  if (!snapshot) {
+    removeTelegramLaunchParamsSnapshotFromSessionStorage();
+    return;
+  }
+
+  persistTelegramLaunchParamsSnapshotInSessionStorage(snapshot);
+}
+
+function persistTelegramLaunchParamsSnapshotInSessionStorage(
+  snapshot: TelegramLaunchParamsSnapshot,
+): void {
+  if (typeof sessionStorage === 'undefined') {
+    throw new Error('Telegram launch params sessionStorage is unavailable.');
   }
 
   try {
-    return localStorage.getItem(TELEGRAM_MINI_APP_STORAGE_KEY) === TELEGRAM_MINI_APP_STORAGE_VALUE;
-  } catch (error: unknown) {
-    console.error('Failed to read Telegram Mini App marker from localStorage.', error);
-    return false;
+    sessionStorage.setItem(TELEGRAM_LAUNCH_PARAMS_STORAGE_KEY, JSON.stringify(snapshot));
+  } catch (e: unknown) {
+    removeTelegramLaunchParamsSnapshotFromSessionStorage();
+    throw new Error('Failed to persist Telegram launch params in sessionStorage.', { cause: e });
   }
 }
 
-function persistTelegramMiniAppMarker(): void {
-  if (typeof localStorage === 'undefined') {
+function readTelegramLaunchParamsSnapshotFromSessionStorage():
+  | TelegramLaunchParamsSnapshot
+  | undefined {
+  if (typeof sessionStorage === 'undefined') {
+    return undefined;
+  }
+
+  let storedValue: string | null;
+  try {
+    storedValue = sessionStorage.getItem(TELEGRAM_LAUNCH_PARAMS_STORAGE_KEY);
+  } catch (e: unknown) {
+    console.error('Failed to read Telegram launch params from sessionStorage.', e);
+    return undefined;
+  }
+
+  if (storedValue === null) {
+    return undefined;
+  }
+
+  let parsedValue: unknown;
+  try {
+    parsedValue = JSON.parse(storedValue);
+  } catch (e: unknown) {
+    console.error('Failed to parse Telegram launch params from sessionStorage.', e);
+    removeTelegramLaunchParamsSnapshotFromSessionStorage();
+    return undefined;
+  }
+
+  if (!isTelegramLaunchParamsSnapshot(parsedValue)) {
+    console.error('Invalid Telegram launch params snapshot in sessionStorage.');
+    removeTelegramLaunchParamsSnapshotFromSessionStorage();
+    return undefined;
+  }
+
+  return parsedValue;
+}
+
+function removeTelegramLaunchParamsSnapshotFromSessionStorage(): void {
+  if (typeof sessionStorage === 'undefined') {
     return;
   }
 
   try {
-    localStorage.setItem(TELEGRAM_MINI_APP_STORAGE_KEY, TELEGRAM_MINI_APP_STORAGE_VALUE);
-  } catch (error: unknown) {
-    console.error('Failed to persist Telegram Mini App marker in localStorage.', error);
+    sessionStorage.removeItem(TELEGRAM_LAUNCH_PARAMS_STORAGE_KEY);
+  } catch (e: unknown) {
+    console.error('Failed to remove Telegram launch params from sessionStorage.', e);
   }
 }
 
-export interface WaitForTelegramInitDataOptions {
-  readonly signal?: AbortSignal;
-  readonly timeoutMs?: number;
-  readonly intervalMs?: number;
-}
-
-export async function waitForTelegramInitData(
-  options?: WaitForTelegramInitDataOptions,
-): Promise<string> {
-  // 10_000 ms = 10 s poll budget for Mini App initData
-  const timeoutMs = options?.timeoutMs ?? 10_000;
-  // 100 ms between polls
-  const intervalMs = options?.intervalMs ?? 100;
-
-  const start = Date.now();
-
-  while (Date.now() - start <= timeoutMs) {
-    if (options?.signal?.aborted) {
-      throw new DOMException('Aborted', 'AbortError');
-    }
-    const initData = getTelegramInitData();
-    if (initData) return initData;
-    await new Promise((r) => setTimeout(r, intervalMs));
+function isTelegramLaunchParamsSnapshot(value: unknown): value is TelegramLaunchParamsSnapshot {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
   }
 
-  throw new Error(
-    'Telegram initData is not available. Open this page from inside Telegram (Mini App).',
-  );
+  const hasInitData = 'initData' in value;
+  const hasStartParam = 'startParam' in value;
+  if (!hasInitData && !hasStartParam) {
+    return false;
+  }
+
+  if (hasInitData && (typeof value.initData !== 'string' || value.initData.length === 0)) {
+    return false;
+  }
+
+  if (hasStartParam && (typeof value.startParam !== 'string' || value.startParam.length === 0)) {
+    return false;
+  }
+
+  return Object.keys(value).every((key) => key === 'initData' || key === 'startParam');
 }
