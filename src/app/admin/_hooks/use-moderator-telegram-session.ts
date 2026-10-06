@@ -4,6 +4,7 @@ import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import type { TelegramAuthState } from '@/lib/telegram/telegram-auth.types';
+import { requestTelegramSignIn } from '@/lib/telegram/telegram-auth';
 
 export interface UseModeratorTelegramSessionResult {
   readonly authState: TelegramAuthState | null;
@@ -11,27 +12,19 @@ export interface UseModeratorTelegramSessionResult {
   readonly isSigningIn: boolean;
   readonly isTelegramSignInAvailable: boolean;
   readonly miniAppEnv: TelegramMiniAppEnv;
-  readonly handleSignIn: () => Promise<void>;
+  readonly handleSignIn: () => void;
   readonly handleSignOut: () => Promise<void>;
 }
 
 export function useModeratorTelegramSession(): UseModeratorTelegramSessionResult {
-  const { authState, isLoadingAuthState, isSigningIn, isTelegramSignInAvailable, signIn, signOut } =
+  const { authState, isLoadingAuthState, isSigningIn, isTelegramSignInAvailable, signOut } =
     useTelegramAuth();
 
   const miniAppEnv = useTelegramMiniAppEnv();
 
-  const handleSignIn = useCallback(async () => {
-    try {
-      await signIn();
-    } catch (e) {
-      toast({
-        title: 'Sign in failed',
-        description: e instanceof Error ? e.message : 'Could not complete Telegram sign-in.',
-        variant: 'destructive',
-      });
-    }
-  }, [signIn]);
+  const handleSignIn = useCallback((): void => {
+    requestTelegramSignIn();
+  }, []);
 
   const handleSignOut = useCallback(async () => {
     await signOut();

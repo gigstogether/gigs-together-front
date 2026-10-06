@@ -11,7 +11,6 @@ import { ADMIN_GIG_CANDIDATE_NEW_ROUTE } from '@/lib/admin-gig-candidate-paths';
 import { SUGGEST_ROUTE } from '@/lib/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { clientEnv } from '@/env/client-env';
-import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { normalizeLocationTitle } from '@/lib/utils';
 import LocationPopover from '@/components/header/LocationPopover';
@@ -55,7 +54,6 @@ export default function HeaderActions(props: HeaderActionsProps) {
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
 
   const { authState, isTelegramSignInAvailable } = useTelegramAuth();
-  const miniAppEnv = useTelegramMiniAppEnv();
 
   const isAdmin = authState?.isAdmin === true;
   const suggestGigHref = isAdmin
@@ -248,7 +246,7 @@ export default function HeaderActions(props: HeaderActionsProps) {
           </PopoverContent>
         </Popover>
       </div>
-      {miniAppEnv === 'browser' ? <HeaderSignInModal /> : null}
+      <HeaderSignInModal />
     </div>
   );
 }

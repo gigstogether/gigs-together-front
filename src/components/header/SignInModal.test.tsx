@@ -1,19 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import SignInModal from '@/components/header/SignInModal';
 
-vi.mock('@/components/header/SignInContent', () => ({
-  default: () => <div data-testid="sign-in-content" />,
-}));
-
 describe('SignInModal', () => {
   it('should not render modal content when closed', () => {
     render(
       <SignInModal
         isOpen={false}
         onOpenChange={vi.fn()}
-        telegramOidcClientId={123456}
-        onAuthenticated={vi.fn()}
-      />,
+      >
+        <div data-testid="sign-in-content" />
+      </SignInModal>,
     );
 
     expect(screen.queryByTestId('sign-in-content')).toBeNull();
@@ -25,9 +21,9 @@ describe('SignInModal', () => {
       <SignInModal
         isOpen
         onOpenChange={vi.fn()}
-        telegramOidcClientId={123456}
-        onAuthenticated={vi.fn()}
-      />,
+      >
+        <div data-testid="sign-in-content" />
+      </SignInModal>,
     );
 
     expect(screen.getByTestId('sign-in-content')).toBeInTheDocument();

@@ -4,8 +4,8 @@ import type { ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
+import { requestTelegramSignIn } from '@/lib/telegram/telegram-auth';
 
 interface SuggestAuthGateProps {
   children: ReactNode;
@@ -14,20 +14,7 @@ interface SuggestAuthGateProps {
 export default function SuggestAuthGate(props: SuggestAuthGateProps) {
   const { children } = props;
 
-  const { authState, isLoadingAuthState, isSigningIn, isTelegramSignInAvailable, signIn } =
-    useTelegramAuth();
-
-  const handleSignIn = async (): Promise<void> => {
-    try {
-      await signIn();
-    } catch (e) {
-      toast({
-        title: 'Sign in failed',
-        description: e instanceof Error ? e.message : 'Could not complete Telegram sign-in.',
-        variant: 'destructive',
-      });
-    }
-  };
+  const { authState, isLoadingAuthState, isTelegramSignInAvailable } = useTelegramAuth();
 
   if (isLoadingAuthState) {
     return (
@@ -52,12 +39,9 @@ export default function SuggestAuthGate(props: SuggestAuthGateProps) {
               <Button
                 type="button"
                 className="w-full"
-                disabled={isSigningIn}
-                onClick={() => {
-                  void handleSignIn();
-                }}
+                onClick={requestTelegramSignIn}
               >
-                {isSigningIn ? 'Signing in…' : 'Sign in'}
+                Sign in
               </Button>
             ) : (
               <p className="text-sm text-muted-foreground">

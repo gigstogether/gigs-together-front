@@ -1,6 +1,6 @@
 'use client';
 
-import SignInContent from '@/components/header/SignInContent';
+import type { ReactNode } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,18 +8,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import type { TelegramOidcCredentials } from '@/lib/telegram/telegram-auth';
+
 export interface SignInModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  telegramOidcClientId: number | undefined;
-  onAuthenticated: (credentials: TelegramOidcCredentials) => void | Promise<void>;
+  children: ReactNode;
 }
 
 export default function SignInModal(props: SignInModalProps) {
-  const { isOpen, onOpenChange, telegramOidcClientId, onAuthenticated } = props;
+  const { isOpen, onOpenChange, children } = props;
 
-  if (!isOpen || !telegramOidcClientId) {
+  if (!isOpen) {
     return null;
   }
 
@@ -39,13 +38,7 @@ export default function SignInModal(props: SignInModalProps) {
         <DialogDescription className="sr-only">
           Continue with the button below to sign in to your account.
         </DialogDescription>
-        <SignInContent
-          telegramOidcClientId={telegramOidcClientId}
-          onAuthenticated={async (credentials) => {
-            await onAuthenticated(credentials);
-            onOpenChange(false);
-          }}
-        />
+        {children}
       </DialogContent>
     </Dialog>
   );

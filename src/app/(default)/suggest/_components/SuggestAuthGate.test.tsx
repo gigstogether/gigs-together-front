@@ -4,7 +4,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import SuggestAuthGate from '@/app/(default)/suggest/_components/SuggestAuthGate';
 
-const { useTelegramAuthMock } = vi.hoisted(() => ({
+const { requestTelegramSignInMock, useTelegramAuthMock } = vi.hoisted(() => ({
+  requestTelegramSignInMock: vi.fn(),
   useTelegramAuthMock: vi.fn(),
 }));
 
@@ -12,8 +13,13 @@ vi.mock('@/hooks/use-telegram-auth', () => ({
   useTelegramAuth: useTelegramAuthMock,
 }));
 
+vi.mock('@/lib/telegram/telegram-auth', () => ({
+  requestTelegramSignIn: requestTelegramSignInMock,
+}));
+
 describe('SuggestAuthGate', () => {
   beforeEach(() => {
+    requestTelegramSignInMock.mockReset();
     useTelegramAuthMock.mockReset();
   });
 
@@ -35,7 +41,7 @@ describe('SuggestAuthGate', () => {
     expect(screen.getByText('Loading…').parentElement).toHaveClass('w-full', 'justify-center');
   });
 
-  it('should keep the form hidden and start sign-in when a guest clicks Sign in', () => {
+  it('should keep the form hidden and request the sign-in modal when a guest clicks Sign in', () => {
     const signIn = vi.fn<() => Promise<void>>().mockResolvedValue();
     useTelegramAuthMock.mockReturnValue({
       authState: null,
@@ -53,7 +59,8 @@ describe('SuggestAuthGate', () => {
 
     expect(screen.queryByText('Form')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
-    expect(signIn).toHaveBeenCalledTimes(1);
+    expect(requestTelegramSignInMock).toHaveBeenCalledTimes(1);
+    expect(signIn).not.toHaveBeenCalled();
   });
 
   it('should render the form after authentication', () => {

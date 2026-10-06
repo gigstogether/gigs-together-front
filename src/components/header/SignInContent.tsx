@@ -1,18 +1,13 @@
 'use client';
 
-import TelegramLoginButton from '@/components/header/TelegramLoginButton';
-import type { TelegramOidcCredentials } from '@/lib/telegram/telegram-auth';
+import type { ReactNode } from 'react';
+
 export interface SignInContentProps {
-  telegramOidcClientId: number | undefined;
-  onAuthenticated: (credentials: TelegramOidcCredentials) => void | Promise<void>;
+  children: ReactNode;
 }
 
 export default function SignInContent(props: SignInContentProps) {
-  const { telegramOidcClientId, onAuthenticated } = props;
-
-  if (!telegramOidcClientId) {
-    return null;
-  }
+  const { children } = props;
 
   return (
     <>
@@ -22,12 +17,7 @@ export default function SignInContent(props: SignInContentProps) {
           Continue with the button below to sign in to your account.
         </p>
       </div>
-      <div className="flex justify-center pt-1">
-        <TelegramLoginButton
-          clientId={telegramOidcClientId}
-          onAuth={onAuthenticated}
-        />
-      </div>
+      <div className="flex justify-center pt-1">{children}</div>
     </>
   );
 }

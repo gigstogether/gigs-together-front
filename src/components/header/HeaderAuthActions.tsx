@@ -3,30 +3,14 @@
 import { LogIn, LogOut } from 'lucide-react';
 import { useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
+import { requestTelegramSignIn } from '@/lib/telegram/telegram-auth';
 
 const menuRowClass =
   'flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted';
 
 export default function HeaderAuthActions() {
-  const { authState, isSigningIn, isTelegramSignInAvailable, signIn, signOut } = useTelegramAuth();
-  const miniAppEnv = useTelegramMiniAppEnv();
-
-  const handleSignIn = useCallback(async () => {
-    try {
-      await signIn();
-      if (miniAppEnv === 'mini') {
-        toast({ title: 'Signed in' });
-      }
-    } catch (e) {
-      toast({
-        title: 'Sign in failed',
-        description: e instanceof Error ? e.message : 'Could not complete Telegram sign-in.',
-        variant: 'destructive',
-      });
-    }
-  }, [miniAppEnv, signIn]);
+  const { authState, isTelegramSignInAvailable, signOut } = useTelegramAuth();
 
   const handleSignOut = useCallback(async () => {
     const label = authState?.displayLabel;
@@ -89,17 +73,14 @@ export default function HeaderAuthActions() {
         <button
           type="button"
           className={menuRowClass}
-          disabled={isSigningIn}
-          onClick={() => {
-            void handleSignIn();
-          }}
+          onClick={requestTelegramSignIn}
           aria-label="Sign in"
         >
           <LogIn
             className="h-4 w-4 shrink-0"
             aria-hidden
           />
-          {isSigningIn ? 'Signing in…' : 'Sign in'}
+          Sign in
         </button>
       ) : null}
     </>

@@ -1,7 +1,8 @@
 import { act, renderHook } from '@testing-library/react';
 import { useModeratorTelegramSession } from '@/app/admin/_hooks/use-moderator-telegram-session';
 
-const { useTelegramAuthMock } = vi.hoisted(() => ({
+const { requestTelegramSignInMock, useTelegramAuthMock } = vi.hoisted(() => ({
+  requestTelegramSignInMock: vi.fn(),
   useTelegramAuthMock: vi.fn(),
 }));
 
@@ -13,12 +14,17 @@ vi.mock('@/hooks/use-telegram-auth', () => ({
   useTelegramAuth: useTelegramAuthMock,
 }));
 
+vi.mock('@/lib/telegram/telegram-auth', () => ({
+  requestTelegramSignIn: requestTelegramSignInMock,
+}));
+
 vi.mock('@/hooks/use-telegram-mini-app-env', () => ({
   useTelegramMiniAppEnv: () => 'browser' as const,
 }));
 
 describe('useModeratorTelegramSession', () => {
   beforeEach(() => {
+    requestTelegramSignInMock.mockReset();
     useTelegramAuthMock.mockReset();
     useTelegramAuthMock.mockReturnValue({
       authState: null,
@@ -36,7 +42,7 @@ describe('useModeratorTelegramSession', () => {
     expect(result.current.isTelegramSignInAvailable).toBe(true);
   });
 
-  it('should start shared sign-in from the moderator handler', async () => {
+  it('should request the shared sign-in modal from the moderator handler', () => {
     const signIn = vi.fn<() => Promise<void>>().mockResolvedValue();
     useTelegramAuthMock.mockReturnValue({
       authState: null,
@@ -48,8 +54,9 @@ describe('useModeratorTelegramSession', () => {
     });
 
     const { result } = renderHook(() => useModeratorTelegramSession());
-    await act(() => result.current.handleSignIn());
+    act(() => result.current.handleSignIn());
 
-    expect(signIn).toHaveBeenCalledTimes(1);
+    expect(requestTelegramSignInMock).toHaveBeenCalledTimes(1);
+    expect(signIn).not.toHaveBeenCalled();
   });
 });
