@@ -16,6 +16,7 @@ import { I18nProvider } from '@/providers/I18nProvider';
 import { resolveTranslationValue } from '@/lib/i18n/translation-value';
 import { getTranslations } from '@/lib/i18n/translations.server';
 import type { Event } from '@/lib/types';
+import { createOpenGraphMetadata } from '@/lib/open-graph';
 
 const PAGE_SIZE = clientEnv.feedPageSize;
 const EAGER_INITIAL_POSTER_COUNT = serverEnv.eagerInitialPosterCount;
@@ -38,11 +39,17 @@ interface FeedCityPageProps {
 
 export async function generateMetadata(props: FeedCityPageProps): Promise<Metadata> {
   const { country, city } = await props.params;
+  const feedPath = buildFeedPath({ country, city });
 
   return {
     alternates: {
-      canonical: buildFeedPath({ country, city }),
+      canonical: feedPath,
     },
+    openGraph: createOpenGraphMetadata({
+      url: feedPath,
+      title: serverEnv.sitePreviewTitle,
+      description: serverEnv.sitePreviewDescription,
+    }),
   };
 }
 
