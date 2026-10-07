@@ -1,5 +1,12 @@
 const getTranslationsMock = vi.hoisted(() => vi.fn());
 
+vi.mock('@/env/server-env', () => ({
+  serverEnv: {
+    appBaseUrl: 'https://gigstogether.example',
+    brandName: 'Gigs Together',
+  },
+}));
+
 vi.mock('@/lib/i18n/translations.server', () => ({
   getTranslations: getTranslationsMock,
 }));
@@ -28,6 +35,21 @@ describe('generateMetadata', () => {
       description: 'About Gigs Together!',
       alternates: {
         canonical: '/about',
+      },
+      openGraph: {
+        type: 'website',
+        siteName: 'Gigs Together',
+        title: 'About',
+        description: 'About Gigs Together!',
+        url: 'https://gigstogether.example/about',
+        images: [
+          {
+            url: 'https://gigstogether.example/logo-1200x630.png',
+            width: 1200,
+            height: 630,
+            alt: 'About',
+          },
+        ],
       },
     });
   });

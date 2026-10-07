@@ -5,15 +5,13 @@ import type { ReactNode } from 'react';
 import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
+import { createOpenGraphMetadata, getSitePreviewImageUrl } from '@/lib/open-graph';
 
 const SITE_BASE_URL = serverEnv.appBaseUrl;
 
 const BRAND_NAME = serverEnv.brandName;
 const TITLE = serverEnv.sitePreviewTitle;
 const DESCRIPTION = serverEnv.sitePreviewDescription;
-const IMAGE_WIDTH = 1200;
-const IMAGE_HEIGHT = 630;
-const PREVIEW_IMAGE = `/logo-${IMAGE_WIDTH}x${IMAGE_HEIGHT}.png`;
 const FAVICON_URL = serverEnv.isDevelopment
   ? '/logo-dev-circle-96x96.png'
   : serverEnv.isStaging
@@ -21,7 +19,7 @@ const FAVICON_URL = serverEnv.isDevelopment
     : '/logo-circle-96x96.png';
 
 const metadataBase = SITE_BASE_URL ? new URL(SITE_BASE_URL) : undefined;
-const previewImage = metadataBase ? new URL(PREVIEW_IMAGE, metadataBase).toString() : PREVIEW_IMAGE;
+const previewImage = getSitePreviewImageUrl();
 
 const sharedMetadata = {
   metadataBase,
@@ -38,21 +36,10 @@ const sharedMetadata = {
 } satisfies Metadata;
 
 const socialMetadata = {
-  openGraph: {
-    type: 'website',
-    siteName: BRAND_NAME,
+  openGraph: createOpenGraphMetadata({
     title: TITLE,
     description: DESCRIPTION,
-    url: SITE_BASE_URL ?? undefined,
-    images: [
-      {
-        url: previewImage,
-        width: IMAGE_WIDTH,
-        height: IMAGE_HEIGHT,
-        alt: TITLE,
-      },
-    ],
-  },
+  }),
   twitter: {
     card: 'summary_large_image',
     title: TITLE,

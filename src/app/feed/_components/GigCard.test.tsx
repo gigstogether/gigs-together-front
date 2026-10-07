@@ -36,7 +36,7 @@ describe('GigCard', () => {
 
     render(<GigCard gig={gig} />);
 
-    expect(screen.getByText('Radiohead')).toBeInTheDocument();
+    expect(screen.getByText('Radiohead')).toHaveClass('truncate');
     expect(screen.queryByRole('link', { name: 'Radiohead' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
   });

@@ -117,7 +117,9 @@ export function GigCard(props: GigCardProps) {
         <div className="flex min-w-0 flex-row gap-4 items-center">
           <div className="flex min-w-0 flex-1 flex-col">
             <div className="flex min-w-0 items-center gap-2">
-              <p className="min-w-0 flex-1 tracking-tight font-bold dark:text-white">{gig.title}</p>
+              <p className="min-w-0 flex-1 truncate tracking-tight font-bold dark:text-white">
+                {gig.title}
+              </p>
               <ShareButton sharePath={sharePath} />
             </div>
             <GigDates

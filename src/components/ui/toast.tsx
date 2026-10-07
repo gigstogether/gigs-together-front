@@ -14,7 +14,7 @@ function ToastViewport({ className, ...props }: ComponentProps<typeof ToastPrimi
   return (
     <ToastPrimitives.Viewport
       className={cn(
-        'fixed top-0 z-[120] flex max-h-screen w-full flex-col p-4 sm:right-0 md:max-w-[420px]',
+        'pointer-events-none fixed left-1/2 top-[calc(var(--header-h)+0.75rem)] z-[120] flex max-h-[calc(100dvh-var(--header-h)-1.5rem)] w-[calc(100%-2rem)] max-w-[420px] -translate-x-1/2 flex-col sm:right-4 sm:left-auto sm:translate-x-0',
         className,
       )}
       {...props}

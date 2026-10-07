@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { getTranslations } from '@/lib/i18n/translations.server';
 import type { V1TranslationsByNamespace } from '@/lib/api-boundary-schemas';
 import { resolveTranslationValue } from '@/lib/i18n/translation-value';
+import { createOpenGraphMetadata } from '@/lib/open-graph';
 
 const NS = 'about';
 
@@ -27,6 +28,11 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: '/about',
     },
+    openGraph: createOpenGraphMetadata({
+      url: '/about',
+      title,
+      description,
+    }),
   };
 }
 
