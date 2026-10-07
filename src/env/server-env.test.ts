@@ -20,6 +20,17 @@ describe('env/server', () => {
     vi.unstubAllEnvs();
   });
 
+  describe('BRAND_NAME', () => {
+    it('should use the branded site name when env var is missing', async () => {
+      vi.stubEnv('NODE_ENV', 'test');
+      vi.stubEnv('BRAND_NAME', undefined);
+
+      const serverEnvModule = await importServerEnv();
+
+      expect(serverEnvModule.serverEnv.brandName).toBe('Gigs Together!');
+    });
+  });
+
   describe('TRANSLATIONS_REVALIDATE_SECONDS', () => {
     it('should parse translations revalidate seconds when env var is a positive integer', async () => {
       vi.stubEnv('NODE_ENV', 'test');

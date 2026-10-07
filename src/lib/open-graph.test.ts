@@ -1,7 +1,7 @@
 vi.mock('@/env/server-env', () => ({
   serverEnv: {
     appBaseUrl: 'https://gigstogether.example',
-    brandName: 'Gigs Together',
+    brandName: 'Gigs Together!',
   },
 }));
 
@@ -17,7 +17,7 @@ describe('createOpenGraphMetadata', () => {
 
     expect(metadata).toEqual({
       type: 'website',
-      siteName: 'Gigs Together',
+      siteName: 'Gigs Together!',
       title: 'About',
       description: 'About Gigs Together!',
       url: 'https://gigstogether.example/about',

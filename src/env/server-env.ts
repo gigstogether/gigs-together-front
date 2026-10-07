@@ -9,7 +9,7 @@ import {
 const DEFAULT_TRANSLATIONS_REVALIDATE_SECONDS = 3_600; // 1 hour (60 minutes)
 /** Posters from the initial feed batch that may appear above the fold (grid up to 5 cols). */
 const DEFAULT_EAGER_INITIAL_POSTER_COUNT = 5;
-const DEFAULT_BRAND_NAME = 'Gigs Together';
+const DEFAULT_BRAND_NAME = 'Gigs Together!';
 const DEFAULT_SITE_PREVIEW_TITLE = 'Gigs Together!';
 const DEFAULT_SITE_PREVIEW_DESCRIPTION = 'Find gigs and company in your city.';
 

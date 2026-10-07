@@ -40,8 +40,18 @@ interface FeedCityPageProps {
 export async function generateMetadata(props: FeedCityPageProps): Promise<Metadata> {
   const { country, city } = await props.params;
   const feedPath = buildFeedPath({ country, city });
+  const normalizedCity = normalizeSegment(city);
+  const i18n = await getTranslations('en', ['country', 'city']);
+  const cityName = resolveTranslationValue({
+    entry: i18n.translations.city?.[normalizedCity],
+    namespace: 'city',
+    key: normalizedCity,
+  });
 
   return {
+    title: {
+      absolute: `${cityName} | ${serverEnv.brandName}`,
+    },
     alternates: {
       canonical: feedPath,
     },
