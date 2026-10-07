@@ -4,7 +4,7 @@ vi.mock('@/env/client-env', () => ({ clientEnv: { feedPageSize: 10 } }));
 vi.mock('@/env/server-env', () => ({
   serverEnv: {
     appBaseUrl: 'https://gigstogether.example',
-    brandName: 'Gigs Together',
+    brandName: 'Gigs Together!',
     sitePreviewTitle: 'Gigs Together!',
     sitePreviewDescription: 'Find gigs and company in your city.',
     eagerInitialPosterCount: 5,
@@ -27,7 +27,7 @@ describe('generateMetadata', () => {
       },
       openGraph: {
         type: 'website',
-        siteName: 'Gigs Together',
+        siteName: 'Gigs Together!',
         title: 'Gigs Together!',
         description: 'Find gigs and company in your city.',
         url: 'https://gigstogether.example/feed/es/barcelona',

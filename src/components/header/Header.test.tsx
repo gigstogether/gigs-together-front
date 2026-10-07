@@ -45,7 +45,7 @@ describe('Header', () => {
       />,
     );
 
-    expect(screen.getByRole('link', { name: 'Go to home' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Gigs Together! — home' })).toHaveAttribute(
       'href',
       '/feed/es/barcelona',
     );
@@ -54,7 +54,10 @@ describe('Header', () => {
   it('should link home to root when location is omitted', () => {
     render(<Header />);
 
-    expect(screen.getByRole('link', { name: 'Go to home' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Gigs Together! — home' })).toHaveAttribute(
+      'href',
+      '/',
+    );
   });
 
   it('should render environment badge in development', () => {

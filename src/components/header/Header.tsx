@@ -53,7 +53,7 @@ export default function Header(props: HeaderProps) {
               <a
                 href={homeHref}
                 className="inline-flex items-center gap-1.5 cursor-pointer select-none"
-                aria-label="Go to home"
+                aria-label="Gigs Together! — home"
                 title="Go to home"
               >
                 <span className="leading-none">

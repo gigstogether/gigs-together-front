@@ -74,7 +74,7 @@ const jsonLd = serverEnv.isProductionSite
       '@context': 'https://schema.org',
       '@type': 'WebSite',
       name: BRAND_NAME,
-      alternateName: ['GigsTogether', 'Gigs Together!'],
+      alternateName: ['Gigs Together', 'GigsTogether'],
       url: SITE_BASE_URL,
     }
   : null;
