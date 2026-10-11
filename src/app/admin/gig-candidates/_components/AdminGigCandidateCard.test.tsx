@@ -71,12 +71,13 @@ describe('AdminGigCandidateCard', () => {
       'href',
       gigCandidate.moderationPostUrl,
     );
-    const linkedGigLink = screen.getByRole('link', { name: 'Open linked gig in admin' });
+    const linkedGigLink = screen.getByRole('link', { name: 'Gig' });
 
     expect(linkedGigLink).toHaveAttribute('href', '/admin/gigs/band-2026-08-20');
     expect(linkedGigLink).toHaveClass('bg-primary', 'h-7', 'rounded-full');
     expect(linkedGigLink.querySelector('svg')).toBeInTheDocument();
     expect(linkedGigLink).toHaveTextContent('Gig');
+    expect(linkedGigLink.parentElement?.firstElementChild).toBe(linkedGigLink);
     expect(
       screen.getByText('Source: user · Test User (currently admin) · TG: @test_user'),
     ).toBeInTheDocument();

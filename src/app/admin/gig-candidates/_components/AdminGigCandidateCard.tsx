@@ -119,6 +119,22 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
               Created {new Date(gigCandidate.createdAt).toLocaleString()}
             </AdminPreviewMetaRow>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {gigCandidate.linkedGigPublicId ? (
+                <Button
+                  asChild
+                  size="sm"
+                  className="h-7 gap-1.5 rounded-full px-2.5"
+                >
+                  <Link
+                    href={buildAdminGigPublicIdRoute(gigCandidate.linkedGigPublicId)}
+                    aria-label="Gig"
+                    title="Gig"
+                  >
+                    <ExternalLink aria-hidden />
+                    Gig
+                  </Link>
+                </Button>
+              ) : null}
               {gigCandidate.intakePostUrl ? (
                 <a
                   href={gigCandidate.intakePostUrl}
@@ -146,22 +162,6 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                   />
                   Moderation post
                 </a>
-              ) : null}
-              {gigCandidate.linkedGigPublicId ? (
-                <Button
-                  asChild
-                  size="sm"
-                  className="h-7 gap-1.5 rounded-full px-2.5"
-                >
-                  <Link
-                    href={buildAdminGigPublicIdRoute(gigCandidate.linkedGigPublicId)}
-                    aria-label="Open linked gig in admin"
-                    title="Open linked gig in admin"
-                  >
-                    <ExternalLink aria-hidden />
-                    Gig
-                  </Link>
-                </Button>
               ) : null}
             </div>
           </div>
