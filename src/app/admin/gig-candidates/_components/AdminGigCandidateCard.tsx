@@ -123,7 +123,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 <Button
                   asChild
                   size="sm"
-                  className="h-7 gap-1.5 rounded-full px-2.5"
+                  className="h-6 gap-1.5 rounded-full px-2.5 [&_svg]:size-3.5"
                 >
                   <Link
                     href={buildAdminGigPublicIdRoute(gigCandidate.linkedGigPublicId)}

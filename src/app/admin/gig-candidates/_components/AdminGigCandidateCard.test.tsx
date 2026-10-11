@@ -74,7 +74,7 @@ describe('AdminGigCandidateCard', () => {
     const linkedGigLink = screen.getByRole('link', { name: 'Gig' });
 
     expect(linkedGigLink).toHaveAttribute('href', '/admin/gigs/band-2026-08-20');
-    expect(linkedGigLink).toHaveClass('bg-primary', 'h-7', 'rounded-full');
+    expect(linkedGigLink).toHaveClass('bg-primary', 'h-6', 'rounded-full', '[&_svg]:size-3.5');
     expect(linkedGigLink.querySelector('svg')).toBeInTheDocument();
     expect(linkedGigLink).toHaveTextContent('Gig');
     expect(linkedGigLink.parentElement?.firstElementChild).toBe(linkedGigLink);
