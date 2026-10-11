@@ -6,6 +6,7 @@ import { FaTelegramPlane } from 'react-icons/fa';
 import { GigPoster } from '@/components/GigPoster';
 import { clientEnv } from '@/env/client-env';
 import { formatGigDate } from '@/lib/feed/gig-date-format';
+import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
 
 interface GigCardProps {
   gig: Event;
@@ -91,9 +92,7 @@ export function GigCard(props: GigCardProps) {
   const { gig, posterLoading, posterFetchPriority } = props;
 
   const location = [gig.venue, gig.city.name, gig.country.name].filter((str) => !!str).join(' ');
-  const mapsHref = location
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
-    : undefined;
+  const mapsHref = location ? buildGoogleMapsSearchUrl(location) : undefined;
   const telegramUrl = gig.postUrl ?? clientEnv.telegramUrl;
   const sharePath = `/gigs/${encodeURIComponent(gig.id)}`;
 

@@ -11,8 +11,10 @@ import AdminGigCandidatePreviewActions from '@/app/admin/gig-candidates/_compone
 import { GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-status';
 import type { AdminGigCandidate } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { LocationIcon } from '@/components/ui/location-icon';
+import { Button } from '@/components/ui/button';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import { buildAdminGigCandidatePath } from '@/lib/admin-gig-candidate-paths';
+import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
 import { cn } from '@/lib/utils';
 import { ShareButton } from '@/components/ShareButton';
 
@@ -25,6 +27,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
   const { gigDraft } = gigCandidate;
   const title = gigDraft.title ?? 'Untitled Gig Candidate';
   const location = [gigDraft.venue, gigDraft.city, gigDraft.country].filter(Boolean).join(', ');
+  const mapsHref = location ? buildGoogleMapsSearchUrl(location) : undefined;
   const sourceLabel = formatAdminGigSource(gigCandidate.source);
   const isIntakePostExpected = !(
     gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'
@@ -70,7 +73,16 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 />
               }
             >
-              {location}
+              <a
+                href={mapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block min-w-0 truncate text-primary underline-offset-4 hover:underline"
+                title="Open in Google Maps"
+                aria-label="Open venue in Google Maps"
+              >
+                {location}
+              </a>
             </AdminPreviewMetaRow>
           ) : null}
           {gigDraft.ticketsUrl ? (
@@ -86,7 +98,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 href={gigDraft.ticketsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="min-w-0 truncate text-primary underline-offset-4 hover:underline"
+                className="block min-w-0 truncate text-primary underline-offset-4 hover:underline"
               >
                 {gigDraft.ticketsUrl}
               </a>
@@ -107,6 +119,22 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
               Created {new Date(gigCandidate.createdAt).toLocaleString()}
             </AdminPreviewMetaRow>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {gigCandidate.linkedGigPublicId ? (
+                <Button
+                  asChild
+                  size="sm"
+                  className="h-6 gap-1.5 rounded-full px-2.5 [&_svg]:size-3.5"
+                >
+                  <Link
+                    href={buildAdminGigPublicIdRoute(gigCandidate.linkedGigPublicId)}
+                    aria-label="Gig"
+                    title="Gig"
+                  >
+                    <ExternalLink aria-hidden />
+                    Gig
+                  </Link>
+                </Button>
+              ) : null}
               {gigCandidate.intakePostUrl ? (
                 <a
                   href={gigCandidate.intakePostUrl}
@@ -134,14 +162,6 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                   />
                   Moderation post
                 </a>
-              ) : null}
-              {gigCandidate.linkedGigPublicId ? (
-                <Link
-                  href={buildAdminGigPublicIdRoute(gigCandidate.linkedGigPublicId)}
-                  className="text-primary underline-offset-4 hover:underline"
-                >
-                  Open linked gig in admin
-                </Link>
               ) : null}
             </div>
           </div>

@@ -71,10 +71,13 @@ describe('AdminGigCandidateCard', () => {
       'href',
       gigCandidate.moderationPostUrl,
     );
-    expect(screen.getByRole('link', { name: 'Open linked gig in admin' })).toHaveAttribute(
-      'href',
-      '/admin/gigs/band-2026-08-20',
-    );
+    const linkedGigLink = screen.getByRole('link', { name: 'Gig' });
+
+    expect(linkedGigLink).toHaveAttribute('href', '/admin/gigs/band-2026-08-20');
+    expect(linkedGigLink).toHaveClass('bg-primary', 'h-6', 'rounded-full', '[&_svg]:size-3.5');
+    expect(linkedGigLink.querySelector('svg')).toBeInTheDocument();
+    expect(linkedGigLink).toHaveTextContent('Gig');
+    expect(linkedGigLink.parentElement?.firstElementChild).toBe(linkedGigLink);
     expect(
       screen.getByText('Source: user · Test User (currently admin) · TG: @test_user'),
     ).toBeInTheDocument();
@@ -102,6 +105,38 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.getByRole('img', { name: 'Band' })).toHaveAttribute(
       'src',
       'https://posters.example/gig-candidate.jpg?size=large&v=3',
+    );
+  });
+
+  it('should truncate the location and ticket link', () => {
+    const ticketsUrl = 'https://tickets.example/a-very-long-ticket-path';
+
+    renderCard({
+      ...gigCandidate,
+      gigDraft: {
+        ...gigCandidate.gigDraft,
+        ticketsUrl,
+      },
+    });
+
+    expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveClass(
+      'block',
+      'min-w-0',
+      'truncate',
+    );
+    expect(screen.getByRole('link', { name: ticketsUrl })).toHaveClass(
+      'block',
+      'min-w-0',
+      'truncate',
+    );
+  });
+
+  it('should link the location to Google Maps', () => {
+    renderCard();
+
+    expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveAttribute(
+      'href',
+      'https://www.google.com/maps/search/?api=1&query=Razzmatazz%2C%20Barcelona%2C%20ES',
     );
   });
 

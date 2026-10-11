@@ -14,6 +14,7 @@ import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
 import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
 import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPreviewTitleRow';
 import { buildAdminGigEditRoute, buildAdminGigPublicIdPath } from '@/lib/admin-gig-paths';
+import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
 
 interface AdminGigCardProps {
   readonly gig: AdminGigDetail | AdminGigFormData;
@@ -27,6 +28,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
   const feedHref = buildAdminGigPublicHref(gig);
   const hasPublicLinks = gig.isVisible && !!(feedHref || gig.mainPostUrl);
+  const mapsHref = buildGoogleMapsSearchUrl([gig.venue, gig.city, gig.country].join(' '));
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -56,7 +58,16 @@ export default function AdminGigCard(props: AdminGigCardProps) {
               />
             }
           >
-            {gig.venue}
+            <a
+              href={mapsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block min-w-0 truncate text-primary underline-offset-4 hover:underline"
+              title="Open in Google Maps"
+              aria-label="Open venue in Google Maps"
+            >
+              {gig.venue}
+            </a>
           </AdminPreviewMetaRow>
           {gig.ticketsUrl ? (
             <AdminPreviewMetaRow
@@ -71,7 +82,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
                 href={gig.ticketsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="truncate text-primary underline-offset-4 hover:underline"
+                className="block min-w-0 truncate text-primary underline-offset-4 hover:underline"
               >
                 {gig.ticketsUrl}
               </a>

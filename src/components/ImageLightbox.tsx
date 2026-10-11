@@ -65,7 +65,12 @@ export function ImageLightbox(props: ImageLightboxProps) {
         tabIndex={-1}
       />
 
-      <div className="relative flex h-full w-full items-center justify-center p-4">
+      <div
+        className="relative flex h-full w-full items-center justify-center p-4"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+      >
         <button
           ref={closeBtnRef}
           type="button"

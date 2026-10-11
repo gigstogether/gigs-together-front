@@ -70,4 +70,30 @@ describe('AdminGigCard', () => {
       'https://posters.example/gig.jpg?size=large&v=3',
     );
   });
+
+  it('should truncate the location and ticket link', () => {
+    const ticketsUrl = 'https://tickets.example/a-very-long-ticket-path';
+
+    render(<AdminGigCard gig={{ ...gig, ticketsUrl }} />);
+
+    expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveClass(
+      'block',
+      'min-w-0',
+      'truncate',
+    );
+    expect(screen.getByRole('link', { name: ticketsUrl })).toHaveClass(
+      'block',
+      'min-w-0',
+      'truncate',
+    );
+  });
+
+  it('should link the location to Google Maps', () => {
+    render(<AdminGigCard gig={gig} />);
+
+    expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveAttribute(
+      'href',
+      'https://www.google.com/maps/search/?api=1&query=Venue%20barcelona%20ES',
+    );
+  });
 });
