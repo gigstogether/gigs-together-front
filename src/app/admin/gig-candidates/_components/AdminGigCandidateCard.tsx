@@ -11,6 +11,7 @@ import AdminGigCandidatePreviewActions from '@/app/admin/gig-candidates/_compone
 import { GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-status';
 import type { AdminGigCandidate } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { LocationIcon } from '@/components/ui/location-icon';
+import { Button } from '@/components/ui/button';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import { buildAdminGigCandidatePath } from '@/lib/admin-gig-candidate-paths';
 import { cn } from '@/lib/utils';
@@ -136,12 +137,20 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 </a>
               ) : null}
               {gigCandidate.linkedGigPublicId ? (
-                <Link
-                  href={buildAdminGigPublicIdRoute(gigCandidate.linkedGigPublicId)}
-                  className="text-primary underline-offset-4 hover:underline"
+                <Button
+                  asChild
+                  size="sm"
+                  className="h-7 gap-1.5 rounded-full px-2.5"
                 >
-                  Open linked gig in admin
-                </Link>
+                  <Link
+                    href={buildAdminGigPublicIdRoute(gigCandidate.linkedGigPublicId)}
+                    aria-label="Open linked gig in admin"
+                    title="Open linked gig in admin"
+                  >
+                    <ExternalLink aria-hidden />
+                    Gig
+                  </Link>
+                </Button>
               ) : null}
             </div>
           </div>
