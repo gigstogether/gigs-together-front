@@ -70,4 +70,17 @@ describe('AdminGigCard', () => {
       'https://posters.example/gig.jpg?size=large&v=3',
     );
   });
+
+  it('should truncate the location and ticket link', () => {
+    const ticketsUrl = 'https://tickets.example/a-very-long-ticket-path';
+
+    render(<AdminGigCard gig={{ ...gig, ticketsUrl }} />);
+
+    expect(screen.getByText(gig.venue)).toHaveClass('block', 'min-w-0', 'truncate');
+    expect(screen.getByRole('link', { name: ticketsUrl })).toHaveClass(
+      'block',
+      'min-w-0',
+      'truncate',
+    );
+  });
 });

@@ -105,6 +105,29 @@ describe('AdminGigCandidateCard', () => {
     );
   });
 
+  it('should truncate the location and ticket link', () => {
+    const ticketsUrl = 'https://tickets.example/a-very-long-ticket-path';
+
+    renderCard({
+      ...gigCandidate,
+      gigDraft: {
+        ...gigCandidate.gigDraft,
+        ticketsUrl,
+      },
+    });
+
+    expect(screen.getByText('Razzmatazz, Barcelona, ES')).toHaveClass(
+      'block',
+      'min-w-0',
+      'truncate',
+    );
+    expect(screen.getByRole('link', { name: ticketsUrl })).toHaveClass(
+      'block',
+      'min-w-0',
+      'truncate',
+    );
+  });
+
   it('should show Reject on a Reviewing detail view', () => {
     renderCard({ ...gigCandidate, status: GigCandidateStatusAPI.Reviewing });
 

@@ -56,7 +56,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
               />
             }
           >
-            {gig.venue}
+            <span className="block min-w-0 truncate">{gig.venue}</span>
           </AdminPreviewMetaRow>
           {gig.ticketsUrl ? (
             <AdminPreviewMetaRow
@@ -71,7 +71,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
                 href={gig.ticketsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="truncate text-primary underline-offset-4 hover:underline"
+                className="block min-w-0 truncate text-primary underline-offset-4 hover:underline"
               >
                 {gig.ticketsUrl}
               </a>

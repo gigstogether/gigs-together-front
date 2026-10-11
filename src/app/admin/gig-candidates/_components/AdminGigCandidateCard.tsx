@@ -70,7 +70,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 />
               }
             >
-              {location}
+              <span className="block min-w-0 truncate">{location}</span>
             </AdminPreviewMetaRow>
           ) : null}
           {gigDraft.ticketsUrl ? (
@@ -86,7 +86,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 href={gigDraft.ticketsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="min-w-0 truncate text-primary underline-offset-4 hover:underline"
+                className="block min-w-0 truncate text-primary underline-offset-4 hover:underline"
               >
                 {gigDraft.ticketsUrl}
               </a>
