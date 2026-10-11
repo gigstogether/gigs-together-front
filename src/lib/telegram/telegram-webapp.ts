@@ -40,6 +40,9 @@ export function getTelegramLaunchParamsSnapshot(): TelegramLaunchParamsSnapshot 
 /**
  * Saves Telegram launch params from the current URL in sessionStorage and clears the address bar.
  * Call as early as possible (see `instrumentation-client.ts`). Safe to call more than once.
+ *
+ * This must run before the feed initializes because the feed treats the URL hash as a gig publicId;
+ * leaving Telegram's `tgWebApp*` fragment in place would trigger gig deep-link loading for it.
  */
 export function captureTelegramLaunchParamsFromUrl(): void {
   if (typeof window === 'undefined') {
