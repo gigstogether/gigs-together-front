@@ -14,6 +14,7 @@ import { LocationIcon } from '@/components/ui/location-icon';
 import { Button } from '@/components/ui/button';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import { buildAdminGigCandidatePath } from '@/lib/admin-gig-candidate-paths';
+import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
 import { cn } from '@/lib/utils';
 import { ShareButton } from '@/components/ShareButton';
 
@@ -26,6 +27,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
   const { gigDraft } = gigCandidate;
   const title = gigDraft.title ?? 'Untitled Gig Candidate';
   const location = [gigDraft.venue, gigDraft.city, gigDraft.country].filter(Boolean).join(', ');
+  const mapsHref = location ? buildGoogleMapsSearchUrl(location) : undefined;
   const sourceLabel = formatAdminGigSource(gigCandidate.source);
   const isIntakePostExpected = !(
     gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'
@@ -71,7 +73,16 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 />
               }
             >
-              <span className="block min-w-0 truncate">{location}</span>
+              <a
+                href={mapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block min-w-0 truncate text-primary underline-offset-4 hover:underline"
+                title="Open in Google Maps"
+                aria-label="Open venue in Google Maps"
+              >
+                {location}
+              </a>
             </AdminPreviewMetaRow>
           ) : null}
           {gigDraft.ticketsUrl ? (

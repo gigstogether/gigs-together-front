@@ -118,7 +118,7 @@ describe('AdminGigCandidateCard', () => {
       },
     });
 
-    expect(screen.getByText('Razzmatazz, Barcelona, ES')).toHaveClass(
+    expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveClass(
       'block',
       'min-w-0',
       'truncate',
@@ -127,6 +127,15 @@ describe('AdminGigCandidateCard', () => {
       'block',
       'min-w-0',
       'truncate',
+    );
+  });
+
+  it('should link the location to Google Maps', () => {
+    renderCard();
+
+    expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveAttribute(
+      'href',
+      'https://www.google.com/maps/search/?api=1&query=Razzmatazz%2C%20Barcelona%2C%20ES',
     );
   });
 
