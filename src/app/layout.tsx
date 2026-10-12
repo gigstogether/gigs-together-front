@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import TelegramWebAppBootstrap from '@/components/TelegramWebAppBootstrap';
 import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
 import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
@@ -86,6 +87,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body>
         <PlausibleAnalyticsProvider>
           <QueryProvider>
+            <TelegramWebAppBootstrap />
             {jsonLd ? (
               <script
                 type="application/ld+json"

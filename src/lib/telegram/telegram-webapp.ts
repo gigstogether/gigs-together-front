@@ -38,25 +38,47 @@ export function getTelegramLaunchParamsSnapshot(): TelegramLaunchParamsSnapshot 
 }
 
 /**
- * Saves Telegram launch params from the current URL in sessionStorage and clears the address bar.
+ * Saves Telegram launch params from the current URL in sessionStorage.
  * Call as early as possible (see `instrumentation-client.ts`). Safe to call more than once.
  *
- * This must run before the feed initializes because the feed treats the URL hash as a gig publicId;
- * leaving Telegram's `tgWebApp*` fragment in place would trigger gig deep-link loading for it.
+ * The URL must remain unchanged until the Telegram Web App SDK has read its launch params.
  */
 export function captureTelegramLaunchParamsFromUrl(): void {
   if (typeof window === 'undefined') {
     return;
   }
 
-  try {
-    const launchParams = readTelegramLaunchParamsFromUrl();
-    if (launchParams.hasLaunchParams) {
-      replaceTelegramLaunchParamsSnapshot(launchParams.snapshot);
-    }
-  } finally {
-    clearTelegramLaunchParamsFromUrl();
+  const launchParams = readTelegramLaunchParamsFromUrl();
+  if (launchParams.hasLaunchParams) {
+    replaceTelegramLaunchParamsSnapshot(launchParams.snapshot);
   }
+}
+
+export function requestTelegramWriteAccess(): Promise<boolean> {
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('Telegram write access can only be requested in a browser.'));
+  }
+
+  const webApp = window.Telegram?.WebApp;
+  if (!webApp) {
+    return Promise.reject(new Error('Telegram Web App SDK is not available.'));
+  }
+
+  if (!webApp.isVersionAtLeast('6.9')) {
+    return Promise.reject(
+      new Error(`Telegram write access is not supported in Web App version ${webApp.version}.`),
+    );
+  }
+
+  return new Promise((resolve, reject) => {
+    try {
+      webApp.requestWriteAccess((isAllowed) => {
+        resolve(isAllowed);
+      });
+    } catch (e: unknown) {
+      reject(new Error('Failed to request Telegram write access.', { cause: e }));
+    }
+  });
 }
 
 export function getTelegramInitData(): string {

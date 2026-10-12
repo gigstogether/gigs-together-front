@@ -12,10 +12,17 @@ interface TelegramLoginSdk {
   auth: (options: TelegramLoginOptions, callback: (result: TelegramLoginResult) => void) => void;
 }
 
+interface TelegramWebAppSdk {
+  version: string;
+  isVersionAtLeast: (version: string) => boolean;
+  requestWriteAccess: (callback?: (isAllowed: boolean) => void) => void;
+}
+
 declare global {
   interface Window {
     Telegram?: {
       Login?: TelegramLoginSdk;
+      WebApp?: TelegramWebAppSdk;
     };
   }
 }
