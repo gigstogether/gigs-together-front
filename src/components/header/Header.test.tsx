@@ -60,6 +60,12 @@ describe('Header', () => {
     );
   });
 
+  it('should not expose the site logo as the page heading', () => {
+    render(<Header />);
+
+    expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument();
+  });
+
   it('should render environment badge in development', () => {
     mockServerEnv.isDevelopment = true;
 
