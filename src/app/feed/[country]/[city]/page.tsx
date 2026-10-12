@@ -37,6 +37,10 @@ interface FeedCityPageProps {
   readonly params: Promise<FeedCityRouteParams>;
 }
 
+function getFeedPageTitle(cityName: string): string {
+  return `${cityName} | ${serverEnv.brandName}`;
+}
+
 export async function generateMetadata(props: FeedCityPageProps): Promise<Metadata> {
   const { country, city } = await props.params;
   const feedPath = buildFeedPath({ country, city });
@@ -50,7 +54,7 @@ export async function generateMetadata(props: FeedCityPageProps): Promise<Metada
 
   return {
     title: {
-      absolute: `${cityName} | ${serverEnv.brandName}`,
+      absolute: getFeedPageTitle(cityName),
     },
     alternates: {
       canonical: feedPath,
@@ -94,6 +98,8 @@ export default async function Page(props: FeedCityPageProps) {
       key: code,
     });
 
+  const pageTitle = getFeedPageTitle(tCity(normalizedCity));
+
   const initialEvents: Event[] = feed.gigs.map((gig) =>
     gigToEvent(gig, {
       resolveCountryName: (iso) => tCountry(iso),
@@ -112,6 +118,7 @@ export default async function Page(props: FeedCityPageProps) {
       locale={i18n.locale}
       translations={i18n.translations}
     >
+      <h1 className="sr-only">{pageTitle}</h1>
       <FeedClient
         country={country}
         city={city}

@@ -1,5 +1,11 @@
-vi.mock('../../_components/FeedClient', () => ({ default: vi.fn() }));
-vi.mock('@/app/feed/_lib/feed.server', () => ({ getFeed: vi.fn() }));
+import type { ReactNode } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+
+const feedClientMock = vi.hoisted(() => vi.fn(() => null));
+const getFeedMock = vi.hoisted(() => vi.fn());
+
+vi.mock('../../_components/FeedClient', () => ({ default: feedClientMock }));
+vi.mock('@/app/feed/_lib/feed.server', () => ({ getFeed: getFeedMock }));
 vi.mock('@/env/client-env', () => ({ clientEnv: { feedPageSize: 10 } }));
 const getTranslationsMock = vi.hoisted(() => vi.fn());
 
@@ -13,12 +19,20 @@ vi.mock('@/env/server-env', () => ({
   },
 }));
 vi.mock('@/lib/i18n/translations.server', () => ({ getTranslations: getTranslationsMock }));
-vi.mock('@/providers/I18nProvider', () => ({ I18nProvider: vi.fn() }));
+vi.mock('@/providers/I18nProvider', () => ({
+  I18nProvider: ({ children }: { children: ReactNode }) => children,
+}));
 
-import { generateMetadata } from './page';
+import Page, { generateMetadata } from './page';
 
-describe('generateMetadata', () => {
+describe('feed city page', () => {
   beforeEach(() => {
+    feedClientMock.mockClear();
+    getFeedMock.mockResolvedValue({
+      gigs: [],
+      prevCursor: undefined,
+      nextCursor: undefined,
+    });
     getTranslationsMock.mockResolvedValue({
       locale: 'en',
       translations: {
@@ -61,5 +75,15 @@ describe('generateMetadata', () => {
         ],
       },
     });
+  });
+
+  it('should expose the metadata title as the accessible page heading', async () => {
+    const page = await Page({
+      params: Promise.resolve({ country: 'ES', city: 'Barcelona' }),
+    });
+
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('<h1 class="sr-only">Barcelona | Gigs Together!</h1>');
   });
 });

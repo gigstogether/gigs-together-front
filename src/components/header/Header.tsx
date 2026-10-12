@@ -49,7 +49,7 @@ export default function Header(props: HeaderProps) {
       <div className="w-full px-4 h-full">
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center w-full h-full">
           <div className="min-w-0 justify-self-start">
-            <h1 className="text-xl font-semibold whitespace-nowrap">
+            <div className="text-xl font-semibold whitespace-nowrap">
               <a
                 href={homeHref}
                 className="inline-flex items-center gap-1.5 cursor-pointer select-none"
@@ -69,7 +69,7 @@ export default function Header(props: HeaderProps) {
                   />
                 ) : null}
               </a>
-            </h1>
+            </div>
           </div>
 
           <div className="min-w-0 justify-self-center">{children}</div>
