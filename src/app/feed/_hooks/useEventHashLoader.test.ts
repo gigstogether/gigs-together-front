@@ -78,4 +78,30 @@ describe('useEventHashLoader', () => {
       expect(resolveAnchorYmdByEventId).toHaveBeenCalledWith(publicId);
     });
   });
+
+  it('should resolve the gig public id before Telegram launch params', async () => {
+    const publicId = 'ist-ist-2026-10-13';
+    window.history.replaceState(
+      null,
+      '',
+      `/feed/es/barcelona#${publicId}?tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop`,
+    );
+    const resolveAnchorYmdByEventId = vi
+      .fn<(eventId: string) => Promise<string>>()
+      .mockResolvedValue('2999-10-13');
+    const loadAroundAndReplace = vi
+      .fn<(anchorYmd: string) => Promise<void>>()
+      .mockImplementation(() => {
+        const anchor = document.createElement('div');
+        anchor.id = publicId;
+        document.body.appendChild(anchor);
+        return Promise.resolve();
+      });
+
+    renderTestHook({ resolveAnchorYmdByEventId, loadAroundAndReplace });
+
+    await waitFor(() => {
+      expect(resolveAnchorYmdByEventId).toHaveBeenCalledWith(publicId);
+    });
+  });
 });

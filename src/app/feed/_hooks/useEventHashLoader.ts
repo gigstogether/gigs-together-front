@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { GIG_PUBLIC_ID_PATTERN } from '@/lib/gig.constants';
 import { toLocalYMD } from '@/lib/utils';
+import { parseGigPublicIdFromHash } from '@/app/feed/_lib/parseGigPublicIdFromHash';
 import { useClearFeedLocationHash } from './useClearFeedLocationHash';
 import type { FeedLoadingAction } from '@/app/feed/_lib/feedLoading';
 
@@ -39,9 +39,8 @@ export function useEventHashLoader(params: UseEventHashLoaderParams): void {
       return;
     }
 
-    const id = hash.startsWith('#') ? hash.slice(1) : hash;
-    if (!id) return;
-    if (!GIG_PUBLIC_ID_PATTERN.test(id)) {
+    const id = parseGigPublicIdFromHash(hash);
+    if (!id) {
       lastMissingHashTargetRef.current = null;
       return;
     }
