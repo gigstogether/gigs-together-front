@@ -19,7 +19,7 @@ beforeEach(() => {
 });
 
 describe('captureTelegramLaunchParamsFromUrl', () => {
-  it('should store initData in sessionStorage and clear telegram hash from the url', () => {
+  it('should store initData in sessionStorage without clearing telegram hash from the url', () => {
     window.history.replaceState(
       null,
       '',
@@ -28,18 +28,19 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
 
     captureTelegramLaunchParamsFromUrl();
 
-    expect(window.location.hash).toBe('');
+    expect(window.location.hash).toBe('#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop');
     expect(getTelegramLaunchParamsSnapshot()?.initData).toBe('user=test');
     expect(getTelegramInitData()).toBe('user=test');
   });
 
-  it('should restore launch params from sessionStorage after the url is cleared', () => {
+  it('should restore launch params from sessionStorage after the url is cleared later', () => {
     window.history.replaceState(
       null,
       '',
       '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
     );
     captureTelegramLaunchParamsFromUrl();
+    clearTelegramLaunchParamsFromUrl();
 
     const snapshot = getTelegramLaunchParamsSnapshot();
 
@@ -103,7 +104,7 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
     expect(getTelegramLaunchParamsSnapshot()).toEqual({ initData: 'user=test' });
   });
 
-  it('should clear telegram hash when sessionStorage persistence fails', () => {
+  it('should keep telegram hash when sessionStorage persistence fails', () => {
     const storageFailure = new DOMException('Storage is unavailable.', 'SecurityError');
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw storageFailure;
@@ -117,7 +118,7 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
     expect(() => captureTelegramLaunchParamsFromUrl()).toThrow(
       'Failed to persist Telegram launch params in sessionStorage.',
     );
-    expect(window.location.hash).toBe('');
+    expect(window.location.hash).toBe('#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop');
   });
 
   it('should reject an invalid snapshot stored in sessionStorage', () => {
@@ -149,6 +150,7 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
     );
 
     captureTelegramLaunchParamsFromUrl();
+    clearTelegramLaunchParamsFromUrl();
 
     expect(`${window.location.search}${window.location.hash}`).toBe('?view=calendar#khjkh');
   });
@@ -161,6 +163,7 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
     );
 
     captureTelegramLaunchParamsFromUrl();
+    clearTelegramLaunchParamsFromUrl();
 
     expect(isTelegramMiniApp()).toBe(true);
     expect(window.location.hash).toBe('');
@@ -186,6 +189,7 @@ describe('clearTelegramLaunchParamsFromUrl', () => {
     window.history.replaceState(null, '', '/admin/gigs/new?startapp=edit-token');
 
     captureTelegramLaunchParamsFromUrl();
+    clearTelegramLaunchParamsFromUrl();
 
     expect(window.location.pathname).toBe('/admin/gigs/new');
     expect(window.location.search).toBe('');

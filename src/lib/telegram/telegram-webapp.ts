@@ -38,24 +38,19 @@ export function getTelegramLaunchParamsSnapshot(): TelegramLaunchParamsSnapshot 
 }
 
 /**
- * Saves Telegram launch params from the current URL in sessionStorage and clears the address bar.
+ * Saves Telegram launch params from the current URL in sessionStorage.
  * Call as early as possible (see `instrumentation-client.ts`). Safe to call more than once.
  *
- * The Telegram Web App SDK runs before interactive application scripts, so it has already read the
- * launch params by the time client instrumentation captures and clears them.
+ * The URL must remain unchanged until the Telegram Web App SDK has read its launch params.
  */
 export function captureTelegramLaunchParamsFromUrl(): void {
   if (typeof window === 'undefined') {
     return;
   }
 
-  try {
-    const launchParams = readTelegramLaunchParamsFromUrl();
-    if (launchParams.hasLaunchParams) {
-      replaceTelegramLaunchParamsSnapshot(launchParams.snapshot);
-    }
-  } finally {
-    clearTelegramLaunchParamsFromUrl();
+  const launchParams = readTelegramLaunchParamsFromUrl();
+  if (launchParams.hasLaunchParams) {
+    replaceTelegramLaunchParamsSnapshot(launchParams.snapshot);
   }
 }
 

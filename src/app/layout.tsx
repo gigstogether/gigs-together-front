@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import './globals.css';
+import TelegramWebAppBootstrap from '@/components/TelegramWebAppBootstrap';
 import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
 import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
@@ -9,7 +9,6 @@ import { serverEnv } from '@/env/server-env';
 import { createOpenGraphMetadata, getSitePreviewImageUrl } from '@/lib/open-graph';
 
 const SITE_BASE_URL = serverEnv.appBaseUrl;
-const TELEGRAM_WEB_APP_SCRIPT_SRC = 'https://telegram.org/js/telegram-web-app.js?64';
 
 const BRAND_NAME = serverEnv.brandName;
 const TITLE = serverEnv.sitePreviewTitle;
@@ -83,22 +82,12 @@ const jsonLd = serverEnv.isProductionSite
 
 // TODO: refactor. Maybe "AppShell"?
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
-  // Telegram adds viewport CSS variables to <html> before React hydration. Suppression is limited
-  // to mismatches on <html>; hydration warnings in its descendants remain visible.
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-    >
-      <head>
-        <Script
-          src={TELEGRAM_WEB_APP_SCRIPT_SRC}
-          strategy="beforeInteractive"
-        />
-      </head>
+    <html lang="en">
       <body>
         <PlausibleAnalyticsProvider>
           <QueryProvider>
+            <TelegramWebAppBootstrap />
             {jsonLd ? (
               <script
                 type="application/ld+json"
