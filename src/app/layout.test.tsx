@@ -1,7 +1,21 @@
 import type { PropsWithChildren } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
+interface ScriptMockProps {
+  src: string;
+  strategy: string;
+}
+
 vi.mock('server-only', () => ({}));
+
+vi.mock('next/script', () => ({
+  default: (props: ScriptMockProps) => (
+    <meta
+      data-script-src={props.src}
+      data-strategy={props.strategy}
+    />
+  ),
+}));
 
 vi.mock('@/env/server-env', () => ({
   serverEnv: {
@@ -30,6 +44,17 @@ vi.mock('@/components/ui/toaster', () => ({
 import RootLayout from '@/app/layout';
 
 describe('RootLayout', () => {
+  it('should load the Telegram Mini App SDK before application hydration', async () => {
+    const element = await RootLayout({ children: <main /> });
+
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain('data-script-src="https://telegram.org/js/telegram-web-app.js?64"');
+    expect(html).toContain('data-strategy="beforeInteractive"');
+    expect(html.indexOf('<head>')).toBeLessThan(html.indexOf('data-script-src='));
+    expect(html.indexOf('data-script-src=')).toBeLessThan(html.indexOf('<body>'));
+  });
+
   it('should render the preferred and alternative site names in structured data', async () => {
     const element = await RootLayout({ children: <main /> });
 
