@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import SignInModal from '@/components/auth/SignInModal';
 import SignInContent from '@/components/auth/SignInContent';
 import TelegramLoginButton from '@/components/auth/TelegramLoginButton';
@@ -9,41 +9,49 @@ import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { ApiError } from '@/lib/api-errors';
-import { subscribeTelegramSignInRequest } from '@/lib/telegram/telegram-auth';
 import { clientEnv } from '@/env/client-env';
 import { exchangeTelegramAuthFromOidc } from '@/lib/telegram/telegram-auth';
 import type { TelegramOidcCredentials } from '@/lib/telegram/telegram-auth';
 
-export default function TelegramSignInModal() {
-  const [signInModalOpen, setSignInModalOpen] = useState(false);
+export interface TelegramSignInModalProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+}
+
+export default function TelegramSignInModal(props: TelegramSignInModalProps) {
+  const { isOpen, onOpenChange } = props;
+
   const { isSigningIn, isTelegramSignInAvailable, signIn } = useTelegramAuth();
   const miniAppEnv = useTelegramMiniAppEnv();
   const telegramOidcClientId = clientEnv.telegramOidcClientId;
 
-  const handleAuthenticated = useCallback(async (credentials: TelegramOidcCredentials) => {
-    try {
-      const { profile } = await exchangeTelegramAuthFromOidc(credentials);
-      toast({
-        title: 'Signed in',
-        description: profile.displayLabel,
-      });
-      setSignInModalOpen(false);
-    } catch (e) {
-      const description =
-        e instanceof ApiError ? e.message : 'Could not complete sign in. Please try again.';
-      toast({
-        title: 'Sign in failed',
-        description,
-        variant: 'destructive',
-      });
-    }
-  }, []);
+  const handleAuthenticated = useCallback(
+    async (credentials: TelegramOidcCredentials) => {
+      try {
+        const { profile } = await exchangeTelegramAuthFromOidc(credentials);
+        toast({
+          title: 'Signed in',
+          description: profile.displayLabel,
+        });
+        onOpenChange(false);
+      } catch (e) {
+        const description =
+          e instanceof ApiError ? e.message : 'Could not complete sign in. Please try again.';
+        toast({
+          title: 'Sign in failed',
+          description,
+          variant: 'destructive',
+        });
+      }
+    },
+    [onOpenChange],
+  );
 
   const handleMiniAppSignIn = useCallback(async (): Promise<void> => {
     try {
       await signIn();
       toast({ title: 'Signed in' });
-      setSignInModalOpen(false);
+      onOpenChange(false);
     } catch (e) {
       toast({
         title: 'Sign in failed',
@@ -51,13 +59,7 @@ export default function TelegramSignInModal() {
         variant: 'destructive',
       });
     }
-  }, [signIn]);
-
-  useEffect(() => {
-    return subscribeTelegramSignInRequest(() => {
-      setSignInModalOpen(true);
-    });
-  }, []);
+  }, [onOpenChange, signIn]);
 
   if (!isTelegramSignInAvailable) {
     return null;
@@ -65,8 +67,8 @@ export default function TelegramSignInModal() {
 
   return (
     <SignInModal
-      isOpen={signInModalOpen}
-      onOpenChange={setSignInModalOpen}
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
     >
       <SignInContent>
         {miniAppEnv === 'mini' ? (

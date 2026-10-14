@@ -27,8 +27,8 @@ vi.mock('@/components/ui/toaster', () => ({
   Toaster: () => null,
 }));
 
-vi.mock('@/components/auth/TelegramSignInModal', () => ({
-  default: () => <div data-testid="telegram-sign-in-modal" />,
+vi.mock('@/components/auth/SignInHost', () => ({
+  default: () => <div data-testid="sign-in-host" />,
 }));
 
 import RootLayout from '@/app/layout';
@@ -44,11 +44,11 @@ describe('RootLayout', () => {
     );
   });
 
-  it('should mount the global Telegram sign-in modal', async () => {
+  it('should mount the global sign-in host', async () => {
     const element = await RootLayout({ children: <main /> });
 
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain('data-testid="telegram-sign-in-modal"');
+    expect(html).toContain('data-testid="sign-in-host"');
   });
 });
