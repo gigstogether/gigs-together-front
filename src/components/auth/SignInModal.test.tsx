@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import SignInModal from '@/components/header/SignInModal';
+import SignInModal from '@/components/auth/SignInModal';
 
 describe('SignInModal', () => {
   it('should not render modal content when closed', () => {

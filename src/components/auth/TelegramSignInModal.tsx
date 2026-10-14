@@ -1,9 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import SignInModal from '@/components/header/SignInModal';
-import SignInContent from '@/components/header/SignInContent';
-import TelegramLoginButton from '@/components/header/TelegramLoginButton';
+import SignInModal from '@/components/auth/SignInModal';
+import SignInContent from '@/components/auth/SignInContent';
+import TelegramLoginButton from '@/components/auth/TelegramLoginButton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
@@ -14,7 +14,7 @@ import { clientEnv } from '@/env/client-env';
 import { exchangeTelegramAuthFromOidc } from '@/lib/telegram/telegram-auth';
 import type { TelegramOidcCredentials } from '@/lib/telegram/telegram-auth';
 
-export default function HeaderSignInModal() {
+export default function TelegramSignInModal() {
   const [signInModalOpen, setSignInModalOpen] = useState(false);
   const { isSigningIn, isTelegramSignInAvailable, signIn } = useTelegramAuth();
   const miniAppEnv = useTelegramMiniAppEnv();

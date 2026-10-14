@@ -27,6 +27,10 @@ vi.mock('@/components/ui/toaster', () => ({
   Toaster: () => null,
 }));
 
+vi.mock('@/components/auth/TelegramSignInModal', () => ({
+  default: () => <div data-testid="telegram-sign-in-modal" />,
+}));
+
 import RootLayout from '@/app/layout';
 
 describe('RootLayout', () => {
@@ -38,5 +42,13 @@ describe('RootLayout', () => {
     expect(html).toContain(
       '<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Gigs Together!","alternateName":["Gigs Together","GigsTogether"],"url":"https://gigstogether.com"}</script>',
     );
+  });
+
+  it('should mount the global Telegram sign-in modal', async () => {
+    const element = await RootLayout({ children: <main /> });
+
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain('data-testid="telegram-sign-in-modal"');
   });
 });

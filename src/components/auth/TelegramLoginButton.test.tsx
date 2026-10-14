@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import TelegramLoginButton from '@/components/header/TelegramLoginButton';
+import TelegramLoginButton from '@/components/auth/TelegramLoginButton';
 import { toast } from '@/hooks/use-toast';
 
 vi.mock('@/hooks/use-toast', () => ({

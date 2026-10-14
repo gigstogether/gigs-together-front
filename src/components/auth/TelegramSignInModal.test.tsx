@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import HeaderSignInModal from '@/components/header/HeaderSignInModal';
+import TelegramSignInModal from '@/components/auth/TelegramSignInModal';
 import { toast } from '@/hooks/use-toast';
 
 interface TelegramLoginButtonMockProps {
@@ -42,7 +42,7 @@ vi.mock('@/lib/telegram/telegram-auth', () => ({
   subscribeTelegramSignInRequest: subscribeTelegramSignInRequestMock,
 }));
 
-vi.mock('@/components/header/TelegramLoginButton', () => ({
+vi.mock('@/components/auth/TelegramLoginButton', () => ({
   default: (props: TelegramLoginButtonMockProps) => (
     <button
       type="button"
@@ -64,7 +64,7 @@ function openSignInModal(): void {
   act(() => listener());
 }
 
-describe('HeaderSignInModal', () => {
+describe('TelegramSignInModal', () => {
   beforeEach(() => {
     exchangeTelegramAuthFromOidcMock.mockReset();
     exchangeTelegramAuthFromOidcMock.mockResolvedValue({
@@ -100,7 +100,7 @@ describe('HeaderSignInModal', () => {
       signIn,
       signOut: vi.fn(),
     });
-    render(<HeaderSignInModal />);
+    render(<TelegramSignInModal />);
 
     openSignInModal();
 
@@ -122,7 +122,7 @@ describe('HeaderSignInModal', () => {
       signIn,
       signOut: vi.fn(),
     });
-    render(<HeaderSignInModal />);
+    render(<TelegramSignInModal />);
 
     openSignInModal();
     fireEvent.click(screen.getByRole('button', { name: 'Log in with Telegram' }));
@@ -153,7 +153,7 @@ describe('HeaderSignInModal', () => {
       signIn,
       signOut: vi.fn(),
     });
-    render(<HeaderSignInModal />);
+    render(<TelegramSignInModal />);
 
     openSignInModal();
     fireEvent.click(screen.getByRole('button', { name: 'Log in with Telegram' }));
