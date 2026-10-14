@@ -10,7 +10,6 @@ import { useTelegramAuth } from '@/hooks/use-telegram-auth';
 import { useTelegramMiniAppEnv } from '@/hooks/use-telegram-mini-app-env';
 import { ApiError } from '@/lib/api-errors';
 import { subscribeTelegramSignInRequest } from '@/lib/telegram/telegram-auth';
-import { requestTelegramWriteAccess } from '@/lib/telegram/telegram-webapp';
 import { clientEnv } from '@/env/client-env';
 import { exchangeTelegramAuthFromOidc } from '@/lib/telegram/telegram-auth';
 import type { TelegramOidcCredentials } from '@/lib/telegram/telegram-auth';
@@ -41,12 +40,6 @@ export default function HeaderSignInModal() {
   }, []);
 
   const handleMiniAppSignIn = useCallback(async (): Promise<void> => {
-    try {
-      await requestTelegramWriteAccess();
-    } catch (e) {
-      console.error('Failed to request Telegram write access during sign-in.', e);
-    }
-
     try {
       await signIn();
       toast({ title: 'Signed in' });

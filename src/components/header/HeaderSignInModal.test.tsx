@@ -10,13 +10,11 @@ interface TelegramLoginButtonMockProps {
 const {
   exchangeTelegramAuthFromOidcMock,
   miniAppEnvMock,
-  requestTelegramWriteAccessMock,
   subscribeTelegramSignInRequestMock,
   useTelegramAuthMock,
 } = vi.hoisted(() => ({
   exchangeTelegramAuthFromOidcMock: vi.fn(),
   miniAppEnvMock: vi.fn<() => 'browser' | 'mini' | 'unknown'>(),
-  requestTelegramWriteAccessMock: vi.fn<() => Promise<boolean>>(),
   subscribeTelegramSignInRequestMock: vi.fn<(listener: () => void) => () => void>(),
   useTelegramAuthMock: vi.fn(),
 }));
@@ -42,10 +40,6 @@ vi.mock('@/hooks/use-toast', () => ({
 vi.mock('@/lib/telegram/telegram-auth', () => ({
   exchangeTelegramAuthFromOidc: exchangeTelegramAuthFromOidcMock,
   subscribeTelegramSignInRequest: subscribeTelegramSignInRequestMock,
-}));
-
-vi.mock('@/lib/telegram/telegram-webapp', () => ({
-  requestTelegramWriteAccess: requestTelegramWriteAccessMock,
 }));
 
 vi.mock('@/components/header/TelegramLoginButton', () => ({
@@ -78,8 +72,6 @@ describe('HeaderSignInModal', () => {
     });
     miniAppEnvMock.mockReset();
     miniAppEnvMock.mockReturnValue('mini');
-    requestTelegramWriteAccessMock.mockReset();
-    requestTelegramWriteAccessMock.mockResolvedValue(true);
     subscribeTelegramSignInRequestMock.mockReset();
     subscribeTelegramSignInRequestMock.mockReturnValue(() => undefined);
     useTelegramAuthMock.mockReset();
@@ -115,34 +107,7 @@ describe('HeaderSignInModal', () => {
     expect(signIn).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Log in with Telegram' }));
     await waitFor(() => expect(signIn).toHaveBeenCalledTimes(1));
-    expect(requestTelegramWriteAccessMock).toHaveBeenCalledTimes(1);
     expect(exchangeTelegramAuthFromOidcMock).not.toHaveBeenCalled();
-    expect(toast).toHaveBeenCalledWith({ title: 'Signed in' });
-  });
-
-  it('should continue Mini App sign-in when requesting write access fails', async () => {
-    const sdkError = new Error('Telegram Web App SDK is not available.');
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const signIn = vi.fn<() => Promise<void>>().mockResolvedValue();
-    requestTelegramWriteAccessMock.mockRejectedValue(sdkError);
-    useTelegramAuthMock.mockReturnValue({
-      authState: null,
-      isLoadingAuthState: false,
-      isSigningIn: false,
-      isTelegramSignInAvailable: true,
-      signIn,
-      signOut: vi.fn(),
-    });
-    render(<HeaderSignInModal />);
-
-    openSignInModal();
-    fireEvent.click(screen.getByRole('button', { name: 'Log in with Telegram' }));
-
-    await waitFor(() => expect(signIn).toHaveBeenCalledTimes(1));
-    expect(consoleError).toHaveBeenCalledWith(
-      'Failed to request Telegram write access during sign-in.',
-      sdkError,
-    );
     expect(toast).toHaveBeenCalledWith({ title: 'Signed in' });
   });
 

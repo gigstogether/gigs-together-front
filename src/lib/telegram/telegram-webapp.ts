@@ -40,8 +40,6 @@ export function getTelegramLaunchParamsSnapshot(): TelegramLaunchParamsSnapshot 
 /**
  * Saves Telegram launch params from the current URL in sessionStorage.
  * Call as early as possible (see `instrumentation-client.ts`). Safe to call more than once.
- *
- * The URL must remain unchanged until the Telegram Web App SDK has read its launch params.
  */
 export function captureTelegramLaunchParamsFromUrl(): void {
   if (typeof window === 'undefined') {
@@ -50,35 +48,12 @@ export function captureTelegramLaunchParamsFromUrl(): void {
 
   const launchParams = readTelegramLaunchParamsFromUrl();
   if (launchParams.hasLaunchParams) {
-    replaceTelegramLaunchParamsSnapshot(launchParams.snapshot);
-  }
-}
-
-export function requestTelegramWriteAccess(): Promise<boolean> {
-  if (typeof window === 'undefined') {
-    return Promise.reject(new Error('Telegram write access can only be requested in a browser.'));
-  }
-
-  const webApp = window.Telegram?.WebApp;
-  if (!webApp) {
-    return Promise.reject(new Error('Telegram Web App SDK is not available.'));
-  }
-
-  if (!webApp.isVersionAtLeast('6.9')) {
-    return Promise.reject(
-      new Error(`Telegram write access is not supported in Web App version ${webApp.version}.`),
-    );
-  }
-
-  return new Promise((resolve, reject) => {
     try {
-      webApp.requestWriteAccess((isAllowed) => {
-        resolve(isAllowed);
-      });
-    } catch (e: unknown) {
-      reject(new Error('Failed to request Telegram write access.', { cause: e }));
+      replaceTelegramLaunchParamsSnapshot(launchParams.snapshot);
+    } finally {
+      clearTelegramLaunchParamsFromUrl();
     }
-  });
+  }
 }
 
 export function getTelegramInitData(): string {
@@ -96,9 +71,9 @@ export function getTelegramInitData(): string {
  * Removes Telegram Mini App launch params from the URL.
  * Keeps unrelated hash fragments (for example gig `#publicId` deep links).
  */
-export function clearTelegramLaunchParamsFromUrl(): boolean {
+function clearTelegramLaunchParamsFromUrl(): void {
   if (typeof window === 'undefined') {
-    return false;
+    return;
   }
 
   const { pathname, search, hash } = window.location;
@@ -127,13 +102,12 @@ export function clearTelegramLaunchParamsFromUrl(): boolean {
   }
 
   if (!searchChanged && nextHash === hash) {
-    return false;
+    return;
   }
 
   const nextSearch = searchParams.toString();
   const url = `${pathname}${nextSearch ? `?${nextSearch}` : ''}${nextHash}`;
   window.history.replaceState(null, '', url);
-  return true;
 }
 
 /**

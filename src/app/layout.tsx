@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import TelegramWebAppBootstrap from '@/components/TelegramWebAppBootstrap';
 import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
 import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
@@ -80,14 +79,16 @@ const jsonLd = serverEnv.isProductionSite
     }
   : null;
 
-// TODO: refactor. Maybe "AppShell"?
-export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+export default async function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
     <html lang="en">
       <body>
         <PlausibleAnalyticsProvider>
           <QueryProvider>
-            <TelegramWebAppBootstrap />
             {jsonLd ? (
               <script
                 type="application/ld+json"
