@@ -1,23 +1,19 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import HeaderSignInModal from '@/components/header/HeaderSignInModal';
+import TelegramSignInModal from '@/components/auth/TelegramSignInModal';
 import { toast } from '@/hooks/use-toast';
 
 interface TelegramLoginButtonMockProps {
   onAuth: (credentials: { idToken: string }) => void | Promise<void>;
 }
 
-const {
-  exchangeTelegramAuthFromOidcMock,
-  miniAppEnvMock,
-  subscribeTelegramSignInRequestMock,
-  useTelegramAuthMock,
-} = vi.hoisted(() => ({
-  exchangeTelegramAuthFromOidcMock: vi.fn(),
-  miniAppEnvMock: vi.fn<() => 'browser' | 'mini' | 'unknown'>(),
-  subscribeTelegramSignInRequestMock: vi.fn<(listener: () => void) => () => void>(),
-  useTelegramAuthMock: vi.fn(),
-}));
+const { exchangeTelegramAuthFromOidcMock, miniAppEnvMock, useTelegramAuthMock } = vi.hoisted(
+  () => ({
+    exchangeTelegramAuthFromOidcMock: vi.fn(),
+    miniAppEnvMock: vi.fn<() => 'browser' | 'mini' | 'unknown'>(),
+    useTelegramAuthMock: vi.fn(),
+  }),
+);
 
 vi.mock('@/env/client-env', () => ({
   clientEnv: {
@@ -39,10 +35,9 @@ vi.mock('@/hooks/use-toast', () => ({
 
 vi.mock('@/lib/telegram/telegram-auth', () => ({
   exchangeTelegramAuthFromOidc: exchangeTelegramAuthFromOidcMock,
-  subscribeTelegramSignInRequest: subscribeTelegramSignInRequestMock,
 }));
 
-vi.mock('@/components/header/TelegramLoginButton', () => ({
+vi.mock('@/components/auth/TelegramLoginButton', () => ({
   default: (props: TelegramLoginButtonMockProps) => (
     <button
       type="button"
@@ -55,16 +50,7 @@ vi.mock('@/components/header/TelegramLoginButton', () => ({
   ),
 }));
 
-function openSignInModal(): void {
-  const listener = subscribeTelegramSignInRequestMock.mock.calls[0]?.[0];
-  if (!listener) {
-    throw new Error('Sign-in request listener was not registered.');
-  }
-
-  act(() => listener());
-}
-
-describe('HeaderSignInModal', () => {
+describe('TelegramSignInModal', () => {
   beforeEach(() => {
     exchangeTelegramAuthFromOidcMock.mockReset();
     exchangeTelegramAuthFromOidcMock.mockResolvedValue({
@@ -72,8 +58,6 @@ describe('HeaderSignInModal', () => {
     });
     miniAppEnvMock.mockReset();
     miniAppEnvMock.mockReturnValue('mini');
-    subscribeTelegramSignInRequestMock.mockReset();
-    subscribeTelegramSignInRequestMock.mockReturnValue(() => undefined);
     useTelegramAuthMock.mockReset();
     useTelegramAuthMock.mockReturnValue({
       authState: null,
@@ -92,6 +76,7 @@ describe('HeaderSignInModal', () => {
 
   it('should authenticate a Mini App user only after the modal action is clicked', async () => {
     const signIn = vi.fn<() => Promise<void>>().mockResolvedValue();
+    const onOpenChange = vi.fn();
     useTelegramAuthMock.mockReturnValue({
       authState: null,
       isLoadingAuthState: false,
@@ -100,20 +85,25 @@ describe('HeaderSignInModal', () => {
       signIn,
       signOut: vi.fn(),
     });
-    render(<HeaderSignInModal />);
-
-    openSignInModal();
+    render(
+      <TelegramSignInModal
+        isOpen
+        onOpenChange={onOpenChange}
+      />,
+    );
 
     expect(signIn).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Log in with Telegram' }));
     await waitFor(() => expect(signIn).toHaveBeenCalledTimes(1));
     expect(exchangeTelegramAuthFromOidcMock).not.toHaveBeenCalled();
     expect(toast).toHaveBeenCalledWith({ title: 'Signed in' });
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it('should keep the browser OIDC action inside the same modal', async () => {
     miniAppEnvMock.mockReturnValue('browser');
     const signIn = vi.fn<() => Promise<void>>().mockResolvedValue();
+    const onOpenChange = vi.fn();
     useTelegramAuthMock.mockReturnValue({
       authState: null,
       isLoadingAuthState: false,
@@ -122,9 +112,12 @@ describe('HeaderSignInModal', () => {
       signIn,
       signOut: vi.fn(),
     });
-    render(<HeaderSignInModal />);
-
-    openSignInModal();
+    render(
+      <TelegramSignInModal
+        isOpen
+        onOpenChange={onOpenChange}
+      />,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Log in with Telegram' }));
 
     await waitFor(() =>
@@ -137,6 +130,7 @@ describe('HeaderSignInModal', () => {
       title: 'Signed in',
       description: '@browser-user',
     });
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it('should show the expired initData error from the Mini App modal action', async () => {
@@ -153,9 +147,12 @@ describe('HeaderSignInModal', () => {
       signIn,
       signOut: vi.fn(),
     });
-    render(<HeaderSignInModal />);
-
-    openSignInModal();
+    render(
+      <TelegramSignInModal
+        isOpen
+        onOpenChange={vi.fn()}
+      />,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Log in with Telegram' }));
 
     await waitFor(() =>

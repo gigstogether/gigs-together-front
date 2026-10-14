@@ -93,29 +93,29 @@ export function getTelegramClientProfileSnapshot(): TelegramStoredClientProfile 
   return getStoredTelegramClientProfile();
 }
 
-function parseAuthExchangeResponse(raw: unknown): TelegramAuthExchangeResponse {
+export function parseAuthClientProfileResponse(raw: unknown): TelegramAuthExchangeResponse {
   if (!isRecord(raw)) {
-    throw new Error('Invalid auth exchange response');
+    throw new Error('Invalid auth client profile response');
   }
   const profileRaw = raw.profile;
   if (!isRecord(profileRaw)) {
-    throw new Error('Invalid auth exchange response: profile');
+    throw new Error('Invalid auth client profile response: profile');
   }
   const displayLabel = profileRaw.displayLabel;
   if (typeof displayLabel !== 'string' || !displayLabel.trim()) {
-    throw new Error('Invalid auth exchange response: profile.displayLabel');
+    throw new Error('Invalid auth client profile response: profile.displayLabel');
   }
   const photoUrlRaw = profileRaw.photoUrl;
   let photoUrl: string | undefined;
   if (photoUrlRaw !== undefined) {
     if (typeof photoUrlRaw !== 'string' || !photoUrlRaw.trim()) {
-      throw new Error('Invalid auth exchange response: profile.photoUrl');
+      throw new Error('Invalid auth client profile response: profile.photoUrl');
     }
     photoUrl = photoUrlRaw.trim();
   }
   const isAdmin = profileRaw.isAdmin;
   if (typeof isAdmin !== 'boolean') {
-    throw new Error('Invalid auth exchange response: profile.isAdmin');
+    throw new Error('Invalid auth client profile response: profile.isAdmin');
   }
   const profile: TelegramStoredClientProfile = {
     displayLabel: displayLabel.trim(),
@@ -260,7 +260,7 @@ export async function exchangeTelegramAuthFromWebApp(initData: string): Promise<
     }
     throw e;
   }
-  const { profile } = parseAuthExchangeResponse(raw);
+  const { profile } = parseAuthClientProfileResponse(raw);
   setStoredTelegramClientProfile(profile);
 }
 
@@ -291,7 +291,7 @@ export async function exchangeTelegramAuthFromOidc(
   const raw = await fetchApiJson<unknown>('v1/auth/telegram/oidc', 'POST', credentials, {
     credentials: 'include',
   });
-  const response = parseAuthExchangeResponse(raw);
+  const response = parseAuthClientProfileResponse(raw);
   setStoredTelegramClientProfile(response.profile);
   persistExplicitTelegramSignIn();
   return response;

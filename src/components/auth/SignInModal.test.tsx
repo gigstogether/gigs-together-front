@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import SignInModal from '@/components/header/SignInModal';
+import SignInModal from '@/components/auth/SignInModal';
 
 describe('SignInModal', () => {
   it('should not render modal content when closed', () => {
@@ -13,7 +13,7 @@ describe('SignInModal', () => {
     );
 
     expect(screen.queryByTestId('sign-in-content')).toBeNull();
-    expect(screen.queryByText('Sign in')).toBeNull();
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 
   it('should render modal content when open', () => {
@@ -27,5 +27,6 @@ describe('SignInModal', () => {
     );
 
     expect(screen.getByTestId('sign-in-content')).toBeInTheDocument();
+    expect(screen.getAllByRole('heading')).toHaveLength(1);
   });
 });

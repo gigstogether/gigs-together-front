@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { ApiError, ApiNetworkError } from '@/lib/api-errors';
 
 const { fetchApiJsonMock } = vi.hoisted(() => ({
@@ -8,12 +10,24 @@ vi.mock('@/lib/api-core', () => ({
   fetchApiJson: fetchApiJsonMock,
 }));
 
+vi.mock('@/env/client-env', () => ({
+  clientEnv: {
+    telegramClientProfileStorageKey: 'gt_test_profile',
+  },
+}));
+
 import { postAuthRefresh } from '@/lib/auth-refresh';
 
 describe('postAuthRefresh', () => {
   beforeEach(() => {
+    localStorage.clear();
     fetchApiJsonMock.mockReset();
-    fetchApiJsonMock.mockResolvedValue(undefined);
+    fetchApiJsonMock.mockResolvedValue({
+      profile: {
+        displayLabel: '@user',
+        isAdmin: false,
+      },
+    });
   });
 
   it('should resolve when the refresh request succeeds', async () => {
@@ -21,6 +35,41 @@ describe('postAuthRefresh', () => {
     expect(fetchApiJsonMock).toHaveBeenCalledWith('v1/auth/refresh', 'POST', undefined, {
       credentials: 'include',
     });
+  });
+
+  it('should replace the stored client profile when refresh returns updated admin access', async () => {
+    localStorage.setItem(
+      'gt_test_profile',
+      JSON.stringify({ displayLabel: '@user', isAdmin: false }),
+    );
+    fetchApiJsonMock.mockResolvedValue({
+      profile: {
+        displayLabel: '@user',
+        isAdmin: true,
+      },
+    });
+
+    await postAuthRefresh();
+
+    expect(localStorage.getItem('gt_test_profile')).toBe(
+      JSON.stringify({ displayLabel: '@user', isAdmin: true }),
+    );
+  });
+
+  it('should reject an invalid refreshed profile without replacing the stored profile', async () => {
+    const storedProfile = JSON.stringify({ displayLabel: '@user', isAdmin: false });
+    localStorage.setItem('gt_test_profile', storedProfile);
+    fetchApiJsonMock.mockResolvedValue({
+      profile: {
+        displayLabel: '@user',
+        isAdmin: 'yes',
+      },
+    });
+
+    await expect(postAuthRefresh()).rejects.toThrow(
+      'Invalid auth client profile response: profile.isAdmin',
+    );
+    expect(localStorage.getItem('gt_test_profile')).toBe(storedProfile);
   });
 
   it('should propagate an unauthorized refresh response', async () => {

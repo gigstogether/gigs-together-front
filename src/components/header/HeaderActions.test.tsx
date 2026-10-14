@@ -11,10 +11,6 @@ const { mockClientEnv } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('@/components/header/HeaderSignInModal', () => ({
-  default: () => <div data-testid="header-sign-in-modal" />,
-}));
-
 vi.mock('next/link', () => ({
   default: ({
     href,
@@ -60,12 +56,6 @@ describe('HeaderActions', () => {
   function clickFirstMenuTrigger(): void {
     fireEvent.click(screen.getAllByRole('button', { name: 'Menu' })[0]!);
   }
-
-  it('should load the shared sign-in modal', async () => {
-    render(<HeaderActions />);
-
-    expect(await screen.findByTestId('header-sign-in-modal')).toBeInTheDocument();
-  });
 
   it('should show Admin panel in menu below auth when user is admin', async () => {
     vi.mocked(useTelegramAuth).mockReturnValue({

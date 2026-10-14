@@ -6,6 +6,7 @@ import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { serverEnv } from '@/env/server-env';
 import { createOpenGraphMetadata, getSitePreviewImageUrl } from '@/lib/open-graph';
+import SignInHost from '@/components/auth/SignInHost';
 
 const SITE_BASE_URL = serverEnv.appBaseUrl;
 
@@ -98,6 +99,7 @@ export default async function RootLayout({ children }: Readonly<RootLayoutProps>
               />
             ) : null}
             <div className="pt-[var(--header-h)]">{children}</div>
+            <SignInHost />
             <Toaster />
           </QueryProvider>
         </PlausibleAnalyticsProvider>
