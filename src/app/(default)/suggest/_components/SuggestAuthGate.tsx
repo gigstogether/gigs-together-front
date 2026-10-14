@@ -31,7 +31,7 @@ export default function SuggestAuthGate(props: SuggestAuthGateProps) {
           <CardHeader>
             <CardTitle>Sign in to suggest a gig</CardTitle>
             <CardDescription>
-              Any signed-in user can propose a concert. We review suggestions before they go live.
+              Any signed-in user can suggest a gig. We review suggestions before they go live.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
