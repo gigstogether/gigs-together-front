@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
@@ -34,11 +35,13 @@ export default function SignInModal(props: SignInModalProps) {
           event.preventDefault();
         }}
       >
-        <DialogTitle className="sr-only">Sign in</DialogTitle>
-        <DialogDescription className="sr-only">
-          Continue with the button below to sign in to your account.
-        </DialogDescription>
-        {children}
+        <DialogHeader>
+          <DialogTitle>Sign in</DialogTitle>
+          <DialogDescription>
+            Continue with the button below to sign in to your account.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-center pt-1">{children}</div>
       </DialogContent>
     </Dialog>
   );

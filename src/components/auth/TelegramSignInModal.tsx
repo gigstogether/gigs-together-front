@@ -2,7 +2,6 @@
 
 import { useCallback } from 'react';
 import SignInModal from '@/components/auth/SignInModal';
-import SignInContent from '@/components/auth/SignInContent';
 import TelegramLoginButton from '@/components/auth/TelegramLoginButton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -70,25 +69,23 @@ export default function TelegramSignInModal(props: TelegramSignInModalProps) {
       isOpen={isOpen}
       onOpenChange={onOpenChange}
     >
-      <SignInContent>
-        {miniAppEnv === 'mini' ? (
-          <Button
-            type="button"
-            className="bg-[#229ED9] text-white hover:bg-[#229ED9]/90"
-            disabled={isSigningIn}
-            onClick={() => {
-              void handleMiniAppSignIn();
-            }}
-          >
-            {isSigningIn ? 'Signing in…' : 'Log in with Telegram'}
-          </Button>
-        ) : telegramOidcClientId ? (
-          <TelegramLoginButton
-            clientId={telegramOidcClientId}
-            onAuth={handleAuthenticated}
-          />
-        ) : null}
-      </SignInContent>
+      {miniAppEnv === 'mini' ? (
+        <Button
+          type="button"
+          className="bg-[#229ED9] text-white hover:bg-[#229ED9]/90"
+          disabled={isSigningIn}
+          onClick={() => {
+            void handleMiniAppSignIn();
+          }}
+        >
+          {isSigningIn ? 'Signing in…' : 'Log in with Telegram'}
+        </Button>
+      ) : telegramOidcClientId ? (
+        <TelegramLoginButton
+          clientId={telegramOidcClientId}
+          onAuth={handleAuthenticated}
+        />
+      ) : null}
     </SignInModal>
   );
 }
