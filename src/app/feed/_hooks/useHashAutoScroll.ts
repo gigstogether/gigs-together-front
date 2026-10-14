@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { parseGigPublicIdFromHash } from '@/app/feed/_lib/parseGigPublicIdFromHash';
 import type { Event } from '@/lib/types';
 
 export interface UseHashAutoScrollParams {
@@ -43,7 +44,7 @@ export function useHashAutoScroll(params: UseHashAutoScrollParams) {
     }
     if (completedAutoScrollForHashRef.current === hash) return;
 
-    const id = hash.startsWith('#') ? hash.slice(1) : hash;
+    const id = parseGigPublicIdFromHash(hash);
     if (!id) return;
 
     const el = document.getElementById(id);

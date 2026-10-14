@@ -86,6 +86,10 @@ describe('HeaderSignInModal', () => {
     vi.mocked(toast).mockReset();
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('should authenticate a Mini App user only after the modal action is clicked', async () => {
     const signIn = vi.fn<() => Promise<void>>().mockResolvedValue();
     useTelegramAuthMock.mockReturnValue({

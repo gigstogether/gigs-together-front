@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   captureTelegramLaunchParamsFromUrl,
-  clearTelegramLaunchParamsFromUrl,
   getTelegramInitData,
   getTelegramLaunchParamsSnapshot,
   getTelegramStartParam,
@@ -29,19 +28,6 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
     expect(window.location.hash).toBe('');
     expect(getTelegramLaunchParamsSnapshot()?.initData).toBe('user=test');
     expect(getTelegramInitData()).toBe('user=test');
-  });
-
-  it('should restore launch params from sessionStorage after the url is cleared', () => {
-    window.history.replaceState(
-      null,
-      '',
-      '/feed/es/barcelona#tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
-    );
-    captureTelegramLaunchParamsFromUrl();
-
-    const snapshot = getTelegramLaunchParamsSnapshot();
-
-    expect(snapshot).toEqual({ initData: 'user=test' });
   });
 
   it('should expose captured launch params to a fresh module instance', async () => {
@@ -164,9 +150,6 @@ describe('captureTelegramLaunchParamsFromUrl', () => {
     expect(window.location.hash).toBe('');
     expect(isTelegramMiniApp()).toBe(true);
   });
-});
-
-describe('clearTelegramLaunchParamsFromUrl', () => {
   it('should clear hash when it only contains telegram launch params', () => {
     window.history.replaceState(
       null,
@@ -174,9 +157,8 @@ describe('clearTelegramLaunchParamsFromUrl', () => {
       '/feed/es/barcelona#tgWebAppData=abc&tgWebAppPlatform=tdesktop',
     );
 
-    const changed = clearTelegramLaunchParamsFromUrl();
+    captureTelegramLaunchParamsFromUrl();
 
-    expect(changed).toBe(true);
     expect(window.location.hash).toBe('');
   });
 

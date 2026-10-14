@@ -79,8 +79,11 @@ const jsonLd = serverEnv.isProductionSite
     }
   : null;
 
-// TODO: refactor. Maybe "AppShell"?
-export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+export default async function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
     <html lang="en">
       <body>

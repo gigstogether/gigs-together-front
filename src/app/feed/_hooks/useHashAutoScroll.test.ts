@@ -88,6 +88,28 @@ describe('useHashAutoScroll', () => {
     a2.remove();
   });
 
+  it('should scroll to the gig public id before Telegram launch params', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/#e1?tgWebAppData=user%3Dtest&tgWebAppPlatform=tdesktop',
+    );
+    const anchor = document.createElement('div');
+    anchor.id = 'e1';
+    document.body.appendChild(anchor);
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+
+    renderHook(() =>
+      useHashAutoScroll({ events: [makeEvent('e1')], headerOffsetPx: 0, extraOffsetPx: 0 }),
+    );
+
+    await act(async () => {});
+
+    expect(scrollTo).toHaveBeenCalledTimes(1);
+
+    anchor.remove();
+  });
+
   it('should scroll once initial hash resolves after events grow (deep-link style)', async () => {
     window.history.replaceState(null, '', '/#late');
     const late = document.createElement('div');

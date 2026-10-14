@@ -38,24 +38,21 @@ export function getTelegramLaunchParamsSnapshot(): TelegramLaunchParamsSnapshot 
 }
 
 /**
- * Saves Telegram launch params from the current URL in sessionStorage and clears the address bar.
+ * Saves Telegram launch params from the current URL in sessionStorage.
  * Call as early as possible (see `instrumentation-client.ts`). Safe to call more than once.
- *
- * This must run before the feed initializes because the feed treats the URL hash as a gig publicId;
- * leaving Telegram's `tgWebApp*` fragment in place would trigger gig deep-link loading for it.
  */
 export function captureTelegramLaunchParamsFromUrl(): void {
   if (typeof window === 'undefined') {
     return;
   }
 
-  try {
-    const launchParams = readTelegramLaunchParamsFromUrl();
-    if (launchParams.hasLaunchParams) {
+  const launchParams = readTelegramLaunchParamsFromUrl();
+  if (launchParams.hasLaunchParams) {
+    try {
       replaceTelegramLaunchParamsSnapshot(launchParams.snapshot);
+    } finally {
+      clearTelegramLaunchParamsFromUrl();
     }
-  } finally {
-    clearTelegramLaunchParamsFromUrl();
   }
 }
 
@@ -74,9 +71,9 @@ export function getTelegramInitData(): string {
  * Removes Telegram Mini App launch params from the URL.
  * Keeps unrelated hash fragments (for example gig `#publicId` deep links).
  */
-export function clearTelegramLaunchParamsFromUrl(): boolean {
+function clearTelegramLaunchParamsFromUrl(): void {
   if (typeof window === 'undefined') {
-    return false;
+    return;
   }
 
   const { pathname, search, hash } = window.location;
@@ -105,13 +102,12 @@ export function clearTelegramLaunchParamsFromUrl(): boolean {
   }
 
   if (!searchChanged && nextHash === hash) {
-    return false;
+    return;
   }
 
   const nextSearch = searchParams.toString();
   const url = `${pathname}${nextSearch ? `?${nextSearch}` : ''}${nextHash}`;
   window.history.replaceState(null, '', url);
-  return true;
 }
 
 /**

@@ -6,9 +6,9 @@ import {
   buildAdminGigCandidateEditRoute,
   buildAdminGigCandidateRoute,
 } from '@/lib/admin-gig-candidate-paths';
+import { GIG_PUBLIC_ID_PATTERN } from '@/lib/gig.constants';
 import { SUGGEST_ROUTE } from '@/lib/suggest-paths';
 
-const GIG_FORM_START_PARAM_PATTERN = /^[a-z0-9-]{1,64}$/;
 const GIG_CANDIDATE_ID_PATTERN = /^[a-f0-9]{24}$/i;
 const TELEGRAM_MINI_APP_START_ACTION_SEPARATOR = '-';
 
@@ -76,7 +76,7 @@ export function resolveAdminTelegramLaunch(
   const editGigPrefix = getTelegramMiniAppStartActionPrefix(TelegramMiniAppStartAction.EditGig);
   if (trimmedStartParam.startsWith(editGigPrefix)) {
     const publicId = trimmedStartParam.slice(editGigPrefix.length);
-    if (GIG_FORM_START_PARAM_PATTERN.test(publicId)) {
+    if (GIG_PUBLIC_ID_PATTERN.test(publicId)) {
       return { kind: 'resolved', route: buildAdminGigEditRoute(publicId) };
     }
 
@@ -86,7 +86,7 @@ export function resolveAdminTelegramLaunch(
   const openGigPrefix = getTelegramMiniAppStartActionPrefix(TelegramMiniAppStartAction.OpenGig);
   if (trimmedStartParam.startsWith(openGigPrefix)) {
     const publicId = trimmedStartParam.slice(openGigPrefix.length);
-    if (GIG_FORM_START_PARAM_PATTERN.test(publicId)) {
+    if (GIG_PUBLIC_ID_PATTERN.test(publicId)) {
       return { kind: 'resolved', route: buildAdminGigPublicIdRoute(publicId) };
     }
 
