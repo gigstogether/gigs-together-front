@@ -35,6 +35,8 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
     gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'
   );
   const isModerationPostExpected = gigCandidate.status !== GigCandidateStatusAPI.New;
+  const isPosterVisible =
+    gigCandidate.status !== GigCandidateStatusAPI.New || gigDraft.posterUrl !== undefined;
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -201,13 +203,15 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
           ) : null}
         </div>
 
-        <div className="p-2 pt-0">
-          <AdminPreviewPoster
-            posterUrl={gigDraft.posterUrl}
-            posterVersion={gigCandidate.version}
-            title={title}
-          />
-        </div>
+        {isPosterVisible ? (
+          <div className="p-2 pt-0">
+            <AdminPreviewPoster
+              posterUrl={gigDraft.posterUrl}
+              posterVersion={gigCandidate.version}
+              title={title}
+            />
+          </div>
+        ) : null}
       </div>
 
       <AdminGigCandidatePreviewActions gigCandidate={gigCandidate} />

@@ -230,6 +230,19 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.queryByText('No moderation post linked.')).not.toBeInTheDocument();
   });
 
+  it('should not render a poster placeholder for New without a poster', () => {
+    renderCard({
+      ...gigCandidate,
+      status: GigCandidateStatusAPI.New,
+      gigDraft: {
+        ...gigCandidate.gigDraft,
+        posterUrl: undefined,
+      },
+    });
+
+    expect(screen.queryByLabelText('No poster')).not.toBeInTheDocument();
+  });
+
   it('should not warn about Intake for an admin-origin Gig Candidate', () => {
     renderCard({ ...gigCandidate, intakePostUrl: undefined });
 
