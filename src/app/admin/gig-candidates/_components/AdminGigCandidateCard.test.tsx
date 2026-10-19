@@ -220,6 +220,16 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.getByText('No moderation post linked.')).toBeInTheDocument();
   });
 
+  it('should not warn about a missing moderation post for New', () => {
+    renderCard({
+      ...gigCandidate,
+      status: GigCandidateStatusAPI.New,
+      moderationPostUrl: undefined,
+    });
+
+    expect(screen.queryByText('No moderation post linked.')).not.toBeInTheDocument();
+  });
+
   it('should not warn about Intake for an admin-origin Gig Candidate', () => {
     renderCard({ ...gigCandidate, intakePostUrl: undefined });
 
