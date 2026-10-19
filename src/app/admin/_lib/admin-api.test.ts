@@ -351,20 +351,21 @@ describe('fetchAdminGigCandidates', () => {
     );
   });
 
-  it('should parse messenger origin without message identifiers', async () => {
+  it('should parse an anonymous messenger source with its original message', async () => {
     mockApiRequest.mockResolvedValue({
       gigCandidates: [
         createGigCandidateApiPayload({
           source: {
             type: 'user',
-            userId: '42',
-            displayName: 'Test User',
             isCurrentlyAdmin: false,
-            telegramUsername: 'test_user',
             origin: {
               type: 'messenger',
               messenger: 'Telegram',
             },
+          },
+          originalMessage: {
+            text: 'Radiohead in Barcelona',
+            url: 'https://t.me/c/123/42',
           },
         }),
       ],
@@ -376,15 +377,33 @@ describe('fetchAdminGigCandidates', () => {
 
     expect(response.gigCandidates[0]?.source).toEqual({
       type: 'user',
-      userId: '42',
-      displayName: 'Test User',
       isCurrentlyAdmin: false,
-      telegramUsername: 'test_user',
       origin: {
         type: 'messenger',
         messenger: 'Telegram',
       },
     });
+    expect(response.gigCandidates[0]?.originalMessage).toEqual({
+      text: 'Radiohead in Barcelona',
+      url: 'https://t.me/c/123/42',
+    });
+  });
+
+  it('should reject a GigCandidate with an invalid original message URL', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          originalMessage: {
+            text: 'Radiohead in Barcelona',
+            url: 'not-a-url',
+          },
+        }),
+      ],
+    });
+
+    await expect(fetchAdminGigCandidates({ status: GigCandidateStatusFilter.New })).rejects.toThrow(
+      'Invalid admin Gig Candidates response',
+    );
   });
 
   it('should parse an arbitrary non-empty GigCandidate provider name', async () => {

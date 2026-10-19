@@ -159,7 +159,10 @@ describe('AdminGigCandidateCard', () => {
           type: 'messenger',
           messenger: 'Telegram',
         },
-        originalText: 'Unstructured submission',
+      },
+      originalMessage: {
+        text: 'Unstructured submission',
+        url: 'https://t.me/c/123/42',
       },
       gigDraft: {},
       status: GigCandidateStatusAPI.New,
@@ -172,6 +175,32 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.queryByRole('link', { name: 'Open' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Send to moderation' })).toBeInTheDocument();
+  });
+
+  it('should show the original message as plain text with its Telegram link', () => {
+    renderCard({
+      ...gigCandidate,
+      originalMessage: {
+        text: '<b>Unstructured submission</b>\nSecond line',
+        url: 'https://t.me/c/123/42',
+      },
+    });
+
+    const originalMessage = screen.getByRole('region', { name: 'Original message' });
+
+    expect(originalMessage.parentElement).toHaveClass('border-t', 'border-border', 'pt-2');
+    expect(originalMessage).toHaveTextContent('<b>Unstructured submission</b> Second line');
+    expect(originalMessage.querySelector('b')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open original message in Telegram' })).toHaveAttribute(
+      'href',
+      'https://t.me/c/123/42',
+    );
+  });
+
+  it('should omit the original message block when it is unavailable', () => {
+    renderCard();
+
+    expect(screen.queryByRole('region', { name: 'Original message' })).not.toBeInTheDocument();
   });
 
   it('should warn about both missing posts when neither expected post is linked', () => {

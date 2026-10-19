@@ -134,28 +134,38 @@ export interface PatchAdminTranslationActiveBody {
   readonly isActive: boolean;
 }
 
-const v1AdminGigCandidateUserOriginSchema = z.discriminatedUnion('type', [
+const v1AdminGigCandidateIdentifiedUserOriginSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('form') }).strict(),
   z.object({ type: z.literal('admin') }).strict(),
-  z
-    .object({
-      type: z.literal('messenger'),
-      messenger: z.literal('Telegram'),
-    })
-    .strict(),
 ]);
 
-const v1AdminGigCandidateSourceSchema = z.discriminatedUnion('type', [
+const v1AdminGigCandidateMessengerUserOriginSchema = z
+  .object({
+    type: z.literal('messenger'),
+    messenger: z.literal('Telegram'),
+  })
+  .strict();
+
+const v1AdminGigCandidateUserSourceShape = {
+  type: z.literal('user'),
+  displayName: z.string().min(1).optional(),
+  isCurrentlyAdmin: z.boolean(),
+  telegramUsername: z.string().min(1).optional(),
+};
+
+const v1AdminGigCandidateSourceSchema = z.union([
   z
     .object({
-      type: z.literal('user'),
+      ...v1AdminGigCandidateUserSourceShape,
       userId: z.string().min(1),
-      displayName: z.string().min(1).optional(),
-      isCurrentlyAdmin: z.boolean(),
-      telegramUsername: z.string().min(1).optional(),
-      origin: v1AdminGigCandidateUserOriginSchema,
-      originalText: z.string().optional(),
-      attachments: z.array(z.record(z.string(), z.unknown())).optional(),
+      origin: v1AdminGigCandidateIdentifiedUserOriginSchema,
+    })
+    .strict(),
+  z
+    .object({
+      ...v1AdminGigCandidateUserSourceShape,
+      userId: z.string().min(1).optional(),
+      origin: v1AdminGigCandidateMessengerUserOriginSchema,
     })
     .strict(),
   z
@@ -188,6 +198,13 @@ const v1AdminGigCandidateDraftSchema = z
   })
   .strict();
 
+const v1AdminGigCandidateOriginalMessageSchema = z
+  .object({
+    text: z.string().min(1),
+    url: z.string().url(),
+  })
+  .strict();
+
 const v1AdminGigCandidateSchema = z
   .object({
     id: z.string().min(1),
@@ -195,6 +212,7 @@ const v1AdminGigCandidateSchema = z
     gigDraft: v1AdminGigCandidateDraftSchema,
     status: z.nativeEnum(GigCandidateStatusAPI),
     version: z.number().int().nonnegative(),
+    originalMessage: v1AdminGigCandidateOriginalMessageSchema.optional(),
     intakePostUrl: z.string().optional(),
     intakePostDate: z.number().optional(),
     moderationPostUrl: z.string().optional(),

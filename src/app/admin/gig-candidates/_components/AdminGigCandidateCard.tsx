@@ -8,6 +8,7 @@ import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
 import { formatAdminEventDate } from '@/app/admin/_lib/admin-event-format';
 import { formatAdminGigSource } from '@/app/admin/gigs/_lib/admin-gig-format';
 import AdminGigCandidatePreviewActions from '@/app/admin/gig-candidates/_components/AdminGigCandidatePreviewActions';
+import AdminGigCandidateOriginalMessage from '@/app/admin/gig-candidates/_components/AdminGigCandidateOriginalMessage';
 import { GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-status';
 import type { AdminGigCandidate } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { LocationIcon } from '@/components/ui/location-icon';
@@ -103,6 +104,12 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 {gigDraft.ticketsUrl}
               </a>
             </AdminPreviewMetaRow>
+          ) : null}
+
+          {gigCandidate.originalMessage !== undefined ? (
+            <div className="border-t border-border pt-2">
+              <AdminGigCandidateOriginalMessage originalMessage={gigCandidate.originalMessage} />
+            </div>
           ) : null}
 
           <div className="space-y-2 border-t border-border pt-2 text-xs text-muted-foreground">
