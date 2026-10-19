@@ -7,17 +7,6 @@ import type {
   GigSourceForAdminView,
 } from '@/app/admin/gigs/_lib/types';
 
-type AdminGigUserSourceForFormatting = Omit<
-  Extract<GigSourceForAdminView, { type: 'user' }>,
-  'userId'
-> & { userId?: string };
-
-type AdminGigProviderSourceForFormatting = Extract<GigSourceForAdminView, { type: 'provider' }>;
-
-type AdminGigSourceForFormatting =
-  | AdminGigUserSourceForFormatting
-  | AdminGigProviderSourceForFormatting;
-
 export function formatAdminGigEventDate(date: string, endDate?: string): string {
   return formatAdminEventDate(date, endDate);
 }
@@ -31,18 +20,20 @@ export function buildAdminGigPublicHref(gig: Pick<AdminGigDetail, 'publicId'>): 
   return `/gigs/${encodeURIComponent(gig.publicId)}` as Route;
 }
 
-export function formatAdminGigSource(source: AdminGigSourceForFormatting): string {
+export function formatAdminGigSource(source: GigSourceForAdminView): string {
   if (source.type === 'provider') {
     return `Source: ${source.type}`;
   }
 
+  const originLabel =
+    source.origin.type === 'messenger' ? source.origin.messenger : source.origin.type;
   const displayName =
     source.displayName !== undefined
       ? `${source.displayName}${source.isCurrentlyAdmin ? ' (currently admin)' : ''}`
       : undefined;
 
   return [
-    `Source: ${source.type}`,
+    `Source: ${source.type} (${originLabel})`,
     displayName,
     source.telegramUsername !== undefined ? `TG: @${source.telegramUsername}` : undefined,
   ]

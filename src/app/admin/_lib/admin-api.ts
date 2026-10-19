@@ -239,15 +239,38 @@ const v1AdminGigCandidateLookupResponseSchema = z
   })
   .strict();
 
-const v1AdminGigSourceSchema = z.discriminatedUnion('type', [
+const v1AdminGigIdentifiedUserOriginSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('form') }).strict(),
+  z.object({ type: z.literal('admin') }).strict(),
+]);
+
+const v1AdminGigMessengerUserOriginSchema = z
+  .object({
+    type: z.literal('messenger'),
+    messenger: z.literal('Telegram'),
+  })
+  .strict();
+
+const v1AdminGigUserSourceShape = {
+  type: z.literal('user'),
+  displayName: z.string().min(1).optional(),
+  isCurrentlyAdmin: z.boolean(),
+  telegramUsername: z.string().min(1).optional(),
+};
+
+const v1AdminGigSourceSchema = z.union([
   z
     .object({
-      type: z.literal('user'),
+      ...v1AdminGigUserSourceShape,
       userId: z.string().min(1),
-      displayName: z.string().min(1).optional(),
-      isCurrentlyAdmin: z.boolean(),
-      telegramUsername: z.string().min(1).optional(),
-      origin: z.object({ type: z.enum(['form', 'admin', 'messenger']) }).strict(),
+      origin: v1AdminGigIdentifiedUserOriginSchema,
+    })
+    .strict(),
+  z
+    .object({
+      ...v1AdminGigUserSourceShape,
+      userId: z.string().min(1).optional(),
+      origin: v1AdminGigMessengerUserOriginSchema,
     })
     .strict(),
   z

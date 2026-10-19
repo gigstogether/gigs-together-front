@@ -79,7 +79,7 @@ describe('AdminGigCandidateCard', () => {
     expect(linkedGigLink).toHaveTextContent('Gig');
     expect(linkedGigLink.parentElement?.firstElementChild).toBe(linkedGigLink);
     expect(
-      screen.getByText('Source: user · Test User (currently admin) · TG: @test_user'),
+      screen.getByText('Source: user (admin) · Test User (currently admin) · TG: @test_user'),
     ).toBeInTheDocument();
     expect(screen.queryByText(/42/)).not.toBeInTheDocument();
     expect(screen.queryByText('No intake post linked.')).not.toBeInTheDocument();
@@ -170,7 +170,7 @@ describe('AdminGigCandidateCard', () => {
 
     expect(screen.getByText('Untitled Gig Candidate')).toBeInTheDocument();
     expect(screen.queryByText('Invalid Date')).not.toBeInTheDocument();
-    expect(screen.getByText('Source: user')).toBeInTheDocument();
+    expect(screen.getByText('Source: user (Telegram)')).toBeInTheDocument();
     expect(screen.queryByText(/user-7/)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Open' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();

@@ -181,6 +181,42 @@ describe('fetchAdminGigs', () => {
     });
   });
 
+  it('should parse an anonymous messenger Gig source with its origin', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigs: [
+        {
+          publicId: 'messenger-gig',
+          title: 'Messenger Gig',
+          isVisible: false,
+          version: 0,
+          source: {
+            type: 'user',
+            isCurrentlyAdmin: false,
+            origin: {
+              type: 'messenger',
+              messenger: 'Telegram',
+            },
+          },
+          date: '2026-09-20',
+          city: 'barcelona',
+          country: 'ES',
+          venue: 'Venue',
+        },
+      ],
+    });
+
+    const result = await fetchAdminGigs({});
+
+    expect(result.gigs[0]?.source).toEqual({
+      type: 'user',
+      isCurrentlyAdmin: false,
+      origin: {
+        type: 'messenger',
+        messenger: 'Telegram',
+      },
+    });
+  });
+
   it('should parse post dates when mainPostDate and moderationPostDate are present', async () => {
     mockApiRequest.mockResolvedValue({
       gigs: [

@@ -63,9 +63,9 @@ describe('formatAdminGigSource', () => {
         displayName: 'Test Admin',
         isCurrentlyAdmin: true,
         telegramUsername: 'test_admin',
-        origin: { type: 'messenger' },
+        origin: { type: 'messenger', messenger: 'Telegram' },
       }),
-    ).toBe('Source: user · Test Admin (currently admin) · TG: @test_admin');
+    ).toBe('Source: user (Telegram) · Test Admin (currently admin) · TG: @test_admin');
   });
 
   it('should show the user name and Telegram username without an admin marker', () => {
@@ -78,7 +78,7 @@ describe('formatAdminGigSource', () => {
         telegramUsername: 'test_user',
         origin: { type: 'form' },
       }),
-    ).toBe('Source: user · Test User · TG: @test_user');
+    ).toBe('Source: user (form) · Test User · TG: @test_user');
   });
 
   it('should omit the user name segment when displayName is unavailable', () => {
@@ -87,8 +87,8 @@ describe('formatAdminGigSource', () => {
         type: 'user',
         userId: '123',
         isCurrentlyAdmin: false,
-        origin: { type: 'messenger' },
+        origin: { type: 'messenger', messenger: 'Telegram' },
       }),
-    ).toBe('Source: user');
+    ).toBe('Source: user (Telegram)');
   });
 });

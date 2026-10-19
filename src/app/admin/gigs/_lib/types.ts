@@ -1,23 +1,36 @@
+interface GigUserSourceForAdminViewBase {
+  type: 'user';
+  displayName?: string;
+  isCurrentlyAdmin: boolean;
+  telegramUsername?: string;
+}
+
+interface GigIdentifiedUserSourceForAdminView extends GigUserSourceForAdminViewBase {
+  userId: string;
+  origin: { type: 'form' | 'admin' };
+}
+
+interface GigMessengerUserSourceForAdminView extends GigUserSourceForAdminViewBase {
+  userId?: string;
+  origin: { type: 'messenger'; messenger: 'Telegram' };
+}
+
+interface GigProviderSourceForAdminView {
+  type: 'provider';
+  provider: {
+    name: string;
+    externalEventId: string;
+    externalVersionId?: string;
+    sourceUrl: string;
+    fetchedAt: string;
+    providerUpdatedAt?: string;
+  };
+}
+
 export type GigSourceForAdminView =
-  | {
-      type: 'user';
-      userId: string;
-      displayName?: string;
-      isCurrentlyAdmin: boolean;
-      telegramUsername?: string;
-      origin: { type: 'form' | 'admin' | 'messenger' };
-    }
-  | {
-      type: 'provider';
-      provider: {
-        name: string;
-        externalEventId: string;
-        externalVersionId?: string;
-        sourceUrl: string;
-        fetchedAt: string;
-        providerUpdatedAt?: string;
-      };
-    };
+  | GigIdentifiedUserSourceForAdminView
+  | GigMessengerUserSourceForAdminView
+  | GigProviderSourceForAdminView;
 
 /** Compact row for the admin Gig list. */
 export interface AdminGigQueueItem {
