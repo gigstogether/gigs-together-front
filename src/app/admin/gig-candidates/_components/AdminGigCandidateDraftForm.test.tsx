@@ -121,6 +121,24 @@ describe('AdminGigCandidateDraftForm', () => {
     expect(pushMock).toHaveBeenCalledWith('/admin/gig-candidates/gigCandidate-42');
   });
 
+  it('should show the original message in edit mode when it is available', () => {
+    const gigCandidate = createReviewingGigCandidate();
+    gigCandidate.originalMessage = {
+      text: 'Unstructured submission',
+      url: 'https://t.me/c/123/42',
+    };
+
+    renderForm(gigCandidate);
+
+    expect(screen.getByRole('region', { name: 'Original message' })).toHaveTextContent(
+      'Unstructured submission',
+    );
+    expect(screen.getByRole('link', { name: 'Open original message in Telegram' })).toHaveAttribute(
+      'href',
+      'https://t.me/c/123/42',
+    );
+  });
+
   it('should version the existing poster URL in edit mode', () => {
     const gigCandidate = createReviewingGigCandidate();
     gigCandidate.gigDraft.posterUrl = 'https://posters.example/gig-candidate.jpg?size=large';

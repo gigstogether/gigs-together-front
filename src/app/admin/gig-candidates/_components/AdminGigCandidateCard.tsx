@@ -8,7 +8,9 @@ import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
 import { formatAdminEventDate } from '@/app/admin/_lib/admin-event-format';
 import { formatAdminGigSource } from '@/app/admin/gigs/_lib/admin-gig-format';
 import AdminGigCandidatePreviewActions from '@/app/admin/gig-candidates/_components/AdminGigCandidatePreviewActions';
+import AdminGigCandidateOriginalMessage from '@/app/admin/gig-candidates/_components/AdminGigCandidateOriginalMessage';
 import { GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-status';
+import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import type { AdminGigCandidate } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { LocationIcon } from '@/components/ui/location-icon';
 import { Button } from '@/components/ui/button';
@@ -32,6 +34,9 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
   const isIntakePostExpected = !(
     gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'
   );
+  const isModerationPostExpected = gigCandidate.status !== GigCandidateStatusAPI.New;
+  const isPosterVisible =
+    gigCandidate.status !== GigCandidateStatusAPI.New || gigDraft.posterUrl !== undefined;
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -103,6 +108,12 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 {gigDraft.ticketsUrl}
               </a>
             </AdminPreviewMetaRow>
+          ) : null}
+
+          {gigCandidate.originalMessage !== undefined ? (
+            <div className="border-t border-border pt-2">
+              <AdminGigCandidateOriginalMessage originalMessage={gigCandidate.originalMessage} />
+            </div>
           ) : null}
 
           <div className="space-y-2 border-t border-border pt-2 text-xs text-muted-foreground">
@@ -178,7 +189,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
               <p className="min-w-0 leading-snug">No intake post linked.</p>
             </div>
           ) : null}
-          {gigCandidate.moderationPostUrl === undefined ? (
+          {isModerationPostExpected && gigCandidate.moderationPostUrl === undefined ? (
             <div
               role="alert"
               className="flex items-start gap-2 rounded-md border border-amber-500/50 bg-amber-500/10 px-2.5 py-2 text-xs text-amber-950 dark:text-amber-200"
@@ -192,13 +203,15 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
           ) : null}
         </div>
 
-        <div className="p-2 pt-0">
-          <AdminPreviewPoster
-            posterUrl={gigDraft.posterUrl}
-            posterVersion={gigCandidate.version}
-            title={title}
-          />
-        </div>
+        {isPosterVisible ? (
+          <div className="p-2 pt-0">
+            <AdminPreviewPoster
+              posterUrl={gigDraft.posterUrl}
+              posterVersion={gigCandidate.version}
+              title={title}
+            />
+          </div>
+        ) : null}
       </div>
 
       <AdminGigCandidatePreviewActions gigCandidate={gigCandidate} />
