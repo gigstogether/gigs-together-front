@@ -113,22 +113,25 @@ describe('env/client', () => {
     });
   });
 
-  describe('NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID', () => {
-    it('should leave plausibleScriptSrc undefined when env var is missing', async () => {
-      vi.stubEnv('NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID', undefined);
+  describe('NEXT_PUBLIC_GOATCOUNTER_ENDPOINT', () => {
+    it('should leave goatCounterEndpoint undefined when env var is missing', async () => {
+      vi.stubEnv('NEXT_PUBLIC_GOATCOUNTER_ENDPOINT', undefined);
 
       const clientEnvModule = await importClientEnv();
 
-      expect(clientEnvModule.clientEnv.plausibleScriptSrc).toBeUndefined();
+      expect(clientEnvModule.clientEnv.goatCounterEndpoint).toBeUndefined();
     });
 
-    it('should build plausible script src when env var is set', async () => {
-      vi.stubEnv('NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID', '  pa-_FpA9btdXUebMIHqavy2c  ');
+    it('should return trimmed endpoint when env var is set', async () => {
+      vi.stubEnv(
+        'NEXT_PUBLIC_GOATCOUNTER_ENDPOINT',
+        '  https://gigstogether.goatcounter.com/count  ',
+      );
 
       const clientEnvModule = await importClientEnv();
 
-      expect(clientEnvModule.clientEnv.plausibleScriptSrc).toBe(
-        'https://plausible.io/js/pa-_FpA9btdXUebMIHqavy2c.js',
+      expect(clientEnvModule.clientEnv.goatCounterEndpoint).toBe(
+        'https://gigstogether.goatcounter.com/count',
       );
     });
   });

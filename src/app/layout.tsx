@@ -1,14 +1,16 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import GoatCounterAnalytics from '@/components/GoatCounterAnalytics';
 import { Toaster } from '@/components/ui/toaster';
 import type { ReactNode } from 'react';
-import PlausibleAnalyticsProvider from '@/providers/PlausibleAnalyticsProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
+import { clientEnv } from '@/env/client-env';
 import { serverEnv } from '@/env/server-env';
 import { createOpenGraphMetadata, getSitePreviewImageUrl } from '@/lib/open-graph';
 import SignInHost from '@/components/auth/SignInHost';
 
 const SITE_BASE_URL = serverEnv.appBaseUrl;
+const GOATCOUNTER_ENDPOINT = serverEnv.isProductionSite ? clientEnv.goatCounterEndpoint : undefined;
 
 const BRAND_NAME = serverEnv.brandName;
 const TITLE = serverEnv.sitePreviewTitle;
@@ -88,21 +90,20 @@ export default async function RootLayout({ children }: Readonly<RootLayoutProps>
   return (
     <html lang="en">
       <body>
-        <PlausibleAnalyticsProvider>
-          <QueryProvider>
-            {jsonLd ? (
-              <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                  __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
-                }}
-              />
-            ) : null}
-            <div className="pt-[var(--header-h)]">{children}</div>
-            <SignInHost />
-            <Toaster />
-          </QueryProvider>
-        </PlausibleAnalyticsProvider>
+        <GoatCounterAnalytics endpoint={GOATCOUNTER_ENDPOINT} />
+        <QueryProvider>
+          {jsonLd ? (
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+              }}
+            />
+          ) : null}
+          <div className="pt-[var(--header-h)]">{children}</div>
+          <SignInHost />
+          <Toaster />
+        </QueryProvider>
       </body>
     </html>
   );
