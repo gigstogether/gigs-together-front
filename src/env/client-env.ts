@@ -10,8 +10,6 @@ const DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY = 'gt_tg_client_profile';
 const DEFAULT_FEED_PAGE_SIZE = 10;
 const DEFAULT_FEED_CALENDAR_DATES_STALE_TIME_MS = 600_000; // 10 minutes
 
-const PLAUSIBLE_SCRIPT_BASE_URL = 'https://plausible.io/js';
-
 const clientEnvSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).optional(),
@@ -33,7 +31,7 @@ const clientEnvSchema = z
     NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS: createOptionalPositiveIntegerFromEnvSchema(
       'NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS',
     ),
-    NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID: optionalTrimmedStringFromEnvSchema,
+    NEXT_PUBLIC_GOATCOUNTER_ENDPOINT: optionalTrimmedStringFromEnvSchema,
   })
   .superRefine((value, ctx) => {
     if (value.NEXT_PUBLIC_AUTH_ENABLED && !value.NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID) {
@@ -60,7 +58,7 @@ const parsedClientEnv = clientEnvSchema.parse({
   NEXT_PUBLIC_FEED_PAGE_SIZE: process.env.NEXT_PUBLIC_FEED_PAGE_SIZE,
   NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS:
     process.env.NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS,
-  NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID: process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID,
+  NEXT_PUBLIC_GOATCOUNTER_ENDPOINT: process.env.NEXT_PUBLIC_GOATCOUNTER_ENDPOINT,
 });
 
 export const clientEnv = {
@@ -78,7 +76,5 @@ export const clientEnv = {
   feedCalendarDatesStaleTimeMs:
     parsedClientEnv.NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS ??
     DEFAULT_FEED_CALENDAR_DATES_STALE_TIME_MS,
-  plausibleScriptSrc: parsedClientEnv.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID
-    ? `${PLAUSIBLE_SCRIPT_BASE_URL}/${parsedClientEnv.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_ID}.js`
-    : undefined,
+  goatCounterEndpoint: parsedClientEnv.NEXT_PUBLIC_GOATCOUNTER_ENDPOINT,
 } as const;

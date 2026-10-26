@@ -15,8 +15,14 @@ vi.mock('@/env/server-env', () => ({
   },
 }));
 
-vi.mock('@/providers/PlausibleAnalyticsProvider', () => ({
-  default: (props: PropsWithChildren) => <>{props.children}</>,
+vi.mock('@/env/client-env', () => ({
+  clientEnv: {
+    goatCounterEndpoint: 'https://gigstogether.goatcounter.com/count',
+  },
+}));
+
+vi.mock('@/components/GoatCounterAnalytics', () => ({
+  default: () => null,
 }));
 
 vi.mock('@/providers/QueryProvider', () => ({
