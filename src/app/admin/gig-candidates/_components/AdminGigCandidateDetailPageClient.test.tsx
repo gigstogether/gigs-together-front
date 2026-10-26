@@ -30,8 +30,10 @@ function createGigCandidate(status: GigCandidateStatusAPI): AdminGigCandidate {
       userId: 'user-7',
       isCurrentlyAdmin: false,
       origin: { type: 'form' },
-      originalText: 'Original submission',
-      attachments: [{ bucketPath: 'gigCandidate/poster.jpg' }],
+    },
+    originalMessage: {
+      text: 'Original submission',
+      url: 'https://t.me/c/123/42',
     },
     gigDraft: { title: 'Band' },
     status,
@@ -80,12 +82,10 @@ describe('AdminGigCandidateDetailPageClient', () => {
     expect(screen.queryByTestId('gigCandidate-draft-form')).not.toBeInTheDocument();
   });
 
-  it('should show the edit form without source data or a reject action when Reviewing', async () => {
+  it('should show the edit form without a reject action when Reviewing', async () => {
     renderEdit(GigCandidateStatusAPI.Reviewing);
 
     expect(await screen.findByTestId('gigCandidate-draft-form')).toBeInTheDocument();
-    expect(screen.queryByText('Original submission')).not.toBeInTheDocument();
-    expect(screen.queryByText(/gigCandidate\/poster.jpg/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
     expect(screen.queryByTestId('gigCandidate-card')).not.toBeInTheDocument();
   });

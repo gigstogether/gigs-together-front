@@ -79,7 +79,7 @@ describe('AdminGigCandidateCard', () => {
     expect(linkedGigLink).toHaveTextContent('Gig');
     expect(linkedGigLink.parentElement?.firstElementChild).toBe(linkedGigLink);
     expect(
-      screen.getByText('Source: user · Test User (currently admin) · TG: @test_user'),
+      screen.getByText('Source: user (admin) · Test User (currently admin) · TG: @test_user'),
     ).toBeInTheDocument();
     expect(screen.queryByText(/42/)).not.toBeInTheDocument();
     expect(screen.queryByText('No intake post linked.')).not.toBeInTheDocument();
@@ -159,7 +159,10 @@ describe('AdminGigCandidateCard', () => {
           type: 'messenger',
           messenger: 'Telegram',
         },
-        originalText: 'Unstructured submission',
+      },
+      originalMessage: {
+        text: 'Unstructured submission',
+        url: 'https://t.me/c/123/42',
       },
       gigDraft: {},
       status: GigCandidateStatusAPI.New,
@@ -167,11 +170,37 @@ describe('AdminGigCandidateCard', () => {
 
     expect(screen.getByText('Untitled Gig Candidate')).toBeInTheDocument();
     expect(screen.queryByText('Invalid Date')).not.toBeInTheDocument();
-    expect(screen.getByText('Source: user')).toBeInTheDocument();
+    expect(screen.getByText('Source: user (Telegram)')).toBeInTheDocument();
     expect(screen.queryByText(/user-7/)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Open' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Send to moderation' })).toBeInTheDocument();
+  });
+
+  it('should show the original message as plain text with its Telegram link', () => {
+    renderCard({
+      ...gigCandidate,
+      originalMessage: {
+        text: '<b>Unstructured submission</b>\nSecond line',
+        url: 'https://t.me/c/123/42',
+      },
+    });
+
+    const originalMessage = screen.getByRole('region', { name: 'Original message' });
+
+    expect(originalMessage.parentElement).toHaveClass('border-t', 'border-border', 'pt-2');
+    expect(originalMessage).toHaveTextContent('<b>Unstructured submission</b> Second line');
+    expect(originalMessage.querySelector('b')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open original message in Telegram' })).toHaveAttribute(
+      'href',
+      'https://t.me/c/123/42',
+    );
+  });
+
+  it('should omit the original message block when it is unavailable', () => {
+    renderCard();
+
+    expect(screen.queryByRole('region', { name: 'Original message' })).not.toBeInTheDocument();
   });
 
   it('should warn about both missing posts when neither expected post is linked', () => {
@@ -189,6 +218,29 @@ describe('AdminGigCandidateCard', () => {
 
     expect(screen.getByText('No intake post linked.')).toBeInTheDocument();
     expect(screen.getByText('No moderation post linked.')).toBeInTheDocument();
+  });
+
+  it('should not warn about a missing moderation post for New', () => {
+    renderCard({
+      ...gigCandidate,
+      status: GigCandidateStatusAPI.New,
+      moderationPostUrl: undefined,
+    });
+
+    expect(screen.queryByText('No moderation post linked.')).not.toBeInTheDocument();
+  });
+
+  it('should not render a poster placeholder for New without a poster', () => {
+    renderCard({
+      ...gigCandidate,
+      status: GigCandidateStatusAPI.New,
+      gigDraft: {
+        ...gigCandidate.gigDraft,
+        posterUrl: undefined,
+      },
+    });
+
+    expect(screen.queryByLabelText('No poster')).not.toBeInTheDocument();
   });
 
   it('should not warn about Intake for an admin-origin Gig Candidate', () => {

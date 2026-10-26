@@ -25,21 +25,27 @@ export interface AdminGigCandidateUserMessengerOrigin {
   messenger: 'Telegram';
 }
 
-export type AdminGigCandidateUserOrigin =
-  | AdminGigCandidateUserFormOrigin
-  | AdminGigCandidateUserAdminOrigin
-  | AdminGigCandidateUserMessengerOrigin;
-
-export interface GigCandidateSourceUserWithProfile {
+interface GigCandidateSourceUserWithProfileBase {
   type: 'user';
-  userId: string;
   displayName?: string;
   isCurrentlyAdmin: boolean;
   telegramUsername?: string;
-  origin: AdminGigCandidateUserOrigin;
-  originalText?: string;
-  attachments?: Record<string, unknown>[];
 }
+
+interface GigCandidateSourceIdentifiedUserWithProfile
+  extends GigCandidateSourceUserWithProfileBase {
+  userId: string;
+  origin: AdminGigCandidateUserFormOrigin | AdminGigCandidateUserAdminOrigin;
+}
+
+interface GigCandidateSourceMessengerUserWithProfile extends GigCandidateSourceUserWithProfileBase {
+  userId?: string;
+  origin: AdminGigCandidateUserMessengerOrigin;
+}
+
+export type GigCandidateSourceUserWithProfile =
+  | GigCandidateSourceIdentifiedUserWithProfile
+  | GigCandidateSourceMessengerUserWithProfile;
 
 export interface GigCandidateProviderReference {
   name: string;
@@ -70,12 +76,18 @@ export interface AdminGigCandidateDraft {
   posterUrl?: string;
 }
 
+export interface AdminGigCandidateOriginalMessage {
+  text: string;
+  url: string;
+}
+
 export interface AdminGigCandidate {
   id: string;
   source: GigCandidateSourceForAdminView;
   gigDraft: AdminGigCandidateDraft;
   status: GigCandidateStatusAPI;
   version: number;
+  originalMessage?: AdminGigCandidateOriginalMessage;
   intakePostUrl?: string;
   intakePostDate?: number;
   moderationPostUrl?: string;

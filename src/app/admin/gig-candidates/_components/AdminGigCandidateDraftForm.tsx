@@ -15,6 +15,7 @@ import {
 import type { LookupAdminGigCandidateDraftParams } from '@/app/admin/_lib/admin-api';
 import { buildVersionedAdminPosterUrl } from '@/app/admin/_lib/admin-poster-url';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
+import AdminGigCandidateOriginalMessage from '@/app/admin/gig-candidates/_components/AdminGigCandidateOriginalMessage';
 import GigFormFields from '@/app/admin/gigs/_components/gig-form/GigFormFields';
 import type {
   AdminGigCandidate,
@@ -210,7 +211,10 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
       <CardHeader>
         <CardTitle>{gigCandidate ? 'Edit Gig Candidate' : 'Create Gig Candidate'}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        {gigCandidate?.originalMessage !== undefined ? (
+          <AdminGigCandidateOriginalMessage originalMessage={gigCandidate.originalMessage} />
+        ) : null}
         <form
           className="space-y-6"
           onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))}
