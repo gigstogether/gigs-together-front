@@ -197,7 +197,7 @@ describe('AdminGigCandidateCard', () => {
     );
   });
 
-  it('should show an image-only original message with links to the image and Telegram', () => {
+  it('should show an image-only original message without a constrained ratio', () => {
     renderCard({
       ...gigCandidate,
       originalMessage: {
@@ -209,14 +209,20 @@ describe('AdminGigCandidateCard', () => {
     const image = screen.getByRole('img', { name: 'Original suggestion' });
 
     expect(image).toHaveAttribute('src', 'https://storage.example/suggestions/radiohead.jpg');
-    expect(screen.getByRole('link', { name: 'Open original suggestion image' })).toHaveAttribute(
-      'href',
-      'https://storage.example/suggestions/radiohead.jpg',
-    );
+    const imageTrigger = screen.getByRole('button', {
+      name: 'Open original suggestion image',
+    });
+    expect(imageTrigger).toHaveClass('rounded-lg', 'cursor-zoom-in');
+    expect(imageTrigger).not.toHaveClass('aspect-[3/4]');
+    expect(image).toHaveClass('h-auto', 'object-contain', 'max-h-[32rem]');
     expect(screen.getByRole('link', { name: 'Open original message in Telegram' })).toHaveAttribute(
       'href',
       'https://t.me/c/123/42',
     );
+
+    fireEvent.click(imageTrigger);
+
+    expect(screen.getByRole('dialog', { name: 'Original suggestion' })).toBeInTheDocument();
   });
 
   it('should omit the original message block when it is unavailable', () => {

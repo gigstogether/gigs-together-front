@@ -15,7 +15,13 @@ describe('GigPoster', () => {
       />,
     );
 
-    expect(screen.getByRole('img', { name: 'Radiohead' })).toHaveAttribute('loading', 'lazy');
+    const image = screen.getByRole('img', { name: 'Radiohead' });
+
+    expect(image).toHaveAttribute('loading', 'lazy');
+    expect(image).toHaveClass('object-cover');
+    expect(screen.getByRole('button', { name: 'Open poster: Radiohead' })).toHaveClass(
+      'aspect-[3/4]',
+    );
   });
 
   it('should use eager loading and high fetch priority when configured', () => {

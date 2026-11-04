@@ -1,6 +1,7 @@
 import { ExternalLink } from 'lucide-react';
 
 import type { AdminGigCandidateOriginalMessage as OriginalMessage } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
+import { ImagePreview } from '@/components/ImagePreview';
 
 interface AdminGigCandidateOriginalMessageProps {
   originalMessage: OriginalMessage;
@@ -32,28 +33,22 @@ export default function AdminGigCandidateOriginalMessage(
           />
         </a>
       </div>
-      <div className="space-y-3 rounded-md border border-border bg-muted/30 p-3">
+      <div className="space-y-3">
         {originalMessage.imageUrl !== undefined ? (
-          <a
-            href={originalMessage.imageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Open original suggestion image"
-            className="block overflow-hidden rounded-md bg-muted"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={originalMessage.imageUrl}
-              alt="Original suggestion"
-              className="max-h-[32rem] w-full object-contain"
-              loading="lazy"
-            />
-          </a>
+          <ImagePreview
+            src={originalMessage.imageUrl}
+            alt="Original suggestion"
+            openLabel="Open original suggestion image"
+            fit="contain"
+            imageClassName="max-h-[32rem]"
+          />
         ) : null}
         {originalMessage.text !== undefined ? (
-          <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
-            {originalMessage.text}
-          </p>
+          <div className="rounded-md border border-border bg-muted/30 p-3">
+            <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+              {originalMessage.text}
+            </p>
+          </div>
         ) : null}
       </div>
     </section>
