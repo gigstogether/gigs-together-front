@@ -2,6 +2,7 @@
 
 import { AlertTriangle, Calendar, Clock3, ExternalLink, Ticket } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
 import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
@@ -35,8 +36,8 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
     gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'
   );
   const isModerationPostExpected = gigCandidate.status !== GigCandidateStatusAPI.New;
-  const isPosterVisible =
-    gigCandidate.status !== GigCandidateStatusAPI.New || gigDraft.posterUrl !== undefined;
+  const isPosterVisible = gigDraft.posterUrl !== undefined;
+  const [isOriginalMessageExpanded, setIsOriginalMessageExpanded] = useState(true);
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -112,7 +113,13 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
 
           {gigCandidate.originalMessage !== undefined ? (
             <div className="border-t border-border pt-2">
-              <AdminGigCandidateOriginalMessage originalMessage={gigCandidate.originalMessage} />
+              <AdminGigCandidateOriginalMessage
+                originalMessage={gigCandidate.originalMessage}
+                disclosure={{
+                  isExpanded: isOriginalMessageExpanded,
+                  onToggle: () => setIsOriginalMessageExpanded((isExpanded) => !isExpanded),
+                }}
+              />
             </div>
           ) : null}
 

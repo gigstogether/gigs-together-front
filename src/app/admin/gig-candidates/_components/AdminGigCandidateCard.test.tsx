@@ -197,6 +197,68 @@ describe('AdminGigCandidateCard', () => {
     );
   });
 
+  it('should show an image-only original message without a constrained ratio', () => {
+    renderCard({
+      ...gigCandidate,
+      originalMessage: {
+        imageUrl: 'https://storage.example/suggestions/radiohead.jpg',
+        url: 'https://t.me/c/123/42',
+      },
+    });
+
+    const image = screen.getByRole('img', { name: 'Original suggestion' });
+
+    expect(image).toHaveAttribute('src', 'https://storage.example/suggestions/radiohead.jpg');
+    const imageTrigger = screen.getByRole('button', {
+      name: 'Open original suggestion image',
+    });
+    expect(imageTrigger).toHaveClass('rounded-lg', 'cursor-zoom-in');
+    expect(imageTrigger).not.toHaveClass('aspect-[3/4]');
+    expect(image).toHaveClass('h-auto', 'object-contain', 'max-h-[32rem]');
+    expect(screen.getByRole('link', { name: 'Open original message in Telegram' })).toHaveAttribute(
+      'href',
+      'https://t.me/c/123/42',
+    );
+
+    fireEvent.click(imageTrigger);
+
+    expect(screen.getByRole('dialog', { name: 'Original suggestion' })).toBeInTheDocument();
+  });
+
+  it('should collapse and expand the original message text and image together', () => {
+    renderCard({
+      ...gigCandidate,
+      originalMessage: {
+        text: 'Radiohead in Barcelona',
+        imageUrl: 'https://storage.example/suggestions/radiohead',
+        url: 'https://t.me/c/123/42',
+      },
+    });
+
+    const collapseButton = screen.getByRole('button', {
+      name: 'Collapse original message',
+    });
+
+    expect(collapseButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Radiohead in Barcelona')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Original suggestion' })).toBeInTheDocument();
+
+    fireEvent.click(collapseButton);
+
+    const expandButton = screen.getByRole('button', {
+      name: 'Expand original message',
+    });
+    expect(expandButton).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('Radiohead in Barcelona')).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Original suggestion' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open original message in Telegram' })).toBeVisible();
+
+    fireEvent.click(expandButton);
+
+    expect(screen.getByText('Radiohead in Barcelona')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Original suggestion' })).toBeInTheDocument();
+  });
+
   it('should omit the original message block when it is unavailable', () => {
     renderCard();
 
@@ -230,15 +292,8 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.queryByText('No moderation post linked.')).not.toBeInTheDocument();
   });
 
-  it('should not render a poster placeholder for New without a poster', () => {
-    renderCard({
-      ...gigCandidate,
-      status: GigCandidateStatusAPI.New,
-      gigDraft: {
-        ...gigCandidate.gigDraft,
-        posterUrl: undefined,
-      },
-    });
+  it('should not render a poster placeholder when the poster is absent', () => {
+    renderCard();
 
     expect(screen.queryByLabelText('No poster')).not.toBeInTheDocument();
   });

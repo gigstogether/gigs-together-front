@@ -200,10 +200,16 @@ const v1AdminGigCandidateDraftSchema = z
 
 const v1AdminGigCandidateOriginalMessageSchema = z
   .object({
-    text: z.string().min(1),
+    text: z.string().min(1).optional(),
+    imageUrl: z.string().url().optional(),
     url: z.string().url(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (originalMessage) =>
+      originalMessage.text !== undefined || originalMessage.imageUrl !== undefined,
+    { message: 'Original message must contain text or an image URL' },
+  );
 
 const v1AdminGigCandidateSchema = z
   .object({

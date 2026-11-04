@@ -77,7 +77,8 @@ export interface AdminGigCandidateDraft {
 }
 
 export interface AdminGigCandidateOriginalMessage {
-  text: string;
+  text?: string;
+  imageUrl?: string;
   url: string;
 }
 
