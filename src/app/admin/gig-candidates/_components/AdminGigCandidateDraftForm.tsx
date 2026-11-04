@@ -213,7 +213,9 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
       </CardHeader>
       <CardContent className="space-y-6">
         {gigCandidate?.originalMessage !== undefined ? (
-          <AdminGigCandidateOriginalMessage originalMessage={gigCandidate.originalMessage} />
+          <div className="border-b border-border pb-2">
+            <AdminGigCandidateOriginalMessage originalMessage={gigCandidate.originalMessage} />
+          </div>
         ) : null}
         <form
           className="space-y-6"
