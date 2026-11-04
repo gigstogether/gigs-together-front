@@ -9,12 +9,27 @@ import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 
-const SVG_IMAGE_MIME_TYPE = 'image/svg+xml';
+const SUPPORTED_POSTER_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/avif',
+  'image/heic',
+  'image/heif',
+];
+const SUPPORTED_POSTER_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.heic', '.heif'];
+const POSTER_FILE_ACCEPT = [...SUPPORTED_POSTER_MIME_TYPES, ...SUPPORTED_POSTER_EXTENSIONS].join(
+  ',',
+);
 
-function isSvgPosterFile(file: File): boolean {
+function isSupportedPosterFile(file: File): boolean {
   const normalizedMimeType = file.type.split(';', 1)[0].trim().toLowerCase();
+  if (SUPPORTED_POSTER_MIME_TYPES.includes(normalizedMimeType)) {
+    return true;
+  }
 
-  return normalizedMimeType === SVG_IMAGE_MIME_TYPE || /\.svgz?$/i.test(file.name);
+  const normalizedFilename = file.name.trim().toLowerCase();
+  return SUPPORTED_POSTER_EXTENSIONS.some((extension) => normalizedFilename.endsWith(extension));
 }
 
 interface PosterFieldProps {
@@ -71,14 +86,14 @@ export default function PosterField(props: PosterFieldProps) {
 
   const isPosterSelected = !!posterFile || !!posterUrl?.trim();
 
-  function rejectSvgPosterFile(file: File): boolean {
-    if (!isSvgPosterFile(file)) {
+  function rejectUnsupportedPosterFile(file: File): boolean {
+    if (isSupportedPosterFile(file)) {
       return false;
     }
 
     toast({
-      title: 'SVG posters are not supported',
-      description: 'Please use a raster image instead.',
+      title: 'Unsupported poster format',
+      description: 'Please use JPEG, PNG, WebP, AVIF, or HEIC/HEIF.',
       variant: 'destructive',
     });
     if (posterFileInputRef.current) {
@@ -96,14 +111,14 @@ export default function PosterField(props: PosterFieldProps) {
 
     for (let index = 0; index < items.length; index += 1) {
       const item = items[index];
-      if (item.kind === 'file' && item.type.startsWith('image/')) {
+      if (item.kind === 'file') {
         const file = item.getAsFile();
         if (!file) {
           continue;
         }
 
         event.preventDefault();
-        if (rejectSvgPosterFile(file)) {
+        if (rejectUnsupportedPosterFile(file)) {
           break;
         }
 
@@ -119,7 +134,7 @@ export default function PosterField(props: PosterFieldProps) {
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
-    if (file && rejectSvgPosterFile(file)) {
+    if (file && rejectUnsupportedPosterFile(file)) {
       return;
     }
 
@@ -131,9 +146,9 @@ export default function PosterField(props: PosterFieldProps) {
 
   const description = isUrlInputEnabled
     ? isEdit
-      ? 'Upload a new image file, paste URL, or paste image from clipboard (optional). SVG is not supported.'
-      : 'Upload an image file (max 10MB), paste URL, or paste image from clipboard. SVG is not supported.'
-    : 'Upload an image file (max 10MB). SVG is not supported.';
+      ? 'Upload a new JPEG, PNG, WebP, AVIF, or HEIC/HEIF file, paste URL, or paste image from clipboard (optional).'
+      : 'Upload a JPEG, PNG, WebP, AVIF, or HEIC/HEIF file (max 10MB), paste URL, or paste image from clipboard.'
+    : 'Upload a JPEG, PNG, WebP, AVIF, or HEIC/HEIF file (max 10MB).';
 
   return (
     <Field>
@@ -150,7 +165,7 @@ export default function PosterField(props: PosterFieldProps) {
             id="poster-file"
             ref={posterFileInputRef}
             type="file"
-            accept="image/*"
+            accept={POSTER_FILE_ACCEPT}
             aria-labelledby="poster-file-label"
             onChange={handleFileChange}
           />
