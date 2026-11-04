@@ -130,9 +130,10 @@ describe('AdminGigCandidateDraftForm', () => {
 
     renderForm(gigCandidate);
 
-    expect(screen.getByRole('region', { name: 'Original message' })).toHaveTextContent(
-      'Unstructured submission',
-    );
+    const originalMessage = screen.getByRole('region', { name: 'Original message' });
+
+    expect(originalMessage).toHaveTextContent('Unstructured submission');
+    expect(originalMessage.parentElement).toHaveClass('border-b', 'border-border', 'pb-2');
     expect(screen.getByRole('link', { name: 'Open original message in Telegram' })).toHaveAttribute(
       'href',
       'https://t.me/c/123/42',

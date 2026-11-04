@@ -401,6 +401,7 @@ describe('fetchAdminGigCandidates', () => {
           },
           originalMessage: {
             text: 'Radiohead in Barcelona',
+            imageUrl: 'https://storage.example/suggestions/radiohead.jpg',
             url: 'https://t.me/c/123/42',
           },
         }),
@@ -421,8 +422,47 @@ describe('fetchAdminGigCandidates', () => {
     });
     expect(response.gigCandidates[0]?.originalMessage).toEqual({
       text: 'Radiohead in Barcelona',
+      imageUrl: 'https://storage.example/suggestions/radiohead.jpg',
       url: 'https://t.me/c/123/42',
     });
+  });
+
+  it('should parse an image-only original message', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          originalMessage: {
+            imageUrl: 'https://storage.example/suggestions/radiohead.jpg',
+            url: 'https://t.me/c/123/42',
+          },
+        }),
+      ],
+    });
+
+    const response = await fetchAdminGigCandidates({
+      status: GigCandidateStatusFilter.New,
+    });
+
+    expect(response.gigCandidates[0]?.originalMessage).toEqual({
+      imageUrl: 'https://storage.example/suggestions/radiohead.jpg',
+      url: 'https://t.me/c/123/42',
+    });
+  });
+
+  it('should reject an original message without text or an image', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          originalMessage: {
+            url: 'https://t.me/c/123/42',
+          },
+        }),
+      ],
+    });
+
+    await expect(fetchAdminGigCandidates({ status: GigCandidateStatusFilter.New })).rejects.toThrow(
+      'Invalid admin Gig Candidates response',
+    );
   });
 
   it('should reject a GigCandidate with an invalid original message URL', async () => {
@@ -432,6 +472,23 @@ describe('fetchAdminGigCandidates', () => {
           originalMessage: {
             text: 'Radiohead in Barcelona',
             url: 'not-a-url',
+          },
+        }),
+      ],
+    });
+
+    await expect(fetchAdminGigCandidates({ status: GigCandidateStatusFilter.New })).rejects.toThrow(
+      'Invalid admin Gig Candidates response',
+    );
+  });
+
+  it('should reject a GigCandidate with an invalid original message image URL', async () => {
+    mockApiRequest.mockResolvedValue({
+      gigCandidates: [
+        createGigCandidateApiPayload({
+          originalMessage: {
+            imageUrl: 'not-a-url',
+            url: 'https://t.me/c/123/42',
           },
         }),
       ],

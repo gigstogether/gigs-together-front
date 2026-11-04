@@ -39,7 +39,8 @@ describe('PosterField', () => {
   it.each([
     ['SVG MIME type', new File(['<svg></svg>'], 'poster', { type: 'image/svg+xml' })],
     ['SVG extension', new File(['<svg></svg>'], 'poster.svg', { type: '' })],
-  ])('should reject a file identified by %s', (_, file) => {
+    ['GIF MIME type', new File(['gif'], 'poster.gif', { type: 'image/gif' })],
+  ])('should reject an unsupported file identified by %s', (_, file) => {
     const { onPosterFileChange } = renderPosterField();
 
     fireEvent.change(screen.getByLabelText('Poster:'), {
@@ -48,21 +49,34 @@ describe('PosterField', () => {
 
     expect(onPosterFileChange).not.toHaveBeenCalled();
     expect(toast).toHaveBeenCalledWith({
-      title: 'SVG posters are not supported',
-      description: 'Please use a raster image instead.',
+      title: 'Unsupported poster format',
+      description: 'Please use JPEG, PNG, WebP, AVIF, or HEIC/HEIF.',
       variant: 'destructive',
     });
   });
 
-  it('should accept an image file', () => {
+  it.each([
+    ['PNG MIME type', new File(['png'], 'poster', { type: 'image/png' })],
+    ['AVIF MIME type', new File(['avif'], 'poster', { type: 'image/avif' })],
+    ['HEIC extension', new File(['heic'], 'poster.heic', { type: '' })],
+    ['HEIF extension', new File(['heif'], 'poster.heif', { type: '' })],
+  ])('should accept a supported file identified by %s', (_, file) => {
     const { onPosterFileChange } = renderPosterField();
-    const file = new File(['png'], 'poster.png', { type: 'image/png' });
 
     fireEvent.change(screen.getByLabelText('Poster:'), {
       target: { files: [file] },
     });
 
     expect(onPosterFileChange).toHaveBeenCalledWith(file);
+  });
+
+  it('should restrict the file picker to supported poster formats', () => {
+    renderPosterField();
+
+    expect(screen.getByLabelText('Poster:')).toHaveAttribute(
+      'accept',
+      'image/jpeg,image/png,image/webp,image/avif,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.avif,.heic,.heif',
+    );
   });
 
   it('should reject an SVG image pasted from the clipboard', () => {
@@ -83,8 +97,8 @@ describe('PosterField', () => {
 
     expect(onPosterFileChange).not.toHaveBeenCalled();
     expect(toast).toHaveBeenCalledWith({
-      title: 'SVG posters are not supported',
-      description: 'Please use a raster image instead.',
+      title: 'Unsupported poster format',
+      description: 'Please use JPEG, PNG, WebP, AVIF, or HEIC/HEIF.',
       variant: 'destructive',
     });
   });
