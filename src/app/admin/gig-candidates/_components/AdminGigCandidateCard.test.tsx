@@ -252,15 +252,8 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.queryByText('No moderation post linked.')).not.toBeInTheDocument();
   });
 
-  it('should not render a poster placeholder for New without a poster', () => {
-    renderCard({
-      ...gigCandidate,
-      status: GigCandidateStatusAPI.New,
-      gigDraft: {
-        ...gigCandidate.gigDraft,
-        posterUrl: undefined,
-      },
-    });
+  it('should not render a poster placeholder when the poster is absent', () => {
+    renderCard();
 
     expect(screen.queryByLabelText('No poster')).not.toBeInTheDocument();
   });

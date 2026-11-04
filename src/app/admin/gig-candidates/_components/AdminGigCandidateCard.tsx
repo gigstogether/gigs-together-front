@@ -35,8 +35,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
     gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'
   );
   const isModerationPostExpected = gigCandidate.status !== GigCandidateStatusAPI.New;
-  const isPosterVisible =
-    gigCandidate.status !== GigCandidateStatusAPI.New || gigDraft.posterUrl !== undefined;
+  const isPosterVisible = gigDraft.posterUrl !== undefined;
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
