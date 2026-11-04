@@ -225,6 +225,40 @@ describe('AdminGigCandidateCard', () => {
     expect(screen.getByRole('dialog', { name: 'Original suggestion' })).toBeInTheDocument();
   });
 
+  it('should collapse and expand the original message text and image together', () => {
+    renderCard({
+      ...gigCandidate,
+      originalMessage: {
+        text: 'Radiohead in Barcelona',
+        imageUrl: 'https://storage.example/suggestions/radiohead',
+        url: 'https://t.me/c/123/42',
+      },
+    });
+
+    const collapseButton = screen.getByRole('button', {
+      name: 'Collapse original message',
+    });
+
+    expect(collapseButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Radiohead in Barcelona')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Original suggestion' })).toBeInTheDocument();
+
+    fireEvent.click(collapseButton);
+
+    const expandButton = screen.getByRole('button', {
+      name: 'Expand original message',
+    });
+    expect(expandButton).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('Radiohead in Barcelona')).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Original suggestion' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open original message in Telegram' })).toBeVisible();
+
+    fireEvent.click(expandButton);
+
+    expect(screen.getByText('Radiohead in Barcelona')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Original suggestion' })).toBeInTheDocument();
+  });
+
   it('should omit the original message block when it is unavailable', () => {
     renderCard();
 
