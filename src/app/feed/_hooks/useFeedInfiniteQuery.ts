@@ -15,7 +15,7 @@ export type ResolveCityName = (code: string) => string;
 
 export interface UseFeedInfiniteQueryParams {
   readonly country: string;
-  readonly city: string;
+  readonly communitySlug: string;
   readonly initialEvents?: readonly Event[];
   readonly initialPrevCursor?: string;
   readonly initialNextCursor?: string;
@@ -104,8 +104,12 @@ export function useFeedInfiniteQuery(
   }, [params.resolveCityName]);
 
   const queryKey = useMemo(
-    () => feedKeys.events({ country: params.country, city: params.city }),
-    [params.city, params.country],
+    () =>
+      feedKeys.events({
+        country: params.country,
+        communitySlug: params.communitySlug,
+      }),
+    [params.communitySlug, params.country],
   );
 
   const query = useInfiniteQuery({
@@ -125,7 +129,7 @@ export function useFeedInfiniteQuery(
         cursor: pageParam.cursor,
         direction: pageParam.direction === 'prev' ? 'prev' : undefined,
         country: params.country,
-        city: params.city,
+        communitySlug: params.communitySlug,
         signal,
       });
 
@@ -172,7 +176,7 @@ export function useFeedInfiniteQuery(
     const lastId = params.initialEvents[params.initialEvents.length - 1]?.id ?? '';
     const snapshot = [
       params.country,
-      params.city,
+      params.communitySlug,
       params.initialPrevCursor ?? '',
       params.initialNextCursor ?? '',
       String(params.initialEvents.length),
@@ -194,7 +198,7 @@ export function useFeedInfiniteQuery(
       }),
     );
   }, [
-    params.city,
+    params.communitySlug,
     params.country,
     params.initialEvents,
     params.initialNextCursor,

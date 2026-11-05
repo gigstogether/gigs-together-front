@@ -19,6 +19,7 @@ import AdminGigCandidateOriginalMessage from '@/app/admin/gig-candidates/_compon
 import GigFormFields from '@/app/admin/gigs/_components/gig-form/GigFormFields';
 import type {
   AdminGigCandidate,
+  AdminGigCandidateDraft,
   AdminGigCandidateLookupResult,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import {
@@ -38,6 +39,7 @@ import { ApiError } from '@/lib/api-errors';
 import { buildAdminGigCandidateRoute } from '@/lib/admin-gig-candidate-paths';
 
 interface AdminGigCandidateDraftFormProps {
+  defaultCommunityId: string;
   countries: Country[];
   gigCandidate?: AdminGigCandidate;
 }
@@ -131,7 +133,7 @@ function useGigCandidateLookup(
 }
 
 export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraftFormProps) {
-  const { countries, gigCandidate } = props;
+  const { defaultCommunityId, countries, gigCandidate } = props;
   const router = useRouter();
   const queryClient = useQueryClient();
   const [posterFile, setPosterFile] = useState<File | null>(null);
@@ -157,7 +159,11 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
 
   const saveMutation = useMutation({
     mutationFn: async (values: GigFormValues) => {
-      const gigDraft = mapGigCandidateFormValuesToDraft(values);
+      const gigDraftFields = mapGigCandidateFormValuesToDraft(values);
+      const gigDraft: AdminGigCandidateDraft = {
+        ...gigDraftFields,
+        communityIds: gigCandidate?.gigDraft.communityIds ?? [defaultCommunityId],
+      };
       const poster = { file: posterFile, url: posterUrl };
       return gigCandidate
         ? updateAdminGigCandidateDraft({

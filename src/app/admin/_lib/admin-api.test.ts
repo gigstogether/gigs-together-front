@@ -39,6 +39,7 @@ function createGigCandidateApiPayload(overrides: Record<string, unknown> = {}) {
       origin: { type: 'admin' },
     },
     gigDraft: {
+      communityIds: ['community-id'],
       title: 'Band',
       date: '2026-08-20',
       city: 'Barcelona',
@@ -630,12 +631,12 @@ describe('admin GigCandidate commands', () => {
     mockApiRequest.mockResolvedValue(createGigCandidateApiPayload());
 
     await createAdminGigCandidate({
-      gigDraft: { title: 'Band', country: 'ES' },
+      gigDraft: { communityIds: ['community-id'], title: 'Band', country: 'ES' },
       poster: { file: null, url: '' },
     });
 
     expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gig-candidates', 'POST', {
-      gigDraft: { title: 'Band', country: 'ES' },
+      gigDraft: { communityIds: ['community-id'], title: 'Band', country: 'ES' },
     });
   });
 
@@ -645,14 +646,17 @@ describe('admin GigCandidate commands', () => {
     await updateAdminGigCandidateDraft({
       gigCandidateId: ' gigCandidate/id ',
       expectedVersion: 3,
-      gigDraft: { venue: 'Razzmatazz' },
+      gigDraft: { communityIds: ['community-id'], venue: 'Razzmatazz' },
       poster: { file: null, url: '' },
     });
 
     expect(mockApiRequest).toHaveBeenCalledWith(
       'v1/admin/gig-candidates/gigCandidate%2Fid/gig-draft',
       'PATCH',
-      { gigDraft: { venue: 'Razzmatazz' }, expectedVersion: 3 },
+      {
+        gigDraft: { communityIds: ['community-id'], venue: 'Razzmatazz' },
+        expectedVersion: 3,
+      },
     );
   });
 

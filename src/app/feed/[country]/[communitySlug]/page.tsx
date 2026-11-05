@@ -6,55 +6,62 @@ import { serverEnv } from '@/env/server-env';
 import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
 import { getFeed } from '@/app/feed/_lib/feed.server';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
-import {
-  DEFAULT_FEED_ROUTE,
-  buildFeedPath,
-  normalizeSegment,
-  SUPPORTED_FEED_LOCATIONS,
-} from '@/lib/feed/feed.routes';
+import { DEFAULT_FEED_ROUTE, buildFeedPath, normalizeSegment } from '@/lib/feed/feed.routes';
 import { I18nProvider } from '@/providers/I18nProvider';
 import { resolveTranslationValue } from '@/lib/i18n/translation-value';
 import { getTranslations } from '@/lib/i18n/translations.server';
 import type { Event } from '@/lib/types';
 import { createOpenGraphMetadata } from '@/lib/open-graph';
+import { getCommunities, getCommunityByRoute } from '@/lib/community/community.server';
 
 const PAGE_SIZE = clientEnv.feedPageSize;
 const EAGER_INITIAL_POSTER_COUNT = serverEnv.eagerInitialPosterCount;
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  return SUPPORTED_FEED_LOCATIONS.map((x) => ({ country: x.country, city: x.city }));
+  const catalog = await getCommunities();
+
+  return catalog.communities.map((community) => ({
+    country: community.countryIso.toLowerCase(),
+    communitySlug: community.slug,
+  }));
 }
 
-interface FeedCityRouteParams {
-  readonly country: string;
-  readonly city: string;
+interface FeedCommunityRouteParams {
+  country: string;
+  communitySlug: string;
 }
 
-interface FeedCityPageProps {
-  readonly params: Promise<FeedCityRouteParams>;
+interface FeedCommunityPageProps {
+  params: Promise<FeedCommunityRouteParams>;
 }
 
-function getFeedPageTitle(cityName: string): string {
-  return `${cityName} | ${serverEnv.brandName}`;
+function getFeedPageTitle(communityName: string): string {
+  return `${communityName} | ${serverEnv.brandName}`;
 }
 
-export async function generateMetadata(props: FeedCityPageProps): Promise<Metadata> {
-  const { country, city } = await props.params;
-  const feedPath = buildFeedPath({ country, city });
-  const normalizedCity = normalizeSegment(city);
-  const i18n = await getTranslations('en', ['country', 'city']);
-  const cityName = resolveTranslationValue({
-    entry: i18n.translations.city?.[normalizedCity],
-    namespace: 'city',
-    key: normalizedCity,
+export async function generateMetadata(props: FeedCommunityPageProps): Promise<Metadata> {
+  const { country, communitySlug } = await props.params;
+  const resolved = await getCommunityByRoute({ country, communitySlug });
+
+  if (!resolved) {
+    redirect(DEFAULT_FEED_ROUTE);
+  }
+
+  const feedPath = buildFeedPath({ country, communitySlug });
+  const i18n = await getTranslations('en', [resolved.nameTranslationNamespace]);
+  const communityName = resolveTranslationValue({
+    entry:
+      i18n.translations[resolved.nameTranslationNamespace]?.[resolved.community.nameTranslationKey],
+    namespace: resolved.nameTranslationNamespace,
+    key: resolved.community.nameTranslationKey,
   });
 
   return {
     title: {
-      absolute: getFeedPageTitle(cityName),
+      absolute: getFeedPageTitle(communityName),
     },
     alternates: {
       canonical: feedPath,
@@ -67,19 +74,26 @@ export async function generateMetadata(props: FeedCityPageProps): Promise<Metada
   };
 }
 
-export default async function Page(props: FeedCityPageProps) {
-  const { country, city } = await props.params;
+export default async function Page(props: FeedCommunityPageProps) {
+  const { country, communitySlug } = await props.params;
   const normalizedCountry = normalizeSegment(country);
-  const normalizedCity = normalizeSegment(city);
+  const normalizedCommunitySlug = normalizeSegment(communitySlug);
+  const resolved = await getCommunityByRoute({
+    country: normalizedCountry,
+    communitySlug: normalizedCommunitySlug,
+  });
 
-  // Currently, we only support one location.
-  if (normalizedCountry !== 'es' || normalizedCity !== 'barcelona') {
+  if (!resolved) {
     redirect(DEFAULT_FEED_ROUTE);
   }
 
   const [i18n, feed] = await Promise.all([
-    getTranslations('en', ['country', 'city']),
-    getFeed({ limit: PAGE_SIZE, country, city }),
+    getTranslations('en', ['country', 'city', resolved.nameTranslationNamespace]),
+    getFeed({
+      limit: PAGE_SIZE,
+      country: normalizedCountry,
+      communitySlug: normalizedCommunitySlug,
+    }),
   ]);
 
   const tCountry = (iso: string): string => {
@@ -98,7 +112,13 @@ export default async function Page(props: FeedCityPageProps) {
       key: code,
     });
 
-  const pageTitle = getFeedPageTitle(tCity(normalizedCity));
+  const communityName = resolveTranslationValue({
+    entry:
+      i18n.translations[resolved.nameTranslationNamespace]?.[resolved.community.nameTranslationKey],
+    namespace: resolved.nameTranslationNamespace,
+    key: resolved.community.nameTranslationKey,
+  });
+  const pageTitle = getFeedPageTitle(communityName);
 
   const initialEvents: Event[] = feed.gigs.map((gig) =>
     gigToEvent(gig, {
@@ -120,8 +140,8 @@ export default async function Page(props: FeedCityPageProps) {
     >
       <h1 className="sr-only">{pageTitle}</h1>
       <FeedClient
-        country={country}
-        city={city}
+        country={normalizedCountry}
+        communitySlug={normalizedCommunitySlug}
         initialEvents={initialEvents}
         initialPrevCursor={feed.prevCursor}
         initialNextCursor={feed.nextCursor}

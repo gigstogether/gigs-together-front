@@ -14,8 +14,8 @@ import type {
 } from '@/lib/types';
 
 interface FeedLocationParams {
-  readonly country?: string;
-  readonly city?: string;
+  country?: string;
+  communitySlug?: string;
   readonly signal?: AbortSignal;
   readonly requestInit?: ApiPublicRequestInit;
 }
@@ -33,8 +33,8 @@ export interface FetchFeedAroundParams extends FeedLocationParams {
 }
 
 export interface FetchFeedAvailableDatesParams extends FeedLocationParams {
-  readonly country: string;
-  readonly city: string;
+  country: string;
+  communitySlug: string;
 }
 
 export interface FetchFeedAnchorYmdByPublicIdParams {
@@ -50,7 +50,7 @@ interface BuildApiPublicRequestInitParams {
 
 function appendFeedLocationQuery(qs: URLSearchParams, params: FeedLocationParams): void {
   if (params.country) qs.set('country', params.country);
-  if (params.city) qs.set('city', params.city);
+  if (params.communitySlug) qs.set('communitySlug', params.communitySlug);
 }
 
 function withQuery(path: string, qs: URLSearchParams): string {
@@ -94,7 +94,7 @@ export async function fetchFeedAvailableDates(
 ): Promise<V1GigDatesGetResponseBody> {
   const qs = new URLSearchParams();
   qs.set('country', params.country);
-  qs.set('city', params.city);
+  qs.set('communitySlug', params.communitySlug);
 
   const raw = await apiPublicRequest<unknown>(
     withQuery('v1/gigs/dates', qs),

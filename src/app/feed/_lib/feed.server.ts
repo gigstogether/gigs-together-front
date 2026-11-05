@@ -14,15 +14,15 @@ const FEED_ISR_REQUEST_INIT = {
 };
 
 interface GetFeedParams {
-  readonly limit: number;
-  readonly country?: string;
-  readonly city?: string;
-  readonly cursor?: string;
+  limit: number;
+  country?: string;
+  communitySlug?: string;
+  cursor?: string;
 }
 
 interface GetAvailableGigDatesParams {
-  readonly country: string;
-  readonly city: string;
+  country: string;
+  communitySlug: string;
 }
 
 /**
@@ -30,12 +30,12 @@ interface GetAvailableGigDatesParams {
  * Use this for the initial page so the feed is pre-rendered.
  */
 export async function getFeed(params: GetFeedParams): Promise<V1GigGetResponseBody> {
-  const { limit, country, city, cursor } = params;
+  const { limit, country, communitySlug, cursor } = params;
 
   return fetchFeedPage({
     limit,
     country,
-    city,
+    communitySlug,
     cursor,
     requestInit: FEED_ISR_REQUEST_INIT,
   });
@@ -46,11 +46,11 @@ export async function getFeed(params: GetFeedParams): Promise<V1GigGetResponseBo
  * Use in the feed layout so the calendar opens without a client fetch.
  */
 export async function getAvailableGigDates(params: GetAvailableGigDatesParams): Promise<string[]> {
-  const { country, city } = params;
+  const { country, communitySlug } = params;
 
   const response = await fetchFeedAvailableDates({
     country,
-    city,
+    communitySlug,
     requestInit: FEED_ISR_REQUEST_INIT,
   });
 

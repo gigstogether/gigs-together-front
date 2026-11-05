@@ -9,14 +9,14 @@ describe('feedKeys', () => {
     expect(
       feedKeys.events({
         country: 'es',
-        city: 'barcelona',
+        communitySlug: 'barcelona',
       }),
     ).toEqual([
       'feed',
       'events',
       {
         country: 'es',
-        city: 'barcelona',
+        communitySlug: 'barcelona',
       },
     ]);
   });
@@ -33,7 +33,7 @@ describe('feedKeys', () => {
     expect(
       feedKeys.around({
         country: 'es',
-        city: 'barcelona',
+        communitySlug: 'barcelona',
         anchorYmd: '2026-05-01',
         beforeLimit: 10,
         afterLimit: 10,
@@ -43,7 +43,7 @@ describe('feedKeys', () => {
       'around',
       {
         country: 'es',
-        city: 'barcelona',
+        communitySlug: 'barcelona',
         anchorYmd: '2026-05-01',
         beforeLimit: 10,
         afterLimit: 10,

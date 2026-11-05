@@ -35,7 +35,7 @@ function createGigCandidate(status: GigCandidateStatusAPI): AdminGigCandidate {
       text: 'Original submission',
       url: 'https://t.me/c/123/42',
     },
-    gigDraft: { title: 'Band' },
+    gigDraft: { communityIds: ['community-id'], title: 'Band' },
     status,
     version: 3,
     createdAt: '2026-08-01T10:00:00.000Z',
@@ -60,6 +60,7 @@ function renderEdit(status: GigCandidateStatusAPI) {
     <AdminGigCandidateDetailPageClient
       mode="edit"
       countries={[{ iso: 'ES' }]}
+      defaultCommunityId="default-community-id"
       gigCandidateId="gigCandidate-42"
     />,
     { wrapper: createQueryClientWrapper(createTestQueryClient()) },

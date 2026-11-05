@@ -38,6 +38,26 @@ export type Country = z.infer<typeof countrySchema>;
 
 const countriesSchema = z.array(countrySchema);
 
+const communitySchema = z
+  .object({
+    id: z.string().min(1),
+    countryIso: z.string().min(1),
+    slug: z.string().min(1),
+    nameTranslationKey: z.string().min(1),
+    timeZone: z.string().min(1),
+  })
+  .strict();
+
+const communitiesResponseSchema = z
+  .object({
+    nameTranslationNamespace: z.string().min(1),
+    communities: z.array(communitySchema),
+  })
+  .strict();
+
+export type Community = z.infer<typeof communitySchema>;
+export type CommunitiesResponse = z.infer<typeof communitiesResponseSchema>;
+
 const gigDateSchema = z.union([z.string().min(1), z.number().int().finite()]);
 
 const gigSchema = z
@@ -91,6 +111,10 @@ export function parseLocaleGetTranslationsResponseBody(raw: unknown) {
 
 export function parseCountries(raw: unknown) {
   return countriesSchema.parse(raw);
+}
+
+export function parseCommunitiesResponse(raw: unknown): CommunitiesResponse {
+  return communitiesResponseSchema.parse(raw);
 }
 
 export function parseV1GigGetResponseBody(raw: unknown): V1GigGetResponseBody {

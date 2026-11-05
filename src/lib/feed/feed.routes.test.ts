@@ -10,8 +10,8 @@ describe('buildFeedHeaderHomeRoute', () => {
     expect(buildFeedHeaderHomeRoute({ country: 'ES' })).toBe('/feed/es');
   });
 
-  it('should return feed location path when country and city are provided', () => {
-    expect(buildFeedHeaderHomeRoute({ country: 'es', city: 'Barcelona' })).toBe(
+  it('should return feed location path when country and community are provided', () => {
+    expect(buildFeedHeaderHomeRoute({ country: 'es', communitySlug: 'Barcelona' })).toBe(
       '/feed/es/barcelona',
     );
   });

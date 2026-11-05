@@ -59,6 +59,7 @@ describe('useSuggestGigSubmit', () => {
     const { result } = renderHook(
       () =>
         useSuggestGigSubmit({
+          communityId: 'community-id',
           posterFile: null,
           posterUrl: 'https://images.example/poster.png',
           onSuccess,
@@ -74,6 +75,7 @@ describe('useSuggestGigSubmit', () => {
 
     expect(createGigCandidateMock).toHaveBeenCalledWith({
       gig: {
+        communityIds: ['community-id'],
         title: 'Arctic Monkeys',
         date: '2026-07-01',
         endDate: undefined,
@@ -98,6 +100,7 @@ describe('useSuggestGigSubmit', () => {
     const { result } = renderHook(
       () =>
         useSuggestGigSubmit({
+          communityId: 'community-id',
           posterFile: null,
           posterUrl: 'not-a-url',
           onSuccess,
@@ -128,6 +131,7 @@ describe('useSuggestGigSubmit', () => {
     const { result } = renderHook(
       () =>
         useSuggestGigSubmit({
+          communityId: 'community-id',
           posterFile: null,
           posterUrl: '',
           onSuccess,
@@ -157,6 +161,7 @@ describe('useSuggestGigSubmit', () => {
     const { result } = renderHook(
       () =>
         useSuggestGigSubmit({
+          communityId: 'community-id',
           posterFile: null,
           posterUrl: '',
           onSuccess,
@@ -192,6 +197,7 @@ describe('useSuggestGigSubmit', () => {
     const { result } = renderHook(
       () =>
         useSuggestGigSubmit({
+          communityId: 'community-id',
           posterFile: null,
           posterUrl: '',
           onSuccess,

@@ -46,7 +46,7 @@ const responseGigCandidate: AdminGigCandidate = {
     isCurrentlyAdmin: false,
     origin: { type: 'admin' },
   },
-  gigDraft: {},
+  gigDraft: { communityIds: ['community-id'] },
   status: GigCandidateStatusAPI.Reviewing,
   version: 8,
   createdAt: '2026-08-25T08:00:00.000Z',

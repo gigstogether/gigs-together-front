@@ -19,6 +19,7 @@ interface AdminGigCandidateViewPageClientProps {
 interface AdminGigCandidateEditPageClientProps {
   mode: 'edit';
   countries: Country[];
+  defaultCommunityId: string;
   gigCandidateId: string;
 }
 
@@ -57,6 +58,7 @@ export default function AdminGigCandidateDetailPageClient(
       <AdminGigCandidateDraftForm
         key={`${gigCandidate.id}:${gigCandidate.version}`}
         countries={props.countries}
+        defaultCommunityId={props.defaultCommunityId}
         gigCandidate={gigCandidate}
       />
     );

@@ -4,6 +4,8 @@ import AdminGigCandidateDraftForm from '@/app/admin/gig-candidates/_components/A
 import { getCountries } from '@/lib/countries.server';
 import { getTranslations } from '@/lib/i18n/translations.server';
 import { I18nProvider } from '@/providers/I18nProvider';
+import { getRequiredCommunityByRoute } from '@/lib/community/community.server';
+import { DEFAULT_FEED_COMMUNITY_SLUG, DEFAULT_FEED_COUNTRY } from '@/lib/feed/feed.routes';
 
 interface AdminGigCandidateCreateFormPageProps {
   mode: 'create';
@@ -19,7 +21,14 @@ type AdminGigCandidateFormPageProps =
   | AdminGigCandidateEditFormPageProps;
 
 export default async function AdminGigCandidateFormPage(props: AdminGigCandidateFormPageProps) {
-  const [countries, i18n] = await Promise.all([getCountries(), getTranslations('en', 'country')]);
+  const [countries, i18n, resolvedCommunity] = await Promise.all([
+    getCountries(),
+    getTranslations('en', 'country'),
+    getRequiredCommunityByRoute({
+      country: DEFAULT_FEED_COUNTRY,
+      communitySlug: DEFAULT_FEED_COMMUNITY_SLUG,
+    }),
+  ]);
 
   return (
     <I18nProvider
@@ -30,12 +39,16 @@ export default async function AdminGigCandidateFormPage(props: AdminGigCandidate
         {props.mode === 'create' ? (
           <>
             <AdminGigCandidateBackLink />
-            <AdminGigCandidateDraftForm countries={countries} />
+            <AdminGigCandidateDraftForm
+              countries={countries}
+              defaultCommunityId={resolvedCommunity.community.id}
+            />
           </>
         ) : (
           <AdminGigCandidateDetailPageClient
             mode="edit"
             countries={countries}
+            defaultCommunityId={resolvedCommunity.community.id}
             gigCandidateId={props.gigCandidateId}
           />
         )}

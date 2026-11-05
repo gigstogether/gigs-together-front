@@ -34,6 +34,7 @@ const gigCandidate: AdminGigCandidate = {
     origin: { type: 'admin' },
   },
   gigDraft: {
+    communityIds: ['community-id'],
     title: 'Band',
     date: '2026-08-20',
     city: 'Barcelona',
@@ -164,7 +165,7 @@ describe('AdminGigCandidateCard', () => {
         text: 'Unstructured submission',
         url: 'https://t.me/c/123/42',
       },
-      gigDraft: {},
+      gigDraft: { communityIds: ['community-id'] },
       status: GigCandidateStatusAPI.New,
     });
 

@@ -29,7 +29,7 @@ export default function LocationPopover(props: LocationPopoverProps) {
         align="end"
         side="bottom"
       >
-        Currently, we only support one location: Barcelona.
+        This feed is curated for the {location} community.
       </PopoverContent>
     </Popover>
   );

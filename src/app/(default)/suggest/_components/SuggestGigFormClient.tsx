@@ -18,11 +18,12 @@ import { toast } from '@/hooks/use-toast';
 import type { Country } from '@/lib/api-boundary-schemas';
 
 interface SuggestGigFormClientProps {
+  communityId: string;
   countries: Country[];
 }
 
 export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
-  const { countries } = props;
+  const { communityId, countries } = props;
 
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState<string>('');
@@ -35,6 +36,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
   });
 
   const { isSubmitting, onSubmit } = useSuggestGigSubmit({
+    communityId,
     posterFile,
     posterUrl,
     onSuccess: () => {
