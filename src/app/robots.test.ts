@@ -42,7 +42,7 @@ describe('robots', () => {
       rules: {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin', '/api'],
+        disallow: ['/admin', '/api', '/cdn-cgi/'],
       },
       sitemap: 'https://gigstogether.example/sitemap.xml',
     });
