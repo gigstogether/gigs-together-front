@@ -1,15 +1,20 @@
 import type { MetadataRoute } from 'next';
 import { getAppBaseUrlOrThrow, serverEnv } from '@/env/server-env';
-import { SUPPORTED_FEED_LOCATIONS, buildFeedPath } from '@/lib/feed/feed.routes';
+import { buildFeedPath } from '@/lib/feed/feed.routes';
+import { getCommunities } from '@/lib/community/community.server';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!serverEnv.isProductionSite) {
     return [];
   }
 
   const baseUrl = getAppBaseUrlOrThrow();
-  const feedUrls = SUPPORTED_FEED_LOCATIONS.map((loc) => ({
-    url: `${baseUrl}${buildFeedPath(loc)}`,
+  const catalog = await getCommunities();
+  const feedUrls = catalog.communities.map((community) => ({
+    url: `${baseUrl}${buildFeedPath({
+      country: community.countryIso,
+      communitySlug: community.slug,
+    })}`,
     lastModified: new Date(),
     changeFrequency: 'daily' as const,
     priority: 0.9,

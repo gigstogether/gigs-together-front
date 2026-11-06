@@ -12,9 +12,10 @@ interface HeaderBadge {
 }
 
 export interface HeaderProps {
-  readonly country?: string;
-  readonly city?: string;
-  readonly children?: ReactNode;
+  country?: string;
+  communitySlug?: string;
+  communityName?: string;
+  children?: ReactNode;
 }
 
 function getHeaderBadge(): HeaderBadge | null {
@@ -36,10 +37,10 @@ function getHeaderBadge(): HeaderBadge | null {
 }
 
 export default function Header(props: HeaderProps) {
-  const { country, city, children } = props;
+  const { country, communitySlug, communityName, children } = props;
 
   const badge = getHeaderBadge();
-  const homeHref = buildFeedHeaderHomeRoute(country ? { country, city } : undefined);
+  const homeHref = buildFeedHeaderHomeRoute(country ? { country, communitySlug } : undefined);
 
   return (
     <header
@@ -76,7 +77,7 @@ export default function Header(props: HeaderProps) {
 
           <HeaderActions
             country={country}
-            city={city}
+            communityName={communityName}
           />
         </div>
       </div>

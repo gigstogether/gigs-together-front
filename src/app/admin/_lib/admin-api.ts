@@ -185,7 +185,7 @@ const v1AdminGigCandidateSourceSchema = z.union([
     .strict(),
 ]);
 
-const v1AdminGigCandidateDraftSchema = z
+const v1AdminGigCandidateDraftFieldsSchema = z
   .object({
     title: z.string().optional(),
     date: z.string().optional(),
@@ -197,6 +197,10 @@ const v1AdminGigCandidateDraftSchema = z
     posterUrl: z.string().optional(),
   })
   .strict();
+
+const v1AdminGigCandidateDraftSchema = v1AdminGigCandidateDraftFieldsSchema.extend({
+  communityIds: z.array(z.string().min(1)).min(1),
+});
 
 const v1AdminGigCandidateOriginalMessageSchema = z
   .object({
@@ -241,7 +245,7 @@ const v1AdminGigCandidatesListResponseSchema = z
 
 const v1AdminGigCandidateLookupResponseSchema = z
   .object({
-    gigDraft: v1AdminGigCandidateDraftSchema.nullable(),
+    gigDraft: v1AdminGigCandidateDraftFieldsSchema.nullable(),
   })
   .strict();
 

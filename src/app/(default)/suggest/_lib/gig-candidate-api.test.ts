@@ -20,6 +20,7 @@ describe('createGigCandidate', () => {
 
     const result = await createGigCandidate({
       gig: {
+        communityIds: ['community-id'],
         title: 'Band',
         date: '2026-08-01',
         city: 'Barcelona',
@@ -30,6 +31,7 @@ describe('createGigCandidate', () => {
 
     expect(apiClientRequestMock).toHaveBeenCalledWith('v1/gig-candidates', 'POST', {
       gig: {
+        communityIds: ['community-id'],
         title: 'Band',
         date: '2026-08-01',
         city: 'Barcelona',
@@ -47,6 +49,7 @@ describe('createGigCandidate', () => {
 
     await createGigCandidate({
       gig: {
+        communityIds: ['community-id'],
         title: 'Band',
         date: '2026-08-01',
         city: 'Barcelona',
@@ -57,6 +60,7 @@ describe('createGigCandidate', () => {
 
     expect(apiClientRequestMock).toHaveBeenCalledWith('v1/gig-candidates', 'POST', {
       gig: {
+        communityIds: ['community-id'],
         title: 'Band',
         date: '2026-08-01',
         city: 'Barcelona',
@@ -75,6 +79,7 @@ describe('createGigCandidate', () => {
 
     await createGigCandidate({
       gig: {
+        communityIds: ['community-id'],
         title: 'Band',
         date: '2026-08-01',
         city: 'Barcelona',
@@ -96,6 +101,7 @@ describe('createGigCandidate', () => {
     expect(fd.get('posterFile')).toBe(file);
     expect(fd.get('gig')).toBe(
       JSON.stringify({
+        communityIds: ['community-id'],
         title: 'Band',
         date: '2026-08-01',
         city: 'Barcelona',
@@ -108,6 +114,7 @@ describe('createGigCandidate', () => {
     await expect(
       createGigCandidate({
         gig: {
+          communityIds: ['community-id'],
           title: 'Band',
           date: '2026-08-01',
           city: 'Barcelona',
@@ -125,6 +132,7 @@ describe('createGigCandidate', () => {
     await expect(
       createGigCandidate({
         gig: {
+          communityIds: ['community-id'],
           title: 'Band',
           date: '2026-08-01',
           city: 'Barcelona',
@@ -141,6 +149,7 @@ describe('createGigCandidate', () => {
     await expect(
       createGigCandidate({
         gig: {
+          communityIds: ['community-id'],
           title: 'Band',
           date: '2026-08-01',
           city: 'Barcelona',

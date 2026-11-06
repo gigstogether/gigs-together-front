@@ -1,6 +1,6 @@
 export interface FeedLocationKeyParams {
-  readonly country: string;
-  readonly city: string;
+  country: string;
+  communitySlug: string;
 }
 
 type FeedLocationKeyValue = FeedLocationKeyParams;
@@ -16,7 +16,7 @@ type FeedAroundKeyValue = FeedAroundKeyParams;
 function buildFeedLocationKeyValue(params: FeedLocationKeyParams): FeedLocationKeyValue {
   return {
     country: params.country,
-    city: params.city,
+    communitySlug: params.communitySlug,
   };
 }
 

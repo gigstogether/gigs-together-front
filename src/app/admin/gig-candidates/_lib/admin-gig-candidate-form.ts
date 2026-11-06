@@ -1,7 +1,7 @@
 import * as z from 'zod';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import type { GigFormValues } from '../../gigs/_lib/gig-form.shared';
-import type { AdminGigCandidateDraft } from './admin-gig-candidate';
+import type { AdminGigCandidateDraft, AdminGigCandidateDraftFields } from './admin-gig-candidate';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
   message: 'Date must be in YYYY-MM-DD format.',
@@ -89,7 +89,9 @@ export function mapGigCandidateDraftToFormValues(gigDraft: AdminGigCandidateDraf
   };
 }
 
-export function mapGigCandidateFormValuesToDraft(values: GigFormValues): AdminGigCandidateDraft {
+export function mapGigCandidateFormValuesToDraft(
+  values: GigFormValues,
+): AdminGigCandidateDraftFields {
   const entries = Object.entries(values).flatMap(([field, value]) => {
     const trimmed = value.trim();
     return trimmed ? [[field, trimmed]] : [];

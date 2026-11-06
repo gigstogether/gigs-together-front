@@ -12,7 +12,7 @@ interface FetchFeedPageParams {
   readonly cursor?: string;
   readonly direction?: 'prev';
   readonly country?: string;
-  readonly city?: string;
+  readonly communitySlug?: string;
   readonly signal?: AbortSignal;
 }
 
@@ -75,7 +75,7 @@ describe('useFeedInfiniteQuery', () => {
       () =>
         useFeedInfiniteQuery({
           country: 'es',
-          city: 'barcelona',
+          communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
           initialNextCursor: 'next-1',
@@ -115,7 +115,7 @@ describe('useFeedInfiniteQuery', () => {
       () =>
         useFeedInfiniteQuery({
           country: 'es',
-          city: 'barcelona',
+          communitySlug: 'barcelona',
           resolveCountryName: () => 'Spain',
           resolveCityName: () => 'Barcelona',
         }),
@@ -131,7 +131,7 @@ describe('useFeedInfiniteQuery', () => {
     expect(fetchFeedPageMock).toHaveBeenCalledWith({
       limit: expect.any(Number),
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
       cursor: undefined,
       direction: undefined,
       signal: expect.any(AbortSignal),
@@ -163,7 +163,7 @@ describe('useFeedInfiniteQuery', () => {
       () =>
         useFeedInfiniteQuery({
           country: 'es',
-          city: 'barcelona',
+          communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialNextCursor: 'next-1',
           resolveCountryName: () => 'Spain',
@@ -183,7 +183,7 @@ describe('useFeedInfiniteQuery', () => {
       cursor: 'next-1',
       direction: undefined,
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
       signal: expect.any(AbortSignal),
     });
     await waitFor(() => {
@@ -214,7 +214,7 @@ describe('useFeedInfiniteQuery', () => {
       () =>
         useFeedInfiniteQuery({
           country: 'es',
-          city: 'barcelona',
+          communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
           resolveCountryName: () => 'Spain',
@@ -234,7 +234,7 @@ describe('useFeedInfiniteQuery', () => {
       cursor: 'prev-1',
       direction: 'prev',
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
       signal: expect.any(AbortSignal),
     });
     await waitFor(() => {
@@ -252,7 +252,7 @@ describe('useFeedInfiniteQuery', () => {
       () =>
         useFeedInfiniteQuery({
           country: 'es',
-          city: 'barcelona',
+          communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
           resolveCountryName: () => 'Spain',

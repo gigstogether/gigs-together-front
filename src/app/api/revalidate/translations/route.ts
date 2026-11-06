@@ -7,6 +7,8 @@ import {
   buildTranslationNamespaceCacheTag,
   isValidTranslationNamespace,
 } from '@/lib/i18n/translation-identifiers';
+import { getCommunitiesFresh } from '@/lib/community/community.server';
+import { buildFeedPath } from '@/lib/feed/feed.routes';
 
 export const runtime = 'nodejs';
 
@@ -14,14 +16,16 @@ interface RevalidateTranslationsRequestBody {
   readonly namespace: string;
 }
 
-interface RevalidateTranslationNamespaceCacheParams {
-  readonly namespace: string;
+interface RevalidateTranslationNamespaceParams {
+  namespace: string;
 }
 
 const TRANSLATION_NAMESPACE_REVALIDATE_PATHS: Readonly<Record<string, readonly string[]>> = {
   about: ['/about'],
   llms: ['/llms.txt'],
 };
+
+const FEED_TRANSLATION_NAMESPACES = ['community', 'country', 'city'] as const;
 
 const isRevalidateTranslationsRequestBody = (
   x: unknown,
@@ -30,7 +34,19 @@ const isRevalidateTranslationsRequestBody = (
   return typeof x.namespace === 'string';
 };
 
-function getRevalidatePathsForTranslationNamespace(namespace: string): readonly string[] {
+async function getRevalidatePathsForTranslationNamespace(
+  namespace: string,
+): Promise<readonly string[]> {
+  if (FEED_TRANSLATION_NAMESPACES.some((feedNamespace) => feedNamespace === namespace)) {
+    const catalog = await getCommunitiesFresh();
+    return catalog.communities.map((community) =>
+      buildFeedPath({
+        country: community.countryIso,
+        communitySlug: community.slug,
+      }),
+    );
+  }
+
   const paths = TRANSLATION_NAMESPACE_REVALIDATE_PATHS[namespace];
   if (paths === undefined) {
     return [];
@@ -39,14 +55,19 @@ function getRevalidatePathsForTranslationNamespace(namespace: string): readonly 
   return paths;
 }
 
-function revalidateTranslationNamespaceCache(
-  params: RevalidateTranslationNamespaceCacheParams,
-): void {
+function revalidateTranslationNamespaceCache(params: RevalidateTranslationNamespaceParams): void {
   const { namespace } = params;
 
   revalidateTag(buildTranslationNamespaceCacheTag(namespace), { expire: 0 });
+}
 
-  for (const path of getRevalidatePathsForTranslationNamespace(namespace)) {
+async function revalidateTranslationNamespacePaths(
+  params: RevalidateTranslationNamespaceParams,
+): Promise<void> {
+  const { namespace } = params;
+
+  const paths = await getRevalidatePathsForTranslationNamespace(namespace);
+  for (const path of paths) {
     revalidatePath(path);
   }
 }
@@ -84,6 +105,7 @@ export async function POST(req: NextRequest) {
   }
 
   revalidateTranslationNamespaceCache({ namespace });
+  await revalidateTranslationNamespacePaths({ namespace });
 
   return new NextResponse(null, { status: 204 });
 }

@@ -3,6 +3,7 @@ import { POST } from '@/app/api/revalidate/feed/route';
 
 const getFeedRevalidateSecretOrThrowMock = vi.hoisted(() => vi.fn());
 const revalidatePathMock = vi.hoisted(() => vi.fn());
+const getCommunitiesFreshMock = vi.hoisted(() => vi.fn());
 
 vi.mock('@/env/server-env', () => ({
   getFeedRevalidateSecretOrThrow: getFeedRevalidateSecretOrThrowMock,
@@ -10,6 +11,10 @@ vi.mock('@/env/server-env', () => ({
 
 vi.mock('next/cache', () => ({
   revalidatePath: revalidatePathMock,
+}));
+
+vi.mock('@/lib/community/community.server', () => ({
+  getCommunitiesFresh: getCommunitiesFreshMock,
 }));
 
 function createRequest(params: {
@@ -36,7 +41,20 @@ describe('POST', () => {
   beforeEach(() => {
     getFeedRevalidateSecretOrThrowMock.mockReset();
     revalidatePathMock.mockReset();
+    getCommunitiesFreshMock.mockReset();
     getFeedRevalidateSecretOrThrowMock.mockReturnValue('top-secret');
+    getCommunitiesFreshMock.mockResolvedValue({
+      nameTranslationNamespace: 'community',
+      communities: [
+        {
+          id: 'community-id',
+          countryIso: 'ES',
+          slug: 'barcelona',
+          nameTranslationKey: 'barcelona.name',
+          timeZone: 'Europe/Madrid',
+        },
+      ],
+    });
   });
 
   it('should return 503 when feed revalidate secret is not configured', async () => {

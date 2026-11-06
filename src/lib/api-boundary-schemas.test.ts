@@ -1,4 +1,5 @@
 import {
+  parseCommunitiesResponse,
   parseCountries,
   parseLocaleGetTranslationsResponseBody,
   parseV1GigAroundGetResponseBody,
@@ -6,6 +7,34 @@ import {
   parseV1GigDatesGetResponseBody,
   parseV1GigGetResponseBody,
 } from '@/lib/api-boundary-schemas';
+
+describe('parseCommunitiesResponse', () => {
+  it('should return the Community catalog when payload is valid', () => {
+    const payload = {
+      nameTranslationNamespace: 'community',
+      communities: [
+        {
+          id: 'community-id',
+          countryIso: 'ES',
+          slug: 'barcelona',
+          nameTranslationKey: 'barcelona.name',
+          timeZone: 'Europe/Madrid',
+        },
+      ],
+    };
+
+    expect(parseCommunitiesResponse(payload)).toEqual(payload);
+  });
+
+  it('should throw when a Community field is missing', () => {
+    const payload = {
+      nameTranslationNamespace: 'community',
+      communities: [{ id: 'community-id', countryIso: 'ES', slug: 'barcelona' }],
+    };
+
+    expect(() => parseCommunitiesResponse(payload)).toThrow();
+  });
+});
 
 describe('parseCountries', () => {
   it('should return countries when payload is valid', () => {

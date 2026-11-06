@@ -9,6 +9,7 @@ import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-
 import { isApiTransportError } from '@/lib/api-errors';
 
 interface UseSuggestGigSubmitParams {
+  communityId: string;
   posterFile: File | null;
   posterUrl: string;
   onSuccess: (result: GigCandidateCreateResponse) => void;
@@ -25,8 +26,16 @@ interface SubmitSuggestGigInput {
   posterUrl: string;
 }
 
-function buildPayload(values: SuggestGigFormValues): GigCandidateUpsertPayload {
+interface BuildPayloadParams {
+  communityId: string;
+  values: SuggestGigFormValues;
+}
+
+function buildPayload(params: BuildPayloadParams): GigCandidateUpsertPayload {
+  const { communityId, values } = params;
+
   return {
+    communityIds: [communityId],
     title: values.title,
     date: values.date,
     endDate: values.endDate || undefined,
@@ -51,11 +60,11 @@ function isPosterUrlValid(posterUrl: string): boolean {
 }
 
 export function useSuggestGigSubmit(params: UseSuggestGigSubmitParams): UseSuggestGigSubmitResult {
-  const { posterFile, posterUrl, onSuccess } = params;
+  const { communityId, posterFile, posterUrl, onSuccess } = params;
 
   const submitMutation = useMutation<GigCandidateCreateResponse, unknown, SubmitSuggestGigInput>({
     mutationFn: (input: SubmitSuggestGigInput): Promise<GigCandidateCreateResponse> => {
-      const gig = buildPayload(input.values);
+      const gig = buildPayload({ communityId, values: input.values });
       const posterMode = input.posterFile ? 'upload' : 'url';
 
       return createGigCandidate({

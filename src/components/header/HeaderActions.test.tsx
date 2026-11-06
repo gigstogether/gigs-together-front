@@ -70,7 +70,7 @@ describe('HeaderActions', () => {
     render(
       <HeaderActions
         country="es"
-        city="barcelona"
+        communityName="Barcelona"
       />,
     );
 
@@ -99,7 +99,7 @@ describe('HeaderActions', () => {
     render(
       <HeaderActions
         country="es"
-        city="barcelona"
+        communityName="Barcelona"
       />,
     );
 
@@ -124,7 +124,7 @@ describe('HeaderActions', () => {
     render(
       <HeaderActions
         country="es"
-        city="barcelona"
+        communityName="Barcelona"
       />,
     );
 
@@ -149,7 +149,7 @@ describe('HeaderActions', () => {
     render(
       <HeaderActions
         country="es"
-        city="barcelona"
+        communityName="Barcelona"
       />,
     );
 
@@ -163,7 +163,7 @@ describe('HeaderActions', () => {
     render(
       <HeaderActions
         country="es"
-        city="barcelona"
+        communityName="Barcelona"
       />,
     );
 
@@ -176,7 +176,7 @@ describe('HeaderActions', () => {
     render(
       <HeaderActions
         country="es"
-        city="barcelona"
+        communityName="Barcelona"
       />,
     );
 

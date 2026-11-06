@@ -65,7 +65,7 @@ export type GigCandidateSourceForAdminView =
   | GigCandidateSourceUserWithProfile
   | GigCandidateSourceProvider;
 
-export interface AdminGigCandidateDraft {
+export interface AdminGigCandidateDraftFields {
   title?: string;
   date?: string;
   endDate?: string;
@@ -74,6 +74,10 @@ export interface AdminGigCandidateDraft {
   venue?: string;
   ticketsUrl?: string;
   posterUrl?: string;
+}
+
+export interface AdminGigCandidateDraft extends AdminGigCandidateDraftFields {
+  communityIds: string[];
 }
 
 export interface AdminGigCandidateOriginalMessage {
@@ -102,7 +106,7 @@ export interface AdminGigCandidate {
   updatedAt: string;
 }
 
-export interface AdminGigCandidateLookupResult extends AdminGigCandidateDraft {
+export interface AdminGigCandidateLookupResult extends AdminGigCandidateDraftFields {
   date: string;
 }
 

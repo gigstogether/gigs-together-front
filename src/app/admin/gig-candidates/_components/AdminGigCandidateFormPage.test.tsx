@@ -4,21 +4,31 @@ import { render, screen } from '@testing-library/react';
 
 import AdminGigCandidateFormPage from '@/app/admin/gig-candidates/_components/AdminGigCandidateFormPage';
 
-const { getCountriesMock, getTranslationsMock } = vi.hoisted(() => ({
-  getCountriesMock: vi.fn(),
-  getTranslationsMock: vi.fn(),
-}));
+const { getCountriesMock, getRequiredCommunityByRouteMock, getTranslationsMock } = vi.hoisted(
+  () => ({
+    getCountriesMock: vi.fn(),
+    getRequiredCommunityByRouteMock: vi.fn(),
+    getTranslationsMock: vi.fn(),
+  }),
+);
 
 vi.mock('@/lib/countries.server', () => ({ getCountries: getCountriesMock }));
 vi.mock('@/lib/i18n/translations.server', () => ({
   getTranslations: getTranslationsMock,
 }));
+vi.mock('@/lib/community/community.server', () => ({
+  getRequiredCommunityByRoute: getRequiredCommunityByRouteMock,
+}));
 vi.mock('@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm', () => ({
-  default: () => <div>Create Gig Candidate form</div>,
+  default: (props: { defaultCommunityId: string }) => (
+    <div data-community-id={props.defaultCommunityId}>Create Gig Candidate form</div>
+  ),
 }));
 vi.mock('@/app/admin/gig-candidates/_components/AdminGigCandidateDetailPageClient', () => ({
-  default: (props: { gigCandidateId: string }) => (
-    <div>Edit Gig Candidate {props.gigCandidateId}</div>
+  default: (props: { defaultCommunityId: string; gigCandidateId: string }) => (
+    <div data-community-id={props.defaultCommunityId}>
+      Edit Gig Candidate {props.gigCandidateId}
+    </div>
   ),
 }));
 
@@ -26,6 +36,10 @@ describe('AdminGigCandidateFormPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getCountriesMock.mockResolvedValue([]);
+    getRequiredCommunityByRouteMock.mockResolvedValue({
+      community: { id: 'community-id' },
+      nameTranslationNamespace: 'community',
+    });
     getTranslationsMock.mockResolvedValue({ locale: 'en', translations: {} });
   });
 
@@ -36,7 +50,10 @@ describe('AdminGigCandidateFormPage', () => {
       'href',
       '/admin/gig-candidates',
     );
-    expect(screen.getByText('Create Gig Candidate form')).toBeInTheDocument();
+    expect(screen.getByText('Create Gig Candidate form')).toHaveAttribute(
+      'data-community-id',
+      'community-id',
+    );
   });
 
   it('should render the shared edit flow for the requested Gig Candidate', async () => {
@@ -47,7 +64,10 @@ describe('AdminGigCandidateFormPage', () => {
       }),
     );
 
-    expect(screen.getByText('Edit Gig Candidate gigCandidate-42')).toBeInTheDocument();
+    expect(screen.getByText('Edit Gig Candidate gigCandidate-42')).toHaveAttribute(
+      'data-community-id',
+      'community-id',
+    );
     expect(getCountriesMock).toHaveBeenCalledTimes(1);
     expect(getTranslationsMock).toHaveBeenCalledWith('en', 'country');
   });

@@ -51,7 +51,12 @@ describe('GigCandidate draft form mapping', () => {
   });
 
   it('should map a partial gigDraft to safe empty form values', () => {
-    expect(mapGigCandidateDraftToFormValues({ title: 'Band' })).toEqual({
+    expect(
+      mapGigCandidateDraftToFormValues({
+        communityIds: ['community-id'],
+        title: 'Band',
+      }),
+    ).toEqual({
       title: 'Band',
       date: '',
       endDate: '',

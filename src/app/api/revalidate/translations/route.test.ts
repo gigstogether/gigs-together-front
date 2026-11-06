@@ -4,6 +4,7 @@ import { POST } from '@/app/api/revalidate/translations/route';
 const getTranslationsRevalidateSecretOrThrowMock = vi.hoisted(() => vi.fn());
 const revalidateTagMock = vi.hoisted(() => vi.fn());
 const revalidatePathMock = vi.hoisted(() => vi.fn());
+const getCommunitiesFreshMock = vi.hoisted(() => vi.fn());
 
 vi.mock('@/env/server-env', () => ({
   getTranslationsRevalidateSecretOrThrow: getTranslationsRevalidateSecretOrThrowMock,
@@ -12,6 +13,10 @@ vi.mock('@/env/server-env', () => ({
 vi.mock('next/cache', () => ({
   revalidateTag: revalidateTagMock,
   revalidatePath: revalidatePathMock,
+}));
+
+vi.mock('@/lib/community/community.server', () => ({
+  getCommunitiesFresh: getCommunitiesFreshMock,
 }));
 
 function createRequest(params: { readonly secret?: string; readonly body?: unknown }): NextRequest {
@@ -30,7 +35,20 @@ describe('POST', () => {
     getTranslationsRevalidateSecretOrThrowMock.mockReset();
     revalidateTagMock.mockReset();
     revalidatePathMock.mockReset();
+    getCommunitiesFreshMock.mockReset();
     getTranslationsRevalidateSecretOrThrowMock.mockReturnValue('top-secret');
+    getCommunitiesFreshMock.mockResolvedValue({
+      nameTranslationNamespace: 'community',
+      communities: [
+        {
+          id: 'community-id',
+          countryIso: 'ES',
+          slug: 'barcelona',
+          nameTranslationKey: 'barcelona.name',
+          timeZone: 'Europe/Madrid',
+        },
+      ],
+    });
   });
 
   it('should return 503 when translations revalidate secret is not configured', async () => {
@@ -71,14 +89,14 @@ describe('POST', () => {
     expect(revalidatePathMock).toHaveBeenCalledWith('/about');
   });
 
-  it('should revalidate tag only when namespace has no mapped paths', async () => {
+  it('should revalidate Community feed paths when a feed translation changes', async () => {
     const response = await POST(
       createRequest({ secret: 'top-secret', body: { namespace: 'country' } }),
     );
 
     expect(response.status).toBe(204);
     expect(revalidateTagMock).toHaveBeenCalledWith('translations:ns:country', { expire: 0 });
-    expect(revalidatePathMock).not.toHaveBeenCalled();
+    expect(revalidatePathMock).toHaveBeenCalledWith('/feed/es/barcelona');
   });
 
   it('should revalidate llms.txt when llms namespace changes', async () => {

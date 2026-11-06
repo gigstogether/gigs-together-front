@@ -12,6 +12,7 @@ export interface GigCandidatePosterSelection {
 }
 
 export interface GigCandidateUpsertPayload {
+  communityIds: string[];
   title: string;
   date: string;
   endDate?: string;
@@ -58,6 +59,7 @@ export async function createGigCandidate(
   params: GigCandidateUpsertApiParams,
 ): Promise<GigCandidateCreateResponse> {
   const gig: GigCandidateUpsertPayload = {
+    communityIds: params.gig.communityIds,
     title: params.gig.title,
     date: params.gig.date,
     endDate: params.gig.endDate || undefined,

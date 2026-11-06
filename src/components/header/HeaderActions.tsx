@@ -11,7 +11,6 @@ import { SUGGEST_ROUTE } from '@/lib/suggest-paths';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { clientEnv } from '@/env/client-env';
 import { useTelegramAuth } from '@/hooks/use-telegram-auth';
-import { normalizeLocationTitle } from '@/lib/utils';
 import LocationPopover from '@/components/header/LocationPopover';
 
 function HeaderMenuDivider() {
@@ -27,21 +26,17 @@ const headerMenuNavItemClass =
   'flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted';
 
 export interface HeaderActionsProps {
-  readonly country?: string;
-  readonly city?: string;
+  country?: string;
+  communityName?: string;
 }
 
 const adminHref: Route = '/admin';
 const aboutHref: Route = '/about';
 
 export default function HeaderActions(props: HeaderActionsProps) {
-  const { country, city } = props;
+  const { country, communityName } = props;
 
-  const location = country
-    ? city
-      ? normalizeLocationTitle(city)
-      : country.toUpperCase()
-    : undefined;
+  const location = communityName ?? country?.toUpperCase();
   const telegramUrl = clientEnv.telegramUrl;
   const githubUrl = clientEnv.githubUrl;
 

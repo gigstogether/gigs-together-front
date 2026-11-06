@@ -46,7 +46,12 @@ function createReviewingGigCandidate(): AdminGigCandidate {
       isCurrentlyAdmin: false,
       origin: { type: 'admin' },
     },
-    gigDraft: { title: 'Existing Band', city: 'Madrid', country: 'ES' },
+    gigDraft: {
+      communityIds: ['existing-community-id'],
+      title: 'Existing Band',
+      city: 'Madrid',
+      country: 'ES',
+    },
     status: GigCandidateStatusAPI.Reviewing,
     version: 4,
     createdAt: '2026-08-01T10:00:00.000Z',
@@ -60,6 +65,7 @@ function renderForm(gigCandidate?: AdminGigCandidate) {
     queryClient,
     ...render(
       <AdminGigCandidateDraftForm
+        defaultCommunityId="default-community-id"
         countries={[{ iso: 'ES' }]}
         gigCandidate={gigCandidate}
       />,
@@ -84,6 +90,7 @@ describe('AdminGigCandidateDraftForm', () => {
     await waitFor(() => {
       expect(createGigCandidateMock).toHaveBeenCalledWith({
         gigDraft: {
+          communityIds: ['default-community-id'],
           title: 'New Band',
           date: '2026-09-30',
           city: 'Barcelona',
@@ -110,6 +117,7 @@ describe('AdminGigCandidateDraftForm', () => {
         gigCandidateId: 'gigCandidate-42',
         expectedVersion: 4,
         gigDraft: {
+          communityIds: ['existing-community-id'],
           title: 'Existing Band',
           city: 'Madrid',
           country: 'ES',

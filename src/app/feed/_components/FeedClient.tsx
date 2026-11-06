@@ -30,7 +30,7 @@ const feedMainClassName =
 
 interface FeedClientProps {
   readonly country: string; // ISO like "es"
-  readonly city: string; // slug like "barcelona"
+  readonly communitySlug: string; // slug like "barcelona"
   readonly initialEvents?: Event[];
   readonly initialPrevCursor?: string;
   readonly initialNextCursor?: string;
@@ -41,7 +41,7 @@ interface FeedClientProps {
 export default function FeedClient(props: FeedClientProps) {
   const {
     country,
-    city,
+    communitySlug,
     initialEvents,
     initialPrevCursor,
     initialNextCursor,
@@ -62,7 +62,7 @@ export default function FeedClient(props: FeedClientProps) {
 
   const feedQuery = useFeedInfiniteQuery({
     country,
-    city,
+    communitySlug,
     initialEvents,
     initialPrevCursor,
     initialNextCursor,
@@ -109,7 +109,7 @@ export default function FeedClient(props: FeedClientProps) {
           beforeLimit: clientEnv.feedPageSize,
           afterLimit: clientEnv.feedPageSize,
           country,
-          city,
+          communitySlug,
         }),
       );
 
@@ -127,7 +127,7 @@ export default function FeedClient(props: FeedClientProps) {
       });
       return windowEvents;
     },
-    [city, country, queryClient, replaceWithWindow, resolveCityName, resolveCountryName],
+    [communitySlug, country, queryClient, replaceWithWindow, resolveCityName, resolveCountryName],
   );
 
   const fetchHashTargetAnchorYmd = useCallback(
