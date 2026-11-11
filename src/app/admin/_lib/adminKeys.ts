@@ -26,6 +26,14 @@ export const adminKeys = {
     return ['admin', 'locales'];
   },
 
+  countries(): readonly ['admin', 'countries'] {
+    return ['admin', 'countries'];
+  },
+
+  countryOptions(): readonly ['admin', 'countryOptions'] {
+    return ['admin', 'countryOptions'];
+  },
+
   translationNamespaces(): readonly ['admin', 'translationNamespaces'] {
     return ['admin', 'translationNamespaces'];
   },
