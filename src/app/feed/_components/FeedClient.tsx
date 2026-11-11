@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useReducer, useRef, useState } from 'react';
+import { useCallback, useMemo, useReducer, useRef, useState } from 'react';
 import { toLocalYMD } from '@/lib/utils';
 import type { Event } from '@/lib/types';
 import type { ResolveCityName, ResolveCountryName } from '@/app/feed/_hooks/useFeedInfiniteQuery';
@@ -21,9 +21,9 @@ import { feedAnchorDateByPublicIdQueryOptions } from '@/app/feed/_lib/fetchFeedA
 import { useFeedInfiniteQuery } from '@/app/feed/_hooks/useFeedInfiniteQuery';
 import { useHeaderConfig } from '@/app/feed/_providers/HeaderConfigProvider';
 import { clientEnv } from '@/env/client-env';
-import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
+import { createCountryDisplayNameResolver } from '@/lib/i18n/country-display-name';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
-import { useT } from '@/providers/I18nProvider';
+import { useI18n } from '@/providers/I18nProvider';
 
 const feedMainClassName =
   'mx-auto flex w-full flex-col gap-2.5 overflow-auto pb-5 max-[600px]:items-center';
@@ -50,12 +50,12 @@ export default function FeedClient(props: FeedClientProps) {
   } = props;
 
   const clearHashFromUrl = useClearFeedLocationHash();
-  const t = useT();
+  const { locale, t } = useI18n();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 45
-  const resolveCountryName = useCallback<ResolveCountryName>(
-    (iso) => t('country', countryIsoToTranslationKey(iso)),
-    [t],
+  const resolveCountryName = useMemo<ResolveCountryName>(
+    () => createCountryDisplayNameResolver(locale),
+    [locale],
   );
   const resolveCityName = useCallback<ResolveCityName>((code) => t('city', code), [t]);
   const queryClient = useQueryClient();

@@ -1,4 +1,7 @@
-import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
+import {
+  createCountryDisplayNameResolver,
+  getCountryDisplayName,
+} from '@/lib/i18n/country-display-name';
 
 describe('getCountryDisplayName', () => {
   it('should localize a country ISO code for the requested locale', () => {
@@ -13,5 +16,16 @@ describe('getCountryDisplayName', () => {
     expect(() => getCountryDisplayName('ESP', 'en')).toThrow(
       'Country ISO code must contain two Latin letters',
     );
+  });
+});
+
+describe('createCountryDisplayNameResolver', () => {
+  it('should resolve multiple country names for one locale', () => {
+    const resolveCountryDisplayName = createCountryDisplayNameResolver('en');
+
+    expect([resolveCountryDisplayName('ES'), resolveCountryDisplayName('FR')]).toEqual([
+      'Spain',
+      'France',
+    ]);
   });
 });
