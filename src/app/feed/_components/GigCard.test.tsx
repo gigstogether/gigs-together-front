@@ -28,10 +28,7 @@ describe('GigCard', () => {
         code: 'barcelona',
         name: 'Barcelona',
       },
-      country: {
-        iso: 'ES',
-        name: 'Spain',
-      },
+      countryIso: 'ES',
     };
 
     render(<GigCard gig={gig} />);
@@ -39,5 +36,9 @@ describe('GigCard', () => {
     expect(screen.getByText('Radiohead')).toHaveClass('truncate');
     expect(screen.queryByRole('link', { name: 'Radiohead' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveAttribute(
+      'href',
+      'https://www.google.com/maps/search/?api=1&query=Palau%20Sant%20Jordi%20Barcelona%20Spain',
+    );
   });
 });

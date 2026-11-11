@@ -1,10 +1,10 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useMemo, useReducer, useRef, useState } from 'react';
+import { useCallback, useReducer, useRef, useState } from 'react';
 import { toLocalYMD } from '@/lib/utils';
 import type { Event } from '@/lib/types';
-import type { ResolveCityName, ResolveCountryName } from '@/app/feed/_hooks/useFeedInfiniteQuery';
+import type { ResolveCityName } from '@/app/feed/_hooks/useFeedInfiniteQuery';
 import { FeedMonths } from '@/app/feed/_components/FeedMonths';
 import { useClearFeedLocationHash } from '@/app/feed/_hooks/useClearFeedLocationHash';
 import { useFeedHeaderConfigSync } from '@/app/feed/_hooks/useFeedHeaderConfigSync';
@@ -21,7 +21,6 @@ import { feedAnchorDateByPublicIdQueryOptions } from '@/app/feed/_lib/fetchFeedA
 import { useFeedInfiniteQuery } from '@/app/feed/_hooks/useFeedInfiniteQuery';
 import { useHeaderConfig } from '@/app/feed/_providers/HeaderConfigProvider';
 import { clientEnv } from '@/env/client-env';
-import { createCountryDisplayNameResolver } from '@/lib/i18n/country-display-name';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
 import { useI18n } from '@/providers/I18nProvider';
 
@@ -50,13 +49,9 @@ export default function FeedClient(props: FeedClientProps) {
   } = props;
 
   const clearHashFromUrl = useClearFeedLocationHash();
-  const { locale, t } = useI18n();
+  const { t } = useI18n();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 45
-  const resolveCountryName = useMemo<ResolveCountryName>(
-    () => createCountryDisplayNameResolver(locale),
-    [locale],
-  );
   const resolveCityName = useCallback<ResolveCityName>((code) => t('city', code), [t]);
   const queryClient = useQueryClient();
 
@@ -66,7 +61,6 @@ export default function FeedClient(props: FeedClientProps) {
     initialEvents,
     initialPrevCursor,
     initialNextCursor,
-    resolveCountryName,
     resolveCityName,
   });
   const {
@@ -114,10 +108,10 @@ export default function FeedClient(props: FeedClientProps) {
       );
 
       const mappedBefore: Event[] = res.before.map((gig) => {
-        return gigToEvent(gig, { resolveCountryName, resolveCityName });
+        return gigToEvent(gig, { resolveCityName });
       });
       const mappedAfter: Event[] = res.after.map((gig) => {
-        return gigToEvent(gig, { resolveCountryName, resolveCityName });
+        return gigToEvent(gig, { resolveCityName });
       });
       const windowEvents = mergeUniqueSorted(mappedBefore, mappedAfter);
       replaceWithWindow({
@@ -127,7 +121,7 @@ export default function FeedClient(props: FeedClientProps) {
       });
       return windowEvents;
     },
-    [communitySlug, country, queryClient, replaceWithWindow, resolveCityName, resolveCountryName],
+    [communitySlug, country, queryClient, replaceWithWindow, resolveCityName],
   );
 
   const fetchHashTargetAnchorYmd = useCallback(

@@ -15,7 +15,7 @@ function makeEvent(id: string): Event {
     title: 't',
     venue: 'v',
     city: { code: 'c', name: 'City' },
-    country: { iso: 'es', name: 'Spain' },
+    countryIso: 'ES',
   };
 }
 

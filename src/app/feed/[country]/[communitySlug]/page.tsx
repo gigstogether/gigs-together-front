@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import FeedClient from '../../_components/FeedClient';
 import { clientEnv } from '@/env/client-env';
 import { serverEnv } from '@/env/server-env';
-import { createCountryDisplayNameResolver } from '@/lib/i18n/country-display-name';
 import { getFeed } from '@/app/feed/_lib/feed.server';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
 import { DEFAULT_FEED_ROUTE, buildFeedPath, normalizeSegment } from '@/lib/feed/feed.routes';
@@ -96,8 +95,6 @@ export default async function Page(props: FeedCommunityPageProps) {
     }),
   ]);
 
-  const resolveCountryName = createCountryDisplayNameResolver(i18n.locale);
-
   const tCity = (code: string): string =>
     resolveTranslationValue({
       entry: i18n.translations.city?.[code],
@@ -115,7 +112,6 @@ export default async function Page(props: FeedCommunityPageProps) {
 
   const initialEvents: Event[] = feed.gigs.map((gig) =>
     gigToEvent(gig, {
-      resolveCountryName,
       resolveCityName: (code) => tCity(code),
     }),
   );

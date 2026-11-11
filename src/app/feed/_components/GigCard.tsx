@@ -7,6 +7,8 @@ import { GigPoster } from '@/components/GigPoster';
 import { clientEnv } from '@/env/client-env';
 import { formatGigDate } from '@/lib/feed/gig-date-format';
 import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
+import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
+import { useI18n } from '@/providers/I18nProvider';
 
 interface GigCardProps {
   gig: Event;
@@ -91,7 +93,9 @@ function GigLocation(props: GigLocationProps) {
 export function GigCard(props: GigCardProps) {
   const { gig, posterLoading, posterFetchPriority } = props;
 
-  const location = [gig.venue, gig.city.name, gig.country.name].filter((str) => !!str).join(' ');
+  const { locale } = useI18n();
+  const countryName = getCountryDisplayName(gig.countryIso, locale);
+  const location = [gig.venue, gig.city.name, countryName].filter((str) => !!str).join(' ');
   const mapsHref = location ? buildGoogleMapsSearchUrl(location) : undefined;
   const telegramUrl = gig.postUrl ?? clientEnv.telegramUrl;
   const sharePath = `/gigs/${encodeURIComponent(gig.id)}`;

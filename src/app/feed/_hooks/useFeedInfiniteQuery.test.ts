@@ -55,10 +55,7 @@ function createEvent(overrides: Partial<Event> = {}): Event {
       name: 'Barcelona',
     },
     venue: 'Razzmatazz',
-    country: {
-      iso: 'es',
-      name: 'Spain',
-    },
+    countryIso: 'ES',
     ...overrides,
   };
 }
@@ -79,7 +76,6 @@ describe('useFeedInfiniteQuery', () => {
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
           initialNextCursor: 'next-1',
-          resolveCountryName: () => 'Spain',
           resolveCityName: () => 'Barcelona',
         }),
       {
@@ -116,7 +112,6 @@ describe('useFeedInfiniteQuery', () => {
         useFeedInfiniteQuery({
           country: 'es',
           communitySlug: 'barcelona',
-          resolveCountryName: () => 'Spain',
           resolveCityName: () => 'Barcelona',
         }),
       {
@@ -166,7 +161,6 @@ describe('useFeedInfiniteQuery', () => {
           communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialNextCursor: 'next-1',
-          resolveCountryName: () => 'Spain',
           resolveCityName: () => 'Barcelona',
         }),
       {
@@ -217,7 +211,6 @@ describe('useFeedInfiniteQuery', () => {
           communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
-          resolveCountryName: () => 'Spain',
           resolveCityName: () => 'Barcelona',
         }),
       {
@@ -255,7 +248,6 @@ describe('useFeedInfiniteQuery', () => {
           communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
-          resolveCountryName: () => 'Spain',
           resolveCityName: () => 'Barcelona',
         }),
       {

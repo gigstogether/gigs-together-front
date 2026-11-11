@@ -1,4 +1,5 @@
 const COUNTRY_ISO_PATTERN = /^[A-Z]{2}$/;
+const countryDisplayNamesByLocale = new Map<string, Intl.DisplayNames>();
 
 export type CountryDisplayNameResolver = (iso: string) => string;
 
@@ -17,13 +18,30 @@ function resolveCountryDisplayName(iso: string, displayNames: Intl.DisplayNames)
   return displayNames.of(normalizedIso) ?? normalizedIso;
 }
 
-export function createCountryDisplayNameResolver(locale: string): CountryDisplayNameResolver {
+function getCountryDisplayNames(locale: string): Intl.DisplayNames {
+  const cachedDisplayNames = countryDisplayNamesByLocale.get(locale);
+  if (cachedDisplayNames !== undefined) {
+    return cachedDisplayNames;
+  }
+
   const displayNames = new Intl.DisplayNames([locale], {
     type: 'region',
     fallback: 'none',
   });
 
+  countryDisplayNamesByLocale.set(locale, displayNames);
+
+  return displayNames;
+}
+
+export function createCountryDisplayNameResolver(locale: string): CountryDisplayNameResolver {
+  const displayNames = getCountryDisplayNames(locale);
+
   return (iso) => resolveCountryDisplayName(iso, displayNames);
+}
+
+export function getCountryDisplayName(iso: string, locale: string): string {
+  return resolveCountryDisplayName(iso, getCountryDisplayNames(locale));
 }
 
 export function createCountryDisplayOptions(

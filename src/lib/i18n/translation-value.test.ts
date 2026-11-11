@@ -9,24 +9,24 @@ describe('resolveTranslationValue', () => {
     expect(
       resolveTranslationValue({
         entry: undefined,
-        namespace: 'country',
-        key: 'es',
+        namespace: 'common',
+        key: 'button.save',
       }),
-    ).toBe('es');
+    ).toBe('button.save');
   });
 
   it('should return plain text value when params are not provided', () => {
     expect(
       resolveTranslationValue({
         entry: {
-          value: 'Spain',
+          value: 'Save',
           format: 'plain',
           kind: 'text',
         },
-        namespace: 'country',
-        key: 'es',
+        namespace: 'common',
+        key: 'button.save',
       }),
-    ).toBe('Spain');
+    ).toBe('Save');
   });
 
   it('should return raw template value when params are not provided', () => {
@@ -62,12 +62,12 @@ describe('resolveTranslationValue', () => {
     expect(() =>
       resolveTranslationValue({
         entry: {
-          value: 'Spain',
+          value: 'Save',
           format: 'plain',
           kind: 'text',
         },
-        namespace: 'country',
-        key: 'es',
+        namespace: 'common',
+        key: 'button.save',
         params: { name: 'Ada' },
       }),
     ).toThrow(TranslationValueResolutionError);

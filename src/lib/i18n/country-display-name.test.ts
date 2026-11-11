@@ -1,6 +1,7 @@
 import {
   createCountryDisplayOptions,
   createCountryDisplayNameResolver,
+  getCountryDisplayName,
 } from '@/lib/i18n/country-display-name';
 
 describe('createCountryDisplayNameResolver', () => {
@@ -41,5 +42,11 @@ describe('createCountryDisplayOptions', () => {
       { iso: 'DE', name: 'Germany' },
       { iso: 'ES', name: 'Spain' },
     ]);
+  });
+});
+
+describe('getCountryDisplayName', () => {
+  it('should localize a country ISO code for the requested locale', () => {
+    expect(getCountryDisplayName('ES', 'en')).toBe('Spain');
   });
 });
