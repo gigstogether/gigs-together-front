@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
+import { createCountryDisplayNameResolver } from '@/lib/i18n/country-display-name';
 
 const ADMIN_LOCALE = 'en';
 
@@ -51,21 +51,28 @@ export default function AdminCountryDialog(props: AdminCountryDialogProps) {
     },
   });
 
-  const visibleOptions = useMemo(() => {
-    const normalizedSearch = search.trim().toLocaleLowerCase('en');
+  const localizedOptions = useMemo(() => {
+    const resolveCountryDisplayName = createCountryDisplayNameResolver(ADMIN_LOCALE);
+    const collator = new Intl.Collator(ADMIN_LOCALE);
     const options = (optionsQuery.data ?? []).map((option) => ({
       ...option,
-      name: getCountryDisplayName(option.iso, ADMIN_LOCALE),
+      name: resolveCountryDisplayName(option.iso),
     }));
 
+    return options.sort((left, right) => collator.compare(left.name, right.name));
+  }, [optionsQuery.data]);
+
+  const visibleOptions = useMemo(() => {
+    const normalizedSearch = search.trim().toLocaleLowerCase(ADMIN_LOCALE);
+
     if (normalizedSearch.length === 0) {
-      return options;
+      return localizedOptions;
     }
 
-    return options.filter((option) =>
-      `${option.name} ${option.iso}`.toLocaleLowerCase('en').includes(normalizedSearch),
+    return localizedOptions.filter((option) =>
+      `${option.name} ${option.iso}`.toLocaleLowerCase(ADMIN_LOCALE).includes(normalizedSearch),
     );
-  }, [optionsQuery.data, search]);
+  }, [localizedOptions, search]);
 
   const handleSubmit = async () => {
     if (selectedIso === null) {

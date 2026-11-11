@@ -15,11 +15,11 @@ import PosterField from '@/components/PosterField';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import type { Country } from '@/lib/api-boundary-schemas';
+import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 
 interface SuggestGigFormClientProps {
   communityId: string;
-  countries: Country[];
+  countries: CountryDisplayOption[];
 }
 
 export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {

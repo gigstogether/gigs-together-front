@@ -10,19 +10,15 @@ import NativeSelect from '@/components/NativeSelect';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import { defaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
-import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
-import type { Country } from '@/lib/api-boundary-schemas';
-import { useT } from '@/providers/I18nProvider';
+import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 
 interface SuggestGigFormFieldsProps {
   form: UseFormReturn<SuggestGigFormValues>;
-  countries: Country[];
+  countries: CountryDisplayOption[];
 }
 
 export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
   const { form, countries } = props;
-
-  const t = useT();
 
   return (
     <>
@@ -89,7 +85,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                     key={country.iso}
                     value={country.iso}
                   >
-                    {t('country', countryIsoToTranslationKey(country.iso))}
+                    {country.name}
                   </option>
                 ))}
               </NativeSelect>

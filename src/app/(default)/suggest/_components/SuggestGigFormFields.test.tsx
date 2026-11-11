@@ -15,12 +15,18 @@ function SuggestGigFormFieldsTestSubject() {
   return (
     <SuggestGigFormFields
       form={form}
-      countries={[]}
+      countries={[{ iso: 'ES', name: 'Spain' }]}
     />
   );
 }
 
 describe('SuggestGigFormFields', () => {
+  it('should display the resolved country name', () => {
+    render(<SuggestGigFormFieldsTestSubject />);
+
+    expect(screen.getByRole('option', { name: 'Spain' })).toHaveValue('ES');
+  });
+
   it('should limit the title input to 300 characters', () => {
     render(<SuggestGigFormFieldsTestSubject />);
 

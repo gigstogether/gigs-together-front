@@ -59,7 +59,7 @@ function renderEdit(status: GigCandidateStatusAPI) {
   return render(
     <AdminGigCandidateDetailPageClient
       mode="edit"
-      countries={[{ iso: 'ES' }]}
+      countries={[{ iso: 'ES', name: 'Spain' }]}
       defaultCommunityId="default-community-id"
       gigCandidateId="gigCandidate-42"
     />,

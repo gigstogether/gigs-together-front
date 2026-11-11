@@ -10,14 +10,12 @@ import { Input } from '@/components/ui/input';
 import NativeSelect from '@/components/NativeSelect';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import type { Country } from '@/lib/api-boundary-schemas';
+import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
-import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
-import { useT } from '@/providers/I18nProvider';
 
 interface GigFormFieldsProps {
   form: UseFormReturn<GigFormValues>;
-  countries: Country[];
+  countries: CountryDisplayOption[];
   isSubmitting: boolean;
   validationMode: 'completeGig' | 'gigCandidateCreate' | 'gigCandidateDraft';
   isLoading?: boolean;
@@ -38,7 +36,6 @@ export default function GigFormFields(props: GigFormFieldsProps) {
     onLookup,
   } = props;
 
-  const t = useT();
   const isCompleteGig = validationMode === 'completeGig';
   const areCoreFieldsRequired = validationMode !== 'gigCandidateDraft';
   const coreRequiredIndicator = areCoreFieldsRequired ? (
@@ -93,7 +90,7 @@ export default function GigFormFields(props: GigFormFieldsProps) {
                     key={country.iso}
                     value={country.iso}
                   >
-                    {t('country', countryIsoToTranslationKey(country.iso))}
+                    {country.name}
                   </option>
                 ))}
               </NativeSelect>

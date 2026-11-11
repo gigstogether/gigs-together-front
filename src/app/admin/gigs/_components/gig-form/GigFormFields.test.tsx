@@ -18,7 +18,7 @@ function GigFormFieldsTestSubject(props: GigFormFieldsTestSubjectProps) {
   return (
     <GigFormFields
       form={form}
-      countries={[]}
+      countries={[{ iso: 'ES', name: 'Spain' }]}
       isSubmitting={false}
       validationMode={validationMode}
       allowEmptyCountry={validationMode === 'gigCandidateDraft'}
@@ -27,6 +27,12 @@ function GigFormFieldsTestSubject(props: GigFormFieldsTestSubjectProps) {
 }
 
 describe('GigFormFields', () => {
+  it('should display the resolved country name', () => {
+    render(<GigFormFieldsTestSubject />);
+
+    expect(screen.getByRole('option', { name: 'Spain' })).toHaveValue('ES');
+  });
+
   it('should limit the title input to 300 characters', () => {
     render(<GigFormFieldsTestSubject />);
 

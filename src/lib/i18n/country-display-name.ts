@@ -2,6 +2,11 @@ const COUNTRY_ISO_PATTERN = /^[A-Z]{2}$/;
 
 export type CountryDisplayNameResolver = (iso: string) => string;
 
+export interface CountryDisplayOption {
+  iso: string;
+  name: string;
+}
+
 function resolveCountryDisplayName(iso: string, displayNames: Intl.DisplayNames): string {
   const normalizedIso = iso.trim().toUpperCase();
 
@@ -21,6 +26,14 @@ export function createCountryDisplayNameResolver(locale: string): CountryDisplay
   return (iso) => resolveCountryDisplayName(iso, displayNames);
 }
 
-export function getCountryDisplayName(iso: string, locale: string): string {
-  return createCountryDisplayNameResolver(locale)(iso);
+export function createCountryDisplayOptions(
+  countryIsos: string[],
+  locale: string,
+): CountryDisplayOption[] {
+  const resolveCountryDisplayName = createCountryDisplayNameResolver(locale);
+  const collator = new Intl.Collator(locale);
+
+  return countryIsos
+    .map((iso) => ({ iso, name: resolveCountryDisplayName(iso) }))
+    .sort((left, right) => collator.compare(left.name, right.name));
 }
