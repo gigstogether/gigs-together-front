@@ -10,6 +10,9 @@ import AdminCountryDialog from '@/app/admin/locations/_components/AdminCountryDi
 import { fetchAdminCountries } from '@/app/admin/locations/_lib/admin-countries-api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
+
+const ADMIN_LOCALE = 'en';
 
 export default function AdminCountriesPageClient() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -64,7 +67,10 @@ export default function AdminCountriesPageClient() {
                   key={country.iso}
                   className="flex items-center justify-between gap-4 px-4 py-3"
                 >
-                  <span className="font-medium">{country.iso}</span>
+                  <span className="font-medium">
+                    {getCountryDisplayName(country.iso, ADMIN_LOCALE)}
+                  </span>
+                  <span className="text-sm text-muted-foreground">{country.iso}</span>
                 </li>
               ))}
             </ul>

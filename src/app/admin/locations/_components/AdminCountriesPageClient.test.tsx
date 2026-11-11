@@ -33,8 +33,8 @@ describe('AdminCountriesPageClient', () => {
     vi.clearAllMocks();
     fetchAdminCountriesMock.mockResolvedValue([{ iso: 'ES' }]);
     fetchAdminCountryOptionsMock.mockResolvedValue([
-      { iso: 'FR', name: 'France', isConfigured: false },
-      { iso: 'ES', name: 'Spain', isConfigured: true },
+      { iso: 'FR', isConfigured: false },
+      { iso: 'ES', isConfigured: true },
     ]);
     createAdminCountryMock.mockResolvedValue({ iso: 'FR' });
   });
@@ -44,6 +44,7 @@ describe('AdminCountriesPageClient', () => {
 
     await waitFor(() => {
       expect(screen.getByText('ES')).toBeInTheDocument();
+      expect(screen.getByText('Spain')).toBeInTheDocument();
     });
     expect(fetchAdminCountryOptionsMock).not.toHaveBeenCalled();
   });

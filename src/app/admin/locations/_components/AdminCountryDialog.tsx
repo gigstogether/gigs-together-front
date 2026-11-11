@@ -17,6 +17,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
+
+const ADMIN_LOCALE = 'en';
 
 interface AdminCountryDialogProps {
   onOpenChange: (isOpen: boolean) => void;
@@ -50,7 +53,10 @@ export default function AdminCountryDialog(props: AdminCountryDialogProps) {
 
   const visibleOptions = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('en');
-    const options = optionsQuery.data ?? [];
+    const options = (optionsQuery.data ?? []).map((option) => ({
+      ...option,
+      name: getCountryDisplayName(option.iso, ADMIN_LOCALE),
+    }));
 
     if (normalizedSearch.length === 0) {
       return options;

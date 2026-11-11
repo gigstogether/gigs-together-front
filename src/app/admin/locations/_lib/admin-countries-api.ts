@@ -10,7 +10,6 @@ const adminCountriesResponseSchema = z.object({ countries: z.array(adminCountryS
 const adminCountryOptionSchema = z
   .object({
     iso: z.string().length(2),
-    name: z.string().min(1),
     isConfigured: z.boolean(),
   })
   .strict();

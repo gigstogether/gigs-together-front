@@ -26,17 +26,15 @@ describe('admin-countries-api', () => {
 
   it('should parse country options with configuration state', async () => {
     apiClientRequestMock.mockResolvedValue({
-      countries: [{ iso: 'ES', name: 'Spain', isConfigured: true }],
+      countries: [{ iso: 'ES', isConfigured: true }],
     });
 
-    await expect(fetchAdminCountryOptions()).resolves.toEqual([
-      { iso: 'ES', name: 'Spain', isConfigured: true },
-    ]);
+    await expect(fetchAdminCountryOptions()).resolves.toEqual([{ iso: 'ES', isConfigured: true }]);
   });
 
   it('should reject an invalid country options response', async () => {
     apiClientRequestMock.mockResolvedValue({
-      countries: [{ iso: 'ESP', name: 'Spain', isConfigured: true }],
+      countries: [{ iso: 'ESP', isConfigured: true }],
     });
 
     await expect(fetchAdminCountryOptions()).rejects.toBeInstanceOf(z.ZodError);
