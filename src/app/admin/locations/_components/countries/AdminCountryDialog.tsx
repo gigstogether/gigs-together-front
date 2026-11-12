@@ -4,10 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
-import {
-  createAdminCountry,
-  fetchAdminCountryOptions,
-} from '@/app/admin/locations/_lib/admin-countries-api';
+import { createAdminCountry, fetchAdminCountryOptions } from '../../_lib/admin-countries-api';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -146,7 +143,8 @@ export default function AdminCountryDialog(props: AdminCountryDialogProps) {
                   >
                     <span>{option.name}</span>
                     <span className="shrink-0 text-xs text-muted-foreground">
-                      {option.isConfigured ? 'Already added' : option.iso}
+                      {option.iso}
+                      {option.isConfigured ? ' · Already added' : null}
                     </span>
                   </button>
                 </li>

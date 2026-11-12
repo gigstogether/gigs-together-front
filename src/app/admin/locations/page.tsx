@@ -1,5 +1,5 @@
-import AdminCountriesPageClient from '@/app/admin/locations/_components/AdminCountriesPageClient';
+import AdminLocationCatalogPageClient from '@/app/admin/locations/_components/AdminLocationCatalogPageClient';
 
 export default function AdminLocationsPage() {
-  return <AdminCountriesPageClient />;
+  return <AdminLocationCatalogPageClient />;
 }
