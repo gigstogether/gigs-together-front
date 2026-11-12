@@ -201,7 +201,17 @@ src/
 
 - One React component per file.
 - Exception: `src/components/ui/**` shadcn primitives.
-- After `const { ... } = props;`, always leave a blank line before the next statement.
+- When a component destructures `props`, `const { ... } = props;` must be the first statement in
+  the component body. Always leave a blank line after it before the next statement.
+- When practical, order component hooks as follows: context and infrastructure hooks
+  (`useRouter`, `useQueryClient`, `useContext`); local state, reducer, and ref hooks (`useState`,
+  `useReducer`, `useRef`); query, mutation, and domain hooks; derived-value hooks (`useMemo`,
+  `useCallback`); and effect hooks (`useEffect`, `useLayoutEffect`). This is a readability
+  preference, not a strict rule: dependencies may require a different order. Do not refactor or
+  fix existing code outside the current task's scope solely to follow this ordering.
+- Use the shared `src/components/Select.tsx` component for fixed-option selects. Do not add
+  feature-specific select components or native `<select>` elements. Editable autocomplete fields
+  with free-form values are comboboxes and may use a separate component.
 - Do not add `'use client'` to an existing server component without explicit approval. Converting a server component to a client component must be agreed on first; without approval, leave the server boundary unchanged. Prefer extracting client-only logic into a new client child module instead of changing an existing component's boundary.
 
 ## React Typing Style
