@@ -209,7 +209,8 @@ src/
   `useCallback`); and effect hooks (`useEffect`, `useLayoutEffect`). This is a readability
   preference, not a strict rule: dependencies may require a different order. Do not refactor or
   fix existing code outside the current task's scope solely to follow this ordering.
-- Use the shared `src/components/Select.tsx` component for fixed-option selects. Do not add
+- Use the shared `src/components/Select.tsx` component for fixed-option selects and
+  `src/components/SearchableSelect.tsx` when a large fixed list requires filtering. Do not add
   feature-specific select components or native `<select>` elements. Editable autocomplete fields
   with free-form values are comboboxes and may use a separate component.
 - Do not add `'use client'` to an existing server component without explicit approval. Converting a server component to a client component must be agreed on first; without approval, leave the server boundary unchanged. Prefer extracting client-only logic into a new client child module instead of changing an existing component's boundary.

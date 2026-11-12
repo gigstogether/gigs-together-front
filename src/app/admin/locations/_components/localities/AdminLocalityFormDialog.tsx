@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import AdminLocationForm, { AdminLocationNameFields } from '../shared/AdminLocationForm';
 import {
@@ -10,9 +10,9 @@ import {
   parseAdminLocationAliases,
 } from '../shared/admin-location-form';
 import type { AdminLocality, AdminRegion } from '../../_lib/admin-locations-api';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { Select } from '@/components/Select';
-import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 
 export interface AdminLocalityFormSubmission {
   id: string | null;
@@ -30,13 +30,55 @@ interface AdminLocalityFormDialogProps {
   onSubmit: (submission: AdminLocalityFormSubmission) => Promise<void>;
 }
 
-function isValidTimeZone(value: string): boolean {
-  try {
-    new Intl.DateTimeFormat('en', { timeZone: value }).format();
-    return true;
-  } catch {
-    return false;
+interface LocaleWithTimeZones extends Intl.Locale {
+  getTimeZones(): string[] | undefined;
+}
+
+function hasTimeZoneLookup(locale: Intl.Locale): locale is LocaleWithTimeZones {
+  return 'getTimeZones' in locale && typeof locale.getTimeZones === 'function';
+}
+
+function getAllTimeZones(): string[] {
+  const timeZones = Intl.supportedValuesOf('timeZone');
+  if (timeZones.includes('UTC')) {
+    return timeZones;
   }
+
+  return ['UTC', ...timeZones];
+}
+
+function getCountryTimeZones(countryIso: string): string[] {
+  const locale = new Intl.Locale('und', { region: countryIso });
+  if (!hasTimeZoneLookup(locale)) {
+    return getAllTimeZones();
+  }
+
+  return locale.getTimeZones() ?? getAllTimeZones();
+}
+
+function getTimeZoneOptions(countryIso: string | undefined) {
+  if (!countryIso) {
+    return [];
+  }
+
+  return getCountryTimeZones(countryIso).map((timeZone) => ({
+    value: timeZone,
+    label: timeZone.replaceAll('_', ' '),
+  }));
+}
+
+function getInitialTimeZone(
+  value: AdminLocality | null,
+  regions: AdminRegion[],
+  regionId: string,
+): string {
+  if (value) {
+    return value.timeZone;
+  }
+
+  const region = regions.find((candidate) => candidate.id === regionId);
+  const timeZoneOptions = getTimeZoneOptions(region?.countryIso);
+  return timeZoneOptions.length === 1 ? timeZoneOptions[0].value : '';
 }
 
 export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogProps) {
@@ -45,12 +87,17 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
   const [regionId, setRegionId] = useState(value?.regionId ?? regions[0]?.id ?? '');
   const [name, setName] = useState(value?.name ?? '');
   const [aliasesText, setAliasesText] = useState(value?.aliases.join(', ') ?? '');
-  const [timeZone, setTimeZone] = useState(value?.timeZone ?? '');
+  const [timeZone, setTimeZone] = useState(() => getInitialTimeZone(value, regions, regionId));
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const selectedRegion = regions.find((region) => region.id === regionId);
+  const timeZoneOptions = useMemo(
+    () => getTimeZoneOptions(selectedRegion?.countryIso),
+    [selectedRegion?.countryIso],
+  );
   const aliases = parseAdminLocationAliases(aliasesText);
   const aliasesError = getAdminLocationAliasesError(name, aliases);
-  const isTimeZoneValid = isValidTimeZone(timeZone.trim());
+  const isTimeZoneValid = timeZoneOptions.some((option) => option.value === timeZone);
   const isCreateMode = value === null;
   const canSubmit =
     regionId.length > 0 &&
@@ -62,6 +109,21 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
     value: region.id,
     label: `${region.name} — ${getAdminCountryOptionLabel(region.countryIso)}`,
   }));
+
+  const handleRegionChange = (nextRegionId: string) => {
+    const nextRegion = regions.find((region) => region.id === nextRegionId);
+    const nextTimeZoneOptions = getTimeZoneOptions(nextRegion?.countryIso);
+
+    setRegionId(nextRegionId);
+    if (nextTimeZoneOptions.length === 1) {
+      setTimeZone(nextTimeZoneOptions[0].value);
+      return;
+    }
+
+    if (!nextTimeZoneOptions.some((option) => option.value === timeZone)) {
+      setTimeZone('');
+    }
+  };
 
   const handleSubmit = async () => {
     if (!canSubmit) {
@@ -75,7 +137,7 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
         regionId,
         name: name.trim(),
         aliases,
-        timeZone: timeZone.trim(),
+        timeZone,
       });
     } catch (e) {
       setSubmitError(getAdminLocationSaveError(e));
@@ -97,7 +159,7 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
         placeholder="Select region"
         ariaLabelledBy="location-form-parent-label"
         isDisabled={isSaving || !isCreateMode}
-        onValueChange={setRegionId}
+        onValueChange={handleRegionChange}
       />
       {!isCreateMode ? (
         <FieldDescription>The parent cannot be changed after creation.</FieldDescription>
@@ -107,16 +169,24 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
 
   const additionalFields = (
     <Field>
-      <FieldLabel htmlFor="location-form-time-zone">Time zone:</FieldLabel>
-      <Input
+      <FieldLabel
+        id="location-form-time-zone-label"
+        htmlFor="location-form-time-zone"
+      >
+        Time zone:
+      </FieldLabel>
+      <SearchableSelect
         id="location-form-time-zone"
         value={timeZone}
-        disabled={isSaving}
-        placeholder="Europe/Madrid"
-        aria-invalid={!isTimeZoneValid}
-        onChange={(event) => setTimeZone(event.target.value)}
+        options={timeZoneOptions}
+        placeholder="Select time zone"
+        searchPlaceholder="Search time zones"
+        emptyText="No time zones found."
+        ariaLabelledBy="location-form-time-zone-label"
+        isDisabled={isSaving || selectedRegion === undefined}
+        isRequired
+        onValueChange={setTimeZone}
       />
-      <FieldError errors={isTimeZoneValid ? [] : [{ message: 'Enter a valid IANA time zone.' }]} />
     </Field>
   );
 
