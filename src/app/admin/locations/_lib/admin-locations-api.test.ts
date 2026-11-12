@@ -3,16 +3,12 @@ import { z } from 'zod';
 import {
   createAdminLocality,
   createAdminPlace,
-  createAdminRegion,
   deleteAdminLocality,
   deleteAdminPlace,
-  deleteAdminRegion,
   fetchAdminLocalities,
   fetchAdminPlaces,
-  fetchAdminRegions,
   updateAdminLocality,
   updateAdminPlace,
-  updateAdminRegion,
 } from '@/app/admin/locations/_lib/admin-locations-api';
 
 const apiClientRequestMock = vi.fn();
@@ -26,78 +22,12 @@ describe('admin-locations-api', () => {
     apiClientRequestMock.mockReset();
   });
 
-  it('should parse regions when the API response matches the contract', async () => {
-    apiClientRequestMock.mockResolvedValue({
-      regions: [
-        {
-          id: 'region-1',
-          countryIso: 'ES',
-          name: 'Catalonia',
-          aliases: ['Catalunya'],
-        },
-      ],
-    });
-
-    await expect(fetchAdminRegions()).resolves.toEqual([
-      {
-        id: 'region-1',
-        countryIso: 'ES',
-        name: 'Catalonia',
-        aliases: ['Catalunya'],
-      },
-    ]);
-    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/admin/regions', 'GET');
-  });
-
-  it('should reject a region response with unknown fields', async () => {
-    apiClientRequestMock.mockResolvedValue({
-      regions: [
-        {
-          id: 'region-1',
-          countryIso: 'ES',
-          name: 'Catalonia',
-          aliases: [],
-          unexpected: true,
-        },
-      ],
-    });
-
-    await expect(fetchAdminRegions()).rejects.toBeInstanceOf(z.ZodError);
-  });
-
-  it('should send a create region body to the versioned admin endpoint', async () => {
-    const body = {
-      countryIso: 'ES',
-      name: 'Catalonia',
-      aliases: ['Catalunya'],
-    };
-    apiClientRequestMock.mockResolvedValue({ id: 'region-1', ...body });
-
-    await expect(createAdminRegion(body)).resolves.toEqual({ id: 'region-1', ...body });
-    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/admin/regions', 'POST', body);
-  });
-
-  it('should send an update region body to the encoded resource endpoint', async () => {
-    const body = { name: 'Catalunya', aliases: ['Catalonia'] };
-    apiClientRequestMock.mockResolvedValue({
-      id: 'region/1',
-      countryIso: 'ES',
-      ...body,
-    });
-
-    await expect(updateAdminRegion('region/1', body)).resolves.toEqual({
-      id: 'region/1',
-      countryIso: 'ES',
-      ...body,
-    });
-    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/admin/regions/region%2F1', 'PATCH', body);
-  });
-
   it('should parse localities when the API response matches the contract', async () => {
     const locality = {
       id: 'locality-1',
-      regionId: 'region-1',
+      countryIso: 'ES',
       name: 'Barcelona',
+      qualifier: 'Barcelona province',
       aliases: ['Barna'],
       timeZone: 'Europe/Madrid',
     };
@@ -112,7 +42,7 @@ describe('admin-locations-api', () => {
       localities: [
         {
           id: 'locality-1',
-          regionId: 'region-1',
+          countryIso: 'ES',
           name: 'Barcelona',
           aliases: [],
           timeZone: 'Europe/Madrid',
@@ -126,8 +56,9 @@ describe('admin-locations-api', () => {
 
   it('should create a locality through the versioned admin endpoint', async () => {
     const body = {
-      regionId: 'region-1',
+      countryIso: 'ES',
       name: 'Barcelona',
+      qualifier: 'Barcelona province',
       aliases: [],
       timeZone: 'Europe/Madrid',
     };
@@ -140,19 +71,24 @@ describe('admin-locations-api', () => {
   it('should update a locality through the encoded resource endpoint', async () => {
     const body = {
       name: 'Barcelona',
+      qualifier: null,
       aliases: ['Barna'],
       timeZone: 'Europe/Madrid',
     };
     apiClientRequestMock.mockResolvedValue({
       id: 'locality/1',
-      regionId: 'region-1',
-      ...body,
+      countryIso: 'ES',
+      name: body.name,
+      aliases: body.aliases,
+      timeZone: body.timeZone,
     });
 
     await expect(updateAdminLocality('locality/1', body)).resolves.toEqual({
       id: 'locality/1',
-      regionId: 'region-1',
-      ...body,
+      countryIso: 'ES',
+      name: body.name,
+      aliases: body.aliases,
+      timeZone: body.timeZone,
     });
     expect(apiClientRequestMock).toHaveBeenCalledWith(
       'v1/admin/localities/locality%2F1',
@@ -222,11 +158,6 @@ describe('admin-locations-api', () => {
   });
 
   it.each([
-    {
-      entityKind: 'region',
-      deleteEntity: deleteAdminRegion,
-      endpoint: 'v1/admin/regions/region%2F1',
-    },
     {
       entityKind: 'locality',
       deleteEntity: deleteAdminLocality,

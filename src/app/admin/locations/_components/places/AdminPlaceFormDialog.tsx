@@ -9,8 +9,9 @@ import {
   getAdminLocationSaveError,
   parseAdminLocationAliases,
 } from '../shared/admin-location-form';
-import type { AdminLocality, AdminPlace, AdminRegion } from '../../_lib/admin-locations-api';
-import { Select } from '@/components/Select';
+import { getAdminLocalityLabel } from '../shared/admin-location-display';
+import type { AdminLocality, AdminPlace } from '../../_lib/admin-locations-api';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Switch } from '@/components/ui/switch';
 
@@ -24,24 +25,18 @@ export interface AdminPlaceFormSubmission {
 
 interface AdminPlaceFormDialogProps {
   value: AdminPlace | null;
-  regions: AdminRegion[];
   localities: AdminLocality[];
   isSaving: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (submission: AdminPlaceFormSubmission) => Promise<void>;
 }
 
-function getLocalityOptionLabel(locality: AdminLocality, regions: AdminRegion[]): string {
-  const region = regions.find((candidate) => candidate.id === locality.regionId);
-  if (!region) {
-    return locality.name;
-  }
-
-  return `${locality.name} — ${region.name} — ${getAdminCountryOptionLabel(region.countryIso)}`;
+function getLocalityOptionLabel(locality: AdminLocality): string {
+  return `${getAdminLocalityLabel(locality.name, locality.qualifier)} — ${getAdminCountryOptionLabel(locality.countryIso)}`;
 }
 
 export default function AdminPlaceFormDialog(props: AdminPlaceFormDialogProps) {
-  const { value, regions, localities, isSaving, onOpenChange, onSubmit } = props;
+  const { value, localities, isSaving, onOpenChange, onSubmit } = props;
 
   const [localityId, setLocalityId] = useState(value?.localityId ?? localities[0]?.id ?? '');
   const [name, setName] = useState(value?.name ?? '');
@@ -56,7 +51,7 @@ export default function AdminPlaceFormDialog(props: AdminPlaceFormDialogProps) {
     localityId.length > 0 && name.trim().length > 0 && aliasesError === null && !isSaving;
   const localityOptions = localities.map((locality) => ({
     value: locality.id,
-    label: getLocalityOptionLabel(locality, regions),
+    label: getLocalityOptionLabel(locality),
   }));
 
   const handleSubmit = async () => {
@@ -86,11 +81,13 @@ export default function AdminPlaceFormDialog(props: AdminPlaceFormDialogProps) {
       >
         Locality:
       </FieldLabel>
-      <Select
+      <SearchableSelect
         id="location-form-parent"
         value={localityId}
         options={localityOptions}
         placeholder="Select locality"
+        searchPlaceholder="Search localities"
+        emptyText="No localities found."
         ariaLabelledBy="location-form-parent-label"
         isDisabled={isSaving || !isCreateMode}
         onValueChange={setLocalityId}

@@ -1,10 +1,9 @@
 import { ADMIN_LOCATION_LOCALE } from './admin-location-display';
 
-export type LocationCatalogKind = 'country' | 'region' | 'locality' | 'place';
+export type LocationCatalogKind = 'country' | 'locality' | 'place';
 
 export const LOCATION_CATALOG_KINDS = [
   'country',
-  'region',
   'locality',
   'place',
 ] satisfies LocationCatalogKind[];
@@ -18,8 +17,6 @@ export function getCatalogLabel(kind: LocationCatalogKind): string {
   switch (kind) {
     case 'country':
       return 'Country';
-    case 'region':
-      return 'Region';
     case 'locality':
       return 'Locality';
     case 'place':

@@ -20,10 +20,9 @@ import {
   deleteAdminPlace,
   fetchAdminLocalities,
   fetchAdminPlaces,
-  fetchAdminRegions,
   updateAdminPlace,
 } from '../../_lib/admin-locations-api';
-import type { AdminLocality, AdminPlace, AdminRegion } from '../../_lib/admin-locations-api';
+import type { AdminLocality, AdminPlace } from '../../_lib/admin-locations-api';
 import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
 
 export default function AdminPlaces(props: AdminLocationCatalogProps) {
@@ -35,10 +34,6 @@ export default function AdminPlaces(props: AdminLocationCatalogProps) {
   const [deleteValue, setDeleteValue] = useState<AdminPlace | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const regionsQuery = useQuery({
-    queryKey: adminKeys.regions(),
-    queryFn: fetchAdminRegions,
-  });
   const localitiesQuery = useQuery({
     queryKey: adminKeys.localities(),
     queryFn: fetchAdminLocalities,
@@ -47,13 +42,8 @@ export default function AdminPlaces(props: AdminLocationCatalogProps) {
     queryKey: adminKeys.places(),
     queryFn: fetchAdminPlaces,
   });
-  const regions = useMemo(() => regionsQuery.data ?? [], [regionsQuery.data]);
   const localities = useMemo(() => localitiesQuery.data ?? [], [localitiesQuery.data]);
   const places = useMemo(() => placesQuery.data ?? [], [placesQuery.data]);
-  const regionById = useMemo(
-    () => new Map<string, AdminRegion>(regions.map((region) => [region.id, region])),
-    [regions],
-  );
   const localityById = useMemo(
     () => new Map<string, AdminLocality>(localities.map((locality) => [locality.id, locality])),
     [localities],
@@ -62,20 +52,19 @@ export default function AdminPlaces(props: AdminLocationCatalogProps) {
     () =>
       places.filter((place) => {
         const locality = localityById.get(place.localityId);
-        const region = locality ? regionById.get(locality.regionId) : undefined;
         return matchesLocationSearch(
           [
             place.name,
             ...place.aliases,
             locality?.name ?? '',
-            region?.name ?? '',
-            region?.countryIso ?? '',
-            region ? getCountryDisplayName(region.countryIso, ADMIN_LOCATION_LOCALE) : '',
+            locality?.qualifier ?? '',
+            locality?.countryIso ?? '',
+            locality ? getCountryDisplayName(locality.countryIso, ADMIN_LOCATION_LOCALE) : '',
           ],
           search,
         );
       }),
-    [localityById, places, regionById, search],
+    [localityById, places, search],
   );
 
   const invalidatePlaces = async () => {
@@ -123,8 +112,8 @@ export default function AdminPlaces(props: AdminLocationCatalogProps) {
       setDeleteError(getAdminLocationOperationError(e));
     }
   };
-  const isLoading = regionsQuery.isLoading || localitiesQuery.isLoading || placesQuery.isLoading;
-  const isLoadError = regionsQuery.isError || localitiesQuery.isError || placesQuery.isError;
+  const isLoading = localitiesQuery.isLoading || placesQuery.isLoading;
+  const isLoadError = localitiesQuery.isError || placesQuery.isError;
 
   return (
     <>
@@ -144,7 +133,6 @@ export default function AdminPlaces(props: AdminLocationCatalogProps) {
         <AdminPlacesCatalog
           places={visiblePlaces}
           localityById={localityById}
-          regionById={regionById}
           onEdit={setFormValue}
           onDelete={(place) => {
             setDeleteError(null);
@@ -157,7 +145,6 @@ export default function AdminPlaces(props: AdminLocationCatalogProps) {
         <AdminPlaceFormDialog
           key={formValue?.id ?? 'new'}
           value={formValue}
-          regions={regions}
           localities={localities}
           isSaving={saveMutation.isPending}
           onOpenChange={(isOpen) => {

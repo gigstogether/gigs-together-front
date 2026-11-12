@@ -2,7 +2,6 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import AdminLocalityFormDialog from './localities/AdminLocalityFormDialog';
 import AdminPlaceFormDialog from './places/AdminPlaceFormDialog';
-import AdminRegionFormDialog from './regions/AdminRegionFormDialog';
 import { stubResizeObserver } from '@/test/moderator-telegram-session-mock';
 
 const originalGetTimeZonesDescriptor = Object.getOwnPropertyDescriptor(
@@ -38,11 +37,12 @@ describe('AdminLocationFormDialogs', () => {
     Reflect.deleteProperty(Intl.Locale.prototype, 'getTimeZones');
   });
 
-  it('should submit a normalized region form when values are valid', async () => {
+  it('should submit a locality under the selected country', async () => {
+    stubCountryTimeZones({ ES: ['Africa/Ceuta', 'Atlantic/Canary', 'Europe/Madrid'] });
     const onSubmit = vi.fn().mockResolvedValue(undefined);
 
     render(
-      <AdminRegionFormDialog
+      <AdminLocalityFormDialog
         value={null}
         countries={[{ iso: 'ES' }]}
         isSaving={false}
@@ -51,44 +51,11 @@ describe('AdminLocationFormDialogs', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('combobox', { name: 'Country:' }));
-    expect(screen.getByRole('option', { name: 'Spain (ES)' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('option', { name: 'Spain (ES)' }));
-
-    fireEvent.change(screen.getByLabelText('Canonical name:'), {
-      target: { value: '  Catalonia  ' },
-    });
-    fireEvent.change(screen.getByLabelText('Aliases:'), {
-      target: { value: 'Catalunya, Cataluña\nCatalonha' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Create region' }));
-
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith({
-        id: null,
-        countryIso: 'ES',
-        name: 'Catalonia',
-        aliases: ['Catalunya', 'Cataluña', 'Catalonha'],
-      });
-    });
-  });
-
-  it('should submit a locality with a time zone from the selected country', async () => {
-    stubCountryTimeZones({ ES: ['Africa/Ceuta', 'Atlantic/Canary', 'Europe/Madrid'] });
-    const onSubmit = vi.fn().mockResolvedValue(undefined);
-
-    render(
-      <AdminLocalityFormDialog
-        value={null}
-        regions={[{ id: 'region-1', countryIso: 'ES', name: 'Catalonia', aliases: [] }]}
-        isSaving={false}
-        onOpenChange={vi.fn()}
-        onSubmit={onSubmit}
-      />,
-    );
-
     fireEvent.change(screen.getByLabelText('Canonical name:'), {
       target: { value: 'Barcelona' },
+    });
+    fireEvent.change(screen.getByLabelText('Qualifier:'), {
+      target: { value: ' Barcelona province ' },
     });
     fireEvent.click(screen.getByRole('combobox', { name: 'Time zone:' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Search time zones' }), {
@@ -100,21 +67,22 @@ describe('AdminLocationFormDialogs', () => {
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
         id: null,
-        regionId: 'region-1',
+        countryIso: 'ES',
         name: 'Barcelona',
+        qualifier: 'Barcelona province',
         aliases: [],
         timeZone: 'Europe/Madrid',
       });
     });
   });
 
-  it('should not show a time zone error before the user interacts with the form', () => {
+  it('should select the only available time zone without showing an initial error', () => {
     stubCountryTimeZones({ ES: ['Europe/Madrid'] });
 
     render(
       <AdminLocalityFormDialog
         value={null}
-        regions={[{ id: 'region-1', countryIso: 'ES', name: 'Catalonia', aliases: [] }]}
+        countries={[{ iso: 'ES' }]}
         isSaving={false}
         onOpenChange={vi.fn()}
         onSubmit={vi.fn()}
@@ -124,10 +92,9 @@ describe('AdminLocationFormDialogs', () => {
     expect(screen.queryByText('Select a time zone.')).not.toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'Time zone:' })).not.toBeInvalid();
     expect(screen.getByRole('combobox', { name: 'Time zone:' })).toHaveTextContent('Europe/Madrid');
-    expect(screen.getByRole('button', { name: 'Create locality' })).toBeDisabled();
   });
 
-  it('should select the only available time zone after the region changes', () => {
+  it('should select the only available time zone after the country changes', () => {
     stubCountryTimeZones({
       ES: ['Atlantic/Canary', 'Europe/Madrid'],
       FR: ['Europe/Paris'],
@@ -136,10 +103,7 @@ describe('AdminLocationFormDialogs', () => {
     render(
       <AdminLocalityFormDialog
         value={null}
-        regions={[
-          { id: 'region-es', countryIso: 'ES', name: 'Catalonia', aliases: [] },
-          { id: 'region-fr', countryIso: 'FR', name: 'Île-de-France', aliases: [] },
-        ]}
+        countries={[{ iso: 'ES' }, { iso: 'FR' }]}
         isSaving={false}
         onOpenChange={vi.fn()}
         onSubmit={vi.fn()}
@@ -150,10 +114,35 @@ describe('AdminLocationFormDialogs', () => {
       'Select time zone',
     );
 
-    fireEvent.click(screen.getByRole('combobox', { name: 'Region:' }));
-    fireEvent.click(screen.getByRole('option', { name: 'Île-de-France — France (FR)' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Country:' }));
+    fireEvent.click(screen.getByRole('option', { name: 'France (FR)' }));
 
     expect(screen.getByRole('combobox', { name: 'Time zone:' })).toHaveTextContent('Europe/Paris');
+  });
+
+  it('should clear a time zone that is invalid for the selected country', () => {
+    stubCountryTimeZones({
+      ES: ['Europe/Madrid'],
+      PT: ['Atlantic/Azores', 'Europe/Lisbon'],
+    });
+
+    render(
+      <AdminLocalityFormDialog
+        value={null}
+        countries={[{ iso: 'ES' }, { iso: 'PT' }]}
+        isSaving={false}
+        onOpenChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('combobox', { name: 'Time zone:' })).toHaveTextContent('Europe/Madrid');
+    fireEvent.click(screen.getByRole('combobox', { name: 'Country:' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Portugal (PT)' }));
+
+    expect(screen.getByRole('combobox', { name: 'Time zone:' })).toHaveTextContent(
+      'Select time zone',
+    );
   });
 
   it('should show all supported time zones when the country lookup is unavailable', () => {
@@ -163,7 +152,7 @@ describe('AdminLocationFormDialogs', () => {
     render(
       <AdminLocalityFormDialog
         value={null}
-        regions={[{ id: 'region-1', countryIso: 'ES', name: 'Catalonia', aliases: [] }]}
+        countries={[{ iso: 'ES' }]}
         isSaving={false}
         onOpenChange={vi.fn()}
         onSubmit={vi.fn()}
@@ -187,12 +176,12 @@ describe('AdminLocationFormDialogs', () => {
           aliases: [],
           isActive: false,
         }}
-        regions={[{ id: 'region-1', countryIso: 'ES', name: 'Catalonia', aliases: [] }]}
         localities={[
           {
             id: 'locality-1',
-            regionId: 'region-1',
+            countryIso: 'ES',
             name: 'Barcelona',
+            qualifier: 'Barcelona province',
             aliases: [],
             timeZone: 'Europe/Madrid',
           },
@@ -205,14 +194,53 @@ describe('AdminLocationFormDialogs', () => {
 
     expect(screen.getByRole('switch', { name: 'Active:' })).not.toBeChecked();
     expect(screen.getByRole('combobox', { name: 'Locality:' })).toBeDisabled();
-    expect(screen.getByText('Barcelona — Catalonia — Spain (ES)')).toBeInTheDocument();
+    expect(screen.getByText('Barcelona (Barcelona province) — Spain (ES)')).toBeInTheDocument();
   });
 
-  it('should show the save failure returned by the catalog operation', async () => {
-    const onSubmit = vi.fn().mockRejectedValue(new Error('Region already exists.'));
+  it('should distinguish same-name Localities in the Place form', () => {
+    render(
+      <AdminPlaceFormDialog
+        value={null}
+        localities={[
+          {
+            id: 'locality-1',
+            countryIso: 'ES',
+            name: 'San Pedro',
+            qualifier: 'Albacete province',
+            aliases: [],
+            timeZone: 'Europe/Madrid',
+          },
+          {
+            id: 'locality-2',
+            countryIso: 'ES',
+            name: 'San Pedro',
+            qualifier: 'Murcia region',
+            aliases: [],
+            timeZone: 'Europe/Madrid',
+          },
+        ]}
+        isSaving={false}
+        onOpenChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Locality:' }));
+
+    expect(
+      screen.getByRole('option', { name: 'San Pedro (Albacete province) — Spain (ES)' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: 'San Pedro (Murcia region) — Spain (ES)' }),
+    ).toBeInTheDocument();
+  });
+
+  it('should show the save failure returned by the locality operation', async () => {
+    stubCountryTimeZones({ ES: ['Europe/Madrid'] });
+    const onSubmit = vi.fn().mockRejectedValue(new Error('Locality already exists.'));
 
     render(
-      <AdminRegionFormDialog
+      <AdminLocalityFormDialog
         value={null}
         countries={[{ iso: 'ES' }]}
         isSaving={false}
@@ -222,10 +250,10 @@ describe('AdminLocationFormDialogs', () => {
     );
 
     fireEvent.change(screen.getByLabelText('Canonical name:'), {
-      target: { value: 'Catalonia' },
+      target: { value: 'Barcelona' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Create region' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Create locality' }));
 
-    expect(await screen.findByText('Region already exists.')).toBeVisible();
+    expect(await screen.findByText('Locality already exists.')).toBeVisible();
   });
 });

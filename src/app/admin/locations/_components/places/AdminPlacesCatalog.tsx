@@ -1,20 +1,19 @@
 import { Pencil, Trash2 } from 'lucide-react';
 
-import { getAdminCountryLabel } from '../shared/admin-location-display';
-import type { AdminLocality, AdminPlace, AdminRegion } from '../../_lib/admin-locations-api';
+import { getAdminCountryLabel, getAdminLocalityLabel } from '../shared/admin-location-display';
+import type { AdminLocality, AdminPlace } from '../../_lib/admin-locations-api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface AdminPlacesCatalogProps {
   places: AdminPlace[];
   localityById: ReadonlyMap<string, AdminLocality>;
-  regionById: ReadonlyMap<string, AdminRegion>;
   onEdit: (place: AdminPlace) => void;
   onDelete: (place: AdminPlace) => void;
 }
 
 export default function AdminPlacesCatalog(props: AdminPlacesCatalogProps) {
-  const { places, localityById, regionById, onEdit, onDelete } = props;
+  const { places, localityById, onEdit, onDelete } = props;
 
   if (places.length === 0) {
     return <p className="p-6 text-sm text-muted-foreground">No places found.</p>;
@@ -26,7 +25,6 @@ export default function AdminPlacesCatalog(props: AdminPlacesCatalogProps) {
         <ul className="divide-y divide-border">
           {places.map((place) => {
             const locality = localityById.get(place.localityId);
-            const region = locality ? regionById.get(locality.regionId) : undefined;
             return (
               <li
                 key={place.id}
@@ -42,10 +40,9 @@ export default function AdminPlacesCatalog(props: AdminPlacesCatalogProps) {
                     ) : null}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {locality?.name ?? 'Unknown locality'}
-                    {region
-                      ? ` · ${region.name} · ${getAdminCountryLabel(region.countryIso)}`
-                      : null}
+                    {locality
+                      ? `${getAdminLocalityLabel(locality.name, locality.qualifier)} · ${getAdminCountryLabel(locality.countryIso)}`
+                      : 'Unknown locality'}
                     {place.aliases.length > 0 ? ` · ${place.aliases.join(', ')}` : null}
                   </div>
                 </div>

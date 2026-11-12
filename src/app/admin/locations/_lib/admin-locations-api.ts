@@ -2,30 +2,15 @@ import { z } from 'zod';
 
 import { apiClientRequest } from '@/lib/api-session-client';
 
-const V1_ADMIN_REGIONS_ENDPOINT = 'v1/admin/regions';
 const V1_ADMIN_LOCALITIES_ENDPOINT = 'v1/admin/localities';
 const V1_ADMIN_PLACES_ENDPOINT = 'v1/admin/places';
-
-const adminRegionSchema = z
-  .object({
-    id: z.string().min(1),
-    countryIso: z.string().min(1),
-    name: z.string().min(1),
-    aliases: z.array(z.string().min(1)),
-  })
-  .strict();
-
-const adminRegionsResponseSchema = z
-  .object({
-    regions: z.array(adminRegionSchema),
-  })
-  .strict();
 
 const adminLocalitySchema = z
   .object({
     id: z.string().min(1),
-    regionId: z.string().min(1),
+    countryIso: z.string().length(2),
     name: z.string().min(1),
+    qualifier: z.string().min(1).optional(),
     aliases: z.array(z.string().min(1)),
     timeZone: z.string().min(1),
   })
@@ -53,30 +38,20 @@ const adminPlacesResponseSchema = z
   })
   .strict();
 
-export type AdminRegion = z.infer<typeof adminRegionSchema>;
 export type AdminLocality = z.infer<typeof adminLocalitySchema>;
 export type AdminPlace = z.infer<typeof adminPlaceSchema>;
 
-export interface CreateAdminRegionBody {
+export interface CreateAdminLocalityBody {
   countryIso: string;
   name: string;
-  aliases: string[];
-}
-
-export interface UpdateAdminRegionBody {
-  name: string;
-  aliases: string[];
-}
-
-export interface CreateAdminLocalityBody {
-  regionId: string;
-  name: string;
+  qualifier?: string;
   aliases: string[];
   timeZone: string;
 }
 
 export interface UpdateAdminLocalityBody {
   name: string;
+  qualifier: string | null;
   aliases: string[];
   timeZone: string;
 }
@@ -92,36 +67,6 @@ export interface UpdateAdminPlaceBody {
   name: string;
   aliases: string[];
   isActive: boolean;
-}
-
-export async function fetchAdminRegions(): Promise<AdminRegion[]> {
-  const raw = await apiClientRequest<unknown>(V1_ADMIN_REGIONS_ENDPOINT, 'GET');
-  return adminRegionsResponseSchema.parse(raw).regions;
-}
-
-export async function createAdminRegion(body: CreateAdminRegionBody): Promise<AdminRegion> {
-  const raw = await apiClientRequest<unknown, CreateAdminRegionBody>(
-    V1_ADMIN_REGIONS_ENDPOINT,
-    'POST',
-    body,
-  );
-  return adminRegionSchema.parse(raw);
-}
-
-export async function updateAdminRegion(
-  id: string,
-  body: UpdateAdminRegionBody,
-): Promise<AdminRegion> {
-  const raw = await apiClientRequest<unknown, UpdateAdminRegionBody>(
-    `${V1_ADMIN_REGIONS_ENDPOINT}/${encodeURIComponent(id)}`,
-    'PATCH',
-    body,
-  );
-  return adminRegionSchema.parse(raw);
-}
-
-export function deleteAdminRegion(id: string): Promise<void> {
-  return apiClientRequest<void>(`${V1_ADMIN_REGIONS_ENDPOINT}/${encodeURIComponent(id)}`, 'DELETE');
 }
 
 export async function fetchAdminLocalities(): Promise<AdminLocality[]> {

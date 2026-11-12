@@ -9,22 +9,25 @@ import {
   getAdminLocationSaveError,
   parseAdminLocationAliases,
 } from '../shared/admin-location-form';
-import type { AdminLocality, AdminRegion } from '../../_lib/admin-locations-api';
+import type { AdminCountry } from '../../_lib/admin-countries-api';
+import type { AdminLocality } from '../../_lib/admin-locations-api';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { Select } from '@/components/Select';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 
 export interface AdminLocalityFormSubmission {
   id: string | null;
-  regionId: string;
+  countryIso: string;
   name: string;
+  qualifier: string | null;
   aliases: string[];
   timeZone: string;
 }
 
 interface AdminLocalityFormDialogProps {
   value: AdminLocality | null;
-  regions: AdminRegion[];
+  countries: AdminCountry[];
   isSaving: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (submission: AdminLocalityFormSubmission) => Promise<void>;
@@ -67,54 +70,45 @@ function getTimeZoneOptions(countryIso: string | undefined) {
   }));
 }
 
-function getInitialTimeZone(
-  value: AdminLocality | null,
-  regions: AdminRegion[],
-  regionId: string,
-): string {
+function getInitialTimeZone(value: AdminLocality | null, countryIso: string): string {
   if (value) {
     return value.timeZone;
   }
 
-  const region = regions.find((candidate) => candidate.id === regionId);
-  const timeZoneOptions = getTimeZoneOptions(region?.countryIso);
+  const timeZoneOptions = getTimeZoneOptions(countryIso);
   return timeZoneOptions.length === 1 ? timeZoneOptions[0].value : '';
 }
 
 export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogProps) {
-  const { value, regions, isSaving, onOpenChange, onSubmit } = props;
+  const { value, countries, isSaving, onOpenChange, onSubmit } = props;
 
-  const [regionId, setRegionId] = useState(value?.regionId ?? regions[0]?.id ?? '');
+  const [countryIso, setCountryIso] = useState(value?.countryIso ?? countries[0]?.iso ?? '');
   const [name, setName] = useState(value?.name ?? '');
+  const [qualifier, setQualifier] = useState(value?.qualifier ?? '');
   const [aliasesText, setAliasesText] = useState(value?.aliases.join(', ') ?? '');
-  const [timeZone, setTimeZone] = useState(() => getInitialTimeZone(value, regions, regionId));
+  const [timeZone, setTimeZone] = useState(() => getInitialTimeZone(value, countryIso));
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const selectedRegion = regions.find((region) => region.id === regionId);
-  const timeZoneOptions = useMemo(
-    () => getTimeZoneOptions(selectedRegion?.countryIso),
-    [selectedRegion?.countryIso],
-  );
+  const timeZoneOptions = useMemo(() => getTimeZoneOptions(countryIso), [countryIso]);
   const aliases = parseAdminLocationAliases(aliasesText);
   const aliasesError = getAdminLocationAliasesError(name, aliases);
   const isTimeZoneValid = timeZoneOptions.some((option) => option.value === timeZone);
   const isCreateMode = value === null;
   const canSubmit =
-    regionId.length > 0 &&
+    countryIso.length > 0 &&
     name.trim().length > 0 &&
     aliasesError === null &&
     isTimeZoneValid &&
     !isSaving;
-  const regionOptions = regions.map((region) => ({
-    value: region.id,
-    label: `${region.name} — ${getAdminCountryOptionLabel(region.countryIso)}`,
+  const countryOptions = countries.map((country) => ({
+    value: country.iso,
+    label: getAdminCountryOptionLabel(country.iso),
   }));
 
-  const handleRegionChange = (nextRegionId: string) => {
-    const nextRegion = regions.find((region) => region.id === nextRegionId);
-    const nextTimeZoneOptions = getTimeZoneOptions(nextRegion?.countryIso);
+  const handleCountryChange = (nextCountryIso: string) => {
+    const nextTimeZoneOptions = getTimeZoneOptions(nextCountryIso);
 
-    setRegionId(nextRegionId);
+    setCountryIso(nextCountryIso);
     if (nextTimeZoneOptions.length === 1) {
       setTimeZone(nextTimeZoneOptions[0].value);
       return;
@@ -134,8 +128,9 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
     try {
       await onSubmit({
         id: value?.id ?? null,
-        regionId,
+        countryIso,
         name: name.trim(),
+        qualifier: qualifier.trim() || null,
         aliases,
         timeZone,
       });
@@ -150,16 +145,17 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
         id="location-form-parent-label"
         htmlFor="location-form-parent"
       >
-        Region:
+        Country:
       </FieldLabel>
       <Select
         id="location-form-parent"
-        value={regionId}
-        options={regionOptions}
-        placeholder="Select region"
+        value={countryIso}
+        options={countryOptions}
+        placeholder="Select country"
         ariaLabelledBy="location-form-parent-label"
         isDisabled={isSaving || !isCreateMode}
-        onValueChange={handleRegionChange}
+        isRequired
+        onValueChange={handleCountryChange}
       />
       {!isCreateMode ? (
         <FieldDescription>The parent cannot be changed after creation.</FieldDescription>
@@ -168,26 +164,41 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
   );
 
   const additionalFields = (
-    <Field>
-      <FieldLabel
-        id="location-form-time-zone-label"
-        htmlFor="location-form-time-zone"
-      >
-        Time zone:
-      </FieldLabel>
-      <SearchableSelect
-        id="location-form-time-zone"
-        value={timeZone}
-        options={timeZoneOptions}
-        placeholder="Select time zone"
-        searchPlaceholder="Search time zones"
-        emptyText="No time zones found."
-        ariaLabelledBy="location-form-time-zone-label"
-        isDisabled={isSaving || selectedRegion === undefined}
-        isRequired
-        onValueChange={setTimeZone}
-      />
-    </Field>
+    <>
+      <Field>
+        <FieldLabel htmlFor="location-form-qualifier">Qualifier:</FieldLabel>
+        <Input
+          id="location-form-qualifier"
+          value={qualifier}
+          disabled={isSaving}
+          placeholder="Optional disambiguation"
+          onChange={(event) => setQualifier(event.target.value)}
+        />
+        <FieldDescription>
+          Distinguishes localities with the same name, for example a province or district.
+        </FieldDescription>
+      </Field>
+      <Field>
+        <FieldLabel
+          id="location-form-time-zone-label"
+          htmlFor="location-form-time-zone"
+        >
+          Time zone:
+        </FieldLabel>
+        <SearchableSelect
+          id="location-form-time-zone"
+          value={timeZone}
+          options={timeZoneOptions}
+          placeholder="Select time zone"
+          searchPlaceholder="Search time zones"
+          emptyText="No time zones found."
+          ariaLabelledBy="location-form-time-zone-label"
+          isDisabled={isSaving || countryIso.length === 0}
+          isRequired
+          onValueChange={setTimeZone}
+        />
+      </Field>
+    </>
   );
 
   return (
