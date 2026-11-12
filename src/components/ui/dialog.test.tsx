@@ -21,4 +21,19 @@ describe('DialogContent', () => {
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it('should contain overflowing content inside the viewport', () => {
+    render(
+      <Dialog open>
+        <DialogContent>
+          <DialogTitle>Test dialog</DialogTitle>
+        </DialogContent>
+      </Dialog>,
+    );
+
+    const panel = document.querySelector('[data-slot="dialog-panel"]');
+
+    expect(panel).toHaveClass('max-h-[calc(100dvh-2rem)]', 'overflow-y-auto');
+    expect(screen.getByRole('button', { name: 'Close dialog' })).toHaveClass('fixed', 'inset-0');
+  });
 });

@@ -38,22 +38,24 @@ function DialogContent({
   return (
     <DialogPortal>
       <DialogPrimitive.Content
+        data-slot="dialog-content"
         className={cn(
-          'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4 outline-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+          'fixed inset-0 z-[100] flex items-center justify-center overflow-hidden p-4 outline-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         )}
         {...props}
       >
         <DialogPrimitive.Close asChild>
           <button
             type="button"
-            className="absolute inset-0 cursor-default border-0 bg-black/70 p-0 backdrop-blur-sm"
+            className="fixed inset-0 cursor-default border-0 bg-black/70 p-0 backdrop-blur-sm"
             tabIndex={-1}
             aria-label="Close dialog"
           />
         </DialogPrimitive.Close>
         <div
+          data-slot="dialog-panel"
           className={cn(
-            'relative z-10 w-full max-w-md rounded-lg bg-background p-6 shadow-2xl',
+            'relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-lg bg-background p-6 shadow-2xl',
             className,
           )}
         >
