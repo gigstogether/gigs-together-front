@@ -1,7 +1,6 @@
 import type { Event } from '@/lib/types';
 import { ShareButton } from '@/components/ShareButton';
-import { LocationIcon } from '@/components/ui/location-icon';
-import { Calendar, Ticket } from 'lucide-react';
+import { Calendar, MapPin, Ticket } from 'lucide-react';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { GigPoster } from '@/components/GigPoster';
 import { clientEnv } from '@/env/client-env';
@@ -81,7 +80,7 @@ interface GigLocationProps {
 function GigLocation(props: GigLocationProps) {
   return (
     <>
-      <LocationIcon
+      <MapPin
         className="h-4 w-4 shrink-0"
         aria-hidden
       />

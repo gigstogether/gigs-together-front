@@ -1,5 +1,5 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { LocationIcon } from '@/components/ui/location-icon';
+import { MapPin } from 'lucide-react';
 
 interface LocationPopoverProps {
   location?: string;
@@ -7,7 +7,7 @@ interface LocationPopoverProps {
 }
 
 export default function LocationPopover(props: LocationPopoverProps) {
-  const { location, cn = 'flex items-center gap-2 text-base font-normal text-gray-800' } = props;
+  const { location, cn = 'flex items-center gap-1 text-base font-normal text-gray-800' } = props;
 
   if (!location) {
     return null;
@@ -21,7 +21,7 @@ export default function LocationPopover(props: LocationPopoverProps) {
         aria-label="Current location"
         title="Location"
       >
-        <LocationIcon className="h-4 w-4" />
+        <MapPin className="h-4 w-4" />
         {location}
       </PopoverTrigger>
       <PopoverContent
