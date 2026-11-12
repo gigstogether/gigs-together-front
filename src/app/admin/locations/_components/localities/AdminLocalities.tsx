@@ -27,6 +27,7 @@ import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
 
 export default function AdminLocalities(props: AdminLocationCatalogProps) {
   const { activeCatalog, onCatalogChange } = props;
+
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [formValue, setFormValue] = useState<AdminLocality | null | undefined>(undefined);

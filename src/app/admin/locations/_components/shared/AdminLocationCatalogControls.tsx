@@ -20,6 +20,7 @@ interface AdminLocationCatalogControlsProps extends AdminLocationCatalogProps {
 
 export default function AdminLocationCatalogControls(props: AdminLocationCatalogControlsProps) {
   const { activeCatalog, actionLabel, isActionDisabled, search, onCatalogChange, onAction } = props;
+
   const searchLabel = `Search ${getCatalogPluralLabel(activeCatalog).toLocaleLowerCase(ADMIN_LOCATION_LOCALE)}`;
 
   return (

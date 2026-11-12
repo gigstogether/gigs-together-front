@@ -6,7 +6,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import DateInput from '@/components/DateInput';
 import { Input } from '@/components/ui/input';
-import NativeSelect from '@/components/NativeSelect';
+import { Select } from '@/components/Select';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import { defaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
@@ -19,6 +19,11 @@ interface SuggestGigFormFieldsProps {
 
 export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
   const { form, countries } = props;
+
+  const countryOptions = countries.map((country) => ({
+    value: country.iso,
+    label: country.name,
+  }));
 
   return (
     <>
@@ -72,23 +77,19 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                   *
                 </span>
               </FieldLabel>
-              <NativeSelect
-                {...field}
+              <Select
                 id="suggest-gig-country"
-                required
-                aria-labelledby="suggest-gig-country-label"
-                aria-invalid={fieldState.invalid}
+                name={field.name}
                 value={field.value ?? defaultSuggestGigFormValues.country}
-              >
-                {countries.map((country) => (
-                  <option
-                    key={country.iso}
-                    value={country.iso}
-                  >
-                    {country.name}
-                  </option>
-                ))}
-              </NativeSelect>
+                options={countryOptions}
+                placeholder="Select country"
+                ariaLabelledBy="suggest-gig-country-label"
+                isRequired
+                isInvalid={fieldState.invalid}
+                triggerRef={field.ref}
+                onBlur={field.onBlur}
+                onValueChange={field.onChange}
+              />
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}

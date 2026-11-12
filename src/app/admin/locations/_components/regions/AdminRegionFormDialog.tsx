@@ -11,7 +11,7 @@ import {
 } from '../shared/admin-location-form';
 import type { AdminCountry } from '../../_lib/admin-countries-api';
 import type { AdminRegion } from '../../_lib/admin-locations-api';
-import NativeSelect from '@/components/NativeSelect';
+import { Select } from '@/components/Select';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 
 export interface AdminRegionFormSubmission {
@@ -42,6 +42,10 @@ export default function AdminRegionFormDialog(props: AdminRegionFormDialogProps)
   const isCreateMode = value === null;
   const canSubmit =
     countryIso.length > 0 && name.trim().length > 0 && aliasesError === null && !isSaving;
+  const countryOptions = countries.map((country) => ({
+    value: country.iso,
+    label: getAdminCountryOptionLabel(country.iso),
+  }));
 
   const handleSubmit = async () => {
     if (!canSubmit) {
@@ -63,22 +67,21 @@ export default function AdminRegionFormDialog(props: AdminRegionFormDialogProps)
 
   const parentField = (
     <Field>
-      <FieldLabel htmlFor="location-form-parent">Country:</FieldLabel>
-      <NativeSelect
+      <FieldLabel
+        id="location-form-parent-label"
+        htmlFor="location-form-parent"
+      >
+        Country:
+      </FieldLabel>
+      <Select
         id="location-form-parent"
         value={countryIso}
-        disabled={isSaving || !isCreateMode}
-        onChange={(event) => setCountryIso(event.target.value)}
-      >
-        {countries.map((country) => (
-          <option
-            key={country.iso}
-            value={country.iso}
-          >
-            {getAdminCountryOptionLabel(country.iso)}
-          </option>
-        ))}
-      </NativeSelect>
+        options={countryOptions}
+        placeholder="Select country"
+        ariaLabelledBy="location-form-parent-label"
+        isDisabled={isSaving || !isCreateMode}
+        onValueChange={setCountryIso}
+      />
       {!isCreateMode ? (
         <FieldDescription>The parent cannot be changed after creation.</FieldDescription>
       ) : null}

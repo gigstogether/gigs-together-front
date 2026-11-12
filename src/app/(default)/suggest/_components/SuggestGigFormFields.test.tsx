@@ -24,7 +24,7 @@ describe('SuggestGigFormFields', () => {
   it('should display the resolved country name', () => {
     render(<SuggestGigFormFieldsTestSubject />);
 
-    expect(screen.getByRole('option', { name: 'Spain' })).toHaveValue('ES');
+    expect(screen.getByRole('combobox', { name: 'Country:' })).toHaveTextContent('Spain');
   });
 
   it('should limit the title input to 300 characters', () => {

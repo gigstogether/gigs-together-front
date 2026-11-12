@@ -10,7 +10,7 @@ import {
   parseAdminLocationAliases,
 } from '../shared/admin-location-form';
 import type { AdminLocality, AdminPlace, AdminRegion } from '../../_lib/admin-locations-api';
-import NativeSelect from '@/components/NativeSelect';
+import { Select } from '@/components/Select';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Switch } from '@/components/ui/switch';
 
@@ -54,6 +54,10 @@ export default function AdminPlaceFormDialog(props: AdminPlaceFormDialogProps) {
   const isCreateMode = value === null;
   const canSubmit =
     localityId.length > 0 && name.trim().length > 0 && aliasesError === null && !isSaving;
+  const localityOptions = localities.map((locality) => ({
+    value: locality.id,
+    label: getLocalityOptionLabel(locality, regions),
+  }));
 
   const handleSubmit = async () => {
     if (!canSubmit) {
@@ -76,22 +80,21 @@ export default function AdminPlaceFormDialog(props: AdminPlaceFormDialogProps) {
 
   const parentField = (
     <Field>
-      <FieldLabel htmlFor="location-form-parent">Locality:</FieldLabel>
-      <NativeSelect
+      <FieldLabel
+        id="location-form-parent-label"
+        htmlFor="location-form-parent"
+      >
+        Locality:
+      </FieldLabel>
+      <Select
         id="location-form-parent"
         value={localityId}
-        disabled={isSaving || !isCreateMode}
-        onChange={(event) => setLocalityId(event.target.value)}
-      >
-        {localities.map((locality) => (
-          <option
-            key={locality.id}
-            value={locality.id}
-          >
-            {getLocalityOptionLabel(locality, regions)}
-          </option>
-        ))}
-      </NativeSelect>
+        options={localityOptions}
+        placeholder="Select locality"
+        ariaLabelledBy="location-form-parent-label"
+        isDisabled={isSaving || !isCreateMode}
+        onValueChange={setLocalityId}
+      />
       {!isCreateMode ? (
         <FieldDescription>The parent cannot be changed after creation.</FieldDescription>
       ) : null}

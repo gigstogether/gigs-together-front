@@ -1,49 +1,65 @@
 'use client';
 
-import { useState } from 'react';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
+import type { FocusEventHandler, Ref } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useDismissOnPointerDownOutside } from '@/hooks/use-dismiss-on-pointer-down-outside';
-import type { SupportedLocale } from '@/app/admin/_lib/admin-api';
 import { cn } from '@/lib/utils';
 
-interface AdminTranslationLocaleSelectProps {
-  readonly id: string;
-  readonly value: string;
-  readonly locales: readonly SupportedLocale[];
-  readonly isDisabled: boolean;
-  readonly onChange: (locale: string) => void;
+interface SelectOption {
+  value: string;
+  label: string;
+  isDisabled?: boolean;
 }
 
-function formatLocaleOptionLabel(iso: string, nativeName: string, isActive: boolean): string {
-  const inactiveSuffix = isActive ? '' : ' (inactive)';
-  return `${nativeName} (${iso})${inactiveSuffix}`;
+interface SelectProps {
+  id: string;
+  value: string;
+  options: SelectOption[];
+  placeholder: string;
+  ariaLabelledBy: string;
+  isDisabled?: boolean;
+  isRequired?: boolean;
+  isInvalid?: boolean;
+  name?: string;
+  triggerRef?: Ref<HTMLButtonElement>;
+  onBlur?: FocusEventHandler<HTMLButtonElement>;
+  onValueChange: (value: string) => void;
 }
 
-export default function AdminTranslationLocaleSelect(props: AdminTranslationLocaleSelectProps) {
-  const { id, value, locales, isDisabled, onChange } = props;
+function Select(props: SelectProps) {
+  const {
+    id,
+    value,
+    options,
+    placeholder,
+    ariaLabelledBy,
+    isDisabled = false,
+    isRequired = false,
+    isInvalid = false,
+    name,
+    triggerRef,
+    onBlur,
+    onValueChange,
+  } = props;
 
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useDismissOnPointerDownOutside({
     isOpen,
     onDismiss: () => setIsOpen(false),
   });
-  const labelId = `${id}-label`;
   const listboxId = `${id}-listbox`;
   const ChevronIcon = isOpen ? ChevronUp : ChevronDown;
+  const selectedOption = options.find((option) => option.value === value);
 
-  const selectedLocale = locales.find((locale) => locale.iso === value);
-  const triggerLabel = selectedLocale
-    ? formatLocaleOptionLabel(
-        selectedLocale.iso,
-        selectedLocale.nativeName,
-        selectedLocale.isActive,
-      )
-    : 'Select locale';
+  const handleSelect = (option: SelectOption) => {
+    if (option.isDisabled) {
+      return;
+    }
 
-  const handleSelect = (locale: string) => {
-    onChange(locale);
+    onValueChange(option.value);
     setIsOpen(false);
   };
 
@@ -53,18 +69,23 @@ export default function AdminTranslationLocaleSelect(props: AdminTranslationLoca
       className="relative w-full"
     >
       <Button
+        ref={triggerRef}
         id={id}
+        name={name}
         type="button"
         variant="outline"
         disabled={isDisabled}
         role="combobox"
         aria-expanded={isOpen}
         aria-controls={listboxId}
-        aria-labelledby={labelId}
+        aria-labelledby={ariaLabelledBy}
+        aria-required={isRequired}
+        aria-invalid={isInvalid}
         className="h-9 w-full justify-between bg-transparent px-3 font-normal shadow-sm"
+        onBlur={onBlur}
         onClick={() => setIsOpen((current) => !current)}
       >
-        <span className="truncate">{triggerLabel}</span>
+        <span className="truncate">{selectedOption?.label ?? placeholder}</span>
         <ChevronIcon
           className="size-4 shrink-0 opacity-50"
           aria-hidden
@@ -75,39 +96,37 @@ export default function AdminTranslationLocaleSelect(props: AdminTranslationLoca
           <ul
             id={listboxId}
             role="listbox"
-            aria-labelledby={labelId}
+            aria-labelledby={ariaLabelledBy}
             className="max-h-48 space-y-0.5 overflow-y-auto p-1"
           >
-            {locales.map((locale) => {
-              const isSelected = locale.iso === value;
-              const optionLabel = formatLocaleOptionLabel(
-                locale.iso,
-                locale.nativeName,
-                locale.isActive,
-              );
+            {options.map((option) => {
+              const isSelected = option.value === value;
 
               return (
                 <li
-                  key={locale.iso}
+                  key={option.value}
                   role="presentation"
                 >
                   <button
                     type="button"
                     role="option"
+                    disabled={option.isDisabled}
                     aria-selected={isSelected}
-                    onClick={() => handleSelect(locale.iso)}
+                    aria-disabled={option.isDisabled}
+                    onClick={() => handleSelect(option)}
                     className={cn(
                       'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition-colors',
                       isSelected
                         ? 'bg-accent text-accent-foreground'
                         : 'text-foreground hover:bg-muted',
+                      option.isDisabled && 'cursor-not-allowed opacity-50',
                     )}
                   >
                     <Check
                       className={cn('size-3.5 shrink-0', isSelected ? 'opacity-100' : 'opacity-0')}
                       aria-hidden
                     />
-                    <span>{optionLabel}</span>
+                    <span>{option.label}</span>
                   </button>
                 </li>
               );
@@ -118,3 +137,6 @@ export default function AdminTranslationLocaleSelect(props: AdminTranslationLoca
     </div>
   );
 }
+
+export { Select };
+export type { SelectOption };

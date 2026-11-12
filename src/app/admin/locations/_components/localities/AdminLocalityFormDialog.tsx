@@ -10,7 +10,7 @@ import {
   parseAdminLocationAliases,
 } from '../shared/admin-location-form';
 import type { AdminLocality, AdminRegion } from '../../_lib/admin-locations-api';
-import NativeSelect from '@/components/NativeSelect';
+import { Select } from '@/components/Select';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 
@@ -58,6 +58,10 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
     aliasesError === null &&
     isTimeZoneValid &&
     !isSaving;
+  const regionOptions = regions.map((region) => ({
+    value: region.id,
+    label: `${region.name} — ${getAdminCountryOptionLabel(region.countryIso)}`,
+  }));
 
   const handleSubmit = async () => {
     if (!canSubmit) {
@@ -80,22 +84,21 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
 
   const parentField = (
     <Field>
-      <FieldLabel htmlFor="location-form-parent">Region:</FieldLabel>
-      <NativeSelect
+      <FieldLabel
+        id="location-form-parent-label"
+        htmlFor="location-form-parent"
+      >
+        Region:
+      </FieldLabel>
+      <Select
         id="location-form-parent"
         value={regionId}
-        disabled={isSaving || !isCreateMode}
-        onChange={(event) => setRegionId(event.target.value)}
-      >
-        {regions.map((region) => (
-          <option
-            key={region.id}
-            value={region.id}
-          >
-            {region.name} — {getAdminCountryOptionLabel(region.countryIso)}
-          </option>
-        ))}
-      </NativeSelect>
+        options={regionOptions}
+        placeholder="Select region"
+        ariaLabelledBy="location-form-parent-label"
+        isDisabled={isSaving || !isCreateMode}
+        onValueChange={setRegionId}
+      />
       {!isCreateMode ? (
         <FieldDescription>The parent cannot be changed after creation.</FieldDescription>
       ) : null}

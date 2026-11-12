@@ -23,7 +23,9 @@ describe('AdminLocationFormDialogs', () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole('combobox', { name: 'Country:' }));
     expect(screen.getByRole('option', { name: 'Spain (ES)' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('option', { name: 'Spain (ES)' }));
 
     fireEvent.change(screen.getByLabelText('Canonical name:'), {
       target: { value: '  Catalonia  ' },
@@ -57,6 +59,7 @@ describe('AdminLocationFormDialogs', () => {
     fireEvent.change(screen.getByLabelText('Canonical name:'), {
       target: { value: 'Barcelona' },
     });
+    fireEvent.click(screen.getByRole('combobox', { name: 'Region:' }));
     expect(screen.getByRole('option', { name: 'Catalonia — Spain (ES)' })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Time zone:'), {
       target: { value: 'Not/A_Time_Zone' },
@@ -93,10 +96,8 @@ describe('AdminLocationFormDialogs', () => {
     );
 
     expect(screen.getByRole('switch', { name: 'Active:' })).not.toBeChecked();
-    expect(screen.getByLabelText('Locality:')).toBeDisabled();
-    expect(
-      screen.getByRole('option', { name: 'Barcelona — Catalonia — Spain (ES)' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Locality:' })).toBeDisabled();
+    expect(screen.getByText('Barcelona — Catalonia — Spain (ES)')).toBeInTheDocument();
   });
 
   it('should show the save failure returned by the catalog operation', async () => {
