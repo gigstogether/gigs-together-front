@@ -1,3 +1,5 @@
+import { MapPin } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { Route } from 'next';
 
 import { ADMIN_GIGS_ROUTE } from '@/lib/admin-gig-paths';
@@ -8,6 +10,7 @@ export interface AdminNavItem {
   readonly label: string;
   readonly description: string;
   readonly isEnabled: boolean;
+  readonly icon?: LucideIcon;
 }
 
 const ADMIN_DASHBOARD_ROUTE: Route = '/admin';
@@ -36,6 +39,13 @@ export const adminNavItems: readonly AdminNavItem[] = [
     isEnabled: true,
   },
   {
+    href: ADMIN_LOCATIONS_ROUTE,
+    label: 'Locations',
+    description: 'Countries and location catalogs',
+    isEnabled: true,
+    icon: MapPin,
+  },
+  {
     href: ADMIN_TRANSLATIONS_ROUTE,
     label: 'Translations',
     description: 'UI text and Telegram post strings',
@@ -45,12 +55,6 @@ export const adminNavItems: readonly AdminNavItem[] = [
     href: ADMIN_LOCALES_ROUTE,
     label: 'Locales',
     description: 'Active locales and ordering',
-    isEnabled: true,
-  },
-  {
-    href: ADMIN_LOCATIONS_ROUTE,
-    label: 'Locations',
-    description: 'Countries and location catalogs',
     isEnabled: true,
   },
   {
