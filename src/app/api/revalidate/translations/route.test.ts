@@ -91,11 +91,11 @@ describe('POST', () => {
 
   it('should revalidate Community feed paths when a feed translation changes', async () => {
     const response = await POST(
-      createRequest({ secret: 'top-secret', body: { namespace: 'country' } }),
+      createRequest({ secret: 'top-secret', body: { namespace: 'city' } }),
     );
 
     expect(response.status).toBe(204);
-    expect(revalidateTagMock).toHaveBeenCalledWith('translations:ns:country', { expire: 0 });
+    expect(revalidateTagMock).toHaveBeenCalledWith('translations:ns:city', { expire: 0 });
     expect(revalidatePathMock).toHaveBeenCalledWith('/feed/es/barcelona');
   });
 

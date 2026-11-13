@@ -121,5 +121,6 @@ describe('feed community page', () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('<h1 class="sr-only">Barcelona | Gigs Together!</h1>');
+    expect(getTranslationsMock).toHaveBeenCalledWith('en', ['city', 'community']);
   });
 });

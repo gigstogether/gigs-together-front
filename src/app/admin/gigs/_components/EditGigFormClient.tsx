@@ -6,7 +6,7 @@ import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import type { Country } from '@/lib/api-boundary-schemas';
+import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 import { useRouter } from 'next/navigation';
 import GigFormFields from '@/app/admin/gigs/_components/gig-form/GigFormFields';
 import PosterField from '@/components/PosterField';
@@ -19,7 +19,7 @@ import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 
 interface EditGigFormClientProps {
-  countries: Country[];
+  countries: CountryDisplayOption[];
   gigPublicId: string;
 }
 

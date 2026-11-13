@@ -31,10 +31,7 @@ export type Event = {
     code: string;
     name: string;
   };
-  country: {
-    iso: string;
-    name: string;
-  };
+  countryIso: string;
   ticketsUrl?: string;
   calendarUrl?: string;
   postUrl?: string;

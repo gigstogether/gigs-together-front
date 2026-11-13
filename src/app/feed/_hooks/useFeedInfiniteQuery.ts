@@ -10,7 +10,6 @@ import { mergeUniqueSorted } from '@/app/feed/_lib/feedEvents';
 import { fetchFeedPage } from '@/app/feed/_lib/feedApi';
 import { feedKeys } from '@/lib/feed/feedKeys';
 
-export type ResolveCountryName = (iso: string) => string;
 export type ResolveCityName = (code: string) => string;
 
 export interface UseFeedInfiniteQueryParams {
@@ -19,7 +18,6 @@ export interface UseFeedInfiniteQueryParams {
   readonly initialEvents?: readonly Event[];
   readonly initialPrevCursor?: string;
   readonly initialNextCursor?: string;
-  readonly resolveCountryName: ResolveCountryName;
   readonly resolveCityName: ResolveCityName;
 }
 
@@ -66,10 +64,9 @@ const INITIAL_FEED_PAGE_PARAM = { direction: 'initial' } satisfies FeedPageParam
 
 function mapGigsToEvents(
   gigs: readonly V1GigGetResponseBodyGig[],
-  resolveCountryName: ResolveCountryName,
   resolveCityName: ResolveCityName,
 ): Event[] {
-  return gigs.map((gig) => gigToEvent(gig, { resolveCountryName, resolveCityName }));
+  return gigs.map((gig) => gigToEvent(gig, { resolveCityName }));
 }
 
 function createInitialInfiniteData(
@@ -91,13 +88,8 @@ export function useFeedInfiniteQuery(
   params: UseFeedInfiniteQueryParams,
 ): UseFeedInfiniteQueryResult {
   const queryClient = useQueryClient();
-  const resolveCountryNameRef = useRef(params.resolveCountryName);
   const resolveCityNameRef = useRef(params.resolveCityName);
   const appliedInitialSnapshotRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    resolveCountryNameRef.current = params.resolveCountryName;
-  }, [params.resolveCountryName]);
 
   useEffect(() => {
     resolveCityNameRef.current = params.resolveCityName;
@@ -134,11 +126,7 @@ export function useFeedInfiniteQuery(
       });
 
       return {
-        events: mapGigsToEvents(
-          result.gigs,
-          resolveCountryNameRef.current,
-          resolveCityNameRef.current,
-        ),
+        events: mapGigsToEvents(result.gigs, resolveCityNameRef.current),
         prevCursor: result.prevCursor,
         nextCursor: result.nextCursor,
         requestedCursor: pageParam.cursor,

@@ -30,9 +30,11 @@ export type V1LocaleGetTranslationsResponseBody = z.infer<
 export type TranslationFormat = V1TranslationValue['format'];
 export type TranslationKind = V1TranslationValue['kind'];
 
-const countrySchema = z.object({
-  iso: z.string().min(1),
-});
+const countrySchema = z
+  .object({
+    iso: z.string().regex(/^[A-Z]{2}$/),
+  })
+  .strict();
 
 export type Country = z.infer<typeof countrySchema>;
 

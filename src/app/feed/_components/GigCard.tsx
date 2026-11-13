@@ -1,12 +1,13 @@
 import type { Event } from '@/lib/types';
 import { ShareButton } from '@/components/ShareButton';
-import { LocationIcon } from '@/components/ui/location-icon';
-import { Calendar, Ticket } from 'lucide-react';
+import { Calendar, MapPin, Ticket } from 'lucide-react';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { GigPoster } from '@/components/GigPoster';
 import { clientEnv } from '@/env/client-env';
 import { formatGigDate } from '@/lib/feed/gig-date-format';
 import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
+import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
+import { useI18n } from '@/providers/I18nProvider';
 
 interface GigCardProps {
   gig: Event;
@@ -79,7 +80,7 @@ interface GigLocationProps {
 function GigLocation(props: GigLocationProps) {
   return (
     <>
-      <LocationIcon
+      <MapPin
         className="h-4 w-4 shrink-0"
         aria-hidden
       />
@@ -91,7 +92,9 @@ function GigLocation(props: GigLocationProps) {
 export function GigCard(props: GigCardProps) {
   const { gig, posterLoading, posterFetchPriority } = props;
 
-  const location = [gig.venue, gig.city.name, gig.country.name].filter((str) => !!str).join(' ');
+  const { locale } = useI18n();
+  const countryName = getCountryDisplayName(gig.countryIso, locale);
+  const location = [gig.venue, gig.city.name, countryName].filter((str) => !!str).join(' ');
   const mapsHref = location ? buildGoogleMapsSearchUrl(location) : undefined;
   const telegramUrl = gig.postUrl ?? clientEnv.telegramUrl;
   const sharePath = `/gigs/${encodeURIComponent(gig.id)}`;

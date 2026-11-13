@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
 import SuggestGigFormFields from '@/app/(default)/suggest/_components/SuggestGigFormFields';
@@ -15,12 +15,37 @@ function SuggestGigFormFieldsTestSubject() {
   return (
     <SuggestGigFormFields
       form={form}
-      countries={[]}
+      countries={[
+        { iso: 'ES', name: 'Spain' },
+        { iso: 'FR', name: 'France' },
+      ]}
     />
   );
 }
 
 describe('SuggestGigFormFields', () => {
+  it('should display the resolved country name', () => {
+    render(<SuggestGigFormFieldsTestSubject />);
+
+    expect(screen.getByRole('combobox', { name: 'Country:' })).toHaveTextContent('Spain');
+  });
+
+  it('should search and select a country', () => {
+    render(<SuggestGigFormFieldsTestSubject />);
+
+    const countrySelect = screen.getByRole('combobox', { name: 'Country:' });
+
+    fireEvent.click(countrySelect);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search countries' }), {
+      target: { value: 'France' },
+    });
+
+    expect(screen.queryByRole('option', { name: 'Spain' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('option', { name: 'France' }));
+
+    expect(countrySelect).toHaveTextContent('France');
+  });
+
   it('should limit the title input to 300 characters', () => {
     render(<SuggestGigFormFieldsTestSubject />);
 

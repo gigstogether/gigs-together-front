@@ -1,3 +1,5 @@
+import { MapPin } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { Route } from 'next';
 
 import { ADMIN_GIGS_ROUTE } from '@/lib/admin-gig-paths';
@@ -8,11 +10,13 @@ export interface AdminNavItem {
   readonly label: string;
   readonly description: string;
   readonly isEnabled: boolean;
+  readonly icon?: LucideIcon;
 }
 
 const ADMIN_DASHBOARD_ROUTE: Route = '/admin';
 const ADMIN_TRANSLATIONS_ROUTE: Route = '/admin/translations';
 const ADMIN_LOCALES_ROUTE: Route = '/admin/locales';
+const ADMIN_LOCATIONS_ROUTE: Route = '/admin/locations';
 const ADMIN_ADMINS_ROUTE: Route = '/admin/admins';
 
 export const adminNavItems: readonly AdminNavItem[] = [
@@ -33,6 +37,13 @@ export const adminNavItems: readonly AdminNavItem[] = [
     label: 'Gig candidates',
     description: 'Review user-submitted gig candidates',
     isEnabled: true,
+  },
+  {
+    href: ADMIN_LOCATIONS_ROUTE,
+    label: 'Locations',
+    description: 'Countries and location catalogs',
+    isEnabled: true,
+    icon: MapPin,
   },
   {
     href: ADMIN_TRANSLATIONS_ROUTE,

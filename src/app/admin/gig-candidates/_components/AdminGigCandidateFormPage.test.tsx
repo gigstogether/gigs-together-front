@@ -4,18 +4,12 @@ import { render, screen } from '@testing-library/react';
 
 import AdminGigCandidateFormPage from '@/app/admin/gig-candidates/_components/AdminGigCandidateFormPage';
 
-const { getCountriesMock, getRequiredCommunityByRouteMock, getTranslationsMock } = vi.hoisted(
-  () => ({
-    getCountriesMock: vi.fn(),
-    getRequiredCommunityByRouteMock: vi.fn(),
-    getTranslationsMock: vi.fn(),
-  }),
-);
+const { getCountriesMock, getRequiredCommunityByRouteMock } = vi.hoisted(() => ({
+  getCountriesMock: vi.fn(),
+  getRequiredCommunityByRouteMock: vi.fn(),
+}));
 
 vi.mock('@/lib/countries.server', () => ({ getCountries: getCountriesMock }));
-vi.mock('@/lib/i18n/translations.server', () => ({
-  getTranslations: getTranslationsMock,
-}));
 vi.mock('@/lib/community/community.server', () => ({
   getRequiredCommunityByRoute: getRequiredCommunityByRouteMock,
 }));
@@ -40,7 +34,6 @@ describe('AdminGigCandidateFormPage', () => {
       community: { id: 'community-id' },
       nameTranslationNamespace: 'community',
     });
-    getTranslationsMock.mockResolvedValue({ locale: 'en', translations: {} });
   });
 
   it('should render the shared create flow', async () => {
@@ -69,6 +62,5 @@ describe('AdminGigCandidateFormPage', () => {
       'community-id',
     );
     expect(getCountriesMock).toHaveBeenCalledTimes(1);
-    expect(getTranslationsMock).toHaveBeenCalledWith('en', 'country');
   });
 });

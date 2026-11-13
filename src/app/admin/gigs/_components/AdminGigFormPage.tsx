@@ -1,8 +1,7 @@
 import EditGigFormClient from '@/app/admin/gigs/_components/EditGigFormClient';
 import AdminGigDetailBackLink from '@/app/admin/gigs/_components/AdminGigDetailBackLink';
-import { I18nProvider } from '@/providers/I18nProvider';
 import { getCountries } from '@/lib/countries.server';
-import { getTranslations } from '@/lib/i18n/translations.server';
+import { createCountryDisplayOptions } from '@/lib/i18n/country-display-name';
 
 interface AdminGigFormPageProps {
   gigPublicId: string;
@@ -10,21 +9,20 @@ interface AdminGigFormPageProps {
 
 export default async function AdminGigFormPage(props: AdminGigFormPageProps) {
   const { gigPublicId } = props;
-  const [countries, i18n] = await Promise.all([getCountries(), getTranslations('en', 'country')]);
+  const countries = await getCountries();
+  const countryOptions = createCountryDisplayOptions(
+    countries.map((country) => country.iso),
+    'en',
+  );
 
   return (
-    <I18nProvider
-      locale={i18n.locale}
-      translations={i18n.translations}
-    >
-      <div className="mx-auto w-full max-w-md">
-        <AdminGigDetailBackLink />
-        {/* TODO: create admin gig form context to prevent prop drilling? */}
-        <EditGigFormClient
-          countries={countries}
-          gigPublicId={gigPublicId}
-        />
-      </div>
-    </I18nProvider>
+    <div className="mx-auto w-full max-w-md">
+      <AdminGigDetailBackLink />
+      {/* TODO: create admin gig form context to prevent prop drilling? */}
+      <EditGigFormClient
+        countries={countryOptions}
+        gigPublicId={gigPublicId}
+      />
+    </div>
   );
 }

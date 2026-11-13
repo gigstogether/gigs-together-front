@@ -7,17 +7,16 @@ import { Button } from '@/components/ui/button';
 import DateInput from '@/components/DateInput';
 import { Field, FieldError, FieldLabel, FieldSeparator } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import NativeSelect from '@/components/NativeSelect';
+import RequiredIndicator from '@/components/RequiredIndicator';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import type { Country } from '@/lib/api-boundary-schemas';
+import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
-import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
-import { useT } from '@/providers/I18nProvider';
 
 interface GigFormFieldsProps {
   form: UseFormReturn<GigFormValues>;
-  countries: Country[];
+  countries: CountryDisplayOption[];
   isSubmitting: boolean;
   validationMode: 'completeGig' | 'gigCandidateCreate' | 'gigCandidateDraft';
   isLoading?: boolean;
@@ -38,17 +37,17 @@ export default function GigFormFields(props: GigFormFieldsProps) {
     onLookup,
   } = props;
 
-  const t = useT();
+  const countryOptions = countries.map((country) => ({
+    value: country.iso,
+    label: country.name,
+  }));
+  if (allowEmptyCountry) {
+    countryOptions.unshift({ value: '', label: 'Not set' });
+  }
+
   const isCompleteGig = validationMode === 'completeGig';
   const areCoreFieldsRequired = validationMode !== 'gigCandidateDraft';
-  const coreRequiredIndicator = areCoreFieldsRequired ? (
-    <span
-      aria-hidden="true"
-      className="text-destructive"
-    >
-      *
-    </span>
-  ) : null;
+  const coreRequiredIndicator = areCoreFieldsRequired ? <RequiredIndicator /> : null;
   const completeGigRequiredIndicator = isCompleteGig ? coreRequiredIndicator : null;
 
   return (
@@ -79,24 +78,27 @@ export default function GigFormFields(props: GigFormFieldsProps) {
           name="country"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="gig-country">Country:{coreRequiredIndicator}</FieldLabel>
-              <NativeSelect
-                {...field}
-                id="gig-country"
-                required={areCoreFieldsRequired}
-                aria-invalid={fieldState.invalid}
-                value={field.value ?? defaultGigFormValues.country}
+              <FieldLabel
+                id="gig-country-label"
+                htmlFor="gig-country"
               >
-                {allowEmptyCountry ? <option value="">Not set</option> : null}
-                {countries.map((country) => (
-                  <option
-                    key={country.iso}
-                    value={country.iso}
-                  >
-                    {t('country', countryIsoToTranslationKey(country.iso))}
-                  </option>
-                ))}
-              </NativeSelect>
+                Country:{coreRequiredIndicator}
+              </FieldLabel>
+              <SearchableSelect
+                id="gig-country"
+                name={field.name}
+                value={field.value ?? defaultGigFormValues.country}
+                options={countryOptions}
+                placeholder="Select country"
+                searchPlaceholder="Search countries"
+                emptyText="No countries found."
+                ariaLabelledBy="gig-country-label"
+                isRequired={areCoreFieldsRequired}
+                isInvalid={fieldState.invalid}
+                triggerRef={field.ref}
+                onBlur={field.onBlur}
+                onValueChange={field.onChange}
+              />
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
