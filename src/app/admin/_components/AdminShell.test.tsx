@@ -20,5 +20,17 @@ describe('AdminShell', () => {
     );
 
     expect(screen.getByRole('link', { name: 'Gigs' })).toBeInTheDocument();
+    const locationsLink = screen.getByRole('link', { name: 'Locations' });
+    expect(locationsLink.lastElementChild?.tagName.toLowerCase()).toBe('svg');
+    expect(locationsLink).toHaveClass('justify-between');
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      'Dashboard',
+      'Gigs',
+      'Gig candidates',
+      'Locations',
+      'Translations',
+      'Locales',
+      'Admins',
+    ]);
   });
 });

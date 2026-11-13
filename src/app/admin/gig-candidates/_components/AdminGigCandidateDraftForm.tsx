@@ -34,13 +34,13 @@ import PosterField from '@/components/PosterField';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import type { Country } from '@/lib/api-boundary-schemas';
+import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 import { ApiError } from '@/lib/api-errors';
 import { buildAdminGigCandidateRoute } from '@/lib/admin-gig-candidate-paths';
 
 interface AdminGigCandidateDraftFormProps {
   defaultCommunityId: string;
-  countries: Country[];
+  countries: CountryDisplayOption[];
   gigCandidate?: AdminGigCandidate;
 }
 

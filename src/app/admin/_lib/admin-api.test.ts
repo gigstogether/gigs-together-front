@@ -847,10 +847,10 @@ describe('fetchAdminTranslationNamespaces', () => {
 
   it('should parse admin translation namespaces response when payload is valid', async () => {
     mockApiRequest.mockResolvedValue({
-      namespaces: ['about', 'country'],
+      namespaces: ['about', 'common'],
     });
 
-    await expect(fetchAdminTranslationNamespaces()).resolves.toEqual(['about', 'country']);
+    await expect(fetchAdminTranslationNamespaces()).resolves.toEqual(['about', 'common']);
     expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/translations/namespaces', 'GET');
   });
 });
@@ -916,15 +916,15 @@ describe('fetchAdminTranslations', () => {
     );
   });
 
-  it('should parse country translation records with lowercase iso keys', async () => {
+  it('should parse common translation records', async () => {
     mockApiRequest.mockResolvedValue({
       records: [
         {
           id: '64f1a2b3c4d5e6f7a8b9c0d2',
-          namespace: 'country',
+          namespace: 'common',
           locale: 'en',
-          key: 'es',
-          value: 'Spain',
+          key: 'button.save',
+          value: 'Save',
           format: 'plain',
           kind: 'text',
           isActive: true,
@@ -932,13 +932,13 @@ describe('fetchAdminTranslations', () => {
       ],
     });
 
-    await expect(fetchAdminTranslations({ namespace: 'country' })).resolves.toEqual([
+    await expect(fetchAdminTranslations({ namespace: 'common' })).resolves.toEqual([
       {
         id: '64f1a2b3c4d5e6f7a8b9c0d2',
-        namespace: 'country',
+        namespace: 'common',
         locale: 'en',
-        key: 'es',
-        value: 'Spain',
+        key: 'button.save',
+        value: 'Save',
         format: 'plain',
         kind: 'text',
         isActive: true,
@@ -1000,9 +1000,9 @@ describe('fetchAdminTranslations', () => {
     mockApiRequest.mockResolvedValue({
       locale: 'en',
       translations: {
-        country: {
-          es: {
-            value: 'Spain',
+        common: {
+          'button.save': {
+            value: 'Save',
             format: 'plain',
             kind: 'text',
           },
@@ -1010,7 +1010,7 @@ describe('fetchAdminTranslations', () => {
       },
     });
 
-    await expect(fetchAdminTranslations({ namespace: 'country' })).rejects.toThrow(
+    await expect(fetchAdminTranslations({ namespace: 'common' })).rejects.toThrow(
       'received locale translations payload',
     );
   });

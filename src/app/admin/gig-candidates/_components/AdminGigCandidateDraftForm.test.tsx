@@ -66,7 +66,7 @@ function renderForm(gigCandidate?: AdminGigCandidate) {
     ...render(
       <AdminGigCandidateDraftForm
         defaultCommunityId="default-community-id"
-        countries={[{ iso: 'ES' }]}
+        countries={[{ iso: 'ES', name: 'Spain' }]}
         gigCandidate={gigCandidate}
       />,
       { wrapper: createQueryClientWrapper(queryClient) },

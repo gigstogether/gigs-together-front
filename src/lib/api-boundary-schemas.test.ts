@@ -44,7 +44,7 @@ describe('parseCountries', () => {
   });
 
   it('should throw when countries payload shape is invalid', () => {
-    const payload = [{ code: 'ES' }];
+    const payload = [{ iso: 'ESP' }];
     expect(() => parseCountries(payload)).toThrow();
   });
 });
@@ -54,9 +54,9 @@ describe('parseLocaleGetTranslationsResponseBody', () => {
     const payload = {
       locale: 'en',
       translations: {
-        country: {
-          es: {
-            value: 'Spain',
+        common: {
+          'button.save': {
+            value: 'Save',
             format: 'plain',
             kind: 'text',
           },
@@ -71,9 +71,9 @@ describe('parseLocaleGetTranslationsResponseBody', () => {
     const payload = {
       locale: 'en',
       translations: {
-        country: {
-          es: {
-            value: 'Spain',
+        common: {
+          'button.save': {
+            value: 'Save',
             format: 'markdown',
           },
         },
@@ -86,9 +86,9 @@ describe('parseLocaleGetTranslationsResponseBody', () => {
     const payload = {
       locale: 'en',
       translations: {
-        country: {
-          es: {
-            value: 'Spain',
+        common: {
+          'button.save': {
+            value: 'Save',
             format: 'plain',
           },
         },

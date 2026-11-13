@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import FeedClient from '../../_components/FeedClient';
 import { clientEnv } from '@/env/client-env';
 import { serverEnv } from '@/env/server-env';
-import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
 import { getFeed } from '@/app/feed/_lib/feed.server';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
 import { DEFAULT_FEED_ROUTE, buildFeedPath, normalizeSegment } from '@/lib/feed/feed.routes';
@@ -88,22 +87,13 @@ export default async function Page(props: FeedCommunityPageProps) {
   }
 
   const [i18n, feed] = await Promise.all([
-    getTranslations('en', ['country', 'city', resolved.nameTranslationNamespace]),
+    getTranslations('en', ['city', resolved.nameTranslationNamespace]),
     getFeed({
       limit: PAGE_SIZE,
       country: normalizedCountry,
       communitySlug: normalizedCommunitySlug,
     }),
   ]);
-
-  const tCountry = (iso: string): string => {
-    const key = countryIsoToTranslationKey(iso);
-    return resolveTranslationValue({
-      entry: i18n.translations.country?.[key],
-      namespace: 'country',
-      key,
-    });
-  };
 
   const tCity = (code: string): string =>
     resolveTranslationValue({
@@ -122,7 +112,6 @@ export default async function Page(props: FeedCommunityPageProps) {
 
   const initialEvents: Event[] = feed.gigs.map((gig) =>
     gigToEvent(gig, {
-      resolveCountryName: (iso) => tCountry(iso),
       resolveCityName: (code) => tCity(code),
     }),
   );

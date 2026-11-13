@@ -25,7 +25,7 @@ const TRANSLATION_NAMESPACE_REVALIDATE_PATHS: Readonly<Record<string, readonly s
   llms: ['/llms.txt'],
 };
 
-const FEED_TRANSLATION_NAMESPACES = ['community', 'country', 'city'] as const;
+const FEED_TRANSLATION_NAMESPACES = ['community', 'city'] as const;
 
 const isRevalidateTranslationsRequestBody = (
   x: unknown,

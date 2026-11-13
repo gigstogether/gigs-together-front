@@ -12,7 +12,7 @@ describe('AdminTranslationsFilterControls', () => {
   it('should render filter dropdowns and create action in one row', () => {
     render(
       <AdminTranslationsFilterControls
-        namespaces={['about', 'country']}
+        namespaces={['about', 'common']}
         selectedNamespace={ADMIN_ALL_TRANSLATION_NAMESPACES}
         onNamespaceChange={vi.fn()}
         isNamespacesLoading={false}
@@ -73,7 +73,7 @@ describe('AdminTranslationsFilterControls', () => {
 
     render(
       <AdminTranslationsFilterControls
-        namespaces={['about', 'country']}
+        namespaces={['about', 'common']}
         selectedNamespace={ADMIN_ALL_TRANSLATION_NAMESPACES}
         onNamespaceChange={onNamespaceChange}
         isNamespacesLoading={false}
@@ -92,8 +92,8 @@ describe('AdminTranslationsFilterControls', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Namespace' }));
-    fireEvent.click(screen.getByRole('option', { name: 'country' }));
+    fireEvent.click(screen.getByRole('option', { name: 'common' }));
 
-    expect(onNamespaceChange).toHaveBeenCalledWith('country');
+    expect(onNamespaceChange).toHaveBeenCalledWith('common');
   });
 });
