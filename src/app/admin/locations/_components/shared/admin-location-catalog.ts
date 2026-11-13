@@ -1,8 +1,8 @@
 import { ADMIN_LOCATION_LOCALE } from './admin-location-display';
 
-export type LocationCatalogKind = 'locality' | 'place';
+export type LocationCatalogKind = 'locality' | 'venue';
 
-export const LOCATION_CATALOG_KINDS = ['locality', 'place'] satisfies LocationCatalogKind[];
+export const LOCATION_CATALOG_KINDS = ['locality', 'venue'] satisfies LocationCatalogKind[];
 
 export interface AdminLocationCatalogProps {
   activeCatalog: LocationCatalogKind;
@@ -13,8 +13,8 @@ export function getCatalogLabel(kind: LocationCatalogKind): string {
   switch (kind) {
     case 'locality':
       return 'Locality';
-    case 'place':
-      return 'Place';
+    case 'venue':
+      return 'Venue';
   }
 }
 

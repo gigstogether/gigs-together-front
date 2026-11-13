@@ -5,7 +5,7 @@ import AdminLocationCatalogPageClient from './AdminLocationCatalogPageClient';
 
 const fetchCountriesMock = vi.fn();
 const fetchAdminLocalitiesMock = vi.fn();
-const fetchAdminPlacesMock = vi.fn();
+const fetchAdminVenuesMock = vi.fn();
 const createAdminLocalityMock = vi.fn();
 const originalGetTimeZonesDescriptor = Object.getOwnPropertyDescriptor(
   Intl.Locale.prototype,
@@ -14,13 +14,13 @@ const originalGetTimeZonesDescriptor = Object.getOwnPropertyDescriptor(
 
 vi.mock('../_lib/admin-locations-api', () => ({
   fetchAdminLocalities: () => fetchAdminLocalitiesMock(),
-  fetchAdminPlaces: () => fetchAdminPlacesMock(),
+  fetchAdminVenues: () => fetchAdminVenuesMock(),
   createAdminLocality: (...args: unknown[]) => createAdminLocalityMock(...args),
   updateAdminLocality: vi.fn(),
   deleteAdminLocality: vi.fn(),
-  createAdminPlace: vi.fn(),
-  updateAdminPlace: vi.fn(),
-  deleteAdminPlace: vi.fn(),
+  createAdminVenue: vi.fn(),
+  updateAdminVenue: vi.fn(),
+  deleteAdminVenue: vi.fn(),
 }));
 
 vi.mock('@/lib/countries', () => ({
@@ -46,7 +46,7 @@ describe('AdminLocationCatalogPageClient', () => {
   beforeEach(() => {
     fetchCountriesMock.mockReset();
     fetchAdminLocalitiesMock.mockReset();
-    fetchAdminPlacesMock.mockReset();
+    fetchAdminVenuesMock.mockReset();
     createAdminLocalityMock.mockReset();
     fetchCountriesMock.mockResolvedValue([{ iso: 'ES' }, { iso: 'FR' }]);
     fetchAdminLocalitiesMock.mockResolvedValue([
@@ -59,9 +59,9 @@ describe('AdminLocationCatalogPageClient', () => {
         timeZone: 'Europe/Madrid',
       },
     ]);
-    fetchAdminPlacesMock.mockResolvedValue([
+    fetchAdminVenuesMock.mockResolvedValue([
       {
-        id: 'place-1',
+        id: 'venue-1',
         localityId: 'locality-1',
         name: 'Razzmatazz',
         aliases: ['Sala Razzmatazz'],
@@ -96,14 +96,14 @@ describe('AdminLocationCatalogPageClient', () => {
     await waitFor(() => {
       expect(screen.getByText('Razzmatazz')).toBeInTheDocument();
     });
-    expect(screen.getByRole('tab', { name: 'Places' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: 'Venues' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByText(/Barcelona \(Barcelona province\).*Spain \(ES\)/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Localities' }));
     expect(await screen.findByText('Barcelona (Barcelona province)')).toBeInTheDocument();
     expect(screen.getByText(/Spain \(ES\).*Europe\/Madrid/)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Places' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Venues' }));
     expect(screen.getByText('Razzmatazz')).toBeInTheDocument();
   });
 
@@ -113,8 +113,8 @@ describe('AdminLocationCatalogPageClient', () => {
     await screen.findByText('Razzmatazz');
     const controls = screen.getByRole('group', { name: 'Location catalog controls' });
     const tablist = within(controls).getByRole('tablist', { name: 'Location catalogs' });
-    const action = within(controls).getByRole('button', { name: 'New place' });
-    const search = within(controls).getByRole('textbox', { name: 'Search places' });
+    const action = within(controls).getByRole('button', { name: 'New venue' });
+    const search = within(controls).getByRole('textbox', { name: 'Search venues' });
     const tabs = within(tablist).getAllByRole('tab');
 
     expect(controls).toHaveClass('flex-col', 'lg:flex-row');

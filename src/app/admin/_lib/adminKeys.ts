@@ -34,8 +34,8 @@ export const adminKeys = {
     return ['admin', 'localities'];
   },
 
-  places(): readonly ['admin', 'places'] {
-    return ['admin', 'places'];
+  venues(): readonly ['admin', 'venues'] {
+    return ['admin', 'venues'];
   },
 
   translationNamespaces(): readonly ['admin', 'translationNamespaces'] {

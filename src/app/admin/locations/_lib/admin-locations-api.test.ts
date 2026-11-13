@@ -2,13 +2,13 @@ import { z } from 'zod';
 
 import {
   createAdminLocality,
-  createAdminPlace,
+  createAdminVenue,
   deleteAdminLocality,
-  deleteAdminPlace,
+  deleteAdminVenue,
   fetchAdminLocalities,
-  fetchAdminPlaces,
+  fetchAdminVenues,
   updateAdminLocality,
-  updateAdminPlace,
+  updateAdminVenue,
 } from '@/app/admin/locations/_lib/admin-locations-api';
 
 const apiClientRequestMock = vi.fn();
@@ -97,25 +97,25 @@ describe('admin-locations-api', () => {
     );
   });
 
-  it('should parse places when the API response matches the contract', async () => {
-    const place = {
-      id: 'place-1',
+  it('should parse venues when the API response matches the contract', async () => {
+    const venue = {
+      id: 'venue-1',
       localityId: 'locality-1',
       name: 'Razzmatazz',
       aliases: ['Sala Razzmatazz'],
       isActive: true,
     };
-    apiClientRequestMock.mockResolvedValue({ places: [place] });
+    apiClientRequestMock.mockResolvedValue({ venues: [venue] });
 
-    await expect(fetchAdminPlaces()).resolves.toEqual([place]);
-    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/admin/places', 'GET');
+    await expect(fetchAdminVenues()).resolves.toEqual([venue]);
+    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/admin/venues', 'GET');
   });
 
-  it('should reject a place response with unknown fields', async () => {
+  it('should reject a venue response with unknown fields', async () => {
     apiClientRequestMock.mockResolvedValue({
-      places: [
+      venues: [
         {
-          id: 'place-1',
+          id: 'venue-1',
           localityId: 'locality-1',
           name: 'Razzmatazz',
           aliases: [],
@@ -125,36 +125,36 @@ describe('admin-locations-api', () => {
       ],
     });
 
-    await expect(fetchAdminPlaces()).rejects.toBeInstanceOf(z.ZodError);
+    await expect(fetchAdminVenues()).rejects.toBeInstanceOf(z.ZodError);
   });
 
-  it('should create a place through the versioned admin endpoint', async () => {
+  it('should create a venue through the versioned admin endpoint', async () => {
     const body = {
       localityId: 'locality-1',
       name: 'Razzmatazz',
       aliases: [],
       isActive: true,
     };
-    apiClientRequestMock.mockResolvedValue({ id: 'place-1', ...body });
+    apiClientRequestMock.mockResolvedValue({ id: 'venue-1', ...body });
 
-    await expect(createAdminPlace(body)).resolves.toEqual({ id: 'place-1', ...body });
-    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/admin/places', 'POST', body);
+    await expect(createAdminVenue(body)).resolves.toEqual({ id: 'venue-1', ...body });
+    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/admin/venues', 'POST', body);
   });
 
-  it('should update a place through the encoded resource endpoint', async () => {
+  it('should update a venue through the encoded resource endpoint', async () => {
     const body = { name: 'Sala Razzmatazz', aliases: ['Razzmatazz'], isActive: false };
     apiClientRequestMock.mockResolvedValue({
-      id: 'place/1',
+      id: 'venue/1',
       localityId: 'locality-1',
       ...body,
     });
 
-    await expect(updateAdminPlace('place/1', body)).resolves.toEqual({
-      id: 'place/1',
+    await expect(updateAdminVenue('venue/1', body)).resolves.toEqual({
+      id: 'venue/1',
       localityId: 'locality-1',
       ...body,
     });
-    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/admin/places/place%2F1', 'PATCH', body);
+    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/admin/venues/venue%2F1', 'PATCH', body);
   });
 
   it.each([
@@ -164,9 +164,9 @@ describe('admin-locations-api', () => {
       endpoint: 'v1/admin/localities/locality%2F1',
     },
     {
-      entityKind: 'place',
-      deleteEntity: deleteAdminPlace,
-      endpoint: 'v1/admin/places/place%2F1',
+      entityKind: 'venue',
+      deleteEntity: deleteAdminVenue,
+      endpoint: 'v1/admin/venues/venue%2F1',
     },
   ])(
     'should encode the $entityKind id when deleting it',

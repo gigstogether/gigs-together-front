@@ -4,9 +4,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
-import AdminPlaceFormDialog from './AdminPlaceFormDialog';
-import type { AdminPlaceFormSubmission } from './AdminPlaceFormDialog';
-import AdminPlacesCatalog from './AdminPlacesCatalog';
+import AdminVenueFormDialog from './AdminVenueFormDialog';
+import type { AdminVenueFormSubmission } from './AdminVenueFormDialog';
+import AdminVenuesCatalog from './AdminVenuesCatalog';
 import AdminLocationCatalogControls from '../shared/AdminLocationCatalogControls';
 import AdminLocationDeleteDialog from '../shared/AdminLocationDeleteDialog';
 import {
@@ -16,46 +16,46 @@ import {
 import type { AdminLocationCatalogProps } from '../shared/admin-location-catalog';
 import { ADMIN_LOCATION_LOCALE } from '../shared/admin-location-display';
 import {
-  createAdminPlace,
-  deleteAdminPlace,
+  createAdminVenue,
+  deleteAdminVenue,
   fetchAdminLocalities,
-  fetchAdminPlaces,
-  updateAdminPlace,
+  fetchAdminVenues,
+  updateAdminVenue,
 } from '../../_lib/admin-locations-api';
-import type { AdminLocality, AdminPlace } from '../../_lib/admin-locations-api';
+import type { AdminLocality, AdminVenue } from '../../_lib/admin-locations-api';
 import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
 
-export default function AdminPlaces(props: AdminLocationCatalogProps) {
+export default function AdminVenues(props: AdminLocationCatalogProps) {
   const { activeCatalog, onCatalogChange } = props;
 
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-  const [formValue, setFormValue] = useState<AdminPlace | null | undefined>(undefined);
-  const [deleteValue, setDeleteValue] = useState<AdminPlace | null>(null);
+  const [formValue, setFormValue] = useState<AdminVenue | null | undefined>(undefined);
+  const [deleteValue, setDeleteValue] = useState<AdminVenue | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const localitiesQuery = useQuery({
     queryKey: adminKeys.localities(),
     queryFn: fetchAdminLocalities,
   });
-  const placesQuery = useQuery({
-    queryKey: adminKeys.places(),
-    queryFn: fetchAdminPlaces,
+  const venuesQuery = useQuery({
+    queryKey: adminKeys.venues(),
+    queryFn: fetchAdminVenues,
   });
   const localities = useMemo(() => localitiesQuery.data ?? [], [localitiesQuery.data]);
-  const places = useMemo(() => placesQuery.data ?? [], [placesQuery.data]);
+  const venues = useMemo(() => venuesQuery.data ?? [], [venuesQuery.data]);
   const localityById = useMemo(
     () => new Map<string, AdminLocality>(localities.map((locality) => [locality.id, locality])),
     [localities],
   );
-  const visiblePlaces = useMemo(
+  const visibleVenues = useMemo(
     () =>
-      places.filter((place) => {
-        const locality = localityById.get(place.localityId);
+      venues.filter((venue) => {
+        const locality = localityById.get(venue.localityId);
         return matchesLocationSearch(
           [
-            place.name,
-            ...place.aliases,
+            venue.name,
+            ...venue.aliases,
             locality?.name ?? '',
             locality?.qualifier ?? '',
             locality?.countryIso ?? '',
@@ -64,16 +64,16 @@ export default function AdminPlaces(props: AdminLocationCatalogProps) {
           search,
         );
       }),
-    [localityById, places, search],
+    [localityById, venues, search],
   );
 
-  const invalidatePlaces = async () => {
-    await queryClient.invalidateQueries({ queryKey: adminKeys.places() });
+  const invalidateVenues = async () => {
+    await queryClient.invalidateQueries({ queryKey: adminKeys.venues() });
   };
   const saveMutation = useMutation({
-    mutationFn: async (submission: AdminPlaceFormSubmission) => {
+    mutationFn: async (submission: AdminVenueFormSubmission) => {
       if (submission.id === null) {
-        await createAdminPlace({
+        await createAdminVenue({
           localityId: submission.localityId,
           name: submission.name,
           aliases: submission.aliases,
@@ -82,20 +82,20 @@ export default function AdminPlaces(props: AdminLocationCatalogProps) {
         return;
       }
 
-      await updateAdminPlace(submission.id, {
+      await updateAdminVenue(submission.id, {
         name: submission.name,
         aliases: submission.aliases,
         isActive: submission.isActive,
       });
     },
-    onSuccess: invalidatePlaces,
+    onSuccess: invalidateVenues,
   });
   const deleteMutation = useMutation({
-    mutationFn: deleteAdminPlace,
-    onSuccess: invalidatePlaces,
+    mutationFn: deleteAdminVenue,
+    onSuccess: invalidateVenues,
   });
 
-  const handleSave = async (submission: AdminPlaceFormSubmission): Promise<void> => {
+  const handleSave = async (submission: AdminVenueFormSubmission): Promise<void> => {
     await saveMutation.mutateAsync(submission);
     setFormValue(undefined);
   };
@@ -112,37 +112,37 @@ export default function AdminPlaces(props: AdminLocationCatalogProps) {
       setDeleteError(getAdminLocationOperationError(e));
     }
   };
-  const isLoading = localitiesQuery.isLoading || placesQuery.isLoading;
-  const isLoadError = localitiesQuery.isError || placesQuery.isError;
+  const isLoading = localitiesQuery.isLoading || venuesQuery.isLoading;
+  const isLoadError = localitiesQuery.isError || venuesQuery.isError;
 
   return (
     <>
       <AdminLocationCatalogControls
         activeCatalog={activeCatalog}
-        actionLabel="New place"
+        actionLabel="New venue"
         isActionDisabled={isLoading || localities.length === 0}
         search={{ value: search, onChange: setSearch }}
         onCatalogChange={onCatalogChange}
         onAction={() => setFormValue(null)}
       />
 
-      {isLoadError ? <p className="mb-4 text-sm text-destructive">Could not load places.</p> : null}
+      {isLoadError ? <p className="mb-4 text-sm text-destructive">Could not load venues.</p> : null}
       {isLoading ? (
-        <p className="py-10 text-sm text-muted-foreground">Loading places…</p>
+        <p className="py-10 text-sm text-muted-foreground">Loading venues…</p>
       ) : (
-        <AdminPlacesCatalog
-          places={visiblePlaces}
+        <AdminVenuesCatalog
+          venues={visibleVenues}
           localityById={localityById}
           onEdit={setFormValue}
-          onDelete={(place) => {
+          onDelete={(venue) => {
             setDeleteError(null);
-            setDeleteValue(place);
+            setDeleteValue(venue);
           }}
         />
       )}
 
       {formValue !== undefined ? (
-        <AdminPlaceFormDialog
+        <AdminVenueFormDialog
           key={formValue?.id ?? 'new'}
           value={formValue}
           localities={localities}
@@ -158,7 +158,7 @@ export default function AdminPlaces(props: AdminLocationCatalogProps) {
 
       {deleteValue ? (
         <AdminLocationDeleteDialog
-          entityLabel="place"
+          entityLabel="venue"
           name={deleteValue.name}
           error={deleteError}
           isDeleting={deleteMutation.isPending}

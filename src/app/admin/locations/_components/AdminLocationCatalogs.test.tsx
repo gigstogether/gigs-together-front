@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import AdminLocalitiesCatalog from './localities/AdminLocalitiesCatalog';
-import AdminPlacesCatalog from './places/AdminPlacesCatalog';
+import AdminVenuesCatalog from './venues/AdminVenuesCatalog';
 
 const locality = {
   id: 'locality-1',
@@ -18,8 +18,8 @@ const sameNameLocality = {
   qualifier: 'Tarragona province',
 };
 
-const place = {
-  id: 'place-1',
+const venue = {
+  id: 'venue-1',
   localityId: locality.id,
   name: 'Razzmatazz',
   aliases: ['Sala Razzmatazz'],
@@ -50,12 +50,12 @@ describe('AdminLocationCatalogs', () => {
     expect(onDelete).toHaveBeenCalledWith(locality);
   });
 
-  it('should render Place status and delegate Place editing', () => {
+  it('should render Venue status and delegate Venue editing', () => {
     const onEdit = vi.fn();
 
     render(
-      <AdminPlacesCatalog
-        places={[place]}
+      <AdminVenuesCatalog
+        venues={[venue]}
         localityById={new Map([[locality.id, locality]])}
         onEdit={onEdit}
         onDelete={vi.fn()}
@@ -64,8 +64,8 @@ describe('AdminLocationCatalogs', () => {
 
     expect(screen.getByText('Inactive')).toBeInTheDocument();
     expect(screen.getByText(/Barcelona \(Barcelona province\).*Spain \(ES\)/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Edit place Razzmatazz' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit venue Razzmatazz' }));
 
-    expect(onEdit).toHaveBeenCalledWith(place);
+    expect(onEdit).toHaveBeenCalledWith(venue);
   });
 });

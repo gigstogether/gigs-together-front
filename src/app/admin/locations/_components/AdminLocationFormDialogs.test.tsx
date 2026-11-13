@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import AdminLocalityFormDialog from './localities/AdminLocalityFormDialog';
-import AdminPlaceFormDialog from './places/AdminPlaceFormDialog';
+import AdminVenueFormDialog from './venues/AdminVenueFormDialog';
 import { stubResizeObserver } from '@/test/moderator-telegram-session-mock';
 
 const originalGetTimeZonesDescriptor = Object.getOwnPropertyDescriptor(
@@ -170,7 +170,7 @@ describe('AdminLocationFormDialogs', () => {
     expect(screen.getByRole('option', { name: 'Europe/Madrid' })).toBeInTheDocument();
   });
 
-  it('should mark required locality fields and place the time zone after country', () => {
+  it('should mark required locality fields and venue the time zone after country', () => {
     stubCountryTimeZones({ ES: ['Atlantic/Canary', 'Europe/Madrid'] });
 
     render(
@@ -194,11 +194,11 @@ describe('AdminLocationFormDialogs', () => {
     expect(timeZone.compareDocumentPosition(name)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it('should expose the active state when editing a place', () => {
+  it('should expose the active state when editing a venue', () => {
     render(
-      <AdminPlaceFormDialog
+      <AdminVenueFormDialog
         value={{
-          id: 'place-1',
+          id: 'venue-1',
           localityId: 'locality-1',
           name: 'Razzmatazz',
           aliases: [],
@@ -225,9 +225,9 @@ describe('AdminLocationFormDialogs', () => {
     expect(screen.getByText('Barcelona (Barcelona province) — Spain (ES)')).toBeInTheDocument();
   });
 
-  it('should distinguish same-name Localities in the Place form', () => {
+  it('should distinguish same-name Localities in the Venue form', () => {
     render(
-      <AdminPlaceFormDialog
+      <AdminVenueFormDialog
         value={null}
         localities={[
           {
@@ -263,9 +263,9 @@ describe('AdminLocationFormDialogs', () => {
     ).toBeInTheDocument();
   });
 
-  it('should mark required place fields', () => {
+  it('should mark required venue fields', () => {
     render(
-      <AdminPlaceFormDialog
+      <AdminVenueFormDialog
         value={null}
         localities={[
           {

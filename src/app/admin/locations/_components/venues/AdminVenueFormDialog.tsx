@@ -10,13 +10,13 @@ import {
   parseAdminLocationAliases,
 } from '../shared/admin-location-form';
 import { getAdminLocalityLabel } from '../shared/admin-location-display';
-import type { AdminLocality, AdminPlace } from '../../_lib/admin-locations-api';
+import type { AdminLocality, AdminVenue } from '../../_lib/admin-locations-api';
 import RequiredIndicator from '@/components/RequiredIndicator';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Switch } from '@/components/ui/switch';
 
-export interface AdminPlaceFormSubmission {
+export interface AdminVenueFormSubmission {
   id: string | null;
   localityId: string;
   name: string;
@@ -24,19 +24,19 @@ export interface AdminPlaceFormSubmission {
   isActive: boolean;
 }
 
-interface AdminPlaceFormDialogProps {
-  value: AdminPlace | null;
+interface AdminVenueFormDialogProps {
+  value: AdminVenue | null;
   localities: AdminLocality[];
   isSaving: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (submission: AdminPlaceFormSubmission) => Promise<void>;
+  onSubmit: (submission: AdminVenueFormSubmission) => Promise<void>;
 }
 
 function getLocalityOptionLabel(locality: AdminLocality): string {
   return `${getAdminLocalityLabel(locality.name, locality.qualifier)} — ${getAdminCountryOptionLabel(locality.countryIso)}`;
 }
 
-export default function AdminPlaceFormDialog(props: AdminPlaceFormDialogProps) {
+export default function AdminVenueFormDialog(props: AdminVenueFormDialogProps) {
   const { value, localities, isSaving, onOpenChange, onSubmit } = props;
 
   const [localityId, setLocalityId] = useState(value?.localityId ?? localities[0]?.id ?? '');
@@ -111,7 +111,7 @@ export default function AdminPlaceFormDialog(props: AdminPlaceFormDialogProps) {
           Active:
         </FieldLabel>
         <FieldDescription>
-          Inactive places stay in the catalog but cannot be selected.
+          Inactive venues stay in the catalog but cannot be selected.
         </FieldDescription>
       </div>
       <Switch
@@ -126,7 +126,7 @@ export default function AdminPlaceFormDialog(props: AdminPlaceFormDialogProps) {
 
   return (
     <AdminLocationForm
-      entityLabel="place"
+      entityLabel="venue"
       isCreateMode={isCreateMode}
       isSaving={isSaving}
       canSubmit={canSubmit}

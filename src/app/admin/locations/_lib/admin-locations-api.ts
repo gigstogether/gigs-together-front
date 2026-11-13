@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { apiClientRequest } from '@/lib/api-session-client';
 
 const V1_ADMIN_LOCALITIES_ENDPOINT = 'v1/admin/localities';
-const V1_ADMIN_PLACES_ENDPOINT = 'v1/admin/places';
+const V1_ADMIN_VENUES_ENDPOINT = 'v1/admin/venues';
 
 const adminLocalitySchema = z
   .object({
@@ -22,7 +22,7 @@ const adminLocalitiesResponseSchema = z
   })
   .strict();
 
-const adminPlaceSchema = z
+const adminVenueSchema = z
   .object({
     id: z.string().min(1),
     localityId: z.string().min(1),
@@ -32,14 +32,14 @@ const adminPlaceSchema = z
   })
   .strict();
 
-const adminPlacesResponseSchema = z
+const adminVenuesResponseSchema = z
   .object({
-    places: z.array(adminPlaceSchema),
+    venues: z.array(adminVenueSchema),
   })
   .strict();
 
 export type AdminLocality = z.infer<typeof adminLocalitySchema>;
-export type AdminPlace = z.infer<typeof adminPlaceSchema>;
+export type AdminVenue = z.infer<typeof adminVenueSchema>;
 
 export interface CreateAdminLocalityBody {
   countryIso: string;
@@ -56,14 +56,14 @@ export interface UpdateAdminLocalityBody {
   timeZone: string;
 }
 
-export interface CreateAdminPlaceBody {
+export interface CreateAdminVenueBody {
   localityId: string;
   name: string;
   aliases: string[];
   isActive: boolean;
 }
 
-export interface UpdateAdminPlaceBody {
+export interface UpdateAdminVenueBody {
   name: string;
   aliases: string[];
   isActive: boolean;
@@ -102,32 +102,32 @@ export function deleteAdminLocality(id: string): Promise<void> {
   );
 }
 
-export async function fetchAdminPlaces(): Promise<AdminPlace[]> {
-  const raw = await apiClientRequest<unknown>(V1_ADMIN_PLACES_ENDPOINT, 'GET');
-  return adminPlacesResponseSchema.parse(raw).places;
+export async function fetchAdminVenues(): Promise<AdminVenue[]> {
+  const raw = await apiClientRequest<unknown>(V1_ADMIN_VENUES_ENDPOINT, 'GET');
+  return adminVenuesResponseSchema.parse(raw).venues;
 }
 
-export async function createAdminPlace(body: CreateAdminPlaceBody): Promise<AdminPlace> {
-  const raw = await apiClientRequest<unknown, CreateAdminPlaceBody>(
-    V1_ADMIN_PLACES_ENDPOINT,
+export async function createAdminVenue(body: CreateAdminVenueBody): Promise<AdminVenue> {
+  const raw = await apiClientRequest<unknown, CreateAdminVenueBody>(
+    V1_ADMIN_VENUES_ENDPOINT,
     'POST',
     body,
   );
-  return adminPlaceSchema.parse(raw);
+  return adminVenueSchema.parse(raw);
 }
 
-export async function updateAdminPlace(
+export async function updateAdminVenue(
   id: string,
-  body: UpdateAdminPlaceBody,
-): Promise<AdminPlace> {
-  const raw = await apiClientRequest<unknown, UpdateAdminPlaceBody>(
-    `${V1_ADMIN_PLACES_ENDPOINT}/${encodeURIComponent(id)}`,
+  body: UpdateAdminVenueBody,
+): Promise<AdminVenue> {
+  const raw = await apiClientRequest<unknown, UpdateAdminVenueBody>(
+    `${V1_ADMIN_VENUES_ENDPOINT}/${encodeURIComponent(id)}`,
     'PATCH',
     body,
   );
-  return adminPlaceSchema.parse(raw);
+  return adminVenueSchema.parse(raw);
 }
 
-export function deleteAdminPlace(id: string): Promise<void> {
-  return apiClientRequest<void>(`${V1_ADMIN_PLACES_ENDPOINT}/${encodeURIComponent(id)}`, 'DELETE');
+export function deleteAdminVenue(id: string): Promise<void> {
+  return apiClientRequest<void>(`${V1_ADMIN_VENUES_ENDPOINT}/${encodeURIComponent(id)}`, 'DELETE');
 }
