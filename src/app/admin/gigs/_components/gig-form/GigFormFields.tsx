@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import DateInput from '@/components/DateInput';
 import { Field, FieldError, FieldLabel, FieldSeparator } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/Select';
+import RequiredIndicator from '@/components/RequiredIndicator';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
@@ -46,14 +47,7 @@ export default function GigFormFields(props: GigFormFieldsProps) {
 
   const isCompleteGig = validationMode === 'completeGig';
   const areCoreFieldsRequired = validationMode !== 'gigCandidateDraft';
-  const coreRequiredIndicator = areCoreFieldsRequired ? (
-    <span
-      aria-hidden="true"
-      className="text-destructive"
-    >
-      *
-    </span>
-  ) : null;
+  const coreRequiredIndicator = areCoreFieldsRequired ? <RequiredIndicator /> : null;
   const completeGigRequiredIndicator = isCompleteGig ? coreRequiredIndicator : null;
 
   return (
@@ -90,12 +84,14 @@ export default function GigFormFields(props: GigFormFieldsProps) {
               >
                 Country:{coreRequiredIndicator}
               </FieldLabel>
-              <Select
+              <SearchableSelect
                 id="gig-country"
                 name={field.name}
                 value={field.value ?? defaultGigFormValues.country}
                 options={countryOptions}
                 placeholder="Select country"
+                searchPlaceholder="Search countries"
+                emptyText="No countries found."
                 ariaLabelledBy="gig-country-label"
                 isRequired={areCoreFieldsRequired}
                 isInvalid={fieldState.invalid}

@@ -44,7 +44,7 @@ describe('parseCountries', () => {
   });
 
   it('should throw when countries payload shape is invalid', () => {
-    const payload = [{ code: 'ES' }];
+    const payload = [{ iso: 'ESP' }];
     expect(() => parseCountries(payload)).toThrow();
   });
 });

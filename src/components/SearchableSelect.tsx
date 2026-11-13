@@ -2,6 +2,7 @@
 
 import { Check, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import type { FocusEventHandler, Ref } from 'react';
 
 import type { SelectOption } from '@/components/Select';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,9 @@ interface SearchableSelectProps {
   isDisabled?: boolean;
   isRequired?: boolean;
   isInvalid?: boolean;
+  name?: string;
+  triggerRef?: Ref<HTMLButtonElement>;
+  onBlur?: FocusEventHandler<HTMLButtonElement>;
   onValueChange: (value: string) => void;
 }
 
@@ -35,6 +39,9 @@ function SearchableSelect(props: SearchableSelectProps) {
     isDisabled = false,
     isRequired = false,
     isInvalid = false,
+    name,
+    triggerRef,
+    onBlur,
     onValueChange,
   } = props;
 
@@ -89,7 +96,9 @@ function SearchableSelect(props: SearchableSelectProps) {
       className="relative w-full"
     >
       <Button
+        ref={triggerRef}
         id={id}
+        name={name}
         type="button"
         variant="outline"
         disabled={isDisabled}
@@ -100,6 +109,7 @@ function SearchableSelect(props: SearchableSelectProps) {
         aria-required={isRequired}
         aria-invalid={isInvalid}
         className="h-9 w-full justify-between bg-transparent px-3 font-normal shadow-sm"
+        onBlur={onBlur}
         onClick={handleToggle}
       >
         <span className="truncate">{selectedOption?.label ?? placeholder}</span>

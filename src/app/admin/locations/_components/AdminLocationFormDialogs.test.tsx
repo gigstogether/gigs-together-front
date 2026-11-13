@@ -51,7 +51,7 @@ describe('AdminLocationFormDialogs', () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText('Canonical name:'), {
+    fireEvent.change(screen.getByLabelText('Canonical name:*'), {
       target: { value: 'Barcelona' },
     });
     fireEvent.change(screen.getByLabelText('Qualifier:'), {
@@ -115,6 +115,10 @@ describe('AdminLocationFormDialogs', () => {
     );
 
     fireEvent.click(screen.getByRole('combobox', { name: 'Country:' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search countries' }), {
+      target: { value: 'France' },
+    });
+    expect(screen.queryByRole('option', { name: 'Spain (ES)' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('option', { name: 'France (FR)' }));
 
     expect(screen.getByRole('combobox', { name: 'Time zone:' })).toHaveTextContent('Europe/Paris');
@@ -164,6 +168,30 @@ describe('AdminLocationFormDialogs', () => {
     expect(screen.getByRole('option', { name: 'UTC' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'America/New York' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Europe/Madrid' })).toBeInTheDocument();
+  });
+
+  it('should mark required locality fields and place the time zone after country', () => {
+    stubCountryTimeZones({ ES: ['Atlantic/Canary', 'Europe/Madrid'] });
+
+    render(
+      <AdminLocalityFormDialog
+        value={null}
+        countries={[{ iso: 'ES' }]}
+        isSaving={false}
+        onOpenChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    const country = screen.getByRole('combobox', { name: 'Country:' });
+    const timeZone = screen.getByRole('combobox', { name: 'Time zone:' });
+    const name = screen.getByLabelText('Canonical name:*');
+
+    expect(country).toHaveAttribute('aria-required', 'true');
+    expect(timeZone).toHaveAttribute('aria-required', 'true');
+    expect(name).toBeRequired();
+    expect(country.compareDocumentPosition(timeZone)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(timeZone.compareDocumentPosition(name)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('should expose the active state when editing a place', () => {
@@ -235,6 +263,32 @@ describe('AdminLocationFormDialogs', () => {
     ).toBeInTheDocument();
   });
 
+  it('should mark required place fields', () => {
+    render(
+      <AdminPlaceFormDialog
+        value={null}
+        localities={[
+          {
+            id: 'locality-1',
+            countryIso: 'ES',
+            name: 'Barcelona',
+            aliases: [],
+            timeZone: 'Europe/Madrid',
+          },
+        ]}
+        isSaving={false}
+        onOpenChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('combobox', { name: 'Locality:' })).toHaveAttribute(
+      'aria-required',
+      'true',
+    );
+    expect(screen.getByLabelText('Canonical name:*')).toBeRequired();
+  });
+
   it('should show the save failure returned by the locality operation', async () => {
     stubCountryTimeZones({ ES: ['Europe/Madrid'] });
     const onSubmit = vi.fn().mockRejectedValue(new Error('Locality already exists.'));
@@ -249,7 +303,7 @@ describe('AdminLocationFormDialogs', () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText('Canonical name:'), {
+    fireEvent.change(screen.getByLabelText('Canonical name:*'), {
       target: { value: 'Barcelona' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Create locality' }));

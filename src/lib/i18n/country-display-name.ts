@@ -49,9 +49,6 @@ export function createCountryDisplayOptions(
   locale: string,
 ): CountryDisplayOption[] {
   const resolveCountryDisplayName = createCountryDisplayNameResolver(locale);
-  const collator = new Intl.Collator(locale);
 
-  return countryIsos
-    .map((iso) => ({ iso, name: resolveCountryDisplayName(iso) }))
-    .sort((left, right) => collator.compare(left.name, right.name));
+  return countryIsos.map((iso) => ({ iso, name: resolveCountryDisplayName(iso) }));
 }

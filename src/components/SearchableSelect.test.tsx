@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { createRef } from 'react';
 
 import { SearchableSelect } from '@/components/SearchableSelect';
 
@@ -61,5 +62,37 @@ describe('SearchableSelect', () => {
     });
 
     expect(screen.getByText('No time zones found.')).toBeInTheDocument();
+  });
+
+  it('should forward form control properties to the trigger', () => {
+    const onBlur = vi.fn();
+    const triggerRef = createRef<HTMLButtonElement>();
+
+    render(
+      <div>
+        <span id="country-label">Country:</span>
+        <SearchableSelect
+          id="country"
+          name="country"
+          value="ES"
+          options={[{ value: 'ES', label: 'Spain' }]}
+          placeholder="Select country"
+          searchPlaceholder="Search countries"
+          emptyText="No countries found."
+          ariaLabelledBy="country-label"
+          triggerRef={triggerRef}
+          onBlur={onBlur}
+          onValueChange={vi.fn()}
+        />
+      </div>,
+    );
+
+    const trigger = screen.getByRole('combobox', { name: 'Country:' });
+
+    fireEvent.blur(trigger);
+
+    expect(trigger).toHaveAttribute('name', 'country');
+    expect(triggerRef.current).toBe(trigger);
+    expect(onBlur).toHaveBeenCalledOnce();
   });
 });

@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 
 import AdminLocationCatalogPageClient from './AdminLocationCatalogPageClient';
 
-const fetchAdminCountriesMock = vi.fn();
+const fetchCountriesMock = vi.fn();
 const fetchAdminLocalitiesMock = vi.fn();
 const fetchAdminPlacesMock = vi.fn();
 const createAdminLocalityMock = vi.fn();
@@ -23,10 +23,8 @@ vi.mock('../_lib/admin-locations-api', () => ({
   deleteAdminPlace: vi.fn(),
 }));
 
-vi.mock('../_lib/admin-countries-api', () => ({
-  fetchAdminCountries: () => fetchAdminCountriesMock(),
-  fetchAdminCountryOptions: vi.fn(),
-  createAdminCountry: vi.fn(),
+vi.mock('@/lib/countries', () => ({
+  fetchCountries: () => fetchCountriesMock(),
 }));
 
 function renderPage() {
@@ -46,11 +44,11 @@ function renderPage() {
 
 describe('AdminLocationCatalogPageClient', () => {
   beforeEach(() => {
-    fetchAdminCountriesMock.mockReset();
+    fetchCountriesMock.mockReset();
     fetchAdminLocalitiesMock.mockReset();
     fetchAdminPlacesMock.mockReset();
     createAdminLocalityMock.mockReset();
-    fetchAdminCountriesMock.mockResolvedValue([{ iso: 'ES' }]);
+    fetchCountriesMock.mockResolvedValue([{ iso: 'ES' }, { iso: 'FR' }]);
     fetchAdminLocalitiesMock.mockResolvedValue([
       {
         id: 'locality-1',
@@ -101,11 +99,8 @@ describe('AdminLocationCatalogPageClient', () => {
     expect(screen.getByRole('tab', { name: 'Places' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByText(/Barcelona \(Barcelona province\).*Spain \(ES\)/)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Countries' }));
-    expect(await screen.findByText('Spain')).toBeInTheDocument();
-
     fireEvent.click(screen.getByRole('tab', { name: 'Localities' }));
-    expect(screen.getByText('Barcelona (Barcelona province)')).toBeInTheDocument();
+    expect(await screen.findByText('Barcelona (Barcelona province)')).toBeInTheDocument();
     expect(screen.getByText(/Spain \(ES\).*Europe\/Madrid/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Places' }));
@@ -126,14 +121,7 @@ describe('AdminLocationCatalogPageClient', () => {
     tabs.forEach((tab) => expect(tab).toHaveClass('flex-1', 'lg:flex-none'));
     expect(Array.from(controls.children)).toEqual([tablist, action, search]);
 
-    fireEvent.click(within(tablist).getByRole('tab', { name: 'Countries' }));
-
-    const addCountry = await screen.findByRole('button', { name: 'Add country' });
-    const countryControls = screen.getByRole('group', { name: 'Location catalog controls' });
-    const countryTablist = within(countryControls).getByRole('tablist', {
-      name: 'Location catalogs',
-    });
-    expect(Array.from(countryControls.children)).toEqual([countryTablist, addCountry]);
+    expect(within(tablist).queryByRole('tab', { name: 'Countries' })).not.toBeInTheDocument();
   });
 
   it('should filter Localities by aliases', async () => {
@@ -158,7 +146,7 @@ describe('AdminLocationCatalogPageClient', () => {
     const newLocalityButton = await screen.findByRole('button', { name: 'New locality' });
     await waitFor(() => expect(newLocalityButton).toBeEnabled());
     fireEvent.click(newLocalityButton);
-    fireEvent.change(screen.getByLabelText('Canonical name:'), {
+    fireEvent.change(screen.getByLabelText('Canonical name:*'), {
       target: { value: 'Badalona' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Create locality' }));

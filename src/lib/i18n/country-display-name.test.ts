@@ -36,11 +36,11 @@ describe('createCountryDisplayNameResolver', () => {
 });
 
 describe('createCountryDisplayOptions', () => {
-  it('should localize and sort country options for the requested locale', () => {
+  it('should localize country options while preserving their source order', () => {
     expect(createCountryDisplayOptions(['ES', 'DE', 'FR'], 'en')).toEqual([
-      { iso: 'FR', name: 'France' },
-      { iso: 'DE', name: 'Germany' },
       { iso: 'ES', name: 'Spain' },
+      { iso: 'DE', name: 'Germany' },
+      { iso: 'FR', name: 'France' },
     ]);
   });
 });

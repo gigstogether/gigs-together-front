@@ -1,12 +1,8 @@
 import { ADMIN_LOCATION_LOCALE } from './admin-location-display';
 
-export type LocationCatalogKind = 'country' | 'locality' | 'place';
+export type LocationCatalogKind = 'locality' | 'place';
 
-export const LOCATION_CATALOG_KINDS = [
-  'country',
-  'locality',
-  'place',
-] satisfies LocationCatalogKind[];
+export const LOCATION_CATALOG_KINDS = ['locality', 'place'] satisfies LocationCatalogKind[];
 
 export interface AdminLocationCatalogProps {
   activeCatalog: LocationCatalogKind;
@@ -15,8 +11,6 @@ export interface AdminLocationCatalogProps {
 
 export function getCatalogLabel(kind: LocationCatalogKind): string {
   switch (kind) {
-    case 'country':
-      return 'Country';
     case 'locality':
       return 'Locality';
     case 'place':
@@ -25,9 +19,6 @@ export function getCatalogLabel(kind: LocationCatalogKind): string {
 }
 
 export function getCatalogPluralLabel(kind: LocationCatalogKind): string {
-  if (kind === 'country') {
-    return 'Countries';
-  }
   return kind === 'locality' ? 'Localities' : `${getCatalogLabel(kind)}s`;
 }
 

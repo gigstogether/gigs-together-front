@@ -22,7 +22,7 @@ import {
   updateAdminLocality,
 } from '../../_lib/admin-locations-api';
 import type { AdminLocality, CreateAdminLocalityBody } from '../../_lib/admin-locations-api';
-import { fetchAdminCountries } from '../../_lib/admin-countries-api';
+import { fetchCountries } from '@/lib/countries';
 import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
 
 export default function AdminLocalities(props: AdminLocationCatalogProps) {
@@ -35,8 +35,8 @@ export default function AdminLocalities(props: AdminLocationCatalogProps) {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const countriesQuery = useQuery({
-    queryKey: adminKeys.countries(),
-    queryFn: fetchAdminCountries,
+    queryKey: adminKeys.countryReferences(),
+    queryFn: () => fetchCountries(),
   });
   const localitiesQuery = useQuery({
     queryKey: adminKeys.localities(),

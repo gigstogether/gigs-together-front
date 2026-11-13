@@ -9,12 +9,12 @@ import {
   getAdminLocationSaveError,
   parseAdminLocationAliases,
 } from '../shared/admin-location-form';
-import type { AdminCountry } from '../../_lib/admin-countries-api';
 import type { AdminLocality } from '../../_lib/admin-locations-api';
+import RequiredIndicator from '@/components/RequiredIndicator';
 import { SearchableSelect } from '@/components/SearchableSelect';
-import { Select } from '@/components/Select';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import type { Country } from '@/lib/api-boundary-schemas';
 
 export interface AdminLocalityFormSubmission {
   id: string | null;
@@ -27,7 +27,7 @@ export interface AdminLocalityFormSubmission {
 
 interface AdminLocalityFormDialogProps {
   value: AdminLocality | null;
-  countries: AdminCountry[];
+  countries: Country[];
   isSaving: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (submission: AdminLocalityFormSubmission) => Promise<void>;
@@ -140,27 +140,53 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
   };
 
   const parentField = (
-    <Field>
-      <FieldLabel
-        id="location-form-parent-label"
-        htmlFor="location-form-parent"
-      >
-        Country:
-      </FieldLabel>
-      <Select
-        id="location-form-parent"
-        value={countryIso}
-        options={countryOptions}
-        placeholder="Select country"
-        ariaLabelledBy="location-form-parent-label"
-        isDisabled={isSaving || !isCreateMode}
-        isRequired
-        onValueChange={handleCountryChange}
-      />
-      {!isCreateMode ? (
-        <FieldDescription>The parent cannot be changed after creation.</FieldDescription>
-      ) : null}
-    </Field>
+    <>
+      <Field>
+        <FieldLabel
+          id="location-form-parent-label"
+          htmlFor="location-form-parent"
+        >
+          Country:
+          <RequiredIndicator />
+        </FieldLabel>
+        <SearchableSelect
+          id="location-form-parent"
+          value={countryIso}
+          options={countryOptions}
+          placeholder="Select country"
+          searchPlaceholder="Search countries"
+          emptyText="No countries found."
+          ariaLabelledBy="location-form-parent-label"
+          isDisabled={isSaving || !isCreateMode}
+          isRequired
+          onValueChange={handleCountryChange}
+        />
+        {!isCreateMode ? (
+          <FieldDescription>The parent cannot be changed after creation.</FieldDescription>
+        ) : null}
+      </Field>
+      <Field>
+        <FieldLabel
+          id="location-form-time-zone-label"
+          htmlFor="location-form-time-zone"
+        >
+          Time zone:
+          <RequiredIndicator />
+        </FieldLabel>
+        <SearchableSelect
+          id="location-form-time-zone"
+          value={timeZone}
+          options={timeZoneOptions}
+          placeholder="Select time zone"
+          searchPlaceholder="Search time zones"
+          emptyText="No time zones found."
+          ariaLabelledBy="location-form-time-zone-label"
+          isDisabled={isSaving || countryIso.length === 0}
+          isRequired
+          onValueChange={setTimeZone}
+        />
+      </Field>
+    </>
   );
 
   const additionalFields = (
@@ -177,26 +203,6 @@ export default function AdminLocalityFormDialog(props: AdminLocalityFormDialogPr
         <FieldDescription>
           Distinguishes localities with the same name, for example a province or district.
         </FieldDescription>
-      </Field>
-      <Field>
-        <FieldLabel
-          id="location-form-time-zone-label"
-          htmlFor="location-form-time-zone"
-        >
-          Time zone:
-        </FieldLabel>
-        <SearchableSelect
-          id="location-form-time-zone"
-          value={timeZone}
-          options={timeZoneOptions}
-          placeholder="Select time zone"
-          searchPlaceholder="Search time zones"
-          emptyText="No time zones found."
-          ariaLabelledBy="location-form-time-zone-label"
-          isDisabled={isSaving || countryIso.length === 0}
-          isRequired
-          onValueChange={setTimeZone}
-        />
       </Field>
     </>
   );

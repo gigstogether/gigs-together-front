@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import RequiredIndicator from '@/components/RequiredIndicator';
 
 interface AdminLocationNameFieldsProps {
   name: string;
@@ -36,11 +37,15 @@ export function AdminLocationNameFields(props: AdminLocationNameFieldsProps) {
   return (
     <>
       <Field>
-        <FieldLabel htmlFor="location-form-name">Canonical name:</FieldLabel>
+        <FieldLabel htmlFor="location-form-name">
+          Canonical name:
+          <RequiredIndicator />
+        </FieldLabel>
         <Input
           id="location-form-name"
           value={name}
           disabled={isSaving}
+          required
           autoFocus
           onChange={(event) => onNameChange(event.target.value)}
         />

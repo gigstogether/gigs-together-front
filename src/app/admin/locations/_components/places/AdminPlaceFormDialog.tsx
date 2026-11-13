@@ -11,6 +11,7 @@ import {
 } from '../shared/admin-location-form';
 import { getAdminLocalityLabel } from '../shared/admin-location-display';
 import type { AdminLocality, AdminPlace } from '../../_lib/admin-locations-api';
+import RequiredIndicator from '@/components/RequiredIndicator';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Switch } from '@/components/ui/switch';
@@ -80,6 +81,7 @@ export default function AdminPlaceFormDialog(props: AdminPlaceFormDialogProps) {
         htmlFor="location-form-parent"
       >
         Locality:
+        <RequiredIndicator />
       </FieldLabel>
       <SearchableSelect
         id="location-form-parent"
@@ -90,6 +92,7 @@ export default function AdminPlaceFormDialog(props: AdminPlaceFormDialogProps) {
         emptyText="No localities found."
         ariaLabelledBy="location-form-parent-label"
         isDisabled={isSaving || !isCreateMode}
+        isRequired
         onValueChange={setLocalityId}
       />
       {!isCreateMode ? (

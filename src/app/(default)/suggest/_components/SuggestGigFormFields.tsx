@@ -6,7 +6,8 @@ import type { UseFormReturn } from 'react-hook-form';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import DateInput from '@/components/DateInput';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/Select';
+import RequiredIndicator from '@/components/RequiredIndicator';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import { defaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
@@ -37,12 +38,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
               htmlFor="suggest-gig-title"
             >
               Title:
-              <span
-                aria-hidden="true"
-                className="text-destructive"
-              >
-                *
-              </span>
+              <RequiredIndicator />
             </FieldLabel>
             <Input
               {...field}
@@ -70,19 +66,16 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 htmlFor="suggest-gig-country"
               >
                 Country:
-                <span
-                  aria-hidden="true"
-                  className="text-destructive"
-                >
-                  *
-                </span>
+                <RequiredIndicator />
               </FieldLabel>
-              <Select
+              <SearchableSelect
                 id="suggest-gig-country"
                 name={field.name}
                 value={field.value ?? defaultSuggestGigFormValues.country}
                 options={countryOptions}
                 placeholder="Select country"
+                searchPlaceholder="Search countries"
+                emptyText="No countries found."
                 ariaLabelledBy="suggest-gig-country-label"
                 isRequired
                 isInvalid={fieldState.invalid}
@@ -105,12 +98,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 htmlFor="suggest-gig-city"
               >
                 City:
-                <span
-                  aria-hidden="true"
-                  className="text-destructive"
-                >
-                  *
-                </span>
+                <RequiredIndicator />
               </FieldLabel>
               <Input
                 {...field}
@@ -141,12 +129,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 htmlFor="suggest-gig-date"
               >
                 Date:
-                <span
-                  aria-hidden="true"
-                  className="text-destructive"
-                >
-                  *
-                </span>
+                <RequiredIndicator />
               </FieldLabel>
               <DateInput
                 {...field}
