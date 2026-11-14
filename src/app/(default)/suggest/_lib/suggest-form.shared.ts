@@ -17,6 +17,13 @@ const yyyyMmDdSchema = z
 
 export const suggestGigFormSchema = z
   .object({
+    communityId: z.string().min(1, { message: 'Community is required.' }),
+    countryIso: z.string().min(1, { message: 'Country is required.' }),
+    localityId: z.string().min(1, { message: 'Locality is required.' }),
+    venueId: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z.string().min(1).optional(),
+    ),
     title: z
       .string()
       .trim()
@@ -28,12 +35,6 @@ export const suggestGigFormSchema = z
     endDate: z.preprocess(
       (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
       yyyyMmDdSchema.optional(),
-    ),
-    city: z.string().min(1, { message: 'City is required.' }),
-    country: z.string().min(1, { message: 'Country is required.' }),
-    venue: z.preprocess(
-      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
-      z.string().min(2, { message: 'Venue must be at least 2 characters.' }).optional(),
     ),
     ticketsUrl: z.preprocess(
       (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
@@ -47,12 +48,22 @@ export const suggestGigFormSchema = z
 
 export type SuggestGigFormValues = z.infer<typeof suggestGigFormSchema>;
 
-export const defaultSuggestGigFormValues: SuggestGigFormValues = {
-  title: '',
-  date: '',
-  endDate: '',
-  city: 'Barcelona',
-  country: 'ES',
-  venue: '',
-  ticketsUrl: '',
-};
+export interface SuggestCommunityOption {
+  value: string;
+  label: string;
+}
+
+export function createDefaultSuggestGigFormValues(
+  communityOptions: SuggestCommunityOption[],
+): SuggestGigFormValues {
+  return {
+    communityId: communityOptions.length === 1 ? (communityOptions[0]?.value ?? '') : '',
+    countryIso: 'ES',
+    localityId: '',
+    venueId: '',
+    title: '',
+    date: '',
+    endDate: '',
+    ticketsUrl: '',
+  };
+}

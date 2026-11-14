@@ -5,9 +5,9 @@ import { act, renderHook } from '@testing-library/react';
 import { useSuggestGigSubmit } from '@/app/(default)/suggest/_hooks/use-suggest-gig-submit';
 import type {
   GigCandidateCreateResponse,
-  GigCandidateUpsertApiParams,
+  GigCandidateCreateApiParams,
 } from '@/app/(default)/suggest/_lib/gig-candidate-api';
-import { defaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
+import { createDefaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 import { ApiNetworkError } from '@/lib/api-errors';
@@ -18,7 +18,7 @@ const { toastMock } = vi.hoisted(() => ({
 
 const { createGigCandidateMock } = vi.hoisted(() => ({
   createGigCandidateMock:
-    vi.fn<(params: GigCandidateUpsertApiParams) => Promise<GigCandidateCreateResponse>>(),
+    vi.fn<(params: GigCandidateCreateApiParams) => Promise<GigCandidateCreateResponse>>(),
 }));
 
 vi.mock('@/hooks/use-toast', () => ({
@@ -30,12 +30,12 @@ vi.mock('@/app/(default)/suggest/_lib/gig-candidate-api', () => ({
 }));
 
 const DEFAULT_SUBMIT_VALUES: SuggestGigFormValues = {
-  ...defaultSuggestGigFormValues,
+  ...createDefaultSuggestGigFormValues([{ value: 'community-id', label: 'Barcelona' }]),
+  localityId: 'locality-id',
   title: 'Arctic Monkeys',
   date: '2026-07-01',
-  city: 'Barcelona',
-  country: 'ES',
-  venue: 'Razzmatazz',
+  endDate: undefined,
+  venueId: 'venue-id',
   ticketsUrl: 'https://tickets.example/gig',
 };
 
@@ -59,7 +59,6 @@ describe('useSuggestGigSubmit', () => {
     const { result } = renderHook(
       () =>
         useSuggestGigSubmit({
-          communityId: 'community-id',
           posterFile: null,
           posterUrl: 'https://images.example/poster.png',
           onSuccess,
@@ -75,13 +74,11 @@ describe('useSuggestGigSubmit', () => {
 
     expect(createGigCandidateMock).toHaveBeenCalledWith({
       gig: {
-        communityIds: ['community-id'],
+        communityId: 'community-id',
+        localityId: 'locality-id',
+        venueId: 'venue-id',
         title: 'Arctic Monkeys',
         date: '2026-07-01',
-        endDate: undefined,
-        city: 'Barcelona',
-        country: 'ES',
-        venue: 'Razzmatazz',
         ticketsUrl: 'https://tickets.example/gig',
       },
       poster: {
@@ -100,7 +97,6 @@ describe('useSuggestGigSubmit', () => {
     const { result } = renderHook(
       () =>
         useSuggestGigSubmit({
-          communityId: 'community-id',
           posterFile: null,
           posterUrl: 'not-a-url',
           onSuccess,
@@ -131,7 +127,6 @@ describe('useSuggestGigSubmit', () => {
     const { result } = renderHook(
       () =>
         useSuggestGigSubmit({
-          communityId: 'community-id',
           posterFile: null,
           posterUrl: '',
           onSuccess,
@@ -161,7 +156,6 @@ describe('useSuggestGigSubmit', () => {
     const { result } = renderHook(
       () =>
         useSuggestGigSubmit({
-          communityId: 'community-id',
           posterFile: null,
           posterUrl: '',
           onSuccess,
@@ -197,7 +191,6 @@ describe('useSuggestGigSubmit', () => {
     const { result } = renderHook(
       () =>
         useSuggestGigSubmit({
-          communityId: 'community-id',
           posterFile: null,
           posterUrl: '',
           onSuccess,
