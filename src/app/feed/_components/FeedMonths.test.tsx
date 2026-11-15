@@ -27,9 +27,12 @@ const event = (id: string): Event => ({
   id,
   title: id,
   date: '2026-06-12',
-  venue: 'Palau Sant Jordi',
-  city: { code: 'barcelona', name: 'Barcelona' },
-  countryIso: 'ES',
+  locality: {
+    id: 'locality-id',
+    countryIso: 'ES',
+    name: 'Barcelona',
+  },
+  venues: [{ id: 'venue-id', name: 'Palau Sant Jordi' }],
 });
 
 describe('FeedMonths', () => {

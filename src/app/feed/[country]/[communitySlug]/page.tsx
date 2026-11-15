@@ -87,20 +87,13 @@ export default async function Page(props: FeedCommunityPageProps) {
   }
 
   const [i18n, feed] = await Promise.all([
-    getTranslations('en', ['city', resolved.nameTranslationNamespace]),
+    getTranslations('en', [resolved.nameTranslationNamespace]),
     getFeed({
       limit: PAGE_SIZE,
       country: normalizedCountry,
       communitySlug: normalizedCommunitySlug,
     }),
   ]);
-
-  const tCity = (code: string): string =>
-    resolveTranslationValue({
-      entry: i18n.translations.city?.[code],
-      namespace: 'city',
-      key: code,
-    });
 
   const communityName = resolveTranslationValue({
     entry:
@@ -110,11 +103,7 @@ export default async function Page(props: FeedCommunityPageProps) {
   });
   const pageTitle = getFeedPageTitle(communityName);
 
-  const initialEvents: Event[] = feed.gigs.map((gig) =>
-    gigToEvent(gig, {
-      resolveCityName: (code) => tCity(code),
-    }),
-  );
+  const initialEvents: Event[] = feed.gigs.map((gig) => gigToEvent(gig));
 
   const initialEventsWithPosters = initialEvents.filter((event) => event.poster);
   const eagerPosterIds = initialEventsWithPosters

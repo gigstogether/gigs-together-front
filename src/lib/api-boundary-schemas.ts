@@ -62,15 +62,30 @@ export type CommunitiesResponse = z.infer<typeof communitiesResponseSchema>;
 
 const gigDateSchema = z.union([z.string().min(1), z.number().int().finite()]);
 
+const gigLocalitySchema = z
+  .object({
+    id: z.string().min(1),
+    countryIso: z.string().regex(/^[A-Z]{2}$/),
+    name: z.string().min(1),
+    qualifier: z.string().min(1).optional(),
+  })
+  .strict();
+
+const gigVenueSchema = z
+  .object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+  })
+  .strict();
+
 const gigSchema = z
   .object({
     id: z.string().min(1),
     title: z.string().min(1),
     date: gigDateSchema,
     endDate: gigDateSchema.optional(),
-    city: z.string().min(1),
-    country: z.string().min(1),
-    venue: z.string().min(1),
+    locality: gigLocalitySchema,
+    venues: z.array(gigVenueSchema).min(1),
     ticketsUrl: z.string().min(1),
     posterUrl: z.string().min(1).optional(),
     calendarUrl: z.string().min(1).optional(),
