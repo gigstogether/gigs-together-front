@@ -38,8 +38,8 @@ function buildPayload(params: BuildPayloadParams): GigCandidateCreatePayload {
     title: values.title,
     date: values.date,
   };
-  if (values.venueId !== undefined) {
-    payload.venueId = values.venueId;
+  if (values.venueIds.length > 0) {
+    payload.venueIds = [...values.venueIds];
   }
   if (values.endDate !== undefined) {
     payload.endDate = values.endDate;

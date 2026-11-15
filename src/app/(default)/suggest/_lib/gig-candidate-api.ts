@@ -14,7 +14,7 @@ export interface GigCandidatePosterSelection {
 export interface GigCandidateCreatePayload {
   communityId: string;
   localityId: string;
-  venueId?: string;
+  venueIds?: string[];
   title: string;
   date: string;
   endDate?: string;
@@ -63,8 +63,8 @@ export async function createGigCandidate(
     title: params.gig.title,
     date: params.gig.date,
   };
-  if (params.gig.venueId !== undefined) {
-    gig.venueId = params.gig.venueId;
+  if (params.gig.venueIds !== undefined) {
+    gig.venueIds = [...params.gig.venueIds];
   }
   if (params.gig.endDate !== undefined) {
     gig.endDate = params.gig.endDate;

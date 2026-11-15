@@ -35,7 +35,7 @@ describe('suggestGigFormSchema', () => {
       title: 'Band',
       date: '2026-08-01',
       endDate: '',
-      venueId: '',
+      venueIds: [],
       ticketsUrl: '',
     });
 
@@ -44,7 +44,7 @@ describe('suggestGigFormSchema', () => {
       ...requiredFields,
       date: '2026-08-01',
       endDate: undefined,
-      venueId: undefined,
+      venueIds: [],
       ticketsUrl: undefined,
     });
   });

@@ -35,7 +35,7 @@ const DEFAULT_SUBMIT_VALUES: SuggestGigFormValues = {
   title: 'Arctic Monkeys',
   date: '2026-07-01',
   endDate: undefined,
-  venueId: 'venue-id',
+  venueIds: ['venue-id-1', 'venue-id-2'],
   ticketsUrl: 'https://tickets.example/gig',
 };
 
@@ -76,7 +76,7 @@ describe('useSuggestGigSubmit', () => {
       gig: {
         communityId: 'community-id',
         localityId: 'locality-id',
-        venueId: 'venue-id',
+        venueIds: ['venue-id-1', 'venue-id-2'],
         title: 'Arctic Monkeys',
         date: '2026-07-01',
         ticketsUrl: 'https://tickets.example/gig',

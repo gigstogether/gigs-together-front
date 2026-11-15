@@ -22,6 +22,7 @@ describe('createGigCandidate', () => {
       gig: {
         communityId: 'community-id',
         localityId: 'locality-id',
+        venueIds: ['venue-id-1', 'venue-id-2'],
         title: 'Band',
         date: '2026-08-01',
       },
@@ -32,6 +33,7 @@ describe('createGigCandidate', () => {
       gig: {
         communityId: 'community-id',
         localityId: 'locality-id',
+        venueIds: ['venue-id-1', 'venue-id-2'],
         title: 'Band',
         date: '2026-08-01',
       },

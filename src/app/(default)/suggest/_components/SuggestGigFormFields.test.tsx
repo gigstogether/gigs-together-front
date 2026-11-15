@@ -69,7 +69,10 @@ describe('SuggestGigFormFields', () => {
           qualifier: 'Catalonia',
           timeZone: 'Europe/Madrid',
         },
-        venues: [{ id: 'venue-id', name: 'Razzmatazz' }],
+        venues: [
+          { id: 'venue-id-1', name: 'Razzmatazz' },
+          { id: 'venue-id-2', name: 'Sala Apolo' },
+        ],
       });
     });
   });
@@ -111,7 +114,7 @@ describe('SuggestGigFormFields', () => {
     expect(screen.getByRole('combobox', { name: 'Locality:' })).toBeRequired();
     expect(screen.getByLabelText('Date:*')).toBeRequired();
     expect(screen.getByLabelText('End Date:')).not.toBeRequired();
-    expect(screen.getByLabelText('Venue:')).not.toBeRequired();
+    expect(screen.getByLabelText('Venues:')).not.toBeRequired();
     expect(screen.getByLabelText('Tickets URL:')).not.toBeRequired();
   });
 
@@ -134,7 +137,7 @@ describe('SuggestGigFormFields', () => {
   it('should show the Locality qualifier and enable only matching Venues', async () => {
     renderFields();
 
-    const venueSelect = screen.getByRole('combobox', { name: 'Venue:' });
+    const venueSelect = screen.getByRole('combobox', { name: 'Venues:' });
     expect(venueSelect).toBeDisabled();
     expect(venueSelect).toHaveTextContent('Select a locality first');
 
@@ -144,11 +147,14 @@ describe('SuggestGigFormFields', () => {
     fireEvent.click(screen.getByRole('option', { name: 'Barcelona (Catalonia)' }));
 
     expect(apiPublicRequestMock).toHaveBeenCalledWith('/v1/venues?localityId=locality-id', 'GET');
-    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Venue:' })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Venues:' })).toBeEnabled());
 
-    fireEvent.click(screen.getByRole('combobox', { name: 'Venue:' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Venues:' }));
     fireEvent.click(screen.getByRole('option', { name: 'Razzmatazz' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Sala Apolo' }));
 
-    expect(screen.getByRole('combobox', { name: 'Venue:' })).toHaveTextContent('Razzmatazz');
+    expect(screen.getByRole('combobox', { name: 'Venues:' })).toHaveTextContent(
+      'Razzmatazz, Sala Apolo',
+    );
   });
 });

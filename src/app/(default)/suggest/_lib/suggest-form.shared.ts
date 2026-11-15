@@ -20,10 +20,7 @@ export const suggestGigFormSchema = z
     communityId: z.string().min(1, { message: 'Community is required.' }),
     countryIso: z.string().min(1, { message: 'Country is required.' }),
     localityId: z.string().min(1, { message: 'Locality is required.' }),
-    venueId: z.preprocess(
-      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
-      z.string().min(1).optional(),
-    ),
+    venueIds: z.array(z.string().min(1)).default([]),
     title: z
       .string()
       .trim()
@@ -60,7 +57,7 @@ export function createDefaultSuggestGigFormValues(
     communityId: communityOptions.length === 1 ? (communityOptions[0]?.value ?? '') : '',
     countryIso: 'ES',
     localityId: '',
-    venueId: '',
+    venueIds: [],
     title: '',
     date: '',
     endDate: '',

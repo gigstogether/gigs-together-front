@@ -147,7 +147,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 onValueChange={(value) => {
                   field.onChange(value);
                   form.setValue('localityId', '');
-                  form.setValue('venueId', '');
+                  form.setValue('venueIds', []);
                 }}
               />
               <FieldError errors={[fieldState.error]} />
@@ -183,7 +183,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 onBlur={field.onBlur}
                 onValueChange={(value) => {
                   field.onChange(value);
-                  form.setValue('venueId', '');
+                  form.setValue('venueIds', []);
                 }}
               />
               <FieldError errors={[fieldState.error]} />
@@ -257,26 +257,27 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
 
       <Controller
         control={form.control}
-        name="venueId"
+        name="venueIds"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
             <FieldLabel
               id="suggest-gig-venue-label"
               htmlFor="suggest-gig-venue"
             >
-              Venue:
+              Venues:
             </FieldLabel>
             <SearchableSelect
               id="suggest-gig-venue"
               name={field.name}
-              value={field.value ?? ''}
+              selectionMode="multiple"
+              value={field.value}
               options={venueOptions}
               placeholder={
                 localityId.length === 0
                   ? 'Select a locality first'
                   : venuesQuery.isPending
                     ? 'Loading venues…'
-                    : 'Select venue'
+                    : 'Select venues'
               }
               searchPlaceholder="Search venues"
               emptyText="No venues found."
