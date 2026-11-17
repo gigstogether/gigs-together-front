@@ -64,6 +64,31 @@ describe('SearchableSelect', () => {
     expect(screen.getByText('No time zones found.')).toBeInTheDocument();
   });
 
+  it('should match options when the search omits diacritics', () => {
+    render(
+      <div>
+        <span id="venue-label">Venue:</span>
+        <SearchableSelect
+          id="venue"
+          value=""
+          options={[{ value: 'olimpic', label: 'Palau Olímpic' }]}
+          placeholder="Select venue"
+          searchPlaceholder="Search venues"
+          emptyText="No venues found."
+          ariaLabelledBy="venue-label"
+          onValueChange={vi.fn()}
+        />
+      </div>,
+    );
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Venue:' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search venues' }), {
+      target: { value: 'Olimpic' },
+    });
+
+    expect(screen.getByRole('option', { name: 'Palau Olímpic' })).toBeInTheDocument();
+  });
+
   it('should forward form control properties to the trigger', () => {
     const onBlur = vi.fn();
     const triggerRef = createRef<HTMLButtonElement>();

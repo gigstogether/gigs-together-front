@@ -8,6 +8,7 @@ import type { SelectOption } from '@/components/Select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useDismissOnPointerDownOutside } from '@/hooks/use-dismiss-on-pointer-down-outside';
+import { toSearchKey } from '@/lib/search-text';
 import { cn } from '@/lib/utils';
 
 interface SearchableSelectBaseProps {
@@ -64,15 +65,15 @@ function SearchableSelect(props: SearchableSelectProps) {
       setSearch('');
     },
   });
-  const normalizedSearch = search.trim().toLocaleLowerCase();
+  const normalizedSearch = toSearchKey(search);
   const filteredOptions = useMemo(() => {
     if (normalizedSearch.length === 0) {
       return options;
     }
 
     return options.filter((option) => {
-      const normalizedLabel = option.label.toLocaleLowerCase();
-      const normalizedValue = option.value.toLocaleLowerCase();
+      const normalizedLabel = toSearchKey(option.label);
+      const normalizedValue = toSearchKey(option.value);
       return (
         normalizedLabel.includes(normalizedSearch) || normalizedValue.includes(normalizedSearch)
       );
