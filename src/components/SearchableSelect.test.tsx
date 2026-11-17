@@ -83,7 +83,7 @@ describe('SearchableSelect', () => {
 
     fireEvent.click(screen.getByRole('combobox', { name: 'Venue:' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Search venues' }), {
-      target: { value: 'Olimpic' },
+      target: { value: 'PalauOlimpic' },
     });
 
     expect(screen.getByRole('option', { name: 'Palau Olímpic' })).toBeInTheDocument();
