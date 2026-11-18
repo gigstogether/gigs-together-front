@@ -74,17 +74,53 @@ function GigDates(props: GigDateProps) {
 }
 
 interface GigLocationProps {
-  venue: string;
+  gig: Event;
+  locale: string;
 }
 
 function GigLocation(props: GigLocationProps) {
+  const localityName = props.gig.locality.qualifier
+    ? `${props.gig.locality.name} (${props.gig.locality.qualifier})`
+    : props.gig.locality.name;
+  const countryName = getCountryDisplayName(props.gig.locality.countryIso, props.locale);
+  const locationContext = [localityName, countryName].join(', ');
+  const fullLocation = [
+    props.gig.venues.map((venue) => venue.name).join(', '),
+    locationContext,
+  ].join(' — ');
+
   return (
     <>
       <MapPin
         className="h-4 w-4 shrink-0"
         aria-hidden
       />
-      <span className="min-w-0 flex-1 truncate">{props.venue}</span>
+      <span
+        className="min-w-0 flex-1 truncate"
+        title={fullLocation}
+      >
+        {props.gig.venues.map((venue, index) => {
+          const mapsHref = buildGoogleMapsSearchUrl(
+            [venue.name, localityName, countryName].join(' '),
+          );
+
+          return (
+            <span key={venue.id}>
+              {index > 0 ? ', ' : null}
+              <a
+                href={mapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-gray-700 dark:hover:text-violet-400"
+                aria-label={`Open ${venue.name} in Google Maps`}
+              >
+                {venue.name}
+              </a>
+            </span>
+          );
+        })}
+        <span>{` — ${locationContext}`}</span>
+      </span>
     </>
   );
 }
@@ -93,9 +129,6 @@ export function GigCard(props: GigCardProps) {
   const { gig, posterLoading, posterFetchPriority } = props;
 
   const { locale } = useI18n();
-  const countryName = getCountryDisplayName(gig.countryIso, locale);
-  const location = [gig.venue, gig.city.name, countryName].filter((str) => !!str).join(' ');
-  const mapsHref = location ? buildGoogleMapsSearchUrl(location) : undefined;
   const telegramUrl = gig.postUrl ?? clientEnv.telegramUrl;
   const sharePath = `/gigs/${encodeURIComponent(gig.id)}`;
 
@@ -131,22 +164,12 @@ export function GigCard(props: GigCardProps) {
             />
             <div
               className="flex w-full min-w-0 flex-row gap-2 items-center text-gray-500"
-              title="Venue"
+              title="Location"
             >
-              {mapsHref ? (
-                <a
-                  href={mapsHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-w-0 flex-1 items-center gap-2 truncate transition-colors hover:text-gray-700 dark:hover:text-violet-400"
-                  title="Open in Google Maps"
-                  aria-label="Open venue in Google Maps"
-                >
-                  <GigLocation venue={gig.venue} />
-                </a>
-              ) : (
-                <GigLocation venue={gig.venue} />
-              )}
+              <GigLocation
+                gig={gig}
+                locale={locale}
+              />
             </div>
           </div>
           {/*

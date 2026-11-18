@@ -67,27 +67,32 @@ describe('gigDatesToSortedUniqueYmd', () => {
 });
 
 describe('gigToEvent', () => {
-  it('should keep the country ISO without resolving a display name', () => {
-    const event = gigToEvent(
-      {
-        id: 'gig-id',
-        title: 'Gig',
-        date: '2026-04-21',
-        city: 'barcelona',
-        country: 'ES',
-        venue: 'Venue',
-        ticketsUrl: 'https://example.com/tickets',
+  it('should preserve the resolved Locality and Venues', () => {
+    const event = gigToEvent({
+      id: 'gig-id',
+      title: 'Gig',
+      date: '2026-04-21',
+      locality: {
+        id: 'locality-id',
+        countryIso: 'ES',
+        name: 'Barcelona',
+        qualifier: 'Catalonia',
       },
-      { resolveCityName: () => 'Barcelona' },
-    );
+      venues: [{ id: 'venue-id', name: 'Venue' }],
+      ticketsUrl: 'https://example.com/tickets',
+    });
 
     expect(event).toEqual({
       id: 'gig-id',
       title: 'Gig',
       date: '2026-04-21',
-      city: { code: 'barcelona', name: 'Barcelona' },
-      countryIso: 'ES',
-      venue: 'Venue',
+      locality: {
+        id: 'locality-id',
+        countryIso: 'ES',
+        name: 'Barcelona',
+        qualifier: 'Catalonia',
+      },
+      venues: [{ id: 'venue-id', name: 'Venue' }],
       ticketsUrl: 'https://example.com/tickets',
     });
   });

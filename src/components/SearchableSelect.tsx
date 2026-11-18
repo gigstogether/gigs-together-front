@@ -8,11 +8,11 @@ import type { SelectOption } from '@/components/Select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useDismissOnPointerDownOutside } from '@/hooks/use-dismiss-on-pointer-down-outside';
+import { toSearchKey } from '@/lib/search-text';
 import { cn } from '@/lib/utils';
 
-interface SearchableSelectProps {
+interface SearchableSelectBaseProps {
   id: string;
-  value: string;
   options: SelectOption[];
   placeholder: string;
   searchPlaceholder: string;
@@ -24,13 +24,25 @@ interface SearchableSelectProps {
   name?: string;
   triggerRef?: Ref<HTMLButtonElement>;
   onBlur?: FocusEventHandler<HTMLButtonElement>;
+}
+
+interface SearchableSingleSelectProps extends SearchableSelectBaseProps {
+  selectionMode?: 'single';
+  value: string;
   onValueChange: (value: string) => void;
 }
+
+interface SearchableMultipleSelectProps extends SearchableSelectBaseProps {
+  selectionMode: 'multiple';
+  value: string[];
+  onValueChange: (value: string[]) => void;
+}
+
+type SearchableSelectProps = SearchableSingleSelectProps | SearchableMultipleSelectProps;
 
 function SearchableSelect(props: SearchableSelectProps) {
   const {
     id,
-    value,
     options,
     placeholder,
     searchPlaceholder,
@@ -42,7 +54,6 @@ function SearchableSelect(props: SearchableSelectProps) {
     name,
     triggerRef,
     onBlur,
-    onValueChange,
   } = props;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -54,15 +65,15 @@ function SearchableSelect(props: SearchableSelectProps) {
       setSearch('');
     },
   });
-  const normalizedSearch = search.trim().toLocaleLowerCase();
+  const normalizedSearch = toSearchKey(search);
   const filteredOptions = useMemo(() => {
     if (normalizedSearch.length === 0) {
       return options;
     }
 
     return options.filter((option) => {
-      const normalizedLabel = option.label.toLocaleLowerCase();
-      const normalizedValue = option.value.toLocaleLowerCase();
+      const normalizedLabel = toSearchKey(option.label);
+      const normalizedValue = toSearchKey(option.value);
       return (
         normalizedLabel.includes(normalizedSearch) || normalizedValue.includes(normalizedSearch)
       );
@@ -70,7 +81,10 @@ function SearchableSelect(props: SearchableSelectProps) {
   }, [normalizedSearch, options]);
   const listboxId = `${id}-listbox`;
   const ChevronIcon = isOpen ? ChevronUp : ChevronDown;
-  const selectedOption = options.find((option) => option.value === value);
+  const selectedValues = props.selectionMode === 'multiple' ? props.value : [props.value];
+  const selectedLabels = options
+    .filter((option) => selectedValues.includes(option.value))
+    .map((option) => option.label);
 
   const handleToggle = () => {
     if (isOpen) {
@@ -85,7 +99,17 @@ function SearchableSelect(props: SearchableSelectProps) {
       return;
     }
 
-    onValueChange(option.value);
+    if (props.selectionMode === 'multiple') {
+      if (props.value.includes(option.value)) {
+        props.onValueChange(props.value.filter((selectedValue) => selectedValue !== option.value));
+        return;
+      }
+
+      props.onValueChange([...props.value, option.value]);
+      return;
+    }
+
+    props.onValueChange(option.value);
     setIsOpen(false);
     setSearch('');
   };
@@ -112,7 +136,9 @@ function SearchableSelect(props: SearchableSelectProps) {
         onBlur={onBlur}
         onClick={handleToggle}
       >
-        <span className="truncate">{selectedOption?.label ?? placeholder}</span>
+        <span className="truncate">
+          {selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}
+        </span>
         <ChevronIcon
           className="size-4 shrink-0 opacity-50"
           aria-hidden
@@ -143,11 +169,12 @@ function SearchableSelect(props: SearchableSelectProps) {
           <ul
             id={listboxId}
             role="listbox"
+            aria-multiselectable={props.selectionMode === 'multiple' ? true : undefined}
             aria-labelledby={ariaLabelledBy}
             className="max-h-48 space-y-0.5 overflow-y-auto p-1"
           >
             {filteredOptions.map((option) => {
-              const isSelected = option.value === value;
+              const isSelected = selectedValues.includes(option.value);
 
               return (
                 <li
