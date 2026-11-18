@@ -87,7 +87,7 @@ function GigLocation(props: GigLocationProps) {
   const fullLocation = [
     props.gig.venues.map((venue) => venue.name).join(', '),
     locationContext,
-  ].join(' — ');
+  ].join(' · ');
 
   return (
     <>
@@ -119,7 +119,7 @@ function GigLocation(props: GigLocationProps) {
             </span>
           );
         })}
-        <span>{` — ${locationContext}`}</span>
+        <span>{` · ${locationContext}`}</span>
       </span>
     </>
   );

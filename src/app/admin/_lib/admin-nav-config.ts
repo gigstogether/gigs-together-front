@@ -1,4 +1,4 @@
-import { MapPin } from 'lucide-react';
+import { MapPin, BookA } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Route } from 'next';
 
@@ -50,6 +50,7 @@ export const adminNavItems: readonly AdminNavItem[] = [
     label: 'Translations',
     description: 'UI text and Telegram post strings',
     isEnabled: true,
+    icon: BookA,
   },
   {
     href: ADMIN_LOCALES_ROUTE,
@@ -62,5 +63,6 @@ export const adminNavItems: readonly AdminNavItem[] = [
     label: 'Admins',
     description: 'Moderator access',
     isEnabled: true,
+    // icon: UserRoundShield, // in v1.63.0 lucide-react
   },
 ];
