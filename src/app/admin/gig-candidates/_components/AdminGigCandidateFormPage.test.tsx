@@ -4,23 +4,23 @@ import { render, screen } from '@testing-library/react';
 
 import AdminGigCandidateFormPage from '@/app/admin/gig-candidates/_components/AdminGigCandidateFormPage';
 
-const { getCountriesMock, getRequiredCommunityByRouteMock } = vi.hoisted(() => ({
+const { getCountriesMock, getCommunityDisplayOptionsMock } = vi.hoisted(() => ({
   getCountriesMock: vi.fn(),
-  getRequiredCommunityByRouteMock: vi.fn(),
+  getCommunityDisplayOptionsMock: vi.fn(),
 }));
 
 vi.mock('@/lib/countries.server', () => ({ getCountries: getCountriesMock }));
-vi.mock('@/lib/community/community.server', () => ({
-  getRequiredCommunityByRoute: getRequiredCommunityByRouteMock,
+vi.mock('@/lib/community/community-display-options.server', () => ({
+  getCommunityDisplayOptions: getCommunityDisplayOptionsMock,
 }));
 vi.mock('@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm', () => ({
-  default: (props: { defaultCommunityId: string }) => (
-    <div data-community-id={props.defaultCommunityId}>Create Gig Candidate form</div>
+  default: (props: { communityOptions: { value: string }[] }) => (
+    <div data-community-id={props.communityOptions[0]?.value}>Create Gig Candidate form</div>
   ),
 }));
 vi.mock('@/app/admin/gig-candidates/_components/AdminGigCandidateDetailPageClient', () => ({
-  default: (props: { defaultCommunityId: string; gigCandidateId: string }) => (
-    <div data-community-id={props.defaultCommunityId}>
+  default: (props: { communityOptions: { value: string }[]; gigCandidateId: string }) => (
+    <div data-community-id={props.communityOptions[0]?.value}>
       Edit Gig Candidate {props.gigCandidateId}
     </div>
   ),
@@ -30,10 +30,9 @@ describe('AdminGigCandidateFormPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getCountriesMock.mockResolvedValue([]);
-    getRequiredCommunityByRouteMock.mockResolvedValue({
-      community: { id: 'community-id' },
-      nameTranslationNamespace: 'community',
-    });
+    getCommunityDisplayOptionsMock.mockResolvedValue([
+      { value: 'community-id', label: 'Barcelona' },
+    ]);
   });
 
   it('should render the shared create flow', async () => {

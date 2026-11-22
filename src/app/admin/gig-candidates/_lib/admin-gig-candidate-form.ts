@@ -1,7 +1,10 @@
 import * as z from 'zod';
+
+import type {
+  AdminGigCandidate,
+  AdminGigCandidateDraft,
+} from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
-import type { GigFormValues } from '../../gigs/_lib/gig-form.shared';
-import type { AdminGigCandidateDraft, AdminGigCandidateDraftFields } from './admin-gig-candidate';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
   message: 'Date must be in YYYY-MM-DD format.',
@@ -28,14 +31,25 @@ const optionalTitleSchema = z
 
 const requiredTitleSchema = optionalTitleSchema.min(1, { message: 'Title is required.' });
 
-const optionalDraftFields = {
+const sharedFields = {
+  communityIds: z
+    .array(z.string().min(1))
+    .min(1, { message: 'At least one Community is required.' }),
+  countryIso: z.string(),
+  localityId: z.string(),
+  venueIds: z.array(z.string().min(1)),
   endDate: optionalDate,
-  venue: z.string(),
   ticketsUrl: optionalUrl,
 };
 
-function validateDateOrder(
-  values: { date: string; endDate: string },
+function validateDraft(
+  values: {
+    countryIso: string;
+    localityId: string;
+    venueIds: string[];
+    date: string;
+    endDate: string;
+  },
   context: z.RefinementCtx,
 ): void {
   if (values.date && values.endDate && values.endDate < values.date) {
@@ -45,56 +59,104 @@ function validateDateOrder(
       message: 'End Date must be on or after Date.',
     });
   }
+  if (values.countryIso.length > 0 && values.localityId.length === 0) {
+    context.addIssue({
+      code: 'custom',
+      path: ['localityId'],
+      message: 'Locality is required when a Country is selected.',
+    });
+  }
+  if (values.countryIso.length === 0 && values.localityId.length > 0) {
+    context.addIssue({
+      code: 'custom',
+      path: ['countryIso'],
+      message: 'Country is required when a Locality is selected.',
+    });
+  }
+  if (values.localityId.length === 0 && values.venueIds.length > 0) {
+    context.addIssue({
+      code: 'custom',
+      path: ['venueIds'],
+      message: 'Locality is required when Venues are selected.',
+    });
+  }
 }
 
 export const gigCandidateDraftFormSchema = z
   .object({
+    ...sharedFields,
     title: optionalTitleSchema,
     date: optionalDate,
-    city: z.string(),
-    country: z.string(),
-    ...optionalDraftFields,
   })
-  .superRefine(validateDateOrder);
+  .superRefine(validateDraft);
 
 export const createGigCandidateDraftFormSchema = z
   .object({
+    ...sharedFields,
+    countryIso: z.string().min(1, { message: 'Country is required.' }),
+    localityId: z.string().min(1, { message: 'Locality is required.' }),
     title: requiredTitleSchema,
     date: dateSchema,
-    city: z.string().min(1, { message: 'City is required.' }),
-    country: z.string().min(1, { message: 'Country is required.' }),
-    ...optionalDraftFields,
   })
-  .superRefine(validateDateOrder);
+  .superRefine(validateDraft);
 
-export const defaultGigCandidateDraftFormValues: GigFormValues = {
-  title: '',
-  date: '',
-  endDate: '',
-  city: 'Barcelona',
-  country: 'ES',
-  venue: '',
-  ticketsUrl: '',
-};
+export type AdminGigCandidateDraftFormValues = z.infer<typeof gigCandidateDraftFormSchema>;
 
-export function mapGigCandidateDraftToFormValues(gigDraft: AdminGigCandidateDraft): GigFormValues {
+export function createDefaultGigCandidateDraftFormValues(
+  communityIds: string[],
+): AdminGigCandidateDraftFormValues {
   return {
-    title: gigDraft.title ?? '',
-    date: gigDraft.date ?? '',
-    endDate: gigDraft.endDate ?? '',
-    city: gigDraft.city ?? '',
-    country: gigDraft.country ?? '',
-    venue: gigDraft.venue ?? '',
-    ticketsUrl: gigDraft.ticketsUrl ?? '',
+    communityIds: communityIds.length === 1 ? [...communityIds] : [],
+    countryIso: 'ES',
+    localityId: '',
+    venueIds: [],
+    title: '',
+    date: '',
+    endDate: '',
+    ticketsUrl: '',
+  };
+}
+
+export function mapGigCandidateToFormValues(
+  gigCandidate: AdminGigCandidate,
+): AdminGigCandidateDraftFormValues {
+  return {
+    communityIds: [...gigCandidate.gigDraft.communityIds],
+    countryIso: gigCandidate.locality?.countryIso ?? '',
+    localityId: gigCandidate.locality?.id ?? '',
+    venueIds: [...(gigCandidate.gigDraft.venueIds ?? [])],
+    title: gigCandidate.gigDraft.title ?? '',
+    date: gigCandidate.gigDraft.date ?? '',
+    endDate: gigCandidate.gigDraft.endDate ?? '',
+    ticketsUrl: gigCandidate.gigDraft.ticketsUrl ?? '',
   };
 }
 
 export function mapGigCandidateFormValuesToDraft(
-  values: GigFormValues,
-): AdminGigCandidateDraftFields {
-  const entries = Object.entries(values).flatMap(([field, value]) => {
-    const trimmed = value.trim();
-    return trimmed ? [[field, trimmed]] : [];
-  });
-  return Object.fromEntries(entries);
+  values: AdminGigCandidateDraftFormValues,
+): AdminGigCandidateDraft {
+  const gigDraft: AdminGigCandidateDraft = {
+    communityIds: [...values.communityIds],
+  };
+  const title = values.title.trim();
+  const date = values.date.trim();
+  const endDate = values.endDate.trim();
+  const ticketsUrl = values.ticketsUrl.trim();
+
+  if (values.venueIds.length > 0) {
+    gigDraft.venueIds = [...values.venueIds];
+  }
+  if (title.length > 0) {
+    gigDraft.title = title;
+  }
+  if (date.length > 0) {
+    gigDraft.date = date;
+  }
+  if (endDate.length > 0) {
+    gigDraft.endDate = endDate;
+  }
+  if (ticketsUrl.length > 0) {
+    gigDraft.ticketsUrl = ticketsUrl;
+  }
+  return gigDraft;
 }

@@ -47,7 +47,7 @@ export const adminNavItems: readonly AdminNavItem[] = [
   },
   {
     href: ADMIN_TRANSLATIONS_ROUTE,
-    label: 'Translations',
+    label: 'Text content',
     description: 'UI text and Telegram post strings',
     isEnabled: true,
     icon: BookA,

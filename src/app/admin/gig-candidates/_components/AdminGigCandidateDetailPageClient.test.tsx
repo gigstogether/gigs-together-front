@@ -60,7 +60,7 @@ function renderEdit(status: GigCandidateStatusAPI) {
     <AdminGigCandidateDetailPageClient
       mode="edit"
       countries={[{ iso: 'ES', name: 'Spain' }]}
-      defaultCommunityId="default-community-id"
+      communityOptions={[{ value: 'default-community-id', label: 'Barcelona' }]}
       gigCandidateId="gigCandidate-42"
     />,
     { wrapper: createQueryClientWrapper(createTestQueryClient()) },

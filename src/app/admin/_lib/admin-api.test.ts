@@ -40,10 +40,16 @@ function createGigCandidateApiPayload(overrides: Record<string, unknown> = {}) {
     },
     gigDraft: {
       communityIds: ['community-id'],
+      venueIds: ['venue-id'],
       title: 'Band',
       date: '2026-08-20',
       city: 'Barcelona',
       country: 'ES',
+    },
+    locality: {
+      id: 'locality-id',
+      countryIso: 'ES',
+      name: 'Barcelona',
     },
     status: 'Reviewing',
     version: 0,
@@ -631,12 +637,22 @@ describe('admin GigCandidate commands', () => {
     mockApiRequest.mockResolvedValue(createGigCandidateApiPayload());
 
     await createAdminGigCandidate({
-      gigDraft: { communityIds: ['community-id'], title: 'Band', country: 'ES' },
+      localityId: 'locality-id',
+      gigDraft: {
+        communityIds: ['community-id'],
+        venueIds: ['venue-id'],
+        title: 'Band',
+      },
       poster: { file: null, url: '' },
     });
 
     expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gig-candidates', 'POST', {
-      gigDraft: { communityIds: ['community-id'], title: 'Band', country: 'ES' },
+      localityId: 'locality-id',
+      gigDraft: {
+        communityIds: ['community-id'],
+        venueIds: ['venue-id'],
+        title: 'Band',
+      },
     });
   });
 
@@ -646,7 +662,8 @@ describe('admin GigCandidate commands', () => {
     await updateAdminGigCandidateDraft({
       gigCandidateId: ' gigCandidate/id ',
       expectedVersion: 3,
-      gigDraft: { communityIds: ['community-id'], venue: 'Razzmatazz' },
+      localityId: 'locality-id',
+      gigDraft: { communityIds: ['community-id'], venueIds: ['venue-id'] },
       poster: { file: null, url: '' },
     });
 
@@ -654,7 +671,8 @@ describe('admin GigCandidate commands', () => {
       'v1/admin/gig-candidates/gigCandidate%2Fid/gig-draft',
       'PATCH',
       {
-        gigDraft: { communityIds: ['community-id'], venue: 'Razzmatazz' },
+        localityId: 'locality-id',
+        gigDraft: { communityIds: ['community-id'], venueIds: ['venue-id'] },
         expectedVersion: 3,
       },
     );
