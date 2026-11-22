@@ -64,6 +64,31 @@ describe('SearchableSelect', () => {
     expect(screen.getByText('No time zones found.')).toBeInTheDocument();
   });
 
+  it('should match options when the search omits diacritics', () => {
+    render(
+      <div>
+        <span id="venue-label">Venue:</span>
+        <SearchableSelect
+          id="venue"
+          value=""
+          options={[{ value: 'olimpic', label: 'Palau Olímpic' }]}
+          placeholder="Select venue"
+          searchPlaceholder="Search venues"
+          emptyText="No venues found."
+          ariaLabelledBy="venue-label"
+          onValueChange={vi.fn()}
+        />
+      </div>,
+    );
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Venue:' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search venues' }), {
+      target: { value: 'PalauOlimpic' },
+    });
+
+    expect(screen.getByRole('option', { name: 'Palau Olímpic' })).toBeInTheDocument();
+  });
+
   it('should forward form control properties to the trigger', () => {
     const onBlur = vi.fn();
     const triggerRef = createRef<HTMLButtonElement>();
@@ -94,5 +119,82 @@ describe('SearchableSelect', () => {
     expect(trigger).toHaveAttribute('name', 'country');
     expect(triggerRef.current).toBe(trigger);
     expect(onBlur).toHaveBeenCalledOnce();
+  });
+
+  it('should add and remove values in multiple selection mode without closing the list', () => {
+    const onValueChange = vi.fn();
+    const options = [
+      { value: 'razzmatazz', label: 'Razzmatazz' },
+      { value: 'sala-apolo', label: 'Sala Apolo' },
+    ];
+    const { rerender } = render(
+      <div>
+        <span id="venues-label">Venues:</span>
+        <SearchableSelect
+          id="venues"
+          selectionMode="multiple"
+          value={[]}
+          options={options}
+          placeholder="Select venues"
+          searchPlaceholder="Search venues"
+          emptyText="No venues found."
+          ariaLabelledBy="venues-label"
+          onValueChange={onValueChange}
+        />
+      </div>,
+    );
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Venues:' }));
+    expect(screen.getByRole('listbox', { name: 'Venues:' })).toHaveAttribute(
+      'aria-multiselectable',
+      'true',
+    );
+    fireEvent.click(screen.getByRole('option', { name: 'Razzmatazz' }));
+
+    expect(onValueChange).toHaveBeenLastCalledWith(['razzmatazz']);
+    expect(screen.getByRole('option', { name: 'Sala Apolo' })).toBeInTheDocument();
+
+    rerender(
+      <div>
+        <span id="venues-label">Venues:</span>
+        <SearchableSelect
+          id="venues"
+          selectionMode="multiple"
+          value={['razzmatazz']}
+          options={options}
+          placeholder="Select venues"
+          searchPlaceholder="Search venues"
+          emptyText="No venues found."
+          ariaLabelledBy="venues-label"
+          onValueChange={onValueChange}
+        />
+      </div>,
+    );
+
+    fireEvent.click(screen.getByRole('option', { name: 'Sala Apolo' }));
+    expect(onValueChange).toHaveBeenLastCalledWith(['razzmatazz', 'sala-apolo']);
+
+    rerender(
+      <div>
+        <span id="venues-label">Venues:</span>
+        <SearchableSelect
+          id="venues"
+          selectionMode="multiple"
+          value={['razzmatazz', 'sala-apolo']}
+          options={options}
+          placeholder="Select venues"
+          searchPlaceholder="Search venues"
+          emptyText="No venues found."
+          ariaLabelledBy="venues-label"
+          onValueChange={onValueChange}
+        />
+      </div>,
+    );
+
+    expect(screen.getByRole('combobox', { name: 'Venues:' })).toHaveTextContent(
+      'Razzmatazz, Sala Apolo',
+    );
+    fireEvent.click(screen.getByRole('option', { name: 'Razzmatazz' }));
+    expect(onValueChange).toHaveBeenLastCalledWith(['sala-apolo']);
   });
 });

@@ -16,8 +16,11 @@ import { Button } from '@/components/ui/button';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import { buildAdminGigCandidatePath } from '@/lib/admin-gig-candidate-paths';
 import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
+import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
 import { cn } from '@/lib/utils';
 import { ShareButton } from '@/components/ShareButton';
+
+const ADMIN_GIG_CANDIDATE_LOCALE = 'en';
 
 interface AdminGigCandidateCardProps {
   gigCandidate: AdminGigCandidate;
@@ -27,8 +30,17 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
   const { gigCandidate } = props;
   const { gigDraft } = gigCandidate;
   const title = gigDraft.title ?? 'Untitled Gig Candidate';
-  const location = [gigDraft.venue, gigDraft.city, gigDraft.country].filter(Boolean).join(', ');
-  const mapsHref = location ? buildGoogleMapsSearchUrl(location) : undefined;
+  const localityName = gigCandidate.locality?.qualifier
+    ? `${gigCandidate.locality.name} (${gigCandidate.locality.qualifier})`
+    : gigCandidate.locality?.name;
+  const countryName = gigCandidate.locality
+    ? getCountryDisplayName(gigCandidate.locality.countryIso, ADMIN_GIG_CANDIDATE_LOCALE)
+    : undefined;
+  const venueNames = gigCandidate.venues?.map((venue) => venue.name).join(', ');
+  const locationContext = [localityName, countryName].filter(Boolean).join(', ');
+  const location = [venueNames, locationContext].filter(Boolean).join(' · ');
+  const mapsSearch = [venueNames, localityName, countryName].filter(Boolean).join(' ');
+  const mapsHref = mapsSearch ? buildGoogleMapsSearchUrl(mapsSearch) : undefined;
   const sourceLabel = formatAdminGigSource(gigCandidate.source);
   const isIntakePostExpected = !(
     gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'

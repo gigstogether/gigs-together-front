@@ -10,15 +10,12 @@ import { mergeUniqueSorted } from '@/app/feed/_lib/feedEvents';
 import { fetchFeedPage } from '@/app/feed/_lib/feedApi';
 import { feedKeys } from '@/lib/feed/feedKeys';
 
-export type ResolveCityName = (code: string) => string;
-
 export interface UseFeedInfiniteQueryParams {
   readonly country: string;
   readonly communitySlug: string;
   readonly initialEvents?: readonly Event[];
   readonly initialPrevCursor?: string;
   readonly initialNextCursor?: string;
-  readonly resolveCityName: ResolveCityName;
 }
 
 export interface ReplaceFeedWindowParams {
@@ -62,11 +59,8 @@ interface CreateInitialInfiniteDataParams {
 
 const INITIAL_FEED_PAGE_PARAM = { direction: 'initial' } satisfies FeedPageParam;
 
-function mapGigsToEvents(
-  gigs: readonly V1GigGetResponseBodyGig[],
-  resolveCityName: ResolveCityName,
-): Event[] {
-  return gigs.map((gig) => gigToEvent(gig, { resolveCityName }));
+function mapGigsToEvents(gigs: readonly V1GigGetResponseBodyGig[]): Event[] {
+  return gigs.map((gig) => gigToEvent(gig));
 }
 
 function createInitialInfiniteData(
@@ -88,12 +82,7 @@ export function useFeedInfiniteQuery(
   params: UseFeedInfiniteQueryParams,
 ): UseFeedInfiniteQueryResult {
   const queryClient = useQueryClient();
-  const resolveCityNameRef = useRef(params.resolveCityName);
   const appliedInitialSnapshotRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    resolveCityNameRef.current = params.resolveCityName;
-  }, [params.resolveCityName]);
 
   const queryKey = useMemo(
     () =>
@@ -126,7 +115,7 @@ export function useFeedInfiniteQuery(
       });
 
       return {
-        events: mapGigsToEvents(result.gigs, resolveCityNameRef.current),
+        events: mapGigsToEvents(result.gigs),
         prevCursor: result.prevCursor,
         nextCursor: result.nextCursor,
         requestedCursor: pageParam.cursor,

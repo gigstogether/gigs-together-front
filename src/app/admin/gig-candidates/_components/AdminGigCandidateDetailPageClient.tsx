@@ -10,6 +10,7 @@ import AdminGigCandidateCard from '@/app/admin/gig-candidates/_components/AdminG
 import AdminGigCandidateDraftForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm';
 import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
+import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
 
 interface AdminGigCandidateViewPageClientProps {
   mode: 'view';
@@ -19,7 +20,7 @@ interface AdminGigCandidateViewPageClientProps {
 interface AdminGigCandidateEditPageClientProps {
   mode: 'edit';
   countries: CountryDisplayOption[];
-  defaultCommunityId: string;
+  communityOptions: CommunityDisplayOption[];
   gigCandidateId: string;
 }
 
@@ -58,7 +59,7 @@ export default function AdminGigCandidateDetailPageClient(
       <AdminGigCandidateDraftForm
         key={`${gigCandidate.id}:${gigCandidate.version}`}
         countries={props.countries}
-        defaultCommunityId={props.defaultCommunityId}
+        communityOptions={props.communityOptions}
         gigCandidate={gigCandidate}
       />
     );

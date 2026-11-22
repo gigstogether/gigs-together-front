@@ -4,7 +4,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useReducer, useRef, useState } from 'react';
 import { toLocalYMD } from '@/lib/utils';
 import type { Event } from '@/lib/types';
-import type { ResolveCityName } from '@/app/feed/_hooks/useFeedInfiniteQuery';
 import { FeedMonths } from '@/app/feed/_components/FeedMonths';
 import { useClearFeedLocationHash } from '@/app/feed/_hooks/useClearFeedLocationHash';
 import { useFeedHeaderConfigSync } from '@/app/feed/_hooks/useFeedHeaderConfigSync';
@@ -22,7 +21,6 @@ import { useFeedInfiniteQuery } from '@/app/feed/_hooks/useFeedInfiniteQuery';
 import { useHeaderConfig } from '@/app/feed/_providers/HeaderConfigProvider';
 import { clientEnv } from '@/env/client-env';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
-import { useI18n } from '@/providers/I18nProvider';
 
 const feedMainClassName =
   'mx-auto flex w-full flex-col gap-2.5 overflow-auto pb-5 max-[600px]:items-center';
@@ -49,10 +47,8 @@ export default function FeedClient(props: FeedClientProps) {
   } = props;
 
   const clearHashFromUrl = useClearFeedLocationHash();
-  const { t } = useI18n();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 45
-  const resolveCityName = useCallback<ResolveCityName>((code) => t('city', code), [t]);
   const queryClient = useQueryClient();
 
   const feedQuery = useFeedInfiniteQuery({
@@ -61,7 +57,6 @@ export default function FeedClient(props: FeedClientProps) {
     initialEvents,
     initialPrevCursor,
     initialNextCursor,
-    resolveCityName,
   });
   const {
     events,
@@ -107,12 +102,8 @@ export default function FeedClient(props: FeedClientProps) {
         }),
       );
 
-      const mappedBefore: Event[] = res.before.map((gig) => {
-        return gigToEvent(gig, { resolveCityName });
-      });
-      const mappedAfter: Event[] = res.after.map((gig) => {
-        return gigToEvent(gig, { resolveCityName });
-      });
+      const mappedBefore: Event[] = res.before.map((gig) => gigToEvent(gig));
+      const mappedAfter: Event[] = res.after.map((gig) => gigToEvent(gig));
       const windowEvents = mergeUniqueSorted(mappedBefore, mappedAfter);
       replaceWithWindow({
         events: windowEvents,
@@ -121,7 +112,7 @@ export default function FeedClient(props: FeedClientProps) {
       });
       return windowEvents;
     },
-    [communitySlug, country, queryClient, replaceWithWindow, resolveCityName],
+    [communitySlug, country, queryClient, replaceWithWindow],
   );
 
   const fetchHashTargetAnchorYmd = useCallback(
