@@ -229,6 +229,16 @@ const v1AdminGigCandidateSchema = z
       })
       .strict()
       .optional(),
+    venues: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1),
+            name: z.string().min(1),
+          })
+          .strict(),
+      )
+      .optional(),
     gigDraft: v1AdminGigCandidateDraftSchema,
     status: z.nativeEnum(GigCandidateStatusAPI),
     version: z.number().int().nonnegative(),

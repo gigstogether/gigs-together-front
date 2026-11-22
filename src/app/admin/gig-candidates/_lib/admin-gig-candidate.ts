@@ -88,6 +88,11 @@ export interface AdminGigCandidateLocality {
   qualifier?: string;
 }
 
+export interface AdminGigCandidateVenue {
+  id: string;
+  name: string;
+}
+
 export interface AdminGigCandidateOriginalMessage {
   text?: string;
   imageUrl?: string;
@@ -98,6 +103,7 @@ export interface AdminGigCandidate {
   id: string;
   source: GigCandidateSourceForAdminView;
   locality?: AdminGigCandidateLocality;
+  venues?: AdminGigCandidateVenue[];
   gigDraft: AdminGigCandidateDraft;
   status: GigCandidateStatusAPI;
   version: number;

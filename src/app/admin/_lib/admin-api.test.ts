@@ -51,6 +51,7 @@ function createGigCandidateApiPayload(overrides: Record<string, unknown> = {}) {
       countryIso: 'ES',
       name: 'Barcelona',
     },
+    venues: [{ id: 'venue-id', name: 'Razzmatazz' }],
     status: 'Reviewing',
     version: 0,
     createdAt: '2026-08-01T10:00:00.000Z',
@@ -375,6 +376,7 @@ describe('fetchAdminGigCandidates', () => {
       gigCandidates: [
         expect.objectContaining({
           id: '507f1f77bcf86cd799439099',
+          venues: [{ id: 'venue-id', name: 'Razzmatazz' }],
           intakePostUrl: 'https://t.me/c/123/77',
           intakePostDate: 1_700_000_000_000,
         }),
