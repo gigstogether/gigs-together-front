@@ -1,4 +1,5 @@
 import { ADMIN_LOCATION_LOCALE } from './admin-location-display';
+import { toSearchKey } from '@/lib/search-text';
 
 export type LocationCatalogKind = 'locality' | 'venue';
 
@@ -23,13 +24,13 @@ export function getCatalogPluralLabel(kind: LocationCatalogKind): string {
 }
 
 export function matchesLocationSearch(values: string[], search: string): boolean {
-  const normalizedSearch = search.trim().toLocaleLowerCase(ADMIN_LOCATION_LOCALE);
+  const normalizedSearch = toSearchKey(search, ADMIN_LOCATION_LOCALE);
   if (normalizedSearch.length === 0) {
     return true;
   }
 
   return values.some((value) =>
-    value.toLocaleLowerCase(ADMIN_LOCATION_LOCALE).includes(normalizedSearch),
+    toSearchKey(value, ADMIN_LOCATION_LOCALE).includes(normalizedSearch),
   );
 }
 

@@ -66,6 +66,7 @@ export type GigCandidateSourceForAdminView =
   | GigCandidateSourceProvider;
 
 export interface AdminGigCandidateDraftFields {
+  venueIds?: string[];
   title?: string;
   date?: string;
   endDate?: string;
@@ -80,6 +81,18 @@ export interface AdminGigCandidateDraft extends AdminGigCandidateDraftFields {
   communityIds: string[];
 }
 
+export interface AdminGigCandidateLocality {
+  id: string;
+  countryIso: string;
+  name: string;
+  qualifier?: string;
+}
+
+export interface AdminGigCandidateVenue {
+  id: string;
+  name: string;
+}
+
 export interface AdminGigCandidateOriginalMessage {
   text?: string;
   imageUrl?: string;
@@ -89,6 +102,8 @@ export interface AdminGigCandidateOriginalMessage {
 export interface AdminGigCandidate {
   id: string;
   source: GigCandidateSourceForAdminView;
+  locality?: AdminGigCandidateLocality;
+  venues?: AdminGigCandidateVenue[];
   gigDraft: AdminGigCandidateDraft;
   status: GigCandidateStatusAPI;
   version: number;

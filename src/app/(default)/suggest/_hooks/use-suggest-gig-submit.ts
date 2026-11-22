@@ -3,13 +3,12 @@ import { toast } from '@/hooks/use-toast';
 import { createGigCandidate } from '@/app/(default)/suggest/_lib/gig-candidate-api';
 import type {
   GigCandidateCreateResponse,
-  GigCandidateUpsertPayload,
+  GigCandidateCreatePayload,
 } from '@/app/(default)/suggest/_lib/gig-candidate-api';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import { isApiTransportError } from '@/lib/api-errors';
 
 interface UseSuggestGigSubmitParams {
-  communityId: string;
   posterFile: File | null;
   posterUrl: string;
   onSuccess: (result: GigCandidateCreateResponse) => void;
@@ -27,23 +26,29 @@ interface SubmitSuggestGigInput {
 }
 
 interface BuildPayloadParams {
-  communityId: string;
   values: SuggestGigFormValues;
 }
 
-function buildPayload(params: BuildPayloadParams): GigCandidateUpsertPayload {
-  const { communityId, values } = params;
+function buildPayload(params: BuildPayloadParams): GigCandidateCreatePayload {
+  const { values } = params;
 
-  return {
-    communityIds: [communityId],
+  const payload: GigCandidateCreatePayload = {
+    communityId: values.communityId,
+    localityId: values.localityId,
     title: values.title,
     date: values.date,
-    endDate: values.endDate || undefined,
-    city: values.city,
-    country: values.country,
-    venue: values.venue || undefined,
-    ticketsUrl: values.ticketsUrl || undefined,
   };
+  if (values.venueIds.length > 0) {
+    payload.venueIds = [...values.venueIds];
+  }
+  if (values.endDate !== undefined) {
+    payload.endDate = values.endDate;
+  }
+  if (values.ticketsUrl !== undefined) {
+    payload.ticketsUrl = values.ticketsUrl;
+  }
+
+  return payload;
 }
 
 function isPosterUrlValid(posterUrl: string): boolean {
@@ -60,11 +65,11 @@ function isPosterUrlValid(posterUrl: string): boolean {
 }
 
 export function useSuggestGigSubmit(params: UseSuggestGigSubmitParams): UseSuggestGigSubmitResult {
-  const { communityId, posterFile, posterUrl, onSuccess } = params;
+  const { posterFile, posterUrl, onSuccess } = params;
 
   const submitMutation = useMutation<GigCandidateCreateResponse, unknown, SubmitSuggestGigInput>({
     mutationFn: (input: SubmitSuggestGigInput): Promise<GigCandidateCreateResponse> => {
-      const gig = buildPayload({ communityId, values: input.values });
+      const gig = buildPayload({ values: input.values });
       const posterMode = input.posterFile ? 'upload' : 'url';
 
       return createGigCandidate({

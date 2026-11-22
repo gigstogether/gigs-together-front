@@ -11,19 +11,18 @@ export interface GigCandidatePosterSelection {
   url: string;
 }
 
-export interface GigCandidateUpsertPayload {
-  communityIds: string[];
+export interface GigCandidateCreatePayload {
+  communityId: string;
+  localityId: string;
+  venueIds?: string[];
   title: string;
   date: string;
   endDate?: string;
-  city: string;
-  country: string;
-  venue?: string;
   ticketsUrl?: string;
 }
 
-export interface GigCandidateUpsertApiParams {
-  gig: GigCandidateUpsertPayload;
+export interface GigCandidateCreateApiParams {
+  gig: GigCandidateCreatePayload;
   poster: GigCandidatePosterSelection;
 }
 
@@ -56,18 +55,23 @@ function getPosterUrlOrUndefined(poster: GigCandidatePosterSelection): string | 
 }
 
 export async function createGigCandidate(
-  params: GigCandidateUpsertApiParams,
+  params: GigCandidateCreateApiParams,
 ): Promise<GigCandidateCreateResponse> {
-  const gig: GigCandidateUpsertPayload = {
-    communityIds: params.gig.communityIds,
+  const gig: GigCandidateCreatePayload = {
+    communityId: params.gig.communityId,
+    localityId: params.gig.localityId,
     title: params.gig.title,
     date: params.gig.date,
-    endDate: params.gig.endDate || undefined,
-    city: params.gig.city,
-    country: params.gig.country,
-    venue: params.gig.venue || undefined,
-    ticketsUrl: params.gig.ticketsUrl || undefined,
   };
+  if (params.gig.venueIds !== undefined) {
+    gig.venueIds = [...params.gig.venueIds];
+  }
+  if (params.gig.endDate !== undefined) {
+    gig.endDate = params.gig.endDate;
+  }
+  if (params.gig.ticketsUrl !== undefined) {
+    gig.ticketsUrl = params.gig.ticketsUrl;
+  }
 
   const posterUrl = getPosterUrlOrUndefined(params.poster);
 

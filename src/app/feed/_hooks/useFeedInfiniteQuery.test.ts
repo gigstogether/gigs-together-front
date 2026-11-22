@@ -50,12 +50,12 @@ function createEvent(overrides: Partial<Event> = {}): Event {
     id: 'gig-1',
     title: 'Arctic Monkeys',
     date: '2026-07-01',
-    city: {
-      code: 'barcelona',
+    locality: {
+      id: 'locality-id',
+      countryIso: 'ES',
       name: 'Barcelona',
     },
-    venue: 'Razzmatazz',
-    countryIso: 'ES',
+    venues: [{ id: 'venue-1', name: 'Razzmatazz' }],
     ...overrides,
   };
 }
@@ -76,7 +76,6 @@ describe('useFeedInfiniteQuery', () => {
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
           initialNextCursor: 'next-1',
-          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -98,9 +97,12 @@ describe('useFeedInfiniteQuery', () => {
           id: 'gig-2',
           title: 'The Strokes',
           date: '2026-07-02',
-          city: 'Barcelona',
-          country: 'es',
-          venue: 'Apolo',
+          locality: {
+            id: 'locality-id',
+            countryIso: 'ES',
+            name: 'Barcelona',
+          },
+          venues: [{ id: 'venue-2', name: 'Apolo' }],
           ticketsUrl: 'https://tickets.example/gig-2',
         },
       ],
@@ -112,7 +114,6 @@ describe('useFeedInfiniteQuery', () => {
         useFeedInfiniteQuery({
           country: 'es',
           communitySlug: 'barcelona',
-          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -144,9 +145,12 @@ describe('useFeedInfiniteQuery', () => {
           id: 'gig-2',
           title: 'The Strokes',
           date: '2026-07-02',
-          city: 'Barcelona',
-          country: 'es',
-          venue: 'Apolo',
+          locality: {
+            id: 'locality-id',
+            countryIso: 'ES',
+            name: 'Barcelona',
+          },
+          venues: [{ id: 'venue-2', name: 'Apolo' }],
           ticketsUrl: 'https://tickets.example/gig-2',
         },
       ],
@@ -161,7 +165,6 @@ describe('useFeedInfiniteQuery', () => {
           communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialNextCursor: 'next-1',
-          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -194,9 +197,12 @@ describe('useFeedInfiniteQuery', () => {
           id: 'gig-0',
           title: 'Phoenix',
           date: '2026-06-30',
-          city: 'Barcelona',
-          country: 'es',
-          venue: 'Sala',
+          locality: {
+            id: 'locality-id',
+            countryIso: 'ES',
+            name: 'Barcelona',
+          },
+          venues: [{ id: 'venue-0', name: 'Sala' }],
           ticketsUrl: 'https://tickets.example/gig-0',
         },
       ],
@@ -211,7 +217,6 @@ describe('useFeedInfiniteQuery', () => {
           communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
-          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -248,7 +253,6 @@ describe('useFeedInfiniteQuery', () => {
           communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
-          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -270,9 +274,12 @@ describe('useFeedInfiniteQuery', () => {
           id: 'gig-0',
           title: 'Phoenix',
           date: '2026-06-30',
-          city: 'Barcelona',
-          country: 'es',
-          venue: 'Sala',
+          locality: {
+            id: 'locality-id',
+            countryIso: 'ES',
+            name: 'Barcelona',
+          },
+          venues: [{ id: 'venue-0', name: 'Sala' }],
           ticketsUrl: 'https://tickets.example/gig-0',
         },
       ],
