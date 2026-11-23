@@ -65,7 +65,7 @@ export type GigCandidateSourceForAdminView =
   | GigCandidateSourceUserWithProfile
   | GigCandidateSourceProvider;
 
-export interface AdminGigCandidateDraftFields {
+export interface AdminGigCandidateGigDraftFields {
   venueIds?: string[];
   title?: string;
   date?: string;
@@ -74,7 +74,7 @@ export interface AdminGigCandidateDraftFields {
   posterUrl?: string;
 }
 
-export interface AdminGigCandidateDraft extends AdminGigCandidateDraftFields {
+export interface AdminGigCandidateGigDraft extends AdminGigCandidateGigDraftFields {
   communityIds: string[];
 }
 
@@ -101,7 +101,7 @@ export interface AdminGigCandidate {
   source: GigCandidateSourceForAdminView;
   locality?: AdminGigCandidateLocality;
   venues?: AdminGigCandidateVenue[];
-  gigDraft: AdminGigCandidateDraft;
+  gigDraft: AdminGigCandidateGigDraft;
   status: GigCandidateStatusAPI;
   version: number;
   originalMessage?: AdminGigCandidateOriginalMessage;
@@ -118,7 +118,7 @@ export interface AdminGigCandidate {
   updatedAt: string;
 }
 
-export interface AdminGigCandidateLookupDraft {
+export interface AdminGigCandidateLookupGigDraft {
   title: string;
   date: string;
   endDate?: string;
@@ -133,7 +133,7 @@ export interface AdminGigCandidateLookupLocationHint {
 }
 
 export interface AdminGigCandidateLookupResult {
-  gigDraft: AdminGigCandidateLookupDraft;
+  gigDraft: AdminGigCandidateLookupGigDraft;
   locationHint: AdminGigCandidateLookupLocationHint;
 }
 

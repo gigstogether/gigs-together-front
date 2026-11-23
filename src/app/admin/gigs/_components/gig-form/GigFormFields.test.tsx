@@ -8,7 +8,7 @@ import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 
 interface GigFormFieldsTestSubjectProps {
-  validationMode?: 'completeGig' | 'gigCandidateCreate' | 'gigCandidateDraft';
+  validationMode?: 'completeGig' | 'gigCandidateCreate' | 'gigCandidateGigDraft';
 }
 
 function GigFormFieldsTestSubject(props: GigFormFieldsTestSubjectProps) {
@@ -24,7 +24,7 @@ function GigFormFieldsTestSubject(props: GigFormFieldsTestSubjectProps) {
       ]}
       isSubmitting={false}
       validationMode={validationMode}
-      allowEmptyCountry={validationMode === 'gigCandidateDraft'}
+      allowEmptyCountry={validationMode === 'gigCandidateGigDraft'}
     />
   );
 }
@@ -55,7 +55,7 @@ describe('GigFormFields', () => {
   });
 
   it('should leave fields optional for the Gig Candidate draft schema', () => {
-    render(<GigFormFieldsTestSubject validationMode="gigCandidateDraft" />);
+    render(<GigFormFieldsTestSubject validationMode="gigCandidateGigDraft" />);
 
     expect(screen.getByLabelText('Title:')).not.toBeRequired();
     expect(screen.getByLabelText('Country:')).not.toBeRequired();

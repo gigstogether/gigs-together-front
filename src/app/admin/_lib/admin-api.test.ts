@@ -17,10 +17,10 @@ import {
   fetchAdminGigCandidateById,
   createAdminGigCandidate,
   approveAdminGigCandidate,
-  lookupAdminGigCandidateDraft,
+  lookupAdminGigDetails,
   rejectAdminGigCandidate,
   sendAdminGigCandidateToModeration,
-  updateAdminGigCandidateDraft,
+  updateAdminGigCandidateGigDraft,
 } from '@/app/admin/_lib/admin-api';
 import { AdminGigsSortBy, AdminGigsSortOrder } from '@/app/admin/gigs/_lib/admin-gigs-sort';
 import {
@@ -659,7 +659,7 @@ describe('admin GigCandidate commands', () => {
   it('should update only gigDraft with expectedVersion', async () => {
     mockApiRequest.mockResolvedValue(createGigCandidateApiPayload({ version: 4 }));
 
-    await updateAdminGigCandidateDraft({
+    await updateAdminGigCandidateGigDraft({
       gigCandidateId: ' gigCandidate/id ',
       expectedVersion: 3,
       localityId: 'locality-id',
@@ -739,7 +739,7 @@ describe('admin GigCandidate commands', () => {
     });
 
     await expect(
-      lookupAdminGigCandidateDraft({ title: ' Band ', location: ' Barcelona, ES ' }),
+      lookupAdminGigDetails({ title: ' Band ', location: ' Barcelona, ES ' }),
     ).resolves.toEqual({
       gigDraft: {
         title: 'Band',
@@ -764,7 +764,7 @@ describe('admin GigCandidate commands', () => {
     mockApiRequest.mockResolvedValue({ gigDraft: null });
 
     await expect(
-      lookupAdminGigCandidateDraft({ title: 'Band', location: 'Barcelona, ES' }),
+      lookupAdminGigDetails({ title: 'Band', location: 'Barcelona, ES' }),
     ).resolves.toBeNull();
   });
 
@@ -783,7 +783,7 @@ describe('admin GigCandidate commands', () => {
     });
 
     await expect(
-      lookupAdminGigCandidateDraft({ title: 'Band', location: 'Barcelona, ES' }),
+      lookupAdminGigDetails({ title: 'Band', location: 'Barcelona, ES' }),
     ).rejects.toThrow('Gig Candidate lookup did not return a date');
   });
 });

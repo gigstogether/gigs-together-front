@@ -7,8 +7,8 @@ import { isRecord } from '@/lib/is-record';
 import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import type {
   AdminGigCandidate,
-  AdminGigCandidateDraft,
-  AdminGigCandidateLookupDraft,
+  AdminGigCandidateGigDraft,
+  AdminGigCandidateLookupGigDraft,
   AdminGigCandidateLookupResult,
   AdminGigCandidatesSortBy,
   AdminGigCandidatesSortOrder,
@@ -186,7 +186,7 @@ const v1AdminGigSourceSchema = z.union([
     .strict(),
 ]);
 
-const v1AdminGigCandidateDraftFieldsSchema = z
+const v1AdminGigCandidateGigDraftFieldsSchema = z
   .object({
     venueIds: z.array(z.string().min(1)).min(1).optional(),
     title: z.string().optional(),
@@ -197,7 +197,7 @@ const v1AdminGigCandidateDraftFieldsSchema = z
   })
   .strict();
 
-const v1AdminGigCandidateDraftSchema = v1AdminGigCandidateDraftFieldsSchema.extend({
+const v1AdminGigCandidateGigDraftSchema = v1AdminGigCandidateGigDraftFieldsSchema.extend({
   communityIds: z.array(z.string().min(1)).min(1),
 });
 
@@ -237,7 +237,7 @@ const v1AdminGigCandidateSchema = z
           .strict(),
       )
       .optional(),
-    gigDraft: v1AdminGigCandidateDraftSchema,
+    gigDraft: v1AdminGigCandidateGigDraftSchema,
     status: z.nativeEnum(GigCandidateStatusAPI),
     version: z.number().int().nonnegative(),
     originalMessage: v1AdminGigCandidateOriginalMessageSchema.optional(),
@@ -395,11 +395,11 @@ export interface AdminGigCandidatePosterInput {
 
 export interface CreateAdminGigCandidateParams {
   localityId?: string;
-  gigDraft: AdminGigCandidateDraft;
+  gigDraft: AdminGigCandidateGigDraft;
   poster: AdminGigCandidatePosterInput;
 }
 
-export interface UpdateAdminGigCandidateDraftParams extends CreateAdminGigCandidateParams {
+export interface UpdateAdminGigCandidateGigDraftParams extends CreateAdminGigCandidateParams {
   gigCandidateId: string;
   expectedVersion: number;
 }
@@ -419,7 +419,7 @@ export interface SendAdminGigCandidateToModerationParams {
   expectedVersion: number;
 }
 
-export interface LookupAdminGigCandidateDraftParams {
+export interface LookupAdminGigDetailsParams {
   title: string;
   location: string;
   signal?: AbortSignal;
@@ -513,7 +513,7 @@ function parseAdminGigCandidateLookup(payload: unknown): AdminGigCandidateLookup
   if (!parsed.data.gigDraft.date) {
     throw new Error('Gig Candidate lookup did not return a date');
   }
-  const gigDraft: AdminGigCandidateLookupDraft = {
+  const gigDraft: AdminGigCandidateLookupGigDraft = {
     title: parsed.data.gigDraft.title,
     date: normalizeGigCandidateLookupDate(parsed.data.gigDraft.date, 'gigDraft.date'),
     ticketsUrl: parsed.data.gigDraft.ticketsUrl,
@@ -674,8 +674,8 @@ export async function createAdminGigCandidate(
   return parseAdminGigCandidate(raw);
 }
 
-export async function updateAdminGigCandidateDraft(
-  params: UpdateAdminGigCandidateDraftParams,
+export async function updateAdminGigCandidateGigDraft(
+  params: UpdateAdminGigCandidateGigDraftParams,
 ): Promise<AdminGigCandidate> {
   const gigCandidateId = encodeURIComponent(params.gigCandidateId.trim());
   const body = buildAdminGigCandidateMutationBody(params);
@@ -728,8 +728,8 @@ export async function sendAdminGigCandidateToModeration(
   return parseAdminGigCandidate(raw);
 }
 
-export async function lookupAdminGigCandidateDraft(
-  params: LookupAdminGigCandidateDraftParams,
+export async function lookupAdminGigDetails(
+  params: LookupAdminGigDetailsParams,
 ): Promise<AdminGigCandidateLookupResult | null> {
   const title = params.title.trim();
   const location = params.location.trim();
@@ -750,7 +750,7 @@ export async function lookupAdminGigCandidateDraft(
 
 interface AdminGigCandidateMutationJsonBody {
   localityId?: string;
-  gigDraft: AdminGigCandidateDraft;
+  gigDraft: AdminGigCandidateGigDraft;
 }
 
 function buildAdminGigCandidateMutationBody(

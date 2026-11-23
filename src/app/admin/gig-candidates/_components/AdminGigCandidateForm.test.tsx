@@ -4,8 +4,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import type {
   createAdminGigCandidate,
-  lookupAdminGigCandidateDraft,
-  updateAdminGigCandidateDraft,
+  lookupAdminGigDetails,
+  updateAdminGigCandidateGigDraft,
 } from '@/app/admin/_lib/admin-api';
 import type {
   fetchAdminLocalities,
@@ -21,18 +21,18 @@ const {
   createGigCandidateMock,
   fetchLocalitiesMock,
   fetchVenuesMock,
-  lookupGigCandidateDraftMock,
+  lookupGigDetailsMock,
   pushMock,
   toastMock,
-  updateGigCandidateDraftMock,
+  updateGigCandidateGigDraftMock,
 } = vi.hoisted(() => ({
   createGigCandidateMock: vi.fn<typeof createAdminGigCandidate>(),
   fetchLocalitiesMock: vi.fn<typeof fetchAdminLocalities>(),
   fetchVenuesMock: vi.fn<typeof fetchAdminVenues>(),
-  lookupGigCandidateDraftMock: vi.fn<typeof lookupAdminGigCandidateDraft>(),
+  lookupGigDetailsMock: vi.fn<typeof lookupAdminGigDetails>(),
   pushMock: vi.fn(),
   toastMock: vi.fn(),
-  updateGigCandidateDraftMock: vi.fn<typeof updateAdminGigCandidateDraft>(),
+  updateGigCandidateGigDraftMock: vi.fn<typeof updateAdminGigCandidateGigDraft>(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -41,8 +41,8 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/hooks/use-toast', () => ({ toast: toastMock }));
 vi.mock('@/app/admin/_lib/admin-api', () => ({
   createAdminGigCandidate: createGigCandidateMock,
-  lookupAdminGigCandidateDraft: lookupGigCandidateDraftMock,
-  updateAdminGigCandidateDraft: updateGigCandidateDraftMock,
+  lookupAdminGigDetails: lookupGigDetailsMock,
+  updateAdminGigCandidateGigDraft: updateGigCandidateGigDraftMock,
 }));
 vi.mock('@/app/admin/locations/_lib/admin-locations-api', () => ({
   fetchAdminLocalities: fetchLocalitiesMock,
@@ -147,7 +147,7 @@ describe('AdminGigCandidateForm', () => {
 
   it('should update a GigCandidate with multiple Venue assignments', async () => {
     const gigCandidate = createReviewingGigCandidate();
-    updateGigCandidateDraftMock.mockResolvedValueOnce({ ...gigCandidate, version: 5 });
+    updateGigCandidateGigDraftMock.mockResolvedValueOnce({ ...gigCandidate, version: 5 });
     renderForm(gigCandidate);
 
     expect(screen.getByText('Edit Gig Candidate')).toBeInTheDocument();
@@ -155,7 +155,7 @@ describe('AdminGigCandidateForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
     await waitFor(() => {
-      expect(updateGigCandidateDraftMock).toHaveBeenCalledWith({
+      expect(updateGigCandidateGigDraftMock).toHaveBeenCalledWith({
         gigCandidateId: 'gigCandidate-42',
         expectedVersion: 4,
         localityId: BARCELONA_LOCALITY_ID,
@@ -201,7 +201,7 @@ describe('AdminGigCandidateForm', () => {
   });
 
   it('should report a stale GigCandidate version conflict', async () => {
-    updateGigCandidateDraftMock.mockRejectedValueOnce(
+    updateGigCandidateGigDraftMock.mockRejectedValueOnce(
       new ApiError('Version conflict', 409, 'GIG_CANDIDATE_CONFLICT'),
     );
     renderForm(createReviewingGigCandidate());
@@ -219,7 +219,7 @@ describe('AdminGigCandidateForm', () => {
   });
 
   it('should map lookup location text to catalog identifiers', async () => {
-    lookupGigCandidateDraftMock.mockResolvedValueOnce({
+    lookupGigDetailsMock.mockResolvedValueOnce({
       gigDraft: {
         title: 'Looked-up Band',
         date: '2026-09-20',
@@ -242,7 +242,7 @@ describe('AdminGigCandidateForm', () => {
     expect(
       screen.getByText('AI suggested location: Sala Apolo · Barcelona · es'),
     ).toBeInTheDocument();
-    expect(lookupGigCandidateDraftMock).toHaveBeenCalledWith({
+    expect(lookupGigDetailsMock).toHaveBeenCalledWith({
       title: 'Band',
       location: 'Barcelona, Spain',
     });

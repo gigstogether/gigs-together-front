@@ -9,13 +9,13 @@ import type { UseFormReturn } from 'react-hook-form';
 
 import {
   createAdminGigCandidate,
-  lookupAdminGigCandidateDraft,
-  updateAdminGigCandidateDraft,
+  lookupAdminGigDetails,
+  updateAdminGigCandidateGigDraft,
 } from '@/app/admin/_lib/admin-api';
 import type {
   CreateAdminGigCandidateParams,
-  LookupAdminGigCandidateDraftParams,
-  UpdateAdminGigCandidateDraftParams,
+  LookupAdminGigDetailsParams,
+  UpdateAdminGigCandidateGigDraftParams,
 } from '@/app/admin/_lib/admin-api';
 import { buildVersionedAdminPosterUrl } from '@/app/admin/_lib/admin-poster-url';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
@@ -30,9 +30,9 @@ import type {
   AdminGigCandidateLookupResult,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import {
-  createGigCandidateDraftFormSchema,
-  createDefaultGigCandidateDraftFormValues,
-  gigCandidateDraftFormSchema,
+  createGigCandidateFormSchema,
+  createDefaultGigCandidateFormValues,
+  gigCandidateFormSchema,
   mapGigCandidateToFormValues,
   mapGigCandidateFormValuesToDraft,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
@@ -61,7 +61,7 @@ interface AdminGigCandidateFormProps {
 
 interface UseGigCandidateLookupResult {
   isLookingUp: boolean;
-  lookupGigCandidateDraft: () => Promise<void>;
+  lookupGigDetails: () => Promise<void>;
 }
 
 interface UseGigCandidateLookupParams {
@@ -81,8 +81,7 @@ function useGigCandidateLookup(params: UseGigCandidateLookupParams): UseGigCandi
     params;
 
   const lookupMutation = useMutation({
-    mutationFn: (params: LookupAdminGigCandidateDraftParams) =>
-      lookupAdminGigCandidateDraft(params),
+    mutationFn: (params: LookupAdminGigDetailsParams) => lookupAdminGigDetails(params),
   });
 
   function applyGigCandidateLookupResult(result: AdminGigCandidateLookupResult) {
@@ -147,7 +146,7 @@ function useGigCandidateLookup(params: UseGigCandidateLookupParams): UseGigCandi
     }
   }
 
-  async function lookupGigCandidateDraft(): Promise<void> {
+  async function lookupGigDetails(): Promise<void> {
     if (lookupMutation.isPending) {
       return;
     }
@@ -183,7 +182,7 @@ function useGigCandidateLookup(params: UseGigCandidateLookupParams): UseGigCandi
 
   return {
     isLookingUp: lookupMutation.isPending,
-    lookupGigCandidateDraft,
+    lookupGigDetails,
   };
 }
 
@@ -197,14 +196,10 @@ export default function AdminGigCandidateForm(props: AdminGigCandidateFormProps)
   const [locationHintText, setLocationHintText] = useState('');
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
   const form = useForm<AdminGigCandidateFormValues>({
-    resolver: zodResolver(
-      gigCandidate ? gigCandidateDraftFormSchema : createGigCandidateDraftFormSchema,
-    ),
+    resolver: zodResolver(gigCandidate ? gigCandidateFormSchema : createGigCandidateFormSchema),
     defaultValues: gigCandidate
       ? mapGigCandidateToFormValues(gigCandidate)
-      : createDefaultGigCandidateDraftFormValues(
-          communityOptions.map((community) => community.value),
-        ),
+      : createDefaultGigCandidateFormValues(communityOptions.map((community) => community.value)),
   });
   const countryIso = useWatch({ control: form.control, name: 'countryIso' });
   const localityId = useWatch({ control: form.control, name: 'localityId' });
@@ -241,7 +236,7 @@ export default function AdminGigCandidateForm(props: AdminGigCandidateFormProps)
         venue.localityId === localityId && (venue.isActive || selectedVenueIds.includes(venue.id)),
     )
     .map((venue) => ({ value: venue.id, label: venue.name }));
-  const { isLookingUp, lookupGigCandidateDraft } = useGigCandidateLookup({
+  const { isLookingUp, lookupGigDetails } = useGigCandidateLookup({
     form,
     countries,
     localities,
@@ -261,7 +256,7 @@ export default function AdminGigCandidateForm(props: AdminGigCandidateFormProps)
       const poster = { file: posterFile, url: posterUrl };
       const localityIdValue = values.localityId.trim();
       if (gigCandidate) {
-        const params: UpdateAdminGigCandidateDraftParams = {
+        const params: UpdateAdminGigCandidateGigDraftParams = {
           gigCandidateId: gigCandidate.id,
           expectedVersion: gigCandidate.version,
           gigDraft,
@@ -270,7 +265,7 @@ export default function AdminGigCandidateForm(props: AdminGigCandidateFormProps)
         if (localityIdValue.length > 0) {
           params.localityId = localityIdValue;
         }
-        return updateAdminGigCandidateDraft(params);
+        return updateAdminGigCandidateGigDraft(params);
       }
 
       const params: CreateAdminGigCandidateParams = {
@@ -474,7 +469,7 @@ export default function AdminGigCandidateForm(props: AdminGigCandidateFormProps)
                 variant="secondary"
                 disabled={isLookingUp || saveMutation.isPending || localityId.length === 0}
                 onClick={() => {
-                  void lookupGigCandidateDraft();
+                  void lookupGigDetails();
                 }}
               >
                 {isLookingUp ? 'Looking up…' : 'Find info with AI'}
