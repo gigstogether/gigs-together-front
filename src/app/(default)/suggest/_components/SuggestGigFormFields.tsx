@@ -1,28 +1,61 @@
 'use client';
 
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
 
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import DateInput from '@/components/DateInput';
 import { Input } from '@/components/ui/input';
-import NativeSelect from '@/components/NativeSelect';
+import RequiredIndicator from '@/components/RequiredIndicator';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
-import { defaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
-import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
-import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
-import type { Country } from '@/lib/api-boundary-schemas';
-import { useT } from '@/providers/I18nProvider';
+import type {
+  SuggestCommunityOption,
+  SuggestGigFormValues,
+} from '@/app/(default)/suggest/_lib/suggest-form.shared';
+import {
+  fetchPublicLocalities,
+  fetchPublicVenues,
+  formatLocalityName,
+} from '@/app/(default)/suggest/_lib/location-catalog-api';
+import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 
 interface SuggestGigFormFieldsProps {
   form: UseFormReturn<SuggestGigFormValues>;
-  countries: Country[];
+  communityOptions: SuggestCommunityOption[];
+  countries: CountryDisplayOption[];
 }
 
 export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
-  const { form, countries } = props;
+  const { form, communityOptions, countries } = props;
 
-  const t = useT();
+  const countryOptions = countries.map((country) => ({
+    value: country.iso,
+    label: country.name,
+  }));
+  const countryIso = useWatch({ control: form.control, name: 'countryIso' });
+  const localityId = useWatch({ control: form.control, name: 'localityId' });
+  const localitiesQuery = useQuery({
+    queryKey: ['public', 'localities', countryIso],
+    queryFn: () => fetchPublicLocalities(countryIso),
+    enabled: countryIso.length > 0,
+  });
+  const venuesQuery = useQuery({
+    queryKey: ['public', 'venues', localityId],
+    queryFn: () => fetchPublicVenues(localityId),
+    enabled: localityId.length > 0,
+  });
+  const localityOptions =
+    localitiesQuery.data?.localities.map((locality) => ({
+      value: locality.id,
+      label: formatLocalityName(locality),
+    })) ?? [];
+  const venueOptions =
+    venuesQuery.data?.venues.map((venue) => ({
+      value: venue.id,
+      label: venue.name,
+    })) ?? [];
 
   return (
     <>
@@ -36,12 +69,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
               htmlFor="suggest-gig-title"
             >
               Title:
-              <span
-                aria-hidden="true"
-                className="text-destructive"
-              >
-                *
-              </span>
+              <RequiredIndicator />
             </FieldLabel>
             <Input
               {...field}
@@ -58,10 +86,42 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
         )}
       />
 
+      <Controller
+        control={form.control}
+        name="communityId"
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel
+              id="suggest-gig-community-label"
+              htmlFor="suggest-gig-community"
+            >
+              Community:
+              <RequiredIndicator />
+            </FieldLabel>
+            <SearchableSelect
+              id="suggest-gig-community"
+              name={field.name}
+              value={field.value}
+              options={communityOptions}
+              placeholder="Select community"
+              searchPlaceholder="Search communities"
+              emptyText="No communities found."
+              ariaLabelledBy="suggest-gig-community-label"
+              isRequired
+              isInvalid={fieldState.invalid}
+              triggerRef={field.ref}
+              onBlur={field.onBlur}
+              onValueChange={field.onChange}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Controller
           control={form.control}
-          name="country"
+          name="countryIso"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel
@@ -69,30 +129,27 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 htmlFor="suggest-gig-country"
               >
                 Country:
-                <span
-                  aria-hidden="true"
-                  className="text-destructive"
-                >
-                  *
-                </span>
+                <RequiredIndicator />
               </FieldLabel>
-              <NativeSelect
-                {...field}
+              <SearchableSelect
                 id="suggest-gig-country"
-                required
-                aria-labelledby="suggest-gig-country-label"
-                aria-invalid={fieldState.invalid}
-                value={field.value ?? defaultSuggestGigFormValues.country}
-              >
-                {countries.map((country) => (
-                  <option
-                    key={country.iso}
-                    value={country.iso}
-                  >
-                    {t('country', countryIsoToTranslationKey(country.iso))}
-                  </option>
-                ))}
-              </NativeSelect>
+                name={field.name}
+                value={field.value}
+                options={countryOptions}
+                placeholder="Select country"
+                searchPlaceholder="Search countries"
+                emptyText="No countries found."
+                ariaLabelledBy="suggest-gig-country-label"
+                isRequired
+                isInvalid={fieldState.invalid}
+                triggerRef={field.ref}
+                onBlur={field.onBlur}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  form.setValue('localityId', '');
+                  form.setValue('venueIds', []);
+                }}
+              />
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
@@ -100,31 +157,39 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
 
         <Controller
           control={form.control}
-          name="city"
+          name="localityId"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel
-                id="suggest-gig-city-label"
-                htmlFor="suggest-gig-city"
+                id="suggest-gig-locality-label"
+                htmlFor="suggest-gig-locality"
               >
-                City:
-                <span
-                  aria-hidden="true"
-                  className="text-destructive"
-                >
-                  *
-                </span>
+                Locality:
+                <RequiredIndicator />
               </FieldLabel>
-              <Input
-                {...field}
-                id="suggest-gig-city"
-                required
-                aria-labelledby="suggest-gig-city-label"
-                aria-invalid={fieldState.invalid}
-                placeholder="e.g. Barcelona"
-                value={field.value ?? ''}
+              <SearchableSelect
+                id="suggest-gig-locality"
+                name={field.name}
+                value={field.value}
+                options={localityOptions}
+                placeholder={localitiesQuery.isPending ? 'Loading localities…' : 'Select locality'}
+                searchPlaceholder="Search localities"
+                emptyText="No localities found."
+                ariaLabelledBy="suggest-gig-locality-label"
+                isDisabled={countryIso.length === 0 || localitiesQuery.isPending}
+                isRequired
+                isInvalid={fieldState.invalid || localitiesQuery.isError}
+                triggerRef={field.ref}
+                onBlur={field.onBlur}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  form.setValue('venueIds', []);
+                }}
               />
               <FieldError errors={[fieldState.error]} />
+              {localitiesQuery.isError ? (
+                <p className="text-sm text-destructive">Could not load localities.</p>
+              ) : null}
             </Field>
           )}
         />
@@ -144,12 +209,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 htmlFor="suggest-gig-date"
               >
                 Date:
-                <span
-                  aria-hidden="true"
-                  className="text-destructive"
-                >
-                  *
-                </span>
+                <RequiredIndicator />
               </FieldLabel>
               <DateInput
                 {...field}
@@ -178,7 +238,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 id="suggest-gig-end-date-label"
                 htmlFor="suggest-gig-end-date"
               >
-                End Date: (optional)
+                End Date:
               </FieldLabel>
               <DateInput
                 {...field}
@@ -197,24 +257,41 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
 
       <Controller
         control={form.control}
-        name="venue"
+        name="venueIds"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
             <FieldLabel
               id="suggest-gig-venue-label"
               htmlFor="suggest-gig-venue"
             >
-              Venue: (optional)
+              Venues:
             </FieldLabel>
-            <Input
-              {...field}
+            <SearchableSelect
               id="suggest-gig-venue"
-              aria-labelledby="suggest-gig-venue-label"
-              aria-invalid={fieldState.invalid}
-              placeholder="e.g. Razzmatazz"
-              value={field.value ?? ''}
+              name={field.name}
+              selectionMode="multiple"
+              value={field.value}
+              options={venueOptions}
+              placeholder={
+                localityId.length === 0
+                  ? 'Select a locality first'
+                  : venuesQuery.isPending
+                    ? 'Loading venues…'
+                    : 'Select venues'
+              }
+              searchPlaceholder="Search venues"
+              emptyText="No venues found."
+              ariaLabelledBy="suggest-gig-venue-label"
+              isDisabled={localityId.length === 0 || venuesQuery.isPending}
+              isInvalid={fieldState.invalid || venuesQuery.isError}
+              triggerRef={field.ref}
+              onBlur={field.onBlur}
+              onValueChange={field.onChange}
             />
             <FieldError errors={[fieldState.error]} />
+            {venuesQuery.isError ? (
+              <p className="text-sm text-destructive">Could not load venues.</p>
+            ) : null}
           </Field>
         )}
       />
@@ -228,7 +305,7 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
               id="suggest-gig-tickets-url-label"
               htmlFor="suggest-gig-tickets-url"
             >
-              Tickets URL: (optional)
+              Tickets URL:
             </FieldLabel>
             <Input
               {...field}

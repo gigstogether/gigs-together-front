@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 
-import AdminTranslationLocaleSelect from '@/app/admin/translations/_components/AdminTranslationLocaleSelect';
 import AdminTranslationNamespaceCombobox from '@/app/admin/translations/_components/AdminTranslationNamespaceCombobox';
 import type { AdminTranslationFormValues } from '@/app/admin/translations/_lib/admin-translation-form.types';
+import { Select } from '@/components/Select';
 import { Button } from '@/components/ui/button';
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
@@ -26,11 +26,20 @@ interface AdminTranslationFormDialogBodyProps {
   readonly onSubmit: (params: PutAdminTranslationParams) => Promise<void>;
 }
 
+function getLocaleOptionLabel(locale: SupportedLocale): string {
+  const inactiveSuffix = locale.isActive ? '' : ' (inactive)';
+  return `${locale.nativeName} (${locale.iso})${inactiveSuffix}`;
+}
+
 export default function AdminTranslationFormDialogBody(props: AdminTranslationFormDialogBodyProps) {
   const { mode, initialValues, namespaces, locales, isSaving, onOpenChange, onSubmit } = props;
 
   const [formValues, setFormValues] = useState<AdminTranslationFormValues>(initialValues);
 
+  const localeOptions = locales.map((locale) => ({
+    value: locale.iso,
+    label: getLocaleOptionLabel(locale),
+  }));
   const isCreateMode = mode === 'create';
   const trimmedKey = formValues.key.trim();
   const keyValidationError =
@@ -108,12 +117,16 @@ export default function AdminTranslationFormDialogBody(props: AdminTranslationFo
             >
               Locale
             </FieldLabel>
-            <AdminTranslationLocaleSelect
+            <Select
               id="translation-form-locale"
               value={formValues.locale}
-              locales={locales}
+              options={localeOptions}
+              placeholder="Select locale"
+              ariaLabelledBy="translation-form-locale-label"
               isDisabled={isSaving || !isCreateMode}
-              onChange={(locale) => setFormValues((current) => ({ ...current, locale }))}
+              onValueChange={(locale) =>
+                setFormValues((current) => ({ ...current, locale }))
+              }
             />
           </Field>
         </div>

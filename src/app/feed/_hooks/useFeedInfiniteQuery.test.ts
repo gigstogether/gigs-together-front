@@ -12,7 +12,7 @@ interface FetchFeedPageParams {
   readonly cursor?: string;
   readonly direction?: 'prev';
   readonly country?: string;
-  readonly city?: string;
+  readonly communitySlug?: string;
   readonly signal?: AbortSignal;
 }
 
@@ -50,15 +50,12 @@ function createEvent(overrides: Partial<Event> = {}): Event {
     id: 'gig-1',
     title: 'Arctic Monkeys',
     date: '2026-07-01',
-    city: {
-      code: 'barcelona',
+    locality: {
+      id: 'locality-id',
+      countryIso: 'ES',
       name: 'Barcelona',
     },
-    venue: 'Razzmatazz',
-    country: {
-      iso: 'es',
-      name: 'Spain',
-    },
+    venues: [{ id: 'venue-1', name: 'Razzmatazz' }],
     ...overrides,
   };
 }
@@ -75,12 +72,10 @@ describe('useFeedInfiniteQuery', () => {
       () =>
         useFeedInfiniteQuery({
           country: 'es',
-          city: 'barcelona',
+          communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
           initialNextCursor: 'next-1',
-          resolveCountryName: () => 'Spain',
-          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -102,9 +97,12 @@ describe('useFeedInfiniteQuery', () => {
           id: 'gig-2',
           title: 'The Strokes',
           date: '2026-07-02',
-          city: 'Barcelona',
-          country: 'es',
-          venue: 'Apolo',
+          locality: {
+            id: 'locality-id',
+            countryIso: 'ES',
+            name: 'Barcelona',
+          },
+          venues: [{ id: 'venue-2', name: 'Apolo' }],
           ticketsUrl: 'https://tickets.example/gig-2',
         },
       ],
@@ -115,9 +113,7 @@ describe('useFeedInfiniteQuery', () => {
       () =>
         useFeedInfiniteQuery({
           country: 'es',
-          city: 'barcelona',
-          resolveCountryName: () => 'Spain',
-          resolveCityName: () => 'Barcelona',
+          communitySlug: 'barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -131,7 +127,7 @@ describe('useFeedInfiniteQuery', () => {
     expect(fetchFeedPageMock).toHaveBeenCalledWith({
       limit: expect.any(Number),
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
       cursor: undefined,
       direction: undefined,
       signal: expect.any(AbortSignal),
@@ -149,9 +145,12 @@ describe('useFeedInfiniteQuery', () => {
           id: 'gig-2',
           title: 'The Strokes',
           date: '2026-07-02',
-          city: 'Barcelona',
-          country: 'es',
-          venue: 'Apolo',
+          locality: {
+            id: 'locality-id',
+            countryIso: 'ES',
+            name: 'Barcelona',
+          },
+          venues: [{ id: 'venue-2', name: 'Apolo' }],
           ticketsUrl: 'https://tickets.example/gig-2',
         },
       ],
@@ -163,11 +162,9 @@ describe('useFeedInfiniteQuery', () => {
       () =>
         useFeedInfiniteQuery({
           country: 'es',
-          city: 'barcelona',
+          communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialNextCursor: 'next-1',
-          resolveCountryName: () => 'Spain',
-          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -183,7 +180,7 @@ describe('useFeedInfiniteQuery', () => {
       cursor: 'next-1',
       direction: undefined,
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
       signal: expect.any(AbortSignal),
     });
     await waitFor(() => {
@@ -200,9 +197,12 @@ describe('useFeedInfiniteQuery', () => {
           id: 'gig-0',
           title: 'Phoenix',
           date: '2026-06-30',
-          city: 'Barcelona',
-          country: 'es',
-          venue: 'Sala',
+          locality: {
+            id: 'locality-id',
+            countryIso: 'ES',
+            name: 'Barcelona',
+          },
+          venues: [{ id: 'venue-0', name: 'Sala' }],
           ticketsUrl: 'https://tickets.example/gig-0',
         },
       ],
@@ -214,11 +214,9 @@ describe('useFeedInfiniteQuery', () => {
       () =>
         useFeedInfiniteQuery({
           country: 'es',
-          city: 'barcelona',
+          communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
-          resolveCountryName: () => 'Spain',
-          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -234,7 +232,7 @@ describe('useFeedInfiniteQuery', () => {
       cursor: 'prev-1',
       direction: 'prev',
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
       signal: expect.any(AbortSignal),
     });
     await waitFor(() => {
@@ -252,11 +250,9 @@ describe('useFeedInfiniteQuery', () => {
       () =>
         useFeedInfiniteQuery({
           country: 'es',
-          city: 'barcelona',
+          communitySlug: 'barcelona',
           initialEvents: [createEvent()],
           initialPrevCursor: 'prev-1',
-          resolveCountryName: () => 'Spain',
-          resolveCityName: () => 'Barcelona',
         }),
       {
         wrapper: createQueryClientWrapper(queryClient),
@@ -278,9 +274,12 @@ describe('useFeedInfiniteQuery', () => {
           id: 'gig-0',
           title: 'Phoenix',
           date: '2026-06-30',
-          city: 'Barcelona',
-          country: 'es',
-          venue: 'Sala',
+          locality: {
+            id: 'locality-id',
+            countryIso: 'ES',
+            name: 'Barcelona',
+          },
+          venues: [{ id: 'venue-0', name: 'Sala' }],
           ticketsUrl: 'https://tickets.example/gig-0',
         },
       ],

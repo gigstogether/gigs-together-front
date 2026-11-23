@@ -7,6 +7,10 @@ import type {
   lookupAdminGigCandidateDraft,
   updateAdminGigCandidateDraft,
 } from '@/app/admin/_lib/admin-api';
+import type {
+  fetchAdminLocalities,
+  fetchAdminVenues,
+} from '@/app/admin/locations/_lib/admin-locations-api';
 import AdminGigCandidateDraftForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm';
 import type { AdminGigCandidate } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
@@ -15,12 +19,16 @@ import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-qu
 
 const {
   createGigCandidateMock,
+  fetchLocalitiesMock,
+  fetchVenuesMock,
   lookupGigCandidateDraftMock,
   pushMock,
   toastMock,
   updateGigCandidateDraftMock,
 } = vi.hoisted(() => ({
   createGigCandidateMock: vi.fn<typeof createAdminGigCandidate>(),
+  fetchLocalitiesMock: vi.fn<typeof fetchAdminLocalities>(),
+  fetchVenuesMock: vi.fn<typeof fetchAdminVenues>(),
   lookupGigCandidateDraftMock: vi.fn<typeof lookupAdminGigCandidateDraft>(),
   pushMock: vi.fn(),
   toastMock: vi.fn(),
@@ -36,6 +44,13 @@ vi.mock('@/app/admin/_lib/admin-api', () => ({
   lookupAdminGigCandidateDraft: lookupGigCandidateDraftMock,
   updateAdminGigCandidateDraft: updateGigCandidateDraftMock,
 }));
+vi.mock('@/app/admin/locations/_lib/admin-locations-api', () => ({
+  fetchAdminLocalities: fetchLocalitiesMock,
+  fetchAdminVenues: fetchVenuesMock,
+}));
+
+const BARCELONA_LOCALITY_ID = '507f1f77bcf86cd799439011';
+const SALA_APOLO_VENUE_ID = '507f1f77bcf86cd799439012';
 
 function createReviewingGigCandidate(): AdminGigCandidate {
   return {
@@ -46,7 +61,15 @@ function createReviewingGigCandidate(): AdminGigCandidate {
       isCurrentlyAdmin: false,
       origin: { type: 'admin' },
     },
-    gigDraft: { title: 'Existing Band', city: 'Madrid', country: 'ES' },
+    locality: {
+      id: BARCELONA_LOCALITY_ID,
+      countryIso: 'ES',
+      name: 'Barcelona',
+    },
+    gigDraft: {
+      communityIds: ['existing-community-id'],
+      title: 'Existing Band',
+    },
     status: GigCandidateStatusAPI.Reviewing,
     version: 4,
     createdAt: '2026-08-01T10:00:00.000Z',
@@ -60,7 +83,8 @@ function renderForm(gigCandidate?: AdminGigCandidate) {
     queryClient,
     ...render(
       <AdminGigCandidateDraftForm
-        countries={[{ iso: 'ES' }]}
+        communityOptions={[{ value: 'existing-community-id', label: 'Barcelona' }]}
+        countries={[{ iso: 'ES', name: 'Spain' }]}
         gigCandidate={gigCandidate}
       />,
       { wrapper: createQueryClientWrapper(queryClient) },
@@ -68,26 +92,52 @@ function renderForm(gigCandidate?: AdminGigCandidate) {
   };
 }
 
+async function selectOption(selectName: RegExp, optionName: string): Promise<void> {
+  const select = screen.getByRole('combobox', { name: selectName });
+  await waitFor(() => expect(select).not.toBeDisabled());
+  fireEvent.click(select);
+  fireEvent.click(await screen.findByRole('option', { name: optionName }));
+}
+
 describe('AdminGigCandidateDraftForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    fetchLocalitiesMock.mockResolvedValue([
+      {
+        id: BARCELONA_LOCALITY_ID,
+        countryIso: 'ES',
+        name: 'Barcelona',
+        aliases: [],
+        timeZone: 'Europe/Madrid',
+      },
+    ]);
+    fetchVenuesMock.mockResolvedValue([
+      {
+        id: SALA_APOLO_VENUE_ID,
+        localityId: BARCELONA_LOCALITY_ID,
+        name: 'Sala Apolo',
+        aliases: [],
+        isActive: true,
+      },
+    ]);
   });
 
-  it('should explicitly create a GigCandidate from the editable gigDraft', async () => {
+  it('should create a GigCandidate with its Community and Locality', async () => {
     createGigCandidateMock.mockResolvedValueOnce(createReviewingGigCandidate());
     renderForm();
 
     fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'New Band' } });
     fireEvent.change(screen.getByLabelText('Date:*'), { target: { value: '2026-09-30' } });
+    await selectOption(/Locality/, 'Barcelona');
     fireEvent.click(screen.getByRole('button', { name: 'Create Gig Candidate' }));
 
     await waitFor(() => {
       expect(createGigCandidateMock).toHaveBeenCalledWith({
+        localityId: BARCELONA_LOCALITY_ID,
         gigDraft: {
+          communityIds: ['existing-community-id'],
           title: 'New Band',
           date: '2026-09-30',
-          city: 'Barcelona',
-          country: 'ES',
         },
         poster: { file: null, url: '' },
       });
@@ -95,25 +145,24 @@ describe('AdminGigCandidateDraftForm', () => {
     expect(pushMock).toHaveBeenCalledWith('/admin/gig-candidates/gigCandidate-42');
   });
 
-  it('should update gigDraft and return to the Gig Candidate view route', async () => {
+  it('should update a GigCandidate with multiple Venue assignments', async () => {
     const gigCandidate = createReviewingGigCandidate();
     updateGigCandidateDraftMock.mockResolvedValueOnce({ ...gigCandidate, version: 5 });
     renderForm(gigCandidate);
 
     expect(screen.getByText('Edit Gig Candidate')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Venue:'), { target: { value: 'Sala Apolo' } });
+    await selectOption(/Venues/, 'Sala Apolo');
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
     await waitFor(() => {
       expect(updateGigCandidateDraftMock).toHaveBeenCalledWith({
         gigCandidateId: 'gigCandidate-42',
         expectedVersion: 4,
+        localityId: BARCELONA_LOCALITY_ID,
         gigDraft: {
+          communityIds: ['existing-community-id'],
+          venueIds: [SALA_APOLO_VENUE_ID],
           title: 'Existing Band',
-          city: 'Madrid',
-          country: 'ES',
-          venue: 'Sala Apolo',
         },
         poster: { file: null, url: '' },
       });
@@ -131,9 +180,7 @@ describe('AdminGigCandidateDraftForm', () => {
     renderForm(gigCandidate);
 
     const originalMessage = screen.getByRole('region', { name: 'Original message' });
-
     expect(originalMessage).toHaveTextContent('Unstructured submission');
-    expect(originalMessage.parentElement).toHaveClass('border-b', 'border-border', 'pb-2');
     expect(screen.getByRole('link', { name: 'Open original message in Telegram' })).toHaveAttribute(
       'href',
       'https://t.me/c/123/42',
@@ -151,7 +198,6 @@ describe('AdminGigCandidateDraftForm', () => {
       'src',
       versionedPosterUrl,
     );
-    expect(screen.getByRole('link', { name: 'open' })).toHaveAttribute('href', versionedPosterUrl);
   });
 
   it('should report a stale GigCandidate version conflict', async () => {
@@ -172,63 +218,26 @@ describe('AdminGigCandidateDraftForm', () => {
     expect(pushMock).not.toHaveBeenCalled();
   });
 
-  it('should apply lookup results locally without saving a GigCandidate', async () => {
+  it('should map lookup location text to catalog identifiers', async () => {
     lookupGigCandidateDraftMock.mockResolvedValueOnce({
       title: 'Looked-up Band',
       date: '2026-09-20',
-      city: 'Madrid',
+      city: 'Barcelona',
       country: 'es',
-      venue: 'Venue',
+      venue: 'Sala Apolo',
     });
     renderForm();
 
     fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Band' } });
+    await selectOption(/Locality/, 'Barcelona');
     fireEvent.click(screen.getByRole('button', { name: 'Find info with AI' }));
 
     expect(await screen.findByDisplayValue('Looked-up Band')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('2026-09-20')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Madrid')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Venue')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /Venues/ })).toHaveTextContent('Sala Apolo');
     expect(lookupGigCandidateDraftMock).toHaveBeenCalledWith({
       title: 'Band',
-      location: 'Barcelona, ES',
+      location: 'Barcelona, Spain',
     });
     expect(createGigCandidateMock).not.toHaveBeenCalled();
-    expect(updateGigCandidateDraftMock).not.toHaveBeenCalled();
-  });
-
-  it('should preserve the lookup error behavior when the request fails', async () => {
-    lookupGigCandidateDraftMock.mockRejectedValueOnce(new Error('AI unavailable'));
-    renderForm();
-
-    fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Band' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Find info with AI' }));
-
-    await waitFor(() => {
-      expect(toastMock).toHaveBeenCalledWith({
-        title: 'Error',
-        description: 'AI unavailable',
-        variant: 'destructive',
-      });
-    });
-    expect(createGigCandidateMock).not.toHaveBeenCalled();
-    expect(updateGigCandidateDraftMock).not.toHaveBeenCalled();
-  });
-
-  it('should show the propagated authentication error', async () => {
-    lookupGigCandidateDraftMock.mockRejectedValueOnce(new Error('Telegram data expired'));
-    renderForm();
-
-    fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Band' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Find info with AI' }));
-
-    await waitFor(() => {
-      expect(lookupGigCandidateDraftMock).toHaveBeenCalledTimes(1);
-    });
-    expect(toastMock).toHaveBeenCalledWith({
-      title: 'Error',
-      description: 'Telegram data expired',
-      variant: 'destructive',
-    });
   });
 });

@@ -20,23 +20,22 @@ describe('createGigCandidate', () => {
 
     const result = await createGigCandidate({
       gig: {
+        communityId: 'community-id',
+        localityId: 'locality-id',
+        venueIds: ['venue-id-1', 'venue-id-2'],
         title: 'Band',
         date: '2026-08-01',
-        city: 'Barcelona',
-        country: 'ES',
       },
       poster: { mode: 'url', file: null, url: '' },
     });
 
     expect(apiClientRequestMock).toHaveBeenCalledWith('v1/gig-candidates', 'POST', {
       gig: {
+        communityId: 'community-id',
+        localityId: 'locality-id',
+        venueIds: ['venue-id-1', 'venue-id-2'],
         title: 'Band',
         date: '2026-08-01',
-        city: 'Barcelona',
-        country: 'ES',
-        endDate: undefined,
-        venue: undefined,
-        ticketsUrl: undefined,
       },
     });
     expect(result).toEqual({ id: '507f1f77bcf86cd799439099' });
@@ -47,23 +46,20 @@ describe('createGigCandidate', () => {
 
     await createGigCandidate({
       gig: {
+        communityId: 'community-id',
+        localityId: 'locality-id',
         title: 'Band',
         date: '2026-08-01',
-        city: 'Barcelona',
-        country: 'ES',
       },
       poster: { mode: 'url', file: null, url: 'https://cdn.example/poster.jpg' },
     });
 
     expect(apiClientRequestMock).toHaveBeenCalledWith('v1/gig-candidates', 'POST', {
       gig: {
+        communityId: 'community-id',
+        localityId: 'locality-id',
         title: 'Band',
         date: '2026-08-01',
-        city: 'Barcelona',
-        country: 'ES',
-        endDate: undefined,
-        venue: undefined,
-        ticketsUrl: undefined,
         posterUrl: 'https://cdn.example/poster.jpg',
       },
     });
@@ -75,10 +71,10 @@ describe('createGigCandidate', () => {
 
     await createGigCandidate({
       gig: {
+        communityId: 'community-id',
+        localityId: 'locality-id',
         title: 'Band',
         date: '2026-08-01',
-        city: 'Barcelona',
-        country: 'ES',
       },
       poster: { mode: 'upload', file, url: '' },
     });
@@ -96,10 +92,10 @@ describe('createGigCandidate', () => {
     expect(fd.get('posterFile')).toBe(file);
     expect(fd.get('gig')).toBe(
       JSON.stringify({
+        communityId: 'community-id',
+        localityId: 'locality-id',
         title: 'Band',
         date: '2026-08-01',
-        city: 'Barcelona',
-        country: 'ES',
       }),
     );
   });
@@ -108,10 +104,10 @@ describe('createGigCandidate', () => {
     await expect(
       createGigCandidate({
         gig: {
+          communityId: 'community-id',
+          localityId: 'locality-id',
           title: 'Band',
           date: '2026-08-01',
-          city: 'Barcelona',
-          country: 'ES',
         },
         poster: { mode: 'url', file: null, url: 'not-a-url' },
       }),
@@ -125,10 +121,10 @@ describe('createGigCandidate', () => {
     await expect(
       createGigCandidate({
         gig: {
+          communityId: 'community-id',
+          localityId: 'locality-id',
           title: 'Band',
           date: '2026-08-01',
-          city: 'Barcelona',
-          country: 'ES',
         },
         poster: { mode: 'url', file: null, url: '' },
       }),
@@ -141,10 +137,10 @@ describe('createGigCandidate', () => {
     await expect(
       createGigCandidate({
         gig: {
+          communityId: 'community-id',
+          localityId: 'locality-id',
           title: 'Band',
           date: '2026-08-01',
-          city: 'Barcelona',
-          country: 'ES',
         },
         poster: { mode: 'url', file: null, url: '' },
       }),

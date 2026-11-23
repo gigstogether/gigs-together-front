@@ -7,7 +7,7 @@ interface FetchFeedAroundCallParams {
   readonly beforeLimit: number;
   readonly afterLimit: number;
   readonly country?: string;
-  readonly city?: string;
+  readonly communitySlug?: string;
   readonly signal?: AbortSignal;
 }
 
@@ -36,7 +36,7 @@ describe('feedAroundQueryOptions', () => {
 
     const options = feedAroundQueryOptions({
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
       anchorYmd: '2026-05-01',
       beforeLimit: 10,
       afterLimit: 10,
@@ -59,7 +59,7 @@ describe('feedAroundQueryOptions', () => {
     const a = await queryClient.fetchQuery(
       feedAroundQueryOptions({
         country: 'es',
-        city: 'barcelona',
+        communitySlug: 'barcelona',
         anchorYmd: '2026-01-01',
         beforeLimit: 10,
         afterLimit: 10,
@@ -68,7 +68,7 @@ describe('feedAroundQueryOptions', () => {
     const b = await queryClient.fetchQuery(
       feedAroundQueryOptions({
         country: 'es',
-        city: 'barcelona',
+        communitySlug: 'barcelona',
         anchorYmd: '2026-06-01',
         beforeLimit: 10,
         afterLimit: 10,

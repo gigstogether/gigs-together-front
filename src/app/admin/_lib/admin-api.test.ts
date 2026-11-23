@@ -39,11 +39,19 @@ function createGigCandidateApiPayload(overrides: Record<string, unknown> = {}) {
       origin: { type: 'admin' },
     },
     gigDraft: {
+      communityIds: ['community-id'],
+      venueIds: ['venue-id'],
       title: 'Band',
       date: '2026-08-20',
       city: 'Barcelona',
       country: 'ES',
     },
+    locality: {
+      id: 'locality-id',
+      countryIso: 'ES',
+      name: 'Barcelona',
+    },
+    venues: [{ id: 'venue-id', name: 'Razzmatazz' }],
     status: 'Reviewing',
     version: 0,
     createdAt: '2026-08-01T10:00:00.000Z',
@@ -368,6 +376,7 @@ describe('fetchAdminGigCandidates', () => {
       gigCandidates: [
         expect.objectContaining({
           id: '507f1f77bcf86cd799439099',
+          venues: [{ id: 'venue-id', name: 'Razzmatazz' }],
           intakePostUrl: 'https://t.me/c/123/77',
           intakePostDate: 1_700_000_000_000,
         }),
@@ -630,12 +639,22 @@ describe('admin GigCandidate commands', () => {
     mockApiRequest.mockResolvedValue(createGigCandidateApiPayload());
 
     await createAdminGigCandidate({
-      gigDraft: { title: 'Band', country: 'ES' },
+      localityId: 'locality-id',
+      gigDraft: {
+        communityIds: ['community-id'],
+        venueIds: ['venue-id'],
+        title: 'Band',
+      },
       poster: { file: null, url: '' },
     });
 
     expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/gig-candidates', 'POST', {
-      gigDraft: { title: 'Band', country: 'ES' },
+      localityId: 'locality-id',
+      gigDraft: {
+        communityIds: ['community-id'],
+        venueIds: ['venue-id'],
+        title: 'Band',
+      },
     });
   });
 
@@ -645,14 +664,19 @@ describe('admin GigCandidate commands', () => {
     await updateAdminGigCandidateDraft({
       gigCandidateId: ' gigCandidate/id ',
       expectedVersion: 3,
-      gigDraft: { venue: 'Razzmatazz' },
+      localityId: 'locality-id',
+      gigDraft: { communityIds: ['community-id'], venueIds: ['venue-id'] },
       poster: { file: null, url: '' },
     });
 
     expect(mockApiRequest).toHaveBeenCalledWith(
       'v1/admin/gig-candidates/gigCandidate%2Fid/gig-draft',
       'PATCH',
-      { gigDraft: { venue: 'Razzmatazz' }, expectedVersion: 3 },
+      {
+        localityId: 'locality-id',
+        gigDraft: { communityIds: ['community-id'], venueIds: ['venue-id'] },
+        expectedVersion: 3,
+      },
     );
   });
 
@@ -843,10 +867,10 @@ describe('fetchAdminTranslationNamespaces', () => {
 
   it('should parse admin translation namespaces response when payload is valid', async () => {
     mockApiRequest.mockResolvedValue({
-      namespaces: ['about', 'country'],
+      namespaces: ['about', 'common'],
     });
 
-    await expect(fetchAdminTranslationNamespaces()).resolves.toEqual(['about', 'country']);
+    await expect(fetchAdminTranslationNamespaces()).resolves.toEqual(['about', 'common']);
     expect(mockApiRequest).toHaveBeenCalledWith('v1/admin/translations/namespaces', 'GET');
   });
 });
@@ -912,15 +936,15 @@ describe('fetchAdminTranslations', () => {
     );
   });
 
-  it('should parse country translation records with lowercase iso keys', async () => {
+  it('should parse common translation records', async () => {
     mockApiRequest.mockResolvedValue({
       records: [
         {
           id: '64f1a2b3c4d5e6f7a8b9c0d2',
-          namespace: 'country',
+          namespace: 'common',
           locale: 'en',
-          key: 'es',
-          value: 'Spain',
+          key: 'button.save',
+          value: 'Save',
           format: 'plain',
           kind: 'text',
           isActive: true,
@@ -928,13 +952,13 @@ describe('fetchAdminTranslations', () => {
       ],
     });
 
-    await expect(fetchAdminTranslations({ namespace: 'country' })).resolves.toEqual([
+    await expect(fetchAdminTranslations({ namespace: 'common' })).resolves.toEqual([
       {
         id: '64f1a2b3c4d5e6f7a8b9c0d2',
-        namespace: 'country',
+        namespace: 'common',
         locale: 'en',
-        key: 'es',
-        value: 'Spain',
+        key: 'button.save',
+        value: 'Save',
         format: 'plain',
         kind: 'text',
         isActive: true,
@@ -996,9 +1020,9 @@ describe('fetchAdminTranslations', () => {
     mockApiRequest.mockResolvedValue({
       locale: 'en',
       translations: {
-        country: {
-          es: {
-            value: 'Spain',
+        common: {
+          'button.save': {
+            value: 'Save',
             format: 'plain',
             kind: 'text',
           },
@@ -1006,7 +1030,7 @@ describe('fetchAdminTranslations', () => {
       },
     });
 
-    await expect(fetchAdminTranslations({ namespace: 'country' })).rejects.toThrow(
+    await expect(fetchAdminTranslations({ namespace: 'common' })).rejects.toThrow(
       'received locale translations payload',
     );
   });

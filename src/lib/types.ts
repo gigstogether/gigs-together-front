@@ -26,19 +26,24 @@ export type Event = {
   endDate?: string;
   poster?: string;
   title: string;
-  venue: string;
-  city: {
-    code: string;
-    name: string;
-  };
-  country: {
-    iso: string;
-    name: string;
-  };
+  locality: GigLocality;
+  venues: GigVenue[];
   ticketsUrl?: string;
   calendarUrl?: string;
   postUrl?: string;
 };
+
+export interface GigLocality {
+  id: string;
+  countryIso: string;
+  name: string;
+  qualifier?: string;
+}
+
+export interface GigVenue {
+  id: string;
+  name: string;
+}
 
 export interface V1GigGetResponseBody {
   gigs: V1GigGetResponseBodyGig[];
@@ -67,9 +72,8 @@ export interface V1GigGetResponseBodyGig {
   title: string;
   date: string | number;
   endDate?: string | number;
-  city: string;
-  country: string;
-  venue: string;
+  locality: GigLocality;
+  venues: GigVenue[];
   ticketsUrl: string;
   posterUrl?: string;
   calendarUrl?: string;

@@ -47,7 +47,7 @@ describe('AdminTranslationsPageClient', () => {
     adminApiMocks.putAdminTranslation.mockReset();
     adminApiMocks.patchAdminTranslationActive.mockReset();
 
-    adminApiMocks.fetchAdminTranslationNamespaces.mockResolvedValue(['about', 'country']);
+    adminApiMocks.fetchAdminTranslationNamespaces.mockResolvedValue(['about', 'common']);
     adminApiMocks.fetchAdminLocales.mockResolvedValue([
       { iso: 'en', nativeName: 'English', isActive: true, order: 0 },
       { iso: 'es', nativeName: 'Español', isActive: true, order: 1 },
@@ -105,11 +105,11 @@ describe('AdminTranslationsPageClient', () => {
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Namespace' }));
-    fireEvent.click(screen.getByRole('option', { name: 'country' }));
+    fireEvent.click(screen.getByRole('option', { name: 'common' }));
 
     await waitFor(() => {
       expect(adminApiMocks.fetchAdminTranslations).toHaveBeenCalledWith({
-        namespace: 'country',
+        namespace: 'common',
         locale: undefined,
       });
     });

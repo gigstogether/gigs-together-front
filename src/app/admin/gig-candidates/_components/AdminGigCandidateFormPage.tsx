@@ -2,8 +2,8 @@ import AdminGigCandidateBackLink from '@/app/admin/gig-candidates/_components/Ad
 import AdminGigCandidateDetailPageClient from '@/app/admin/gig-candidates/_components/AdminGigCandidateDetailPageClient';
 import AdminGigCandidateDraftForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm';
 import { getCountries } from '@/lib/countries.server';
-import { getTranslations } from '@/lib/i18n/translations.server';
-import { I18nProvider } from '@/providers/I18nProvider';
+import { createCountryDisplayOptions } from '@/lib/i18n/country-display-name';
+import { getCommunityDisplayOptions } from '@/lib/community/community-display-options.server';
 
 interface AdminGigCandidateCreateFormPageProps {
   mode: 'create';
@@ -19,27 +19,33 @@ type AdminGigCandidateFormPageProps =
   | AdminGigCandidateEditFormPageProps;
 
 export default async function AdminGigCandidateFormPage(props: AdminGigCandidateFormPageProps) {
-  const [countries, i18n] = await Promise.all([getCountries(), getTranslations('en', 'country')]);
+  const [countries, communityOptions] = await Promise.all([
+    getCountries(),
+    getCommunityDisplayOptions('en'),
+  ]);
+  const countryOptions = createCountryDisplayOptions(
+    countries.map((country) => country.iso),
+    'en',
+  );
 
   return (
-    <I18nProvider
-      locale={i18n.locale}
-      translations={i18n.translations}
-    >
-      <div className="mx-auto w-full max-w-md space-y-4">
-        {props.mode === 'create' ? (
-          <>
-            <AdminGigCandidateBackLink />
-            <AdminGigCandidateDraftForm countries={countries} />
-          </>
-        ) : (
-          <AdminGigCandidateDetailPageClient
-            mode="edit"
-            countries={countries}
-            gigCandidateId={props.gigCandidateId}
+    <div className="mx-auto w-full max-w-md space-y-4">
+      {props.mode === 'create' ? (
+        <>
+          <AdminGigCandidateBackLink />
+          <AdminGigCandidateDraftForm
+            countries={countryOptions}
+            communityOptions={communityOptions}
           />
-        )}
-      </div>
-    </I18nProvider>
+        </>
+      ) : (
+        <AdminGigCandidateDetailPageClient
+          mode="edit"
+          countries={countryOptions}
+          communityOptions={communityOptions}
+          gigCandidateId={props.gigCandidateId}
+        />
+      )}
+    </div>
   );
 }

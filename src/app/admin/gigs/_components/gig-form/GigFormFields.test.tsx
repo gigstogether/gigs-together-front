@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
 import GigFormFields from '@/app/admin/gigs/_components/gig-form/GigFormFields';
@@ -18,7 +18,10 @@ function GigFormFieldsTestSubject(props: GigFormFieldsTestSubjectProps) {
   return (
     <GigFormFields
       form={form}
-      countries={[]}
+      countries={[
+        { iso: 'ES', name: 'Spain' },
+        { iso: 'FR', name: 'France' },
+      ]}
       isSubmitting={false}
       validationMode={validationMode}
       allowEmptyCountry={validationMode === 'gigCandidateDraft'}
@@ -27,6 +30,12 @@ function GigFormFieldsTestSubject(props: GigFormFieldsTestSubjectProps) {
 }
 
 describe('GigFormFields', () => {
+  it('should display the resolved country name', () => {
+    render(<GigFormFieldsTestSubject />);
+
+    expect(screen.getByRole('combobox', { name: 'Country:' })).toHaveTextContent('Spain');
+  });
+
   it('should limit the title input to 300 characters', () => {
     render(<GigFormFieldsTestSubject />);
 
@@ -67,6 +76,22 @@ describe('GigFormFields', () => {
     expect(screen.getByLabelText('Venue:')).not.toBeRequired();
     expect(screen.getByLabelText('Tickets URL:')).not.toBeRequired();
     expect(screen.getByLabelText('End Date: (optional)')).not.toBeRequired();
+  });
+
+  it('should search countries when creating a Gig Candidate', () => {
+    render(<GigFormFieldsTestSubject validationMode="gigCandidateCreate" />);
+
+    const countrySelect = screen.getByRole('combobox', { name: 'Country:' });
+
+    fireEvent.click(countrySelect);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search countries' }), {
+      target: { value: 'France' },
+    });
+
+    expect(screen.queryByRole('option', { name: 'Spain' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('option', { name: 'France' }));
+
+    expect(countrySelect).toHaveTextContent('France');
   });
 
   it('should stack date fields on mobile and align them horizontally on larger screens', () => {

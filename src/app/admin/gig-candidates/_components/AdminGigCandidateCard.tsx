@@ -1,9 +1,8 @@
 'use client';
 
-import { AlertTriangle, Calendar, Clock3, ExternalLink, Ticket } from 'lucide-react';
+import { MapPin, AlertTriangle, Calendar, Clock3, ExternalLink, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-
 import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
 import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
 import { formatAdminEventDate } from '@/app/admin/_lib/admin-event-format';
@@ -13,13 +12,15 @@ import AdminGigCandidateOriginalMessage from '@/app/admin/gig-candidates/_compon
 import { GIG_CANDIDATE_STATUS_DOT_CLASS_NAMES } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-status';
 import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import type { AdminGigCandidate } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
-import { LocationIcon } from '@/components/ui/location-icon';
 import { Button } from '@/components/ui/button';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import { buildAdminGigCandidatePath } from '@/lib/admin-gig-candidate-paths';
 import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
+import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
 import { cn } from '@/lib/utils';
 import { ShareButton } from '@/components/ShareButton';
+
+const ADMIN_GIG_CANDIDATE_LOCALE = 'en';
 
 interface AdminGigCandidateCardProps {
   gigCandidate: AdminGigCandidate;
@@ -29,8 +30,17 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
   const { gigCandidate } = props;
   const { gigDraft } = gigCandidate;
   const title = gigDraft.title ?? 'Untitled Gig Candidate';
-  const location = [gigDraft.venue, gigDraft.city, gigDraft.country].filter(Boolean).join(', ');
-  const mapsHref = location ? buildGoogleMapsSearchUrl(location) : undefined;
+  const localityName = gigCandidate.locality?.qualifier
+    ? `${gigCandidate.locality.name} (${gigCandidate.locality.qualifier})`
+    : gigCandidate.locality?.name;
+  const countryName = gigCandidate.locality
+    ? getCountryDisplayName(gigCandidate.locality.countryIso, ADMIN_GIG_CANDIDATE_LOCALE)
+    : undefined;
+  const venueNames = gigCandidate.venues?.map((venue) => venue.name).join(', ');
+  const locationContext = [localityName, countryName].filter(Boolean).join(', ');
+  const location = [venueNames, locationContext].filter(Boolean).join(' · ');
+  const mapsSearch = [venueNames, localityName, countryName].filter(Boolean).join(' ');
+  const mapsHref = mapsSearch ? buildGoogleMapsSearchUrl(mapsSearch) : undefined;
   const sourceLabel = formatAdminGigSource(gigCandidate.source);
   const isIntakePostExpected = !(
     gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'
@@ -73,7 +83,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
           {location ? (
             <AdminPreviewMetaRow
               icon={
-                <LocationIcon
+                <MapPin
                   className="h-4 w-4"
                   aria-hidden
                 />

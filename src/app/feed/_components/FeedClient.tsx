@@ -4,7 +4,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useReducer, useRef, useState } from 'react';
 import { toLocalYMD } from '@/lib/utils';
 import type { Event } from '@/lib/types';
-import type { ResolveCityName, ResolveCountryName } from '@/app/feed/_hooks/useFeedInfiniteQuery';
 import { FeedMonths } from '@/app/feed/_components/FeedMonths';
 import { useClearFeedLocationHash } from '@/app/feed/_hooks/useClearFeedLocationHash';
 import { useFeedHeaderConfigSync } from '@/app/feed/_hooks/useFeedHeaderConfigSync';
@@ -21,16 +20,14 @@ import { feedAnchorDateByPublicIdQueryOptions } from '@/app/feed/_lib/fetchFeedA
 import { useFeedInfiniteQuery } from '@/app/feed/_hooks/useFeedInfiniteQuery';
 import { useHeaderConfig } from '@/app/feed/_providers/HeaderConfigProvider';
 import { clientEnv } from '@/env/client-env';
-import { countryIsoToTranslationKey } from '@/lib/i18n/country-iso-to-translation-key';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
-import { useT } from '@/providers/I18nProvider';
 
 const feedMainClassName =
   'mx-auto flex w-full flex-col gap-2.5 overflow-auto pb-5 max-[600px]:items-center';
 
 interface FeedClientProps {
   readonly country: string; // ISO like "es"
-  readonly city: string; // slug like "barcelona"
+  readonly communitySlug: string; // slug like "barcelona"
   readonly initialEvents?: Event[];
   readonly initialPrevCursor?: string;
   readonly initialNextCursor?: string;
@@ -41,7 +38,7 @@ interface FeedClientProps {
 export default function FeedClient(props: FeedClientProps) {
   const {
     country,
-    city,
+    communitySlug,
     initialEvents,
     initialPrevCursor,
     initialNextCursor,
@@ -50,24 +47,16 @@ export default function FeedClient(props: FeedClientProps) {
   } = props;
 
   const clearHashFromUrl = useClearFeedLocationHash();
-  const t = useT();
   const { setConfig: setHeaderConfig } = useHeaderConfig();
   const headerH = useHeaderHeight(); // will pick [data-app-header], fallback 45
-  const resolveCountryName = useCallback<ResolveCountryName>(
-    (iso) => t('country', countryIsoToTranslationKey(iso)),
-    [t],
-  );
-  const resolveCityName = useCallback<ResolveCityName>((code) => t('city', code), [t]);
   const queryClient = useQueryClient();
 
   const feedQuery = useFeedInfiniteQuery({
     country,
-    city,
+    communitySlug,
     initialEvents,
     initialPrevCursor,
     initialNextCursor,
-    resolveCountryName,
-    resolveCityName,
   });
   const {
     events,
@@ -109,16 +98,12 @@ export default function FeedClient(props: FeedClientProps) {
           beforeLimit: clientEnv.feedPageSize,
           afterLimit: clientEnv.feedPageSize,
           country,
-          city,
+          communitySlug,
         }),
       );
 
-      const mappedBefore: Event[] = res.before.map((gig) => {
-        return gigToEvent(gig, { resolveCountryName, resolveCityName });
-      });
-      const mappedAfter: Event[] = res.after.map((gig) => {
-        return gigToEvent(gig, { resolveCountryName, resolveCityName });
-      });
+      const mappedBefore: Event[] = res.before.map((gig) => gigToEvent(gig));
+      const mappedAfter: Event[] = res.after.map((gig) => gigToEvent(gig));
       const windowEvents = mergeUniqueSorted(mappedBefore, mappedAfter);
       replaceWithWindow({
         events: windowEvents,
@@ -127,7 +112,7 @@ export default function FeedClient(props: FeedClientProps) {
       });
       return windowEvents;
     },
-    [city, country, queryClient, replaceWithWindow, resolveCityName, resolveCountryName],
+    [communitySlug, country, queryClient, replaceWithWindow],
   );
 
   const fetchHashTargetAnchorYmd = useCallback(

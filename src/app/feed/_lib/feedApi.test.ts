@@ -30,7 +30,7 @@ describe('fetchFeedPage', () => {
       cursor: 'abc',
       direction: 'prev',
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
     });
 
     expect(result).toEqual({
@@ -39,7 +39,7 @@ describe('fetchFeedPage', () => {
       nextCursor: 'next',
     });
     expect(apiPublicRequestMock).toHaveBeenCalledWith(
-      'v1/gigs?limit=10&cursor=abc&direction=prev&country=es&city=barcelona',
+      'v1/gigs?limit=10&cursor=abc&direction=prev&country=es&communitySlug=barcelona',
       'GET',
       undefined,
       undefined,
@@ -108,14 +108,14 @@ describe('fetchFeedAvailableDates', () => {
 
     const result = await fetchFeedAvailableDates({
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
     });
 
     expect(result).toEqual({
       dates: ['2026-04-21', '2026-05-01'],
     });
     expect(apiPublicRequestMock).toHaveBeenCalledWith(
-      'v1/gigs/dates?country=es&city=barcelona',
+      'v1/gigs/dates?country=es&communitySlug=barcelona',
       'GET',
       undefined,
       undefined,
@@ -141,7 +141,7 @@ describe('fetchFeedAround', () => {
       beforeLimit: 10,
       afterLimit: 10,
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
     });
 
     expect(result).toEqual({
@@ -151,7 +151,7 @@ describe('fetchFeedAround', () => {
       nextCursor: 'next',
     });
     expect(apiPublicRequestMock).toHaveBeenCalledWith(
-      'v1/gigs/around?anchor=2026-04-21&beforeLimit=10&afterLimit=10&country=es&city=barcelona',
+      'v1/gigs/around?anchor=2026-04-21&beforeLimit=10&afterLimit=10&country=es&communitySlug=barcelona',
       'GET',
       undefined,
       undefined,

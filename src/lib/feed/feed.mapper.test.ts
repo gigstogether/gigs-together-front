@@ -1,4 +1,4 @@
-import { gigDateToYMD, gigDatesToSortedUniqueYmd } from '@/lib/feed/feed.mapper';
+import { gigDateToYMD, gigDatesToSortedUniqueYmd, gigToEvent } from '@/lib/feed/feed.mapper';
 import { toLocalYMD } from '@/lib/utils';
 
 describe('gigDateToYMD', () => {
@@ -63,5 +63,37 @@ describe('gigDatesToSortedUniqueYmd', () => {
     expect(result).toEqual(
       Array.from(new Set(['2026-04-21', toLocalYMD(new Date(unixSeconds * 1000))])).sort(),
     );
+  });
+});
+
+describe('gigToEvent', () => {
+  it('should preserve the resolved Locality and Venues', () => {
+    const event = gigToEvent({
+      id: 'gig-id',
+      title: 'Gig',
+      date: '2026-04-21',
+      locality: {
+        id: 'locality-id',
+        countryIso: 'ES',
+        name: 'Barcelona',
+        qualifier: 'Catalonia',
+      },
+      venues: [{ id: 'venue-id', name: 'Venue' }],
+      ticketsUrl: 'https://example.com/tickets',
+    });
+
+    expect(event).toEqual({
+      id: 'gig-id',
+      title: 'Gig',
+      date: '2026-04-21',
+      locality: {
+        id: 'locality-id',
+        countryIso: 'ES',
+        name: 'Barcelona',
+        qualifier: 'Catalonia',
+      },
+      venues: [{ id: 'venue-id', name: 'Venue' }],
+      ticketsUrl: 'https://example.com/tickets',
+    });
   });
 });

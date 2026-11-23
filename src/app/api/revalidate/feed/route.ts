@@ -2,7 +2,8 @@ import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getFeedRevalidateSecretOrThrow } from '@/env/server-env';
-import { buildFeedPath, SUPPORTED_FEED_LOCATIONS } from '@/lib/feed/feed.routes';
+import { buildFeedPath } from '@/lib/feed/feed.routes';
+import { getCommunitiesFresh } from '@/lib/community/community.server';
 import { isRecord } from '@/lib/is-record';
 
 export const runtime = 'nodejs';
@@ -52,7 +53,16 @@ export async function POST(req: NextRequest) {
     bodyPaths = body.paths;
   }
 
-  const paths = bodyPaths ?? SUPPORTED_FEED_LOCATIONS.map(buildFeedPath);
+  let paths = bodyPaths;
+  if (paths === undefined) {
+    const catalog = await getCommunitiesFresh();
+    paths = catalog.communities.map((community) =>
+      buildFeedPath({
+        country: community.countryIso,
+        communitySlug: community.slug,
+      }),
+    );
+  }
   for (const path of paths) {
     revalidatePath(path);
   }

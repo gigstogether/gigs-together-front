@@ -1,10 +1,10 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 
 import {
@@ -12,33 +12,50 @@ import {
   lookupAdminGigCandidateDraft,
   updateAdminGigCandidateDraft,
 } from '@/app/admin/_lib/admin-api';
-import type { LookupAdminGigCandidateDraftParams } from '@/app/admin/_lib/admin-api';
+import type {
+  CreateAdminGigCandidateParams,
+  LookupAdminGigCandidateDraftParams,
+  UpdateAdminGigCandidateDraftParams,
+} from '@/app/admin/_lib/admin-api';
 import { buildVersionedAdminPosterUrl } from '@/app/admin/_lib/admin-poster-url';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import AdminGigCandidateOriginalMessage from '@/app/admin/gig-candidates/_components/AdminGigCandidateOriginalMessage';
-import GigFormFields from '@/app/admin/gigs/_components/gig-form/GigFormFields';
+import {
+  fetchAdminLocalities,
+  fetchAdminVenues,
+} from '@/app/admin/locations/_lib/admin-locations-api';
+import type { AdminLocality, AdminVenue } from '@/app/admin/locations/_lib/admin-locations-api';
 import type {
   AdminGigCandidate,
   AdminGigCandidateLookupResult,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import {
   createGigCandidateDraftFormSchema,
-  defaultGigCandidateDraftFormValues,
+  createDefaultGigCandidateDraftFormValues,
   gigCandidateDraftFormSchema,
-  mapGigCandidateDraftToFormValues,
+  mapGigCandidateToFormValues,
   mapGigCandidateFormValuesToDraft,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
-import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
+import type { AdminGigCandidateDraftFormValues } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
 import PosterField from '@/components/PosterField';
+import DateInput from '@/components/DateInput';
+import RequiredIndicator from '@/components/RequiredIndicator';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Field, FieldError, FieldLabel, FieldSeparator } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import type { Country } from '@/lib/api-boundary-schemas';
+import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
+import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
 import { ApiError } from '@/lib/api-errors';
 import { buildAdminGigCandidateRoute } from '@/lib/admin-gig-candidate-paths';
+import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
+import { toSearchKey } from '@/lib/search-text';
 
 interface AdminGigCandidateDraftFormProps {
-  countries: Country[];
+  communityOptions: CommunityDisplayOption[];
+  countries: CountryDisplayOption[];
   gigCandidate?: AdminGigCandidate;
 }
 
@@ -47,16 +64,13 @@ interface UseGigCandidateLookupResult {
   lookupGigCandidateDraft: () => Promise<void>;
 }
 
-const GIG_CANDIDATE_LOOKUP_OPTIONAL_FORM_FIELDS = [
-  'title',
-  'endDate',
-  'city',
-  'venue',
-  'ticketsUrl',
-] as const;
+const GIG_CANDIDATE_LOOKUP_OPTIONAL_FORM_FIELDS = ['title', 'endDate', 'ticketsUrl'] as const;
 
 function useGigCandidateLookup(
-  form: UseFormReturn<GigFormValues>,
+  form: UseFormReturn<AdminGigCandidateDraftFormValues>,
+  countries: CountryDisplayOption[],
+  localities: AdminLocality[],
+  venues: AdminVenue[],
   setPosterFile: (file: File | null) => void,
   setPosterUrl: (url: string) => void,
 ): UseGigCandidateLookupResult {
@@ -74,7 +88,29 @@ function useGigCandidateLookup(
       }
     }
     if (result.country) {
-      form.setValue('country', result.country.toUpperCase(), { shouldDirty: true });
+      const countryIso = result.country.toUpperCase();
+      form.setValue('countryIso', countryIso, { shouldDirty: true });
+      const localitySearchKey = toSearchKey(result.city ?? '');
+      const locality = localities.find(
+        (candidate) =>
+          candidate.countryIso === countryIso &&
+          [candidate.name, ...candidate.aliases].some(
+            (name) => toSearchKey(name) === localitySearchKey,
+          ),
+      );
+      form.setValue('localityId', locality?.id ?? '', { shouldDirty: true });
+      const venueSearchKey = toSearchKey(result.venue ?? '');
+      const venue = venues.find(
+        (candidate) =>
+          candidate.isActive &&
+          candidate.localityId === locality?.id &&
+          [candidate.name, ...candidate.aliases].some(
+            (name) => toSearchKey(name) === venueSearchKey,
+          ),
+      );
+      form.setValue('venueIds', venue === undefined ? [] : [venue.id], {
+        shouldDirty: true,
+      });
     }
     if (result.posterUrl) {
       const nextPosterUrl = result.posterUrl.trim();
@@ -97,9 +133,11 @@ function useGigCandidateLookup(
       return;
     }
     const title = form.getValues('title').trim();
-    const location = [form.getValues('city').trim(), form.getValues('country').trim()]
-      .filter(Boolean)
-      .join(', ');
+    const localityId = form.getValues('localityId');
+    const countryIso = form.getValues('countryIso');
+    const locality = localities.find((candidate) => candidate.id === localityId);
+    const country = countries.find((candidate) => candidate.iso === countryIso);
+    const location = [locality?.name, country?.name].filter(Boolean).join(', ');
 
     try {
       const result = await lookupMutation.mutateAsync({ title, location });
@@ -131,22 +169,63 @@ function useGigCandidateLookup(
 }
 
 export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraftFormProps) {
-  const { countries, gigCandidate } = props;
+  const { communityOptions, countries, gigCandidate } = props;
+
   const router = useRouter();
   const queryClient = useQueryClient();
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState('');
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
-  const form = useForm<GigFormValues>({
+  const form = useForm<AdminGigCandidateDraftFormValues>({
     resolver: zodResolver(
       gigCandidate ? gigCandidateDraftFormSchema : createGigCandidateDraftFormSchema,
     ),
     defaultValues: gigCandidate
-      ? mapGigCandidateDraftToFormValues(gigCandidate.gigDraft)
-      : defaultGigCandidateDraftFormValues,
+      ? mapGigCandidateToFormValues(gigCandidate)
+      : createDefaultGigCandidateDraftFormValues(
+          communityOptions.map((community) => community.value),
+        ),
   });
+  const countryIso = useWatch({ control: form.control, name: 'countryIso' });
+  const localityId = useWatch({ control: form.control, name: 'localityId' });
+  const selectedVenueIds = useWatch({
+    control: form.control,
+    name: 'venueIds',
+  });
+  const localitiesQuery = useQuery({
+    queryKey: adminKeys.localities(),
+    queryFn: fetchAdminLocalities,
+  });
+  const venuesQuery = useQuery({
+    queryKey: adminKeys.venues(),
+    queryFn: fetchAdminVenues,
+  });
+  const localities = localitiesQuery.data ?? [];
+  const venues = venuesQuery.data ?? [];
+  const countryOptions = countries.map((country) => ({
+    value: country.iso,
+    label: country.name,
+  }));
+  const localityOptions = localities
+    .filter((locality) => locality.countryIso === countryIso)
+    .map((locality) => ({
+      value: locality.id,
+      label:
+        locality.qualifier === undefined
+          ? locality.name
+          : `${locality.name} (${locality.qualifier})`,
+    }));
+  const venueOptions = venues
+    .filter(
+      (venue) =>
+        venue.localityId === localityId && (venue.isActive || selectedVenueIds.includes(venue.id)),
+    )
+    .map((venue) => ({ value: venue.id, label: venue.name }));
   const { isLookingUp, lookupGigCandidateDraft } = useGigCandidateLookup(
     form,
+    countries,
+    localities,
+    venues,
     setPosterFile,
     setPosterUrl,
   );
@@ -156,17 +235,31 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
   }
 
   const saveMutation = useMutation({
-    mutationFn: async (values: GigFormValues) => {
+    mutationFn: (values: AdminGigCandidateDraftFormValues) => {
       const gigDraft = mapGigCandidateFormValuesToDraft(values);
       const poster = { file: posterFile, url: posterUrl };
-      return gigCandidate
-        ? updateAdminGigCandidateDraft({
-            gigCandidateId: gigCandidate.id,
-            expectedVersion: gigCandidate.version,
-            gigDraft,
-            poster,
-          })
-        : createAdminGigCandidate({ gigDraft, poster });
+      const localityIdValue = values.localityId.trim();
+      if (gigCandidate) {
+        const params: UpdateAdminGigCandidateDraftParams = {
+          gigCandidateId: gigCandidate.id,
+          expectedVersion: gigCandidate.version,
+          gigDraft,
+          poster,
+        };
+        if (localityIdValue.length > 0) {
+          params.localityId = localityIdValue;
+        }
+        return updateAdminGigCandidateDraft(params);
+      }
+
+      const params: CreateAdminGigCandidateParams = {
+        gigDraft,
+        poster,
+      };
+      if (localityIdValue.length > 0) {
+        params.localityId = localityIdValue;
+      }
+      return createAdminGigCandidate(params);
     },
     onSuccess: async (savedGigCandidate) => {
       await Promise.all([
@@ -221,14 +314,255 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
           className="space-y-6"
           onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))}
         >
-          <GigFormFields
-            form={form}
-            countries={countries}
-            isSubmitting={saveMutation.isPending}
-            validationMode={gigCandidate ? 'gigCandidateDraft' : 'gigCandidateCreate'}
-            allowEmptyCountry
-            isLookingUp={isLookingUp}
-            onLookup={lookupGigCandidateDraft}
+          <Controller
+            control={form.control}
+            name="title"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="gig-candidate-title">
+                  Title:{gigCandidate ? null : <RequiredIndicator />}
+                </FieldLabel>
+                <Input
+                  {...field}
+                  id="gig-candidate-title"
+                  required={!gigCandidate}
+                  maxLength={GIG_TITLE_MAX_LENGTH}
+                  aria-invalid={fieldState.invalid}
+                  placeholder="e.g. Arctic Monkeys"
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="communityIds"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  id="gig-candidate-communities-label"
+                  htmlFor="gig-candidate-communities"
+                >
+                  Communities:
+                  <RequiredIndicator />
+                </FieldLabel>
+                <SearchableSelect
+                  id="gig-candidate-communities"
+                  name={field.name}
+                  selectionMode="multiple"
+                  value={field.value}
+                  options={communityOptions}
+                  placeholder="Select communities"
+                  searchPlaceholder="Search communities"
+                  emptyText="No communities found."
+                  ariaLabelledBy="gig-candidate-communities-label"
+                  isRequired
+                  isInvalid={fieldState.invalid}
+                  triggerRef={field.ref}
+                  onBlur={field.onBlur}
+                  onValueChange={field.onChange}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Controller
+              control={form.control}
+              name="countryIso"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel
+                    id="gig-candidate-country-label"
+                    htmlFor="gig-candidate-country"
+                  >
+                    Country:{gigCandidate ? null : <RequiredIndicator />}
+                  </FieldLabel>
+                  <SearchableSelect
+                    id="gig-candidate-country"
+                    name={field.name}
+                    value={field.value}
+                    options={countryOptions}
+                    placeholder="Select country"
+                    searchPlaceholder="Search countries"
+                    emptyText="No countries found."
+                    ariaLabelledBy="gig-candidate-country-label"
+                    isRequired={!gigCandidate}
+                    isInvalid={fieldState.invalid}
+                    triggerRef={field.ref}
+                    onBlur={field.onBlur}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue('localityId', '');
+                      form.setValue('venueIds', []);
+                    }}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="localityId"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel
+                    id="gig-candidate-locality-label"
+                    htmlFor="gig-candidate-locality"
+                  >
+                    Locality:{gigCandidate ? null : <RequiredIndicator />}
+                  </FieldLabel>
+                  <SearchableSelect
+                    id="gig-candidate-locality"
+                    name={field.name}
+                    value={field.value}
+                    options={localityOptions}
+                    placeholder={
+                      localitiesQuery.isPending ? 'Loading localities…' : 'Select locality'
+                    }
+                    searchPlaceholder="Search localities"
+                    emptyText="No localities found."
+                    ariaLabelledBy="gig-candidate-locality-label"
+                    isDisabled={countryIso.length === 0 || localitiesQuery.isPending}
+                    isRequired={!gigCandidate}
+                    isInvalid={fieldState.invalid || localitiesQuery.isError}
+                    triggerRef={field.ref}
+                    onBlur={field.onBlur}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue('venueIds', []);
+                    }}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                  {localitiesQuery.isError ? (
+                    <p className="text-sm text-destructive">Could not load localities.</p>
+                  ) : null}
+                </Field>
+              )}
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <FieldSeparator className="flex-1" />
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={isLookingUp || saveMutation.isPending || localityId.length === 0}
+              onClick={() => {
+                void lookupGigCandidateDraft();
+              }}
+            >
+              {isLookingUp ? 'Looking up…' : 'Find info with AI'}
+            </Button>
+            <FieldSeparator className="flex-1" />
+          </div>
+
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+            <Controller
+              control={form.control}
+              name="date"
+              render={({ field, fieldState }) => (
+                <Field
+                  className="min-w-0"
+                  data-invalid={fieldState.invalid}
+                >
+                  <FieldLabel htmlFor="gig-candidate-date">
+                    Date:{gigCandidate ? null : <RequiredIndicator />}
+                  </FieldLabel>
+                  <DateInput
+                    {...field}
+                    id="gig-candidate-date"
+                    required={!gigCandidate}
+                    clearLabel="Clear Date"
+                    onClear={() => field.onChange('')}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="endDate"
+              render={({ field, fieldState }) => (
+                <Field
+                  className="min-w-0"
+                  data-invalid={fieldState.invalid}
+                >
+                  <FieldLabel htmlFor="gig-candidate-end-date">End Date:</FieldLabel>
+                  <DateInput
+                    {...field}
+                    id="gig-candidate-end-date"
+                    clearLabel="Clear End Date"
+                    onClear={() => field.onChange('')}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+          </div>
+
+          <Controller
+            control={form.control}
+            name="venueIds"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  id="gig-candidate-venues-label"
+                  htmlFor="gig-candidate-venues"
+                >
+                  Venues:
+                </FieldLabel>
+                <SearchableSelect
+                  id="gig-candidate-venues"
+                  name={field.name}
+                  selectionMode="multiple"
+                  value={field.value}
+                  options={venueOptions}
+                  placeholder={
+                    localityId.length === 0
+                      ? 'Select a locality first'
+                      : venuesQuery.isPending
+                        ? 'Loading venues…'
+                        : 'Select venues'
+                  }
+                  searchPlaceholder="Search venues"
+                  emptyText="No venues found."
+                  ariaLabelledBy="gig-candidate-venues-label"
+                  isDisabled={localityId.length === 0 || venuesQuery.isPending}
+                  isInvalid={fieldState.invalid || venuesQuery.isError}
+                  triggerRef={field.ref}
+                  onBlur={field.onBlur}
+                  onValueChange={field.onChange}
+                />
+                <FieldError errors={[fieldState.error]} />
+                {venuesQuery.isError ? (
+                  <p className="text-sm text-destructive">Could not load venues.</p>
+                ) : null}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="ticketsUrl"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="gig-candidate-tickets-url">Tickets URL:</FieldLabel>
+                <Input
+                  {...field}
+                  id="gig-candidate-tickets-url"
+                  aria-invalid={fieldState.invalid}
+                  placeholder="e.g. https://www.ticketmaster.es/event/..."
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
           />
           <PosterField
             variant={gigCandidate ? 'edit' : 'create'}

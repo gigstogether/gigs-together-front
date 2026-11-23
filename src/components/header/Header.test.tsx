@@ -27,7 +27,8 @@ describe('Header', () => {
     render(
       <Header
         country="es"
-        city="barcelona"
+        communitySlug="barcelona"
+        communityName="Barcelona"
       >
         <div data-testid="header-center-slot">Center</div>
       </Header>,
@@ -37,11 +38,12 @@ describe('Header', () => {
     expect(screen.getByTestId('header-actions')).toBeInTheDocument();
   });
 
-  it('should link home to feed location when country and city are provided', () => {
+  it('should link home to feed location when country and community are provided', () => {
     render(
       <Header
         country="es"
-        city="barcelona"
+        communitySlug="barcelona"
+        communityName="Barcelona"
       />,
     );
 

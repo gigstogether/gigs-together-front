@@ -1,4 +1,5 @@
 import {
+  parseCommunitiesResponse,
   parseCountries,
   parseLocaleGetTranslationsResponseBody,
   parseV1GigAroundGetResponseBody,
@@ -6,6 +7,34 @@ import {
   parseV1GigDatesGetResponseBody,
   parseV1GigGetResponseBody,
 } from '@/lib/api-boundary-schemas';
+
+describe('parseCommunitiesResponse', () => {
+  it('should return the Community catalog when payload is valid', () => {
+    const payload = {
+      nameTranslationNamespace: 'community',
+      communities: [
+        {
+          id: 'community-id',
+          countryIso: 'ES',
+          slug: 'barcelona',
+          nameTranslationKey: 'barcelona.name',
+          timeZone: 'Europe/Madrid',
+        },
+      ],
+    };
+
+    expect(parseCommunitiesResponse(payload)).toEqual(payload);
+  });
+
+  it('should throw when a Community field is missing', () => {
+    const payload = {
+      nameTranslationNamespace: 'community',
+      communities: [{ id: 'community-id', countryIso: 'ES', slug: 'barcelona' }],
+    };
+
+    expect(() => parseCommunitiesResponse(payload)).toThrow();
+  });
+});
 
 describe('parseCountries', () => {
   it('should return countries when payload is valid', () => {
@@ -15,7 +44,7 @@ describe('parseCountries', () => {
   });
 
   it('should throw when countries payload shape is invalid', () => {
-    const payload = [{ code: 'ES' }];
+    const payload = [{ iso: 'ESP' }];
     expect(() => parseCountries(payload)).toThrow();
   });
 });
@@ -25,9 +54,9 @@ describe('parseLocaleGetTranslationsResponseBody', () => {
     const payload = {
       locale: 'en',
       translations: {
-        country: {
-          es: {
-            value: 'Spain',
+        common: {
+          'button.save': {
+            value: 'Save',
             format: 'plain',
             kind: 'text',
           },
@@ -42,9 +71,9 @@ describe('parseLocaleGetTranslationsResponseBody', () => {
     const payload = {
       locale: 'en',
       translations: {
-        country: {
-          es: {
-            value: 'Spain',
+        common: {
+          'button.save': {
+            value: 'Save',
             format: 'markdown',
           },
         },
@@ -57,9 +86,9 @@ describe('parseLocaleGetTranslationsResponseBody', () => {
     const payload = {
       locale: 'en',
       translations: {
-        country: {
-          es: {
-            value: 'Spain',
+        common: {
+          'button.save': {
+            value: 'Save',
             format: 'plain',
           },
         },
@@ -85,9 +114,13 @@ describe('parseV1GigGetResponseBody', () => {
           id: '1',
           title: 'Gig',
           date: '2026-04-21',
-          city: 'Barcelona',
-          country: 'ES',
-          venue: 'Club',
+          locality: {
+            id: 'locality-id',
+            countryIso: 'ES',
+            name: 'Barcelona',
+            qualifier: 'Catalonia',
+          },
+          venues: [{ id: 'venue-id', name: 'Club' }],
           ticketsUrl: 'https://example.com/tickets',
         },
       ],
@@ -135,9 +168,12 @@ describe('parseV1GigAroundGetResponseBody', () => {
           id: '2',
           title: 'Next Gig',
           date: 42,
-          city: 'Barcelona',
-          country: 'ES',
-          venue: 'Hall',
+          locality: {
+            id: 'locality-id',
+            countryIso: 'ES',
+            name: 'Barcelona',
+          },
+          venues: [{ id: 'venue-id', name: 'Hall' }],
           ticketsUrl: 'https://example.com/tickets',
         },
       ],

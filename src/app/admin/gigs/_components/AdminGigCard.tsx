@@ -1,8 +1,7 @@
 'use client';
 
-import { AlertTriangle, Calendar, ExternalLink, Rss, Ticket } from 'lucide-react';
+import { MapPin, AlertTriangle, Calendar, ExternalLink, Rss, Ticket } from 'lucide-react';
 import Link from 'next/link';
-import { LocationIcon } from '@/components/ui/location-icon';
 import {
   buildAdminGigPublicHref,
   formatAdminGigEventDate,
@@ -52,7 +51,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
           </AdminPreviewMetaRow>
           <AdminPreviewMetaRow
             icon={
-              <LocationIcon
+              <MapPin
                 className="h-4 w-4"
                 aria-hidden
               />

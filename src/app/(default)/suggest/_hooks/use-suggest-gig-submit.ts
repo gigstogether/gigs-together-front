@@ -3,7 +3,7 @@ import { toast } from '@/hooks/use-toast';
 import { createGigCandidate } from '@/app/(default)/suggest/_lib/gig-candidate-api';
 import type {
   GigCandidateCreateResponse,
-  GigCandidateUpsertPayload,
+  GigCandidateCreatePayload,
 } from '@/app/(default)/suggest/_lib/gig-candidate-api';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import { isApiTransportError } from '@/lib/api-errors';
@@ -25,16 +25,30 @@ interface SubmitSuggestGigInput {
   posterUrl: string;
 }
 
-function buildPayload(values: SuggestGigFormValues): GigCandidateUpsertPayload {
-  return {
+interface BuildPayloadParams {
+  values: SuggestGigFormValues;
+}
+
+function buildPayload(params: BuildPayloadParams): GigCandidateCreatePayload {
+  const { values } = params;
+
+  const payload: GigCandidateCreatePayload = {
+    communityId: values.communityId,
+    localityId: values.localityId,
     title: values.title,
     date: values.date,
-    endDate: values.endDate || undefined,
-    city: values.city,
-    country: values.country,
-    venue: values.venue || undefined,
-    ticketsUrl: values.ticketsUrl || undefined,
   };
+  if (values.venueIds.length > 0) {
+    payload.venueIds = [...values.venueIds];
+  }
+  if (values.endDate !== undefined) {
+    payload.endDate = values.endDate;
+  }
+  if (values.ticketsUrl !== undefined) {
+    payload.ticketsUrl = values.ticketsUrl;
+  }
+
+  return payload;
 }
 
 function isPosterUrlValid(posterUrl: string): boolean {
@@ -55,7 +69,7 @@ export function useSuggestGigSubmit(params: UseSuggestGigSubmitParams): UseSugge
 
   const submitMutation = useMutation<GigCandidateCreateResponse, unknown, SubmitSuggestGigInput>({
     mutationFn: (input: SubmitSuggestGigInput): Promise<GigCandidateCreateResponse> => {
-      const gig = buildPayload(input.values);
+      const gig = buildPayload({ values: input.values });
       const posterMode = input.posterFile ? 'upload' : 'url';
 
       return createGigCandidate({

@@ -4,14 +4,14 @@ import HeaderCalendarClient from '@/app/feed/_components/HeaderCalendarClient';
 import { getAvailableGigDates } from '@/app/feed/_lib/feed.server';
 
 export interface HeaderCalendarProps {
-  readonly country: string;
-  readonly city: string;
+  country: string;
+  communitySlug: string;
 }
 
 export default async function HeaderCalendar(props: HeaderCalendarProps) {
-  const { country, city } = props;
+  const { country, communitySlug } = props;
 
-  const availableDates = await getAvailableGigDates({ country, city });
+  const availableDates = await getAvailableGigDates({ country, communitySlug });
 
   return <HeaderCalendarClient availableDates={availableDates} />;
 }

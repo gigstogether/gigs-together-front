@@ -7,22 +7,28 @@ import { useForm } from 'react-hook-form';
 import SuggestGigFormFields from '@/app/(default)/suggest/_components/SuggestGigFormFields';
 import { useSuggestGigSubmit } from '@/app/(default)/suggest/_hooks/use-suggest-gig-submit';
 import {
-  defaultSuggestGigFormValues,
+  createDefaultSuggestGigFormValues,
   suggestGigFormSchema,
 } from '@/app/(default)/suggest/_lib/suggest-form.shared';
-import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
+import type {
+  SuggestCommunityOption,
+  SuggestGigFormValues,
+} from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import PosterField from '@/components/PosterField';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import type { Country } from '@/lib/api-boundary-schemas';
+import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 
 interface SuggestGigFormClientProps {
-  countries: Country[];
+  communityOptions: SuggestCommunityOption[];
+  countries: CountryDisplayOption[];
 }
 
 export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
-  const { countries } = props;
+  const { communityOptions, countries } = props;
+
+  const defaultValues = createDefaultSuggestGigFormValues(communityOptions);
 
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState<string>('');
@@ -31,7 +37,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
 
   const form = useForm<SuggestGigFormValues>({
     resolver: zodResolver(suggestGigFormSchema),
-    defaultValues: defaultSuggestGigFormValues,
+    defaultValues,
   });
 
   const { isSubmitting, onSubmit } = useSuggestGigSubmit({
@@ -43,7 +49,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
         description: "Thanks — we'll review your suggestion soon.",
       });
       setIsSubmitted(true);
-      form.reset(defaultSuggestGigFormValues);
+      form.reset(defaultValues);
       setPosterFile(null);
       setPosterUrl('');
       if (posterFileInputRef.current) {
@@ -93,6 +99,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
         >
           <SuggestGigFormFields
             form={form}
+            communityOptions={communityOptions}
             countries={countries}
           />
           <PosterField

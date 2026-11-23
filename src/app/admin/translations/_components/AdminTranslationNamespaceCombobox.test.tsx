@@ -14,8 +14,8 @@ describe('AdminTranslationNamespaceCombobox', () => {
     render(
       <AdminTranslationNamespaceCombobox
         id="translation-form-namespace"
-        value="cou"
-        namespaces={['about', 'country', 'common']}
+        value="com"
+        namespaces={['about', 'common', 'telegram']}
         isDisabled={false}
         onChange={onChange}
       />,
@@ -23,7 +23,7 @@ describe('AdminTranslationNamespaceCombobox', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Show namespace suggestions' }));
 
-    expect(screen.getByRole('option', { name: 'country' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'common' })).toBeInTheDocument();
     expect(screen.queryByRole('option', { name: 'about' })).not.toBeInTheDocument();
   });
 
@@ -34,7 +34,7 @@ describe('AdminTranslationNamespaceCombobox', () => {
       <AdminTranslationNamespaceCombobox
         id="translation-form-namespace"
         value="telegram"
-        namespaces={['about', 'country']}
+        namespaces={['about', 'common']}
         isDisabled={false}
         onChange={onChange}
       />,
@@ -51,7 +51,7 @@ describe('AdminTranslationNamespaceCombobox', () => {
       <AdminTranslationNamespaceCombobox
         id="translation-form-namespace"
         value="about"
-        namespaces={['about', 'country']}
+        namespaces={['about', 'common']}
         isDisabled={false}
         onChange={vi.fn()}
       />,

@@ -52,16 +52,16 @@ describe('getTranslations', () => {
   it('should tag fetch with per-namespace tags when namespaces are requested', async () => {
     const { getTranslations } = await import('@/lib/i18n/translations.server');
 
-    await getTranslations('en', ['about', 'country']);
+    await getTranslations('en', ['about', 'common']);
 
     expect(getTranslationsApiPublicRequestMock).toHaveBeenCalledWith(
-      '/v1/translations?namespaces=about%2Ccountry',
+      '/v1/translations?namespaces=about%2Ccommon',
       'GET',
       undefined,
       expect.objectContaining({
         next: {
           revalidate: 3_600,
-          tags: ['translations:ns:about', 'translations:ns:country'],
+          tags: ['translations:ns:about', 'translations:ns:common'],
         },
       }),
     );

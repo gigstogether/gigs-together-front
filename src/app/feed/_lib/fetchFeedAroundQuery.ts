@@ -28,7 +28,7 @@ export function feedAroundQueryOptions(params: FeedAroundKeyParams): FeedAroundQ
         beforeLimit: params.beforeLimit,
         afterLimit: params.afterLimit,
         country: params.country,
-        city: params.city,
+        communitySlug: params.communitySlug,
         signal: ctx.signal,
       });
     },

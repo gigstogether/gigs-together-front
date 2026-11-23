@@ -185,8 +185,9 @@ const v1AdminGigCandidateSourceSchema = z.union([
     .strict(),
 ]);
 
-const v1AdminGigCandidateDraftSchema = z
+const v1AdminGigCandidateDraftFieldsSchema = z
   .object({
+    venueIds: z.array(z.string().min(1)).min(1).optional(),
     title: z.string().optional(),
     date: z.string().optional(),
     endDate: z.string().optional(),
@@ -197,6 +198,10 @@ const v1AdminGigCandidateDraftSchema = z
     posterUrl: z.string().optional(),
   })
   .strict();
+
+const v1AdminGigCandidateDraftSchema = v1AdminGigCandidateDraftFieldsSchema.extend({
+  communityIds: z.array(z.string().min(1)).min(1),
+});
 
 const v1AdminGigCandidateOriginalMessageSchema = z
   .object({
@@ -215,6 +220,25 @@ const v1AdminGigCandidateSchema = z
   .object({
     id: z.string().min(1),
     source: v1AdminGigCandidateSourceSchema,
+    locality: z
+      .object({
+        id: z.string().min(1),
+        countryIso: z.string().length(2),
+        name: z.string().min(1),
+        qualifier: z.string().min(1).optional(),
+      })
+      .strict()
+      .optional(),
+    venues: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1),
+            name: z.string().min(1),
+          })
+          .strict(),
+      )
+      .optional(),
     gigDraft: v1AdminGigCandidateDraftSchema,
     status: z.nativeEnum(GigCandidateStatusAPI),
     version: z.number().int().nonnegative(),
@@ -241,7 +265,7 @@ const v1AdminGigCandidatesListResponseSchema = z
 
 const v1AdminGigCandidateLookupResponseSchema = z
   .object({
-    gigDraft: v1AdminGigCandidateDraftSchema.nullable(),
+    gigDraft: v1AdminGigCandidateDraftFieldsSchema.nullable(),
   })
   .strict();
 
@@ -401,6 +425,7 @@ export interface AdminGigCandidatePosterInput {
 }
 
 export interface CreateAdminGigCandidateParams {
+  localityId?: string;
   gigDraft: AdminGigCandidateDraft;
   poster: AdminGigCandidatePosterInput;
 }
@@ -748,9 +773,14 @@ export async function lookupAdminGigCandidateDraft(
   return parseAdminGigCandidateLookup(raw);
 }
 
+interface AdminGigCandidateMutationJsonBody {
+  localityId?: string;
+  gigDraft: AdminGigCandidateDraft;
+}
+
 function buildAdminGigCandidateMutationBody(
   params: CreateAdminGigCandidateParams,
-): FormData | { gigDraft: AdminGigCandidateDraft } {
+): FormData | AdminGigCandidateMutationJsonBody {
   const posterUrl = params.poster.url.trim();
   if (posterUrl) {
     new URL(posterUrl);
@@ -764,9 +794,16 @@ function buildAdminGigCandidateMutationBody(
     const body = new FormData();
     body.append('posterFile', params.poster.file);
     body.append('gigDraft', JSON.stringify(gigDraft));
+    if (params.localityId !== undefined) {
+      body.append('localityId', params.localityId);
+    }
     return body;
   }
-  return { gigDraft };
+  const body: AdminGigCandidateMutationJsonBody = { gigDraft };
+  if (params.localityId !== undefined) {
+    body.localityId = params.localityId;
+  }
+  return body;
 }
 
 export async function patchAdminLocale(

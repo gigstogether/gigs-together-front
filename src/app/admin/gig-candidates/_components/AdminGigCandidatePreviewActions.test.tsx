@@ -25,7 +25,7 @@ const gigCandidate: AdminGigCandidate = {
     isCurrentlyAdmin: false,
     origin: { type: 'form' },
   },
-  gigDraft: {},
+  gigDraft: { communityIds: ['community-id'] },
   status: GigCandidateStatusAPI.New,
   version: 3,
   createdAt: '2026-08-01T10:00:00.000Z',

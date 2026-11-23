@@ -13,9 +13,12 @@ function makeEvent(id: string): Event {
     id,
     date: '2026-05-01',
     title: 't',
-    venue: 'v',
-    city: { code: 'c', name: 'City' },
-    country: { iso: 'es', name: 'Spain' },
+    locality: {
+      id: 'locality-id',
+      countryIso: 'ES',
+      name: 'City',
+    },
+    venues: [{ id: 'venue-id', name: 'Venue' }],
   };
 }
 

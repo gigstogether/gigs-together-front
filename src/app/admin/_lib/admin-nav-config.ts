@@ -1,3 +1,5 @@
+import { MapPin, BookA } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { Route } from 'next';
 
 import { ADMIN_GIGS_ROUTE } from '@/lib/admin-gig-paths';
@@ -8,11 +10,13 @@ export interface AdminNavItem {
   readonly label: string;
   readonly description: string;
   readonly isEnabled: boolean;
+  readonly icon?: LucideIcon;
 }
 
 const ADMIN_DASHBOARD_ROUTE: Route = '/admin';
 const ADMIN_TRANSLATIONS_ROUTE: Route = '/admin/translations';
 const ADMIN_LOCALES_ROUTE: Route = '/admin/locales';
+const ADMIN_LOCATIONS_ROUTE: Route = '/admin/locations';
 const ADMIN_ADMINS_ROUTE: Route = '/admin/admins';
 
 export const adminNavItems: readonly AdminNavItem[] = [
@@ -35,10 +39,18 @@ export const adminNavItems: readonly AdminNavItem[] = [
     isEnabled: true,
   },
   {
+    href: ADMIN_LOCATIONS_ROUTE,
+    label: 'Locations',
+    description: 'Countries and location catalogs',
+    isEnabled: true,
+    icon: MapPin,
+  },
+  {
     href: ADMIN_TRANSLATIONS_ROUTE,
-    label: 'Translations',
+    label: 'Text content',
     description: 'UI text and Telegram post strings',
     isEnabled: true,
+    icon: BookA,
   },
   {
     href: ADMIN_LOCALES_ROUTE,
@@ -51,5 +63,6 @@ export const adminNavItems: readonly AdminNavItem[] = [
     label: 'Admins',
     description: 'Moderator access',
     isEnabled: true,
+    // icon: UserRoundShield, // in v1.63.0 lucide-react
   },
 ];

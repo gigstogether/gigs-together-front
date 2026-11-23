@@ -43,7 +43,7 @@ vi.mock('@/components/PosterField', () => ({
 function renderClient() {
   return render(
     <EditGigFormClient
-      countries={[{ iso: 'ES' }]}
+      countries={[{ iso: 'ES', name: 'Spain' }]}
       gigPublicId="radiohead-barcelona"
     />,
   );

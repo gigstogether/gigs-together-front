@@ -1,12 +1,10 @@
 import 'server-only';
 
-import { apiPublicRequest } from '@/lib/api-public';
-import { parseCountries } from '@/lib/api-boundary-schemas';
+import { fetchCountries } from '@/lib/countries';
 import type { Country } from '@/lib/api-boundary-schemas';
 
-export async function getCountries(): Promise<Country[]> {
-  const raw = await apiPublicRequest<unknown>('/v1/countries', 'GET', undefined, {
+export function getCountries(): Promise<Country[]> {
+  return fetchCountries({
     cache: 'force-cache',
   });
-  return parseCountries(raw);
 }

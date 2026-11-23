@@ -17,8 +17,10 @@ const DialogClose = DialogPrimitive.Close;
 
 /**
  * Radix `DialogPrimitive.Overlay` wraps content in `react-remove-scroll`, which applies
- * `padding-right` to the body and shifts the layout. We use a full-screen `Dialog.Close`
- * backdrop instead (no RemoveScroll) and lock body scroll like `ImageLightbox`.
+ * `padding-right` to the body and shifts the layout. We render a full-screen
+ * `Dialog.Close` backdrop inside the content boundary instead and lock body scroll like
+ * `ImageLightbox`. Keeping the backdrop inside the modal boundary lets it receive pointer
+ * events while Radix isolates interactions outside the dialog.
  */
 function DialogContent({
   className,
@@ -35,23 +37,25 @@ function DialogContent({
 
   return (
     <DialogPortal>
-      <DialogPrimitive.Close asChild>
-        <button
-          type="button"
-          className="fixed inset-0 z-[100] cursor-default border-0 bg-black/70 p-0 backdrop-blur-sm"
-          tabIndex={-1}
-          aria-label="Close dialog"
-        />
-      </DialogPrimitive.Close>
       <DialogPrimitive.Content
+        data-slot="dialog-content"
         className={cn(
-          'pointer-events-none fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4 outline-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+          'fixed inset-0 z-[100] flex items-center justify-center overflow-hidden p-4 outline-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         )}
         {...props}
       >
+        <DialogPrimitive.Close asChild>
+          <button
+            type="button"
+            className="fixed inset-0 cursor-default border-0 bg-black/70 p-0 backdrop-blur-sm"
+            tabIndex={-1}
+            aria-label="Close dialog"
+          />
+        </DialogPrimitive.Close>
         <div
+          data-slot="dialog-panel"
           className={cn(
-            'pointer-events-auto relative w-full max-w-md rounded-lg bg-background p-6 shadow-2xl',
+            'relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-lg bg-background p-6 shadow-2xl',
             className,
           )}
         >

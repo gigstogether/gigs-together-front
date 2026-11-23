@@ -33,12 +33,16 @@ const gigCandidate: AdminGigCandidate = {
     telegramUsername: 'test_user',
     origin: { type: 'admin' },
   },
+  locality: {
+    id: 'locality-id',
+    countryIso: 'ES',
+    name: 'Barcelona',
+  },
+  venues: [{ id: 'venue-id', name: 'Razzmatazz' }],
   gigDraft: {
+    communityIds: ['community-id'],
     title: 'Band',
     date: '2026-08-20',
-    city: 'Barcelona',
-    country: 'ES',
-    venue: 'Razzmatazz',
   },
   status: GigCandidateStatusAPI.Approved,
   version: 3,
@@ -134,9 +138,10 @@ describe('AdminGigCandidateCard', () => {
   it('should link the location to Google Maps', () => {
     renderCard();
 
+    expect(screen.getByText('Razzmatazz · Barcelona, Spain')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveAttribute(
       'href',
-      'https://www.google.com/maps/search/?api=1&query=Razzmatazz%2C%20Barcelona%2C%20ES',
+      'https://www.google.com/maps/search/?api=1&query=Razzmatazz%20Barcelona%20Spain',
     );
   });
 
@@ -164,7 +169,7 @@ describe('AdminGigCandidateCard', () => {
         text: 'Unstructured submission',
         url: 'https://t.me/c/123/42',
       },
-      gigDraft: {},
+      gigDraft: { communityIds: ['community-id'] },
       status: GigCandidateStatusAPI.New,
     });
 

@@ -1,24 +1,29 @@
 import {
+  createDefaultGigCandidateDraftFormValues,
   createGigCandidateDraftFormSchema,
   gigCandidateDraftFormSchema,
-  mapGigCandidateDraftToFormValues,
   mapGigCandidateFormValuesToDraft,
+  mapGigCandidateToFormValues,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
+import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 
-describe('GigCandidate draft form mapping', () => {
-  it('should allow an empty draft but reject a title longer than 300 characters', () => {
-    const emptyDraft = {
-      title: '',
-      date: '',
-      endDate: '',
-      city: '',
-      country: '',
-      venue: '',
-      ticketsUrl: '',
-    };
+const emptyDraft = {
+  communityIds: ['community-id'],
+  countryIso: '',
+  localityId: '',
+  venueIds: [],
+  title: '',
+  date: '',
+  endDate: '',
+  ticketsUrl: '',
+};
 
+describe('admin-gig-candidate-form', () => {
+  it('should allow an empty location in an existing draft', () => {
     expect(gigCandidateDraftFormSchema.safeParse(emptyDraft).success).toBe(true);
-    expect(gigCandidateDraftFormSchema.safeParse({ ...emptyDraft, title: 'B' }).success).toBe(true);
+  });
+
+  it('should reject a title longer than 300 characters', () => {
     expect(
       gigCandidateDraftFormSchema.safeParse({
         ...emptyDraft,
@@ -27,52 +32,73 @@ describe('GigCandidate draft form mapping', () => {
     ).toBe(false);
   });
 
-  it('should require core fields when creating a Gig Candidate', () => {
-    const emptyCandidate = {
-      title: '',
-      date: '',
-      endDate: '',
-      city: '',
-      country: '',
-      venue: '',
-      ticketsUrl: '',
-    };
-
-    expect(createGigCandidateDraftFormSchema.safeParse(emptyCandidate).success).toBe(false);
+  it('should require a Community, Country, Locality, title, and date when creating', () => {
+    expect(createGigCandidateDraftFormSchema.safeParse(emptyDraft).success).toBe(false);
     expect(
       createGigCandidateDraftFormSchema.safeParse({
-        ...emptyCandidate,
+        ...emptyDraft,
+        countryIso: 'ES',
+        localityId: 'locality-id',
         title: 'Band',
         date: '2026-09-30',
-        city: 'Barcelona',
-        country: 'ES',
       }).success,
     ).toBe(true);
   });
 
-  it('should map a partial gigDraft to safe empty form values', () => {
-    expect(mapGigCandidateDraftToFormValues({ title: 'Band' })).toEqual({
+  it('should select the only Community in new draft defaults', () => {
+    expect(createDefaultGigCandidateDraftFormValues(['community-id'])).toEqual({
+      ...emptyDraft,
+      countryIso: 'ES',
+    });
+    expect(createDefaultGigCandidateDraftFormValues(['one', 'two']).communityIds).toEqual([]);
+  });
+
+  it('should map the candidate location and Venue assignments to form values', () => {
+    expect(
+      mapGigCandidateToFormValues({
+        id: 'candidate-id',
+        source: {
+          type: 'user',
+          userId: 'user-id',
+          isCurrentlyAdmin: false,
+          origin: { type: 'admin' },
+        },
+        locality: {
+          id: 'locality-id',
+          countryIso: 'ES',
+          name: 'Barcelona',
+        },
+        gigDraft: {
+          communityIds: ['community-id'],
+          venueIds: ['venue-id'],
+          title: 'Band',
+        },
+        status: GigCandidateStatusAPI.Reviewing,
+        version: 1,
+        createdAt: '2026-08-01T10:00:00.000Z',
+        updatedAt: '2026-08-02T10:00:00.000Z',
+      }),
+    ).toEqual({
+      ...emptyDraft,
+      countryIso: 'ES',
+      localityId: 'locality-id',
+      venueIds: ['venue-id'],
       title: 'Band',
-      date: '',
-      endDate: '',
-      city: '',
-      country: '',
-      venue: '',
-      ticketsUrl: '',
     });
   });
 
-  it('should omit empty fields from the editable gigDraft', () => {
+  it('should omit empty optional fields from the editable gigDraft', () => {
     expect(
       mapGigCandidateFormValuesToDraft({
+        ...emptyDraft,
+        communityIds: ['community-id'],
+        venueIds: ['venue-id'],
         title: ' Band ',
-        date: '',
-        endDate: '',
-        city: ' Barcelona ',
-        country: ' ES ',
-        venue: '',
-        ticketsUrl: '',
       }),
-    ).toEqual({ title: 'Band', city: 'Barcelona', country: 'ES' });
+    ).toEqual({
+      communityIds: ['community-id'],
+      venueIds: ['venue-id'],
+      title: 'Band',
+    });
   });
 });

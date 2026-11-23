@@ -26,6 +26,18 @@ export const adminKeys = {
     return ['admin', 'locales'];
   },
 
+  countryReferences(): readonly ['admin', 'countryReferences'] {
+    return ['admin', 'countryReferences'];
+  },
+
+  localities(): readonly ['admin', 'localities'] {
+    return ['admin', 'localities'];
+  },
+
+  venues(): readonly ['admin', 'venues'] {
+    return ['admin', 'venues'];
+  },
+
   translationNamespaces(): readonly ['admin', 'translationNamespaces'] {
     return ['admin', 'translationNamespaces'];
   },

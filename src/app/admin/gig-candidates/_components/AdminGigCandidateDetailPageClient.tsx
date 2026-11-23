@@ -9,7 +9,8 @@ import AdminGigCandidateBackLink from '@/app/admin/gig-candidates/_components/Ad
 import AdminGigCandidateCard from '@/app/admin/gig-candidates/_components/AdminGigCandidateCard';
 import AdminGigCandidateDraftForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm';
 import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
-import type { Country } from '@/lib/api-boundary-schemas';
+import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
+import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
 
 interface AdminGigCandidateViewPageClientProps {
   mode: 'view';
@@ -18,7 +19,8 @@ interface AdminGigCandidateViewPageClientProps {
 
 interface AdminGigCandidateEditPageClientProps {
   mode: 'edit';
-  countries: Country[];
+  countries: CountryDisplayOption[];
+  communityOptions: CommunityDisplayOption[];
   gigCandidateId: string;
 }
 
@@ -57,6 +59,7 @@ export default function AdminGigCandidateDetailPageClient(
       <AdminGigCandidateDraftForm
         key={`${gigCandidate.id}:${gigCandidate.version}`}
         countries={props.countries}
+        communityOptions={props.communityOptions}
         gigCandidate={gigCandidate}
       />
     );

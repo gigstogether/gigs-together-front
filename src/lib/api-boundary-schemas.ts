@@ -30,15 +30,53 @@ export type V1LocaleGetTranslationsResponseBody = z.infer<
 export type TranslationFormat = V1TranslationValue['format'];
 export type TranslationKind = V1TranslationValue['kind'];
 
-const countrySchema = z.object({
-  iso: z.string().min(1),
-});
+const countrySchema = z
+  .object({
+    iso: z.string().regex(/^[A-Z]{2}$/),
+  })
+  .strict();
 
 export type Country = z.infer<typeof countrySchema>;
 
 const countriesSchema = z.array(countrySchema);
 
+const communitySchema = z
+  .object({
+    id: z.string().min(1),
+    countryIso: z.string().min(1),
+    slug: z.string().min(1),
+    nameTranslationKey: z.string().min(1),
+    timeZone: z.string().min(1),
+  })
+  .strict();
+
+const communitiesResponseSchema = z
+  .object({
+    nameTranslationNamespace: z.string().min(1),
+    communities: z.array(communitySchema),
+  })
+  .strict();
+
+export type Community = z.infer<typeof communitySchema>;
+export type CommunitiesResponse = z.infer<typeof communitiesResponseSchema>;
+
 const gigDateSchema = z.union([z.string().min(1), z.number().int().finite()]);
+
+const gigLocalitySchema = z
+  .object({
+    id: z.string().min(1),
+    countryIso: z.string().regex(/^[A-Z]{2}$/),
+    name: z.string().min(1),
+    qualifier: z.string().min(1).optional(),
+  })
+  .strict();
+
+const gigVenueSchema = z
+  .object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+  })
+  .strict();
 
 const gigSchema = z
   .object({
@@ -46,9 +84,8 @@ const gigSchema = z
     title: z.string().min(1),
     date: gigDateSchema,
     endDate: gigDateSchema.optional(),
-    city: z.string().min(1),
-    country: z.string().min(1),
-    venue: z.string().min(1),
+    locality: gigLocalitySchema,
+    venues: z.array(gigVenueSchema).min(1),
     ticketsUrl: z.string().min(1),
     posterUrl: z.string().min(1).optional(),
     calendarUrl: z.string().min(1).optional(),
@@ -91,6 +128,10 @@ export function parseLocaleGetTranslationsResponseBody(raw: unknown) {
 
 export function parseCountries(raw: unknown) {
   return countriesSchema.parse(raw);
+}
+
+export function parseCommunitiesResponse(raw: unknown): CommunitiesResponse {
+  return communitiesResponseSchema.parse(raw);
 }
 
 export function parseV1GigGetResponseBody(raw: unknown): V1GigGetResponseBody {

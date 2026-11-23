@@ -24,7 +24,7 @@ describe('getFeed', () => {
     await getFeed({
       limit: 10,
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
     });
 
     expect(feedServerApiPublicRequestMock).toHaveBeenCalledOnce();
@@ -49,7 +49,7 @@ describe('getAvailableGigDates', () => {
 
     const result = await getAvailableGigDates({
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
     });
 
     expect(result).toEqual(['2026-04-21', '2026-05-01']);

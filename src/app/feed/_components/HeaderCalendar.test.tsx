@@ -26,13 +26,13 @@ describe('HeaderCalendar', () => {
     render(
       await HeaderCalendar({
         country: 'es',
-        city: 'barcelona',
+        communitySlug: 'barcelona',
       }),
     );
 
     expect(mockGetAvailableGigDates).toHaveBeenCalledWith({
       country: 'es',
-      city: 'barcelona',
+      communitySlug: 'barcelona',
     });
     expect(screen.getByTestId('header-calendar-client')).toHaveTextContent('2026-04-21,2026-05-01');
   });

@@ -6,7 +6,7 @@ import type { VisibleEventDateRange } from '@/app/feed/_hooks/useVisibleEventDat
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn, toLocalYMD } from '@/lib/utils';
-import { FaRegCalendar } from 'react-icons/fa';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import type { Modifiers } from 'react-day-picker';
 import { useHeaderConfig } from '@/app/feed/_providers/HeaderConfigProvider';
 
@@ -124,7 +124,7 @@ export default function HeaderCalendarClient(props: HeaderCalendarClientProps) {
           className="flex items-center gap-2 focus:outline-none"
         >
           <span className="inline-flex items-center justify-center gap-2 px-2 text-base font-normal text-gray-800">
-            <FaRegCalendar className="text-gray-600" />
+            <CalendarIcon className="text-gray-600 h-4 w-4" />
             {formatDisplayMonth(displayEventDate, visibleEventDateRange)}
           </span>
         </PopoverTrigger>
