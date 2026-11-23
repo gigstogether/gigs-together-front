@@ -39,9 +39,9 @@ This also runs the `prepare` script and installs Husky git hooks.
 
 ### 2. Create environment variables
 
-Copy `.env.example` into a local env file:
+Copy `.env.example` to `.env` in the repository root.
 
-You can also use `.env`, but `.env.local` is the safer default for machine-specific values.
+Next.js also supports `.env.local`, which takes precedence over `.env`.
 
 ### 3. Fill in the required env vars
 
@@ -123,6 +123,18 @@ Useful routes:
 - `/admin/translations` -> translations placeholder page
 - `/admin/admins` -> moderator access placeholder page
 - `/about` -> about page
+
+## Local HTTPS access with Cloudflare Tunnel
+
+This tunnel provides public HTTPS access to the local frontend for browser and Telegram Mini App testing.
+
+To start an already configured tunnel, use the name chosen during creation:
+
+```text
+cloudflared tunnel run <tunnel-name>
+```
+
+See the [Cloudflare Tunnel development guide](./docs/development/CLOUDFLARE_TUNNEL.md) for frontend routing, environment settings, and local startup.
 
 ## Production build and local production run
 
