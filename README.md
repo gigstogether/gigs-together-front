@@ -126,7 +126,7 @@ Useful routes:
 
 ## Local HTTPS access with Cloudflare Tunnel
 
-This tunnel provides public HTTPS access to the locally running API and frontend, including Telegram bot webhook handling and Mini App development.
+This tunnel provides public HTTPS access to the local frontend for browser and Telegram Mini App testing.
 
 To start an already configured tunnel, use the name chosen during creation:
 
@@ -134,7 +134,7 @@ To start an already configured tunnel, use the name chosen during creation:
 cloudflared tunnel run <tunnel-name>
 ```
 
-See the [Cloudflare Tunnel development guide](./docs/development/CLOUDFLARE_TUNNEL.md) for frontend settings, local startup, and the full tunnel setup instructions.
+See the [Cloudflare Tunnel development guide](./docs/development/CLOUDFLARE_TUNNEL.md) for frontend routing, environment settings, and local startup.
 
 ## Production build and local production run
 
