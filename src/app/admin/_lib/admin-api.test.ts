@@ -59,6 +59,16 @@ function createGigCandidateApiPayload(overrides: Record<string, unknown> = {}) {
 }
 
 const mockApiRequest = vi.fn();
+const adminGigCatalogFields = {
+  communityIds: ['community-id'],
+  venueIds: ['venue-id'],
+  locality: {
+    id: 'locality-id',
+    countryIso: 'ES',
+    name: 'Barcelona',
+  },
+  venues: [{ id: 'venue-id', name: 'Venue' }],
+};
 
 vi.mock('@/lib/api-session-client', () => ({
   apiClientRequest: (...args: unknown[]) => mockApiRequest(...args),
@@ -103,6 +113,7 @@ describe('fetchAdminGigs', () => {
       gigs: [
         {
           publicId: 'my-gig',
+          ...adminGigCatalogFields,
           title: 'My Gig',
           isVisible: false,
           version: 3,
@@ -115,9 +126,6 @@ describe('fetchAdminGigs', () => {
             origin: { type: 'admin' },
           },
           date: '2026-06-12',
-          city: 'barcelona',
-          country: 'ES',
-          venue: 'Venue',
         },
       ],
     });
@@ -128,6 +136,7 @@ describe('fetchAdminGigs', () => {
       gigs: [
         {
           publicId: 'my-gig',
+          ...adminGigCatalogFields,
           title: 'My Gig',
           isVisible: false,
           version: 3,
@@ -140,9 +149,6 @@ describe('fetchAdminGigs', () => {
             origin: { type: 'admin' },
           },
           date: '2026-06-12',
-          city: 'barcelona',
-          country: 'ES',
-          venue: 'Venue',
         },
       ],
     });
@@ -154,6 +160,7 @@ describe('fetchAdminGigs', () => {
       gigs: [
         {
           publicId: 'provider-gig',
+          ...adminGigCatalogFields,
           title: 'Provider Gig',
           isVisible: true,
           version: 0,
@@ -167,9 +174,6 @@ describe('fetchAdminGigs', () => {
             },
           },
           date: '2026-09-20',
-          city: 'barcelona',
-          country: 'ES',
-          venue: 'Venue',
         },
       ],
     });
@@ -192,6 +196,7 @@ describe('fetchAdminGigs', () => {
       gigs: [
         {
           publicId: 'messenger-gig',
+          ...adminGigCatalogFields,
           title: 'Messenger Gig',
           isVisible: false,
           version: 0,
@@ -204,9 +209,6 @@ describe('fetchAdminGigs', () => {
             },
           },
           date: '2026-09-20',
-          city: 'barcelona',
-          country: 'ES',
-          venue: 'Venue',
         },
       ],
     });
@@ -228,6 +230,7 @@ describe('fetchAdminGigs', () => {
       gigs: [
         {
           publicId: 'visible-gig',
+          ...adminGigCatalogFields,
           title: 'Visible Gig',
           isVisible: true,
           version: 5,
@@ -238,9 +241,6 @@ describe('fetchAdminGigs', () => {
             origin: { type: 'admin' },
           },
           date: '2026-06-12',
-          city: 'barcelona',
-          country: 'ES',
-          venue: 'Venue',
           mainPostDate: 1_748_784_000_000,
           moderationPostDate: 1_748_697_600_000,
         },
@@ -292,6 +292,7 @@ describe('fetchAdminGigByPublicId', () => {
   it('should parse admin gig form data when payload is valid', async () => {
     mockApiRequest.mockResolvedValue({
       publicId: 'radiohead-barcelona-2026-06-12',
+      ...adminGigCatalogFields,
       title: 'Radiohead',
       isVisible: false,
       version: 3,
@@ -302,9 +303,6 @@ describe('fetchAdminGigByPublicId', () => {
         origin: { type: 'admin' },
       },
       date: '2026-06-12',
-      city: 'barcelona',
-      country: 'ES',
-      venue: 'Palau Sant Jordi',
       ticketsUrl: 'https://example.com/tickets',
       mainPostUrl: 'https://t.me/channel/1',
       moderationPostDate: 1_748_697_600_000,
@@ -314,6 +312,7 @@ describe('fetchAdminGigByPublicId', () => {
 
     expect(result).toEqual({
       publicId: 'radiohead-barcelona-2026-06-12',
+      ...adminGigCatalogFields,
       title: 'Radiohead',
       isVisible: false,
       version: 3,
@@ -324,9 +323,6 @@ describe('fetchAdminGigByPublicId', () => {
         origin: { type: 'admin' },
       },
       date: '2026-06-12',
-      city: 'barcelona',
-      country: 'ES',
-      venue: 'Palau Sant Jordi',
       ticketsUrl: 'https://example.com/tickets',
       mainPostUrl: 'https://t.me/channel/1',
       moderationPostDate: 1_748_697_600_000,

@@ -26,12 +26,13 @@ describe('dateToYMD', () => {
 
 describe('gigFormSchema', () => {
   const validGig = {
+    communityIds: ['community-id'],
+    countryIso: 'ES',
+    localityId: 'locality-id',
+    venueIds: ['venue-id'],
     title: 'Band',
     date: '2026-04-21',
     endDate: '',
-    city: 'Barcelona',
-    country: 'ES',
-    venue: 'Venue',
     ticketsUrl: 'https://tickets.example/gig',
   };
 

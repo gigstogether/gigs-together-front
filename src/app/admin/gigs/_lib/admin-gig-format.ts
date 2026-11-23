@@ -3,7 +3,7 @@ import type { Route } from 'next';
 import { formatAdminEventDate } from '@/app/admin/_lib/admin-event-format';
 import type {
   AdminGigDetail,
-  AdminGigQueueItem,
+  AdminGigListItem,
   GigSourceForAdminView,
 } from '@/app/admin/gigs/_lib/types';
 
@@ -11,7 +11,7 @@ export function formatAdminGigEventDate(date: string, endDate?: string): string 
   return formatAdminEventDate(date, endDate);
 }
 
-export function formatAdminGigListMeta(gig: AdminGigQueueItem): string {
+export function formatAdminGigListMeta(gig: AdminGigListItem): string {
   return formatAdminEventDate(gig.date, gig.endDate);
 }
 

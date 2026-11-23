@@ -1,54 +1,40 @@
 'use client';
 
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 
-import { Button } from '@/components/ui/button';
 import DateInput from '@/components/DateInput';
-import { Field, FieldError, FieldLabel, FieldSeparator } from '@/components/ui/field';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import RequiredIndicator from '@/components/RequiredIndicator';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
-import { defaultGigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
+import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
+import { useAdminLocationCatalog } from '@/app/admin/_hooks/useAdminLocationCatalog';
 
 interface GigFormFieldsProps {
   form: UseFormReturn<GigFormValues>;
   countries: CountryDisplayOption[];
+  communityOptions: CommunityDisplayOption[];
   isSubmitting: boolean;
-  validationMode: 'completeGig' | 'gigCandidateCreate' | 'gigCandidateGigDraft';
   isLoading?: boolean;
-  allowEmptyCountry?: boolean;
-  isLookingUp?: boolean;
-  onLookup?: () => Promise<void>;
 }
 
 export default function GigFormFields(props: GigFormFieldsProps) {
-  const {
-    form,
-    countries,
-    isSubmitting,
-    validationMode,
-    isLoading,
-    allowEmptyCountry = false,
-    isLookingUp = false,
-    onLookup,
-  } = props;
+  const { form, countries, communityOptions, isSubmitting, isLoading } = props;
 
-  const countryOptions = countries.map((country) => ({
-    value: country.iso,
-    label: country.name,
-  }));
-  if (allowEmptyCountry) {
-    countryOptions.unshift({ value: '', label: 'Not set' });
-  }
-
-  const isCompleteGig = validationMode === 'completeGig';
-  const areCoreFieldsRequired = validationMode !== 'gigCandidateGigDraft';
-  const coreRequiredIndicator = areCoreFieldsRequired ? <RequiredIndicator /> : null;
-  const completeGigRequiredIndicator = isCompleteGig ? coreRequiredIndicator : null;
+  const countryIso = useWatch({ control: form.control, name: 'countryIso' });
+  const localityId = useWatch({ control: form.control, name: 'localityId' });
+  const selectedVenueIds = useWatch({ control: form.control, name: 'venueIds' });
+  const { localitiesQuery, venuesQuery, countryOptions, localityOptions, venueOptions } =
+    useAdminLocationCatalog({
+      countries,
+      countryIso,
+      localityId,
+      selectedVenueIds,
+    });
 
   return (
     <>
@@ -57,11 +43,14 @@ export default function GigFormFields(props: GigFormFieldsProps) {
         name="title"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="gig-title">Title:{coreRequiredIndicator}</FieldLabel>
+            <FieldLabel htmlFor="gig-title">
+              Title:
+              <RequiredIndicator />
+            </FieldLabel>
             <Input
               {...field}
               id="gig-title"
-              required={areCoreFieldsRequired}
+              required
               maxLength={GIG_TITLE_MAX_LENGTH}
               aria-invalid={fieldState.invalid}
               placeholder="e.g. Arctic Monkeys"
@@ -72,32 +61,72 @@ export default function GigFormFields(props: GigFormFieldsProps) {
         )}
       />
 
+      <Controller
+        control={form.control}
+        name="communityIds"
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel
+              id="gig-communities-label"
+              htmlFor="gig-communities"
+            >
+              Communities:
+              <RequiredIndicator />
+            </FieldLabel>
+            <SearchableSelect
+              id="gig-communities"
+              name={field.name}
+              selectionMode="multiple"
+              value={field.value}
+              options={communityOptions}
+              placeholder="Select communities"
+              searchPlaceholder="Search communities"
+              emptyText="No communities found."
+              ariaLabelledBy="gig-communities-label"
+              isRequired
+              isDisabled={isSubmitting || Boolean(isLoading)}
+              isInvalid={fieldState.invalid}
+              triggerRef={field.ref}
+              onBlur={field.onBlur}
+              onValueChange={field.onChange}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Controller
           control={form.control}
-          name="country"
+          name="countryIso"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel
                 id="gig-country-label"
                 htmlFor="gig-country"
               >
-                Country:{coreRequiredIndicator}
+                Country:
+                <RequiredIndicator />
               </FieldLabel>
               <SearchableSelect
                 id="gig-country"
                 name={field.name}
-                value={field.value ?? defaultGigFormValues.country}
+                value={field.value}
                 options={countryOptions}
                 placeholder="Select country"
                 searchPlaceholder="Search countries"
                 emptyText="No countries found."
                 ariaLabelledBy="gig-country-label"
-                isRequired={areCoreFieldsRequired}
+                isRequired
+                isDisabled={isSubmitting || Boolean(isLoading)}
                 isInvalid={fieldState.invalid}
                 triggerRef={field.ref}
                 onBlur={field.onBlur}
-                onValueChange={field.onChange}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  form.setValue('localityId', '');
+                  form.setValue('venueIds', []);
+                }}
               />
               <FieldError errors={[fieldState.error]} />
             </Field>
@@ -106,40 +135,48 @@ export default function GigFormFields(props: GigFormFieldsProps) {
 
         <Controller
           control={form.control}
-          name="city"
+          name="localityId"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="gig-city">City:{coreRequiredIndicator}</FieldLabel>
-              <Input
-                {...field}
-                id="gig-city"
-                required={areCoreFieldsRequired}
-                aria-invalid={fieldState.invalid}
-                placeholder="e.g. Barcelona"
-                value={field.value ?? ''}
+              <FieldLabel
+                id="gig-locality-label"
+                htmlFor="gig-locality"
+              >
+                Locality:
+                <RequiredIndicator />
+              </FieldLabel>
+              <SearchableSelect
+                id="gig-locality"
+                name={field.name}
+                value={field.value}
+                options={localityOptions}
+                placeholder={localitiesQuery.isPending ? 'Loading localities…' : 'Select locality'}
+                searchPlaceholder="Search localities"
+                emptyText="No localities found."
+                ariaLabelledBy="gig-locality-label"
+                isDisabled={
+                  isSubmitting ||
+                  Boolean(isLoading) ||
+                  countryIso.length === 0 ||
+                  localitiesQuery.isPending
+                }
+                isRequired
+                isInvalid={fieldState.invalid || localitiesQuery.isError}
+                triggerRef={field.ref}
+                onBlur={field.onBlur}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  form.setValue('venueIds', []);
+                }}
               />
               <FieldError errors={[fieldState.error]} />
+              {localitiesQuery.isError ? (
+                <p className="text-sm text-destructive">Could not load localities.</p>
+              ) : null}
             </Field>
           )}
         />
       </div>
-
-      {onLookup ? (
-        <div className="flex items-center gap-3">
-          <FieldSeparator className="flex-1" />
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isLookingUp || isSubmitting || !!isLoading}
-            onClick={() => {
-              void onLookup();
-            }}
-          >
-            {isLookingUp ? 'Looking up...' : 'Find info with AI'}
-          </Button>
-          <FieldSeparator className="flex-1" />
-        </div>
-      ) : null}
 
       <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
         <Controller
@@ -150,11 +187,14 @@ export default function GigFormFields(props: GigFormFieldsProps) {
               className="min-w-0"
               data-invalid={fieldState.invalid}
             >
-              <FieldLabel htmlFor="gig-date">Date:{coreRequiredIndicator}</FieldLabel>
+              <FieldLabel htmlFor="gig-date">
+                Date:
+                <RequiredIndicator />
+              </FieldLabel>
               <DateInput
                 {...field}
                 id="gig-date"
-                required={areCoreFieldsRequired}
+                required
                 clearLabel="Clear Date"
                 onClear={() => field.onChange('')}
                 aria-invalid={fieldState.invalid}
@@ -173,7 +213,7 @@ export default function GigFormFields(props: GigFormFieldsProps) {
               className="min-w-0"
               data-invalid={fieldState.invalid}
             >
-              <FieldLabel htmlFor="gig-end-date">End Date: (optional)</FieldLabel>
+              <FieldLabel htmlFor="gig-end-date">End Date:</FieldLabel>
               <DateInput
                 {...field}
                 id="gig-end-date"
@@ -190,19 +230,48 @@ export default function GigFormFields(props: GigFormFieldsProps) {
 
       <Controller
         control={form.control}
-        name="venue"
+        name="venueIds"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="gig-venue">Venue:{completeGigRequiredIndicator}</FieldLabel>
-            <Input
-              {...field}
-              id="gig-venue"
-              required={isCompleteGig}
-              aria-invalid={fieldState.invalid}
-              placeholder="e.g. Razzmatazz"
-              value={field.value ?? ''}
+            <FieldLabel
+              id="gig-venues-label"
+              htmlFor="gig-venues"
+            >
+              Venues:
+              <RequiredIndicator />
+            </FieldLabel>
+            <SearchableSelect
+              id="gig-venues"
+              name={field.name}
+              selectionMode="multiple"
+              value={field.value}
+              options={venueOptions}
+              placeholder={
+                localityId.length === 0
+                  ? 'Select a locality first'
+                  : venuesQuery.isPending
+                    ? 'Loading venues…'
+                    : 'Select venues'
+              }
+              searchPlaceholder="Search venues"
+              emptyText="No venues found."
+              ariaLabelledBy="gig-venues-label"
+              isDisabled={
+                isSubmitting ||
+                Boolean(isLoading) ||
+                localityId.length === 0 ||
+                venuesQuery.isPending
+              }
+              isRequired
+              isInvalid={fieldState.invalid || venuesQuery.isError}
+              triggerRef={field.ref}
+              onBlur={field.onBlur}
+              onValueChange={field.onChange}
             />
             <FieldError errors={[fieldState.error]} />
+            {venuesQuery.isError ? (
+              <p className="text-sm text-destructive">Could not load venues.</p>
+            ) : null}
           </Field>
         )}
       />
@@ -213,12 +282,13 @@ export default function GigFormFields(props: GigFormFieldsProps) {
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
             <FieldLabel htmlFor="gig-tickets-url">
-              Tickets URL:{completeGigRequiredIndicator}
+              Tickets URL:
+              <RequiredIndicator />
             </FieldLabel>
             <Input
               {...field}
               id="gig-tickets-url"
-              required={isCompleteGig}
+              required
               aria-invalid={fieldState.invalid}
               placeholder="e.g. https://www.ticketmaster.es/event/..."
               value={field.value ?? ''}

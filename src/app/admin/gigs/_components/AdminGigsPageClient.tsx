@@ -6,7 +6,7 @@ import { useCallback, useEffect } from 'react';
 
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import AdminGigPreviewCard from '@/app/admin/gigs/_components/AdminGigPreviewCard';
-import AdminGigQueueList from '@/app/admin/gigs/_components/AdminGigQueueList';
+import AdminGigList from '@/app/admin/gigs/_components/AdminGigList';
 import AdminGigsSortControls from '@/app/admin/gigs/_components/AdminGigsSortControls';
 import {
   buildAdminGigsSearchParams,
@@ -94,7 +94,7 @@ export default function AdminGigsPageClient() {
             ) : gigsQuery.isLoading ? (
               <p className="px-3 py-10 text-center text-sm text-muted-foreground">Loading gigs…</p>
             ) : (
-              <AdminGigQueueList
+              <AdminGigList
                 gigs={gigs}
                 selectedPublicId={effectiveSelectedPublicId}
                 onSelect={handleSelectGig}

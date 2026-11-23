@@ -6,7 +6,7 @@ import {
   formatAdminGigListMeta,
   formatAdminGigSource,
 } from '@/app/admin/gigs/_lib/admin-gig-format';
-import type { AdminGigQueueItem } from '@/app/admin/gigs/_lib/types';
+import type { AdminGigListItem } from '@/app/admin/gigs/_lib/types';
 
 describe('formatAdminGigEventDate', () => {
   it('should return single date when end date is missing', () => {
@@ -33,8 +33,12 @@ describe('buildAdminGigPublicHref', () => {
 
 describe('formatAdminGigListMeta', () => {
   it('should return formatted event date', () => {
-    const gig: AdminGigQueueItem = {
+    const gig: AdminGigListItem = {
       publicId: 'a',
+      communityIds: ['community-id'],
+      venueIds: ['venue-id'],
+      locality: { id: 'locality-id', countryIso: 'ES', name: 'Barcelona' },
+      venues: [{ id: 'venue-id', name: 'V' }],
       title: 'T',
       isVisible: false,
       version: 3,
@@ -45,12 +49,9 @@ describe('formatAdminGigListMeta', () => {
         origin: { type: 'admin' },
       },
       date: '2026-06-12',
-      city: 'barcelona',
-      country: 'ES',
-      venue: 'V',
     };
     expect(formatAdminGigListMeta(gig)).toContain('2026');
-    expect(formatAdminGigListMeta(gig)).not.toContain('barcelona');
+    expect(formatAdminGigListMeta(gig)).not.toContain('Barcelona');
   });
 });
 

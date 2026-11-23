@@ -27,7 +27,14 @@ export default function AdminGigCard(props: AdminGigCardProps) {
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
   const feedHref = buildAdminGigPublicHref(gig);
   const hasPublicLinks = gig.isVisible && !!(feedHref || gig.mainPostUrl);
-  const mapsHref = buildGoogleMapsSearchUrl([gig.venue, gig.city, gig.country].join(' '));
+  const venueNames = gig.venues.map((venue) => venue.name).join(' · ');
+  const localityName =
+    gig.locality.qualifier === undefined
+      ? gig.locality.name
+      : `${gig.locality.name} (${gig.locality.qualifier})`;
+  const mapsHref = buildGoogleMapsSearchUrl(
+    `${venueNames} ${localityName} ${gig.locality.countryIso}`,
+  );
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -65,7 +72,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
               title="Open in Google Maps"
               aria-label="Open venue in Google Maps"
             >
-              {gig.venue}
+              {venueNames} · {localityName}
             </a>
           </AdminPreviewMetaRow>
           {gig.ticketsUrl ? (

@@ -289,18 +289,35 @@ const v1AdminGigCandidateLookupResponseSchema = z.union([
     .strict(),
 ]);
 
+const v1AdminGigLocalitySchema = z
+  .object({
+    id: z.string().min(1),
+    countryIso: z.string().length(2),
+    name: z.string().min(1),
+    qualifier: z.string().min(1).optional(),
+  })
+  .strict();
+
+const v1AdminGigVenueSchema = z
+  .object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+  })
+  .strict();
+
 const v1AdminGigListItemSchema = z
   .object({
     publicId: z.string(),
+    communityIds: z.array(z.string().min(1)).min(1),
+    venueIds: z.array(z.string().min(1)).min(1),
+    locality: v1AdminGigLocalitySchema,
+    venues: z.array(v1AdminGigVenueSchema).min(1),
     title: z.string(),
     isVisible: z.boolean(),
     version: z.number().int().nonnegative(),
     source: v1AdminGigSourceSchema,
     date: z.string(),
     endDate: z.string().optional(),
-    city: z.string(),
-    country: z.string(),
-    venue: z.string(),
     posterUrl: z.string().optional(),
     ticketsUrl: z.string().optional(),
     mainPostUrl: z.string().optional(),
@@ -319,12 +336,13 @@ const v1AdminGigsListResponseSchema = z
 const v1AdminGigFormDataSchema = z
   .object({
     publicId: z.string(),
+    communityIds: z.array(z.string().min(1)).min(1),
+    venueIds: z.array(z.string().min(1)).min(1),
+    locality: v1AdminGigLocalitySchema,
+    venues: z.array(v1AdminGigVenueSchema).min(1),
     title: z.string(),
     date: z.string(),
     endDate: z.string().optional(),
-    city: z.string(),
-    country: z.string(),
-    venue: z.string(),
     ticketsUrl: z.string(),
     posterUrl: z.string().optional(),
     isVisible: z.boolean(),

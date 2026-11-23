@@ -32,12 +32,11 @@ interface SubmitGigInput {
 
 function buildGigPayload(values: GigFormValues): GigUpsertPayload {
   return {
+    communityIds: values.communityIds,
+    venueIds: values.venueIds,
     title: values.title,
     date: values.date,
     endDate: values.endDate || undefined,
-    city: values.city,
-    country: values.country,
-    venue: values.venue,
     ticketsUrl: values.ticketsUrl,
   };
 }

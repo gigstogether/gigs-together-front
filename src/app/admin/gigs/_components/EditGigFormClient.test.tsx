@@ -44,6 +44,7 @@ function renderClient() {
   return render(
     <EditGigFormClient
       countries={[{ iso: 'ES', name: 'Spain' }]}
+      communityOptions={[{ value: 'community-id', label: 'Barcelona' }]}
       gigPublicId="radiohead-barcelona"
     />,
   );

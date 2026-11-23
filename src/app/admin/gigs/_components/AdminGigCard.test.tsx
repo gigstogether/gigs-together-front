@@ -7,6 +7,10 @@ vi.mock('./AdminGigPreviewActions', () => ({ default: () => <div>actions</div> }
 
 const gig: AdminGigDetail = {
   publicId: 'gig-2026-09-17',
+  communityIds: ['community-id'],
+  venueIds: ['venue-id'],
+  locality: { id: 'locality-id', countryIso: 'ES', name: 'Barcelona' },
+  venues: [{ id: 'venue-id', name: 'Venue' }],
   title: 'Gig',
   isVisible: false,
   version: 3,
@@ -19,9 +23,6 @@ const gig: AdminGigDetail = {
     origin: { type: 'admin' },
   },
   date: '2026-09-17',
-  city: 'barcelona',
-  country: 'ES',
-  venue: 'Venue',
 };
 
 describe('AdminGigCard', () => {
@@ -93,7 +94,7 @@ describe('AdminGigCard', () => {
 
     expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveAttribute(
       'href',
-      'https://www.google.com/maps/search/?api=1&query=Venue%20barcelona%20ES',
+      'https://www.google.com/maps/search/?api=1&query=Venue%20Barcelona%20ES',
     );
   });
 });

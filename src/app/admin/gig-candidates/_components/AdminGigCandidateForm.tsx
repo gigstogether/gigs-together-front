@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -19,11 +19,8 @@ import type {
 } from '@/app/admin/_lib/admin-api';
 import { buildVersionedAdminPosterUrl } from '@/app/admin/_lib/admin-poster-url';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
+import { useAdminLocationCatalog } from '@/app/admin/_hooks/useAdminLocationCatalog';
 import AdminGigCandidateOriginalMessage from '@/app/admin/gig-candidates/_components/AdminGigCandidateOriginalMessage';
-import {
-  fetchAdminLocalities,
-  fetchAdminVenues,
-} from '@/app/admin/locations/_lib/admin-locations-api';
 import type { AdminLocality, AdminVenue } from '@/app/admin/locations/_lib/admin-locations-api';
 import type {
   AdminGigCandidate,
@@ -207,35 +204,20 @@ export default function AdminGigCandidateForm(props: AdminGigCandidateFormProps)
     control: form.control,
     name: 'venueIds',
   });
-  const localitiesQuery = useQuery({
-    queryKey: adminKeys.localities(),
-    queryFn: fetchAdminLocalities,
+  const {
+    localitiesQuery,
+    venuesQuery,
+    localities,
+    venues,
+    countryOptions,
+    localityOptions,
+    venueOptions,
+  } = useAdminLocationCatalog({
+    countries,
+    countryIso,
+    localityId,
+    selectedVenueIds,
   });
-  const venuesQuery = useQuery({
-    queryKey: adminKeys.venues(),
-    queryFn: fetchAdminVenues,
-  });
-  const localities = localitiesQuery.data ?? [];
-  const venues = venuesQuery.data ?? [];
-  const countryOptions = countries.map((country) => ({
-    value: country.iso,
-    label: country.name,
-  }));
-  const localityOptions = localities
-    .filter((locality) => locality.countryIso === countryIso)
-    .map((locality) => ({
-      value: locality.id,
-      label:
-        locality.qualifier === undefined
-          ? locality.name
-          : `${locality.name} (${locality.qualifier})`,
-    }));
-  const venueOptions = venues
-    .filter(
-      (venue) =>
-        venue.localityId === localityId && (venue.isActive || selectedVenueIds.includes(venue.id)),
-    )
-    .map((venue) => ({ value: venue.id, label: venue.name }));
   const { isLookingUp, lookupGigDetails } = useGigCandidateLookup({
     form,
     countries,

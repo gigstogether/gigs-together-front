@@ -17,14 +17,16 @@ import type { GigFormValues } from '@/app/admin/gigs/_lib/gig-form.shared';
 import { useEditGigFormData } from '@/app/admin/gigs/_hooks/useEditGigFormData';
 import { useGigSubmit } from '@/app/admin/gigs/_hooks/useGigSubmit';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
+import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
 
 interface EditGigFormClientProps {
   countries: CountryDisplayOption[];
+  communityOptions: CommunityDisplayOption[];
   gigPublicId: string;
 }
 
 export default function EditGigFormClient(props: EditGigFormClientProps) {
-  const { countries, gigPublicId } = props;
+  const { countries, communityOptions, gigPublicId } = props;
   const router = useRouter();
 
   const [posterFile, setPosterFile] = useState<File | null>(null);
@@ -123,8 +125,8 @@ export default function EditGigFormClient(props: EditGigFormClientProps) {
               <GigFormFields
                 form={form}
                 countries={countries}
+                communityOptions={communityOptions}
                 isSubmitting={isSubmitting}
-                validationMode="completeGig"
                 isLoading={isLoadingGig}
               />
 

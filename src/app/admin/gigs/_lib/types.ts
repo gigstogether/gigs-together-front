@@ -32,35 +32,48 @@ export type GigSourceForAdminView =
   | GigMessengerUserSourceForAdminView
   | GigProviderSourceForAdminView;
 
+export interface AdminGigLocality {
+  id: string;
+  countryIso: string;
+  name: string;
+  qualifier?: string;
+}
+
+export interface AdminGigVenue {
+  id: string;
+  name: string;
+}
+
 /** Compact row for the admin Gig list. */
-export interface AdminGigQueueItem {
-  readonly publicId: string;
-  readonly title: string;
-  readonly isVisible: boolean;
-  readonly version: number;
-  readonly source: GigSourceForAdminView;
-  readonly date: string;
-  readonly endDate?: string;
-  readonly city: string;
-  readonly country: string;
-  readonly venue: string;
-  readonly posterUrl?: string;
+export interface AdminGigListItem {
+  publicId: string;
+  communityIds: string[];
+  venueIds: string[];
+  locality: AdminGigLocality;
+  venues: AdminGigVenue[];
+  title: string;
+  isVisible: boolean;
+  version: number;
+  source: GigSourceForAdminView;
+  date: string;
+  endDate?: string;
+  posterUrl?: string;
 }
 
 /** Full card shown in the detail panel. */
-export interface AdminGigDetail extends AdminGigQueueItem {
-  readonly ticketsUrl?: string;
-  readonly mainPostUrl?: string;
-  readonly mainPostDate?: number;
-  readonly moderationPostDate?: number;
-  readonly moderationPostUrl?: string;
+export interface AdminGigDetail extends AdminGigListItem {
+  ticketsUrl?: string;
+  mainPostUrl?: string;
+  mainPostDate?: number;
+  moderationPostDate?: number;
+  moderationPostUrl?: string;
 }
 
 /** Mirrors the response from GET v1/admin/gigs/:publicId. */
-export interface AdminGigFormData extends AdminGigQueueItem {
-  readonly ticketsUrl: string;
-  readonly mainPostUrl?: string;
-  readonly mainPostDate?: number;
-  readonly moderationPostDate?: number;
-  readonly moderationPostUrl?: string;
+export interface AdminGigFormData extends AdminGigListItem {
+  ticketsUrl: string;
+  mainPostUrl?: string;
+  mainPostDate?: number;
+  moderationPostDate?: number;
+  moderationPostUrl?: string;
 }
