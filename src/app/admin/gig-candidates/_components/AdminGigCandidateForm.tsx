@@ -36,7 +36,7 @@ import {
   mapGigCandidateToFormValues,
   mapGigCandidateFormValuesToDraft,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
-import type { AdminGigCandidateDraftFormValues } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
+import type { AdminGigCandidateFormValues } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
 import PosterField from '@/components/PosterField';
 import DateInput from '@/components/DateInput';
 import RequiredIndicator from '@/components/RequiredIndicator';
@@ -53,7 +53,7 @@ import { buildAdminGigCandidateRoute } from '@/lib/admin-gig-candidate-paths';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import { toSearchKey } from '@/lib/search-text';
 
-interface AdminGigCandidateDraftFormProps {
+interface AdminGigCandidateFormProps {
   communityOptions: CommunityDisplayOption[];
   countries: CountryDisplayOption[];
   gigCandidate?: AdminGigCandidate;
@@ -65,7 +65,7 @@ interface UseGigCandidateLookupResult {
 }
 
 interface UseGigCandidateLookupParams {
-  form: UseFormReturn<AdminGigCandidateDraftFormValues>;
+  form: UseFormReturn<AdminGigCandidateFormValues>;
   countries: CountryDisplayOption[];
   localities: AdminLocality[];
   venues: AdminVenue[];
@@ -187,7 +187,7 @@ function useGigCandidateLookup(params: UseGigCandidateLookupParams): UseGigCandi
   };
 }
 
-export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraftFormProps) {
+export default function AdminGigCandidateForm(props: AdminGigCandidateFormProps) {
   const { communityOptions, countries, gigCandidate } = props;
 
   const router = useRouter();
@@ -196,7 +196,7 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
   const [posterUrl, setPosterUrl] = useState('');
   const [locationHintText, setLocationHintText] = useState('');
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
-  const form = useForm<AdminGigCandidateDraftFormValues>({
+  const form = useForm<AdminGigCandidateFormValues>({
     resolver: zodResolver(
       gigCandidate ? gigCandidateDraftFormSchema : createGigCandidateDraftFormSchema,
     ),
@@ -256,7 +256,7 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
   }
 
   const saveMutation = useMutation({
-    mutationFn: (values: AdminGigCandidateDraftFormValues) => {
+    mutationFn: (values: AdminGigCandidateFormValues) => {
       const gigDraft = mapGigCandidateFormValuesToDraft(values);
       const poster = { file: posterFile, url: posterUrl };
       const localityIdValue = values.localityId.trim();

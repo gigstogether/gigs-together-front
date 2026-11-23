@@ -100,11 +100,11 @@ export const createGigCandidateDraftFormSchema = z
   })
   .superRefine(validateDraft);
 
-export type AdminGigCandidateDraftFormValues = z.infer<typeof gigCandidateDraftFormSchema>;
+export type AdminGigCandidateFormValues = z.infer<typeof gigCandidateDraftFormSchema>;
 
 export function createDefaultGigCandidateDraftFormValues(
   communityIds: string[],
-): AdminGigCandidateDraftFormValues {
+): AdminGigCandidateFormValues {
   return {
     communityIds: communityIds.length === 1 ? [...communityIds] : [],
     countryIso: 'ES',
@@ -119,7 +119,7 @@ export function createDefaultGigCandidateDraftFormValues(
 
 export function mapGigCandidateToFormValues(
   gigCandidate: AdminGigCandidate,
-): AdminGigCandidateDraftFormValues {
+): AdminGigCandidateFormValues {
   return {
     communityIds: [...gigCandidate.gigDraft.communityIds],
     countryIso: gigCandidate.locality?.countryIso ?? '',
@@ -133,7 +133,7 @@ export function mapGigCandidateToFormValues(
 }
 
 export function mapGigCandidateFormValuesToDraft(
-  values: AdminGigCandidateDraftFormValues,
+  values: AdminGigCandidateFormValues,
 ): AdminGigCandidateDraft {
   const gigDraft: AdminGigCandidateDraft = {
     communityIds: [...values.communityIds],

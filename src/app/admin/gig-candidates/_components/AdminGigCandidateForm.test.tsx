@@ -11,7 +11,7 @@ import type {
   fetchAdminLocalities,
   fetchAdminVenues,
 } from '@/app/admin/locations/_lib/admin-locations-api';
-import AdminGigCandidateDraftForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm';
+import AdminGigCandidateForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateForm';
 import type { AdminGigCandidate } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { ApiError } from '@/lib/api-errors';
@@ -82,7 +82,7 @@ function renderForm(gigCandidate?: AdminGigCandidate) {
   return {
     queryClient,
     ...render(
-      <AdminGigCandidateDraftForm
+      <AdminGigCandidateForm
         communityOptions={[{ value: 'existing-community-id', label: 'Barcelona' }]}
         countries={[{ iso: 'ES', name: 'Spain' }]}
         gigCandidate={gigCandidate}
@@ -99,7 +99,7 @@ async function selectOption(selectName: RegExp, optionName: string): Promise<voi
   fireEvent.click(await screen.findByRole('option', { name: optionName }));
 }
 
-describe('AdminGigCandidateDraftForm', () => {
+describe('AdminGigCandidateForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fetchLocalitiesMock.mockResolvedValue([
