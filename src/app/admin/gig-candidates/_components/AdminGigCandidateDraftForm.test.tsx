@@ -220,11 +220,16 @@ describe('AdminGigCandidateDraftForm', () => {
 
   it('should map lookup location text to catalog identifiers', async () => {
     lookupGigCandidateDraftMock.mockResolvedValueOnce({
-      title: 'Looked-up Band',
-      date: '2026-09-20',
-      city: 'Barcelona',
-      country: 'es',
-      venue: 'Sala Apolo',
+      gigDraft: {
+        title: 'Looked-up Band',
+        date: '2026-09-20',
+        ticketsUrl: 'https://tickets.example/looked-up-band',
+      },
+      locationHint: {
+        locality: 'Barcelona',
+        country: 'es',
+        venue: 'Sala Apolo',
+      },
     });
     renderForm();
 
@@ -234,6 +239,9 @@ describe('AdminGigCandidateDraftForm', () => {
 
     expect(await screen.findByDisplayValue('Looked-up Band')).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: /Venues/ })).toHaveTextContent('Sala Apolo');
+    expect(
+      screen.getByText('AI suggested location: Sala Apolo · Barcelona · es'),
+    ).toBeInTheDocument();
     expect(lookupGigCandidateDraftMock).toHaveBeenCalledWith({
       title: 'Band',
       location: 'Barcelona, Spain',

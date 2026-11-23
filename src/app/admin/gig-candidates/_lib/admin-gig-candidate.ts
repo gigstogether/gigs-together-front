@@ -70,9 +70,6 @@ export interface AdminGigCandidateDraftFields {
   title?: string;
   date?: string;
   endDate?: string;
-  city?: string;
-  country?: string;
-  venue?: string;
   ticketsUrl?: string;
   posterUrl?: string;
 }
@@ -121,8 +118,23 @@ export interface AdminGigCandidate {
   updatedAt: string;
 }
 
-export interface AdminGigCandidateLookupResult extends AdminGigCandidateDraftFields {
+export interface AdminGigCandidateLookupDraft {
+  title: string;
   date: string;
+  endDate?: string;
+  ticketsUrl: string;
+  posterUrl?: string;
+}
+
+export interface AdminGigCandidateLookupLocationHint {
+  locality: string;
+  country: string;
+  venue: string;
+}
+
+export interface AdminGigCandidateLookupResult {
+  gigDraft: AdminGigCandidateLookupDraft;
+  locationHint: AdminGigCandidateLookupLocationHint;
 }
 
 export enum AdminGigCandidatesSortBy {

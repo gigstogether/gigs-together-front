@@ -64,33 +64,47 @@ interface UseGigCandidateLookupResult {
   lookupGigCandidateDraft: () => Promise<void>;
 }
 
+interface UseGigCandidateLookupParams {
+  form: UseFormReturn<AdminGigCandidateDraftFormValues>;
+  countries: CountryDisplayOption[];
+  localities: AdminLocality[];
+  venues: AdminVenue[];
+  setPosterFile: (file: File | null) => void;
+  setPosterUrl: (url: string) => void;
+  setLocationHintText: (value: string) => void;
+}
+
 const GIG_CANDIDATE_LOOKUP_OPTIONAL_FORM_FIELDS = ['title', 'endDate', 'ticketsUrl'] as const;
 
-function useGigCandidateLookup(
-  form: UseFormReturn<AdminGigCandidateDraftFormValues>,
-  countries: CountryDisplayOption[],
-  localities: AdminLocality[],
-  venues: AdminVenue[],
-  setPosterFile: (file: File | null) => void,
-  setPosterUrl: (url: string) => void,
-): UseGigCandidateLookupResult {
+function useGigCandidateLookup(params: UseGigCandidateLookupParams): UseGigCandidateLookupResult {
+  const { form, countries, localities, venues, setPosterFile, setPosterUrl, setLocationHintText } =
+    params;
+
   const lookupMutation = useMutation({
     mutationFn: (params: LookupAdminGigCandidateDraftParams) =>
       lookupAdminGigCandidateDraft(params),
   });
 
   function applyGigCandidateLookupResult(result: AdminGigCandidateLookupResult) {
-    form.setValue('date', result.date, { shouldDirty: true });
+    const { gigDraft, locationHint } = result;
+
+    form.setValue('date', gigDraft.date, { shouldDirty: true });
     for (const fieldName of GIG_CANDIDATE_LOOKUP_OPTIONAL_FORM_FIELDS) {
-      const fieldValue = result[fieldName];
+      const fieldValue = gigDraft[fieldName];
       if (fieldValue) {
         form.setValue(fieldName, fieldValue, { shouldDirty: true });
       }
     }
-    if (result.country) {
-      const countryIso = result.country.toUpperCase();
-      form.setValue('countryIso', countryIso, { shouldDirty: true });
-      const localitySearchKey = toSearchKey(result.city ?? '');
+    const locationHintParts = [
+      locationHint.venue,
+      locationHint.locality,
+      locationHint.country,
+    ].filter((part) => part.length > 0);
+    setLocationHintText(locationHintParts.join(' · '));
+
+    if (locationHint.country) {
+      const countryIso = locationHint.country.toUpperCase();
+      const localitySearchKey = toSearchKey(locationHint.locality);
       const locality = localities.find(
         (candidate) =>
           candidate.countryIso === countryIso &&
@@ -98,22 +112,27 @@ function useGigCandidateLookup(
             (name) => toSearchKey(name) === localitySearchKey,
           ),
       );
-      form.setValue('localityId', locality?.id ?? '', { shouldDirty: true });
-      const venueSearchKey = toSearchKey(result.venue ?? '');
+      if (locality === undefined) {
+        return;
+      }
+
+      form.setValue('countryIso', countryIso, { shouldDirty: true });
+      form.setValue('localityId', locality.id, { shouldDirty: true });
+      const venueSearchKey = toSearchKey(locationHint.venue);
       const venue = venues.find(
         (candidate) =>
           candidate.isActive &&
-          candidate.localityId === locality?.id &&
+          candidate.localityId === locality.id &&
           [candidate.name, ...candidate.aliases].some(
             (name) => toSearchKey(name) === venueSearchKey,
           ),
       );
-      form.setValue('venueIds', venue === undefined ? [] : [venue.id], {
-        shouldDirty: true,
-      });
+      if (venue !== undefined) {
+        form.setValue('venueIds', [venue.id], { shouldDirty: true });
+      }
     }
-    if (result.posterUrl) {
-      const nextPosterUrl = result.posterUrl.trim();
+    if (gigDraft.posterUrl) {
+      const nextPosterUrl = gigDraft.posterUrl.trim();
       setPosterFile(null);
       setPosterUrl(nextPosterUrl);
       try {
@@ -175,6 +194,7 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
   const queryClient = useQueryClient();
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState('');
+  const [locationHintText, setLocationHintText] = useState('');
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
   const form = useForm<AdminGigCandidateDraftFormValues>({
     resolver: zodResolver(
@@ -221,14 +241,15 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
         venue.localityId === localityId && (venue.isActive || selectedVenueIds.includes(venue.id)),
     )
     .map((venue) => ({ value: venue.id, label: venue.name }));
-  const { isLookingUp, lookupGigCandidateDraft } = useGigCandidateLookup(
+  const { isLookingUp, lookupGigCandidateDraft } = useGigCandidateLookup({
     form,
     countries,
     localities,
     venues,
     setPosterFile,
     setPosterUrl,
-  );
+    setLocationHintText,
+  });
   let existingPosterUrl = gigCandidate?.gigDraft.posterUrl;
   if (existingPosterUrl !== undefined && gigCandidate !== undefined) {
     existingPosterUrl = buildVersionedAdminPosterUrl(existingPosterUrl, gigCandidate.version);
@@ -445,19 +466,26 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
             />
           </div>
 
-          <div className="flex items-center gap-3">
-            <FieldSeparator className="flex-1" />
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={isLookingUp || saveMutation.isPending || localityId.length === 0}
-              onClick={() => {
-                void lookupGigCandidateDraft();
-              }}
-            >
-              {isLookingUp ? 'Looking up…' : 'Find info with AI'}
-            </Button>
-            <FieldSeparator className="flex-1" />
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <FieldSeparator className="flex-1" />
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={isLookingUp || saveMutation.isPending || localityId.length === 0}
+                onClick={() => {
+                  void lookupGigCandidateDraft();
+                }}
+              >
+                {isLookingUp ? 'Looking up…' : 'Find info with AI'}
+              </Button>
+              <FieldSeparator className="flex-1" />
+            </div>
+            {locationHintText.length > 0 ? (
+              <p className="text-center text-sm text-muted-foreground">
+                AI suggested location: {locationHintText}
+              </p>
+            ) : null}
           </div>
 
           <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">

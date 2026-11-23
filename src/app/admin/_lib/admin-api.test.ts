@@ -43,8 +43,6 @@ function createGigCandidateApiPayload(overrides: Record<string, unknown> = {}) {
       venueIds: ['venue-id'],
       title: 'Band',
       date: '2026-08-20',
-      city: 'Barcelona',
-      country: 'ES',
     },
     locality: {
       id: 'locality-id',
@@ -731,13 +729,29 @@ describe('admin GigCandidate commands', () => {
       gigDraft: {
         title: 'Band',
         date: '2026-08-20T00:00:00.000Z',
+        ticketsUrl: 'https://tickets.example/band',
+      },
+      locationHint: {
+        locality: 'Barcelona',
         country: 'ES',
+        venue: 'Sala Apolo',
       },
     });
 
     await expect(
       lookupAdminGigCandidateDraft({ title: ' Band ', location: ' Barcelona, ES ' }),
-    ).resolves.toEqual({ title: 'Band', date: '2026-08-20', country: 'ES' });
+    ).resolves.toEqual({
+      gigDraft: {
+        title: 'Band',
+        date: '2026-08-20',
+        ticketsUrl: 'https://tickets.example/band',
+      },
+      locationHint: {
+        locality: 'Barcelona',
+        country: 'ES',
+        venue: 'Sala Apolo',
+      },
+    });
     expect(mockApiRequest).toHaveBeenCalledWith(
       'v1/admin/gig-candidates/lookup',
       'POST',
@@ -755,7 +769,18 @@ describe('admin GigCandidate commands', () => {
   });
 
   it('should reject a lookup response without the required date', async () => {
-    mockApiRequest.mockResolvedValue({ gigDraft: { title: 'Band' } });
+    mockApiRequest.mockResolvedValue({
+      gigDraft: {
+        title: 'Band',
+        date: '',
+        ticketsUrl: 'https://tickets.example/band',
+      },
+      locationHint: {
+        locality: 'Barcelona',
+        country: 'ES',
+        venue: 'Sala Apolo',
+      },
+    });
 
     await expect(
       lookupAdminGigCandidateDraft({ title: 'Band', location: 'Barcelona, ES' }),

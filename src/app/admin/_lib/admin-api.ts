@@ -8,6 +8,7 @@ import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig
 import type {
   AdminGigCandidate,
   AdminGigCandidateDraft,
+  AdminGigCandidateLookupDraft,
   AdminGigCandidateLookupResult,
   AdminGigCandidatesSortBy,
   AdminGigCandidatesSortOrder,
@@ -134,38 +135,38 @@ export interface PatchAdminTranslationActiveBody {
   readonly isActive: boolean;
 }
 
-const v1AdminGigCandidateIdentifiedUserOriginSchema = z.discriminatedUnion('type', [
+const v1AdminIdentifiedUserOriginSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('form') }).strict(),
   z.object({ type: z.literal('admin') }).strict(),
 ]);
 
-const v1AdminGigCandidateMessengerUserOriginSchema = z
+const v1AdminMessengerUserOriginSchema = z
   .object({
     type: z.literal('messenger'),
     messenger: z.literal('Telegram'),
   })
   .strict();
 
-const v1AdminGigCandidateUserSourceShape = {
+const v1AdminUserSourceShape = {
   type: z.literal('user'),
   displayName: z.string().min(1).optional(),
   isCurrentlyAdmin: z.boolean(),
   telegramUsername: z.string().min(1).optional(),
 };
 
-const v1AdminGigCandidateSourceSchema = z.union([
+const v1AdminGigSourceSchema = z.union([
   z
     .object({
-      ...v1AdminGigCandidateUserSourceShape,
+      ...v1AdminUserSourceShape,
       userId: z.string().min(1),
-      origin: v1AdminGigCandidateIdentifiedUserOriginSchema,
+      origin: v1AdminIdentifiedUserOriginSchema,
     })
     .strict(),
   z
     .object({
-      ...v1AdminGigCandidateUserSourceShape,
+      ...v1AdminUserSourceShape,
       userId: z.string().min(1).optional(),
-      origin: v1AdminGigCandidateMessengerUserOriginSchema,
+      origin: v1AdminMessengerUserOriginSchema,
     })
     .strict(),
   z
@@ -191,9 +192,6 @@ const v1AdminGigCandidateDraftFieldsSchema = z
     title: z.string().optional(),
     date: z.string().optional(),
     endDate: z.string().optional(),
-    city: z.string().optional(),
-    country: z.string().optional(),
-    venue: z.string().optional(),
     ticketsUrl: z.string().optional(),
     posterUrl: z.string().optional(),
   })
@@ -219,7 +217,7 @@ const v1AdminGigCandidateOriginalMessageSchema = z
 const v1AdminGigCandidateSchema = z
   .object({
     id: z.string().min(1),
-    source: v1AdminGigCandidateSourceSchema,
+    source: v1AdminGigSourceSchema,
     locality: z
       .object({
         id: z.string().min(1),
@@ -263,59 +261,30 @@ const v1AdminGigCandidatesListResponseSchema = z
   })
   .strict();
 
-const v1AdminGigCandidateLookupResponseSchema = z
+const v1AdminGigCandidateLookupDraftSchema = z
   .object({
-    gigDraft: v1AdminGigCandidateDraftFieldsSchema.nullable(),
+    title: z.string(),
+    date: z.string(),
+    endDate: z.string().optional(),
+    ticketsUrl: z.string(),
+    posterUrl: z.string().optional(),
   })
   .strict();
 
-const v1AdminGigIdentifiedUserOriginSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('form') }).strict(),
-  z.object({ type: z.literal('admin') }).strict(),
-]);
-
-const v1AdminGigMessengerUserOriginSchema = z
+const v1AdminGigCandidateLookupLocationHintSchema = z
   .object({
-    type: z.literal('messenger'),
-    messenger: z.literal('Telegram'),
+    locality: z.string(),
+    country: z.string(),
+    venue: z.string(),
   })
   .strict();
 
-const v1AdminGigUserSourceShape = {
-  type: z.literal('user'),
-  displayName: z.string().min(1).optional(),
-  isCurrentlyAdmin: z.boolean(),
-  telegramUsername: z.string().min(1).optional(),
-};
-
-const v1AdminGigSourceSchema = z.union([
+const v1AdminGigCandidateLookupResponseSchema = z.union([
+  z.object({ gigDraft: z.null() }).strict(),
   z
     .object({
-      ...v1AdminGigUserSourceShape,
-      userId: z.string().min(1),
-      origin: v1AdminGigIdentifiedUserOriginSchema,
-    })
-    .strict(),
-  z
-    .object({
-      ...v1AdminGigUserSourceShape,
-      userId: z.string().min(1).optional(),
-      origin: v1AdminGigMessengerUserOriginSchema,
-    })
-    .strict(),
-  z
-    .object({
-      type: z.literal('provider'),
-      provider: z
-        .object({
-          name: z.string().min(1),
-          externalEventId: z.string(),
-          externalVersionId: z.string().optional(),
-          sourceUrl: z.string(),
-          fetchedAt: z.string(),
-          providerUpdatedAt: z.string().optional(),
-        })
-        .strict(),
+      gigDraft: v1AdminGigCandidateLookupDraftSchema,
+      locationHint: v1AdminGigCandidateLookupLocationHintSchema,
     })
     .strict(),
 ]);
@@ -544,17 +513,23 @@ function parseAdminGigCandidateLookup(payload: unknown): AdminGigCandidateLookup
   if (!parsed.data.gigDraft.date) {
     throw new Error('Gig Candidate lookup did not return a date');
   }
-  return {
-    ...parsed.data.gigDraft,
+  const gigDraft: AdminGigCandidateLookupDraft = {
+    title: parsed.data.gigDraft.title,
     date: normalizeGigCandidateLookupDate(parsed.data.gigDraft.date, 'gigDraft.date'),
-    ...(parsed.data.gigDraft.endDate !== undefined
-      ? {
-          endDate: normalizeGigCandidateLookupDate(
-            parsed.data.gigDraft.endDate,
-            'gigDraft.endDate',
-          ),
-        }
-      : {}),
+    ticketsUrl: parsed.data.gigDraft.ticketsUrl,
+  };
+  if (parsed.data.gigDraft.endDate !== undefined) {
+    gigDraft.endDate = normalizeGigCandidateLookupDate(
+      parsed.data.gigDraft.endDate,
+      'gigDraft.endDate',
+    );
+  }
+  if (parsed.data.gigDraft.posterUrl !== undefined) {
+    gigDraft.posterUrl = parsed.data.gigDraft.posterUrl;
+  }
+  return {
+    gigDraft,
+    locationHint: { ...parsed.data.locationHint },
   };
 }
 
