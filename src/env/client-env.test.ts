@@ -24,12 +24,44 @@ describe('env/client', () => {
       expect(clientEnvModule.clientEnv.isAuthEnabled).toBe(true);
     });
 
-    it('should set isAuthEnabled to false when NEXT_PUBLIC_AUTH_ENABLED is missing', async () => {
-      vi.stubEnv('NEXT_PUBLIC_AUTH_ENABLED', undefined);
+    it.each([undefined, '', '   '])(
+      'should set isAuthEnabled to false when NEXT_PUBLIC_AUTH_ENABLED is %j',
+      async (value) => {
+        vi.stubEnv('NEXT_PUBLIC_AUTH_ENABLED', value);
 
-      const clientEnvModule = await importClientEnv();
+        const clientEnvModule = await importClientEnv();
 
-      expect(clientEnvModule.clientEnv.isAuthEnabled).toBe(false);
+        expect(clientEnvModule.clientEnv.isAuthEnabled).toBe(false);
+      },
+    );
+
+    it.each([
+      { value: 'true', expected: true },
+      { value: '1', expected: true },
+      { value: 'false', expected: false },
+      { value: '0', expected: false },
+    ])(
+      'should set isAuthEnabled to $expected when the configured value is $value',
+      async ({ value, expected }) => {
+        vi.stubEnv('NEXT_PUBLIC_AUTH_ENABLED', value);
+        vi.stubEnv('NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID', '123456');
+
+        const clientEnvModule = await importClientEnv();
+
+        expect(clientEnvModule.clientEnv.isAuthEnabled).toBe(expected);
+      },
+    );
+
+    it('should reject auth configuration when the boolean value is invalid', async () => {
+      vi.stubEnv('NEXT_PUBLIC_AUTH_ENABLED', 'enabled');
+
+      const error = await captureRejectedError(() => importClientEnv());
+
+      expectZodIssue(error, {
+        code: 'invalid_type',
+        message: 'Expected boolean-like env value: use true/false/1/0',
+        path: ['NEXT_PUBLIC_AUTH_ENABLED'],
+      });
     });
 
     it('should throw when auth is enabled and Telegram OIDC client ID is missing', async () => {
@@ -56,12 +88,27 @@ describe('env/client', () => {
   });
 
   describe('NEXT_PUBLIC_SUGGEST_GIG_ENABLED', () => {
-    it('should set isPublicSuggestGigEnabled to false when env var is missing', async () => {
-      vi.stubEnv('NEXT_PUBLIC_SUGGEST_GIG_ENABLED', undefined);
+    it.each([undefined, '', '   '])(
+      'should set isPublicSuggestGigEnabled to false when env var is %j',
+      async (value) => {
+        vi.stubEnv('NEXT_PUBLIC_SUGGEST_GIG_ENABLED', value);
 
-      const clientEnvModule = await importClientEnv();
+        const clientEnvModule = await importClientEnv();
 
-      expect(clientEnvModule.clientEnv.isPublicSuggestGigEnabled).toBe(false);
+        expect(clientEnvModule.clientEnv.isPublicSuggestGigEnabled).toBe(false);
+      },
+    );
+
+    it('should reject suggestion configuration when the boolean value is invalid', async () => {
+      vi.stubEnv('NEXT_PUBLIC_SUGGEST_GIG_ENABLED', 'enabled');
+
+      const error = await captureRejectedError(() => importClientEnv());
+
+      expectZodIssue(error, {
+        code: 'invalid_type',
+        message: 'Expected boolean-like env value: use true/false/1/0',
+        path: ['NEXT_PUBLIC_SUGGEST_GIG_ENABLED'],
+      });
     });
 
     it('should set isPublicSuggestGigEnabled to true when env var is true', async () => {
@@ -70,6 +117,29 @@ describe('env/client', () => {
       const clientEnvModule = await importClientEnv();
 
       expect(clientEnvModule.clientEnv.isPublicSuggestGigEnabled).toBe(true);
+    });
+  });
+
+  describe('NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY', () => {
+    it.each([undefined, '', '   '])(
+      'should use the default profile storage key when env var is %j',
+      async (value) => {
+        vi.stubEnv('NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY', value);
+
+        const clientEnvModule = await importClientEnv();
+
+        expect(clientEnvModule.clientEnv.telegramClientProfileStorageKey).toBe(
+          'gt_tg_client_profile',
+        );
+      },
+    );
+
+    it('should use the trimmed profile storage key when a custom value is configured', async () => {
+      vi.stubEnv('NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY', ' custom_profile ');
+
+      const clientEnvModule = await importClientEnv();
+
+      expect(clientEnvModule.clientEnv.telegramClientProfileStorageKey).toBe('custom_profile');
     });
   });
 

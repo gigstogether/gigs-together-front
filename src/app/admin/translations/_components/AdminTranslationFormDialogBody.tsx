@@ -124,9 +124,7 @@ export default function AdminTranslationFormDialogBody(props: AdminTranslationFo
               placeholder="Select locale"
               ariaLabelledBy="translation-form-locale-label"
               isDisabled={isSaving || !isCreateMode}
-              onValueChange={(locale) =>
-                setFormValues((current) => ({ ...current, locale }))
-              }
+              onValueChange={(locale) => setFormValues((current) => ({ ...current, locale }))}
             />
           </Field>
         </div>
