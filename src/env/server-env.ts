@@ -16,11 +16,9 @@ const DEFAULT_SITE_PREVIEW_DESCRIPTION = 'Find gigs and company in your city.';
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).optional(),
   NEXT_PUBLIC_APP_BASE_URL: optionalTrimmedStringFromEnvSchema,
-  BRAND_NAME: optionalTrimmedStringFromEnvSchema.default(DEFAULT_BRAND_NAME),
-  SITE_PREVIEW_TITLE: optionalTrimmedStringFromEnvSchema.default(DEFAULT_SITE_PREVIEW_TITLE),
-  SITE_PREVIEW_DESCRIPTION: optionalTrimmedStringFromEnvSchema.default(
-    DEFAULT_SITE_PREVIEW_DESCRIPTION,
-  ),
+  BRAND_NAME: optionalTrimmedStringFromEnvSchema,
+  SITE_PREVIEW_TITLE: optionalTrimmedStringFromEnvSchema,
+  SITE_PREVIEW_DESCRIPTION: optionalTrimmedStringFromEnvSchema,
   TRANSLATIONS_REVALIDATE_SECONDS: createOptionalPositiveIntegerFromEnvSchema(
     'TRANSLATIONS_REVALIDATE_SECONDS',
   ),
@@ -83,9 +81,10 @@ export const serverEnv = {
     parsedServerEnv.NEXT_PUBLIC_APP_BASE_URL,
   ),
   appBaseUrl: parsedServerEnv.NEXT_PUBLIC_APP_BASE_URL,
-  brandName: parsedServerEnv.BRAND_NAME,
-  sitePreviewTitle: parsedServerEnv.SITE_PREVIEW_TITLE,
-  sitePreviewDescription: parsedServerEnv.SITE_PREVIEW_DESCRIPTION,
+  brandName: parsedServerEnv.BRAND_NAME ?? DEFAULT_BRAND_NAME,
+  sitePreviewTitle: parsedServerEnv.SITE_PREVIEW_TITLE ?? DEFAULT_SITE_PREVIEW_TITLE,
+  sitePreviewDescription:
+    parsedServerEnv.SITE_PREVIEW_DESCRIPTION ?? DEFAULT_SITE_PREVIEW_DESCRIPTION,
   translationsRevalidateSeconds:
     parsedServerEnv.TRANSLATIONS_REVALIDATE_SECONDS ?? DEFAULT_TRANSLATIONS_REVALIDATE_SECONDS,
   eagerInitialPosterCount:
