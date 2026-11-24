@@ -992,15 +992,15 @@ describe('fetchAdminTranslations', () => {
       records: [
         {
           id: '64f1a2b3c4d5e6f7a8b9c0d3',
-          namespace: 'city',
+          namespace: 'common',
           locale: 'en',
-          key: 'barcelona',
-          value: 'Barcelona',
+          key: 'button.save',
+          value: 'Save',
         },
       ],
     });
 
-    await expect(fetchAdminTranslations({ namespace: 'city' })).rejects.toThrow(
+    await expect(fetchAdminTranslations({ namespace: 'common' })).rejects.toThrow(
       'Invalid admin translations response',
     );
   });
