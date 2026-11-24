@@ -37,35 +37,11 @@ npm install
 
 This also runs the `prepare` script and installs Husky git hooks.
 
-### 2. Create environment variables
+### 2. Configure the environment
 
-Copy `.env.example` to `.env` in the repository root.
+Copy [`.env.example`](./.env.example) to `.env` in the repository root, then configure the API and frontend base URLs.
 
-Next.js also supports `.env.local`, which takes precedence over `.env`.
-
-### 3. Fill in the required env vars
-
-What they are used for:
-
-| Variable                                          | Required?                        | Purpose                                                                                                                                             |
-| ------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_APP_API_BASE_URL`                    | Required                         | Base URL for backend API requests. Without it, direct API calls throw at runtime.                                                                   |
-| `NEXT_PUBLIC_APP_BASE_URL`                        | Optional\*                       | Public site base URL used for metadata, sitemap, and robots. \*Recommended; required at runtime for `/sitemap.xml` and `/robots.txt`.               |
-| `NEXT_PUBLIC_GITHUB_URL`                          | Optional                         | GitHub link rendered in the header.                                                                                                                 |
-| `NEXT_PUBLIC_TELEGRAM_URL`                        | Optional                         | Telegram link used in the header and as a fallback on gig cards.                                                                                    |
-| `NEXT_PUBLIC_AUTH_ENABLED`                        | Optional                         | Shows/hides auth menu button. Parsed as boolean. Default: `false`.                                                                                  |
-| `NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID`             | Required\*                       | Public Telegram Login Client ID from BotFather. Must be a positive integer. \*Required when `NEXT_PUBLIC_AUTH_ENABLED` is `true`.                   |
-| `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` | Optional                         | localStorage key for the cached Telegram display profile. Default: `gt_tg_client_profile`.                                                          |
-| `NEXT_PUBLIC_FEED_PAGE_SIZE`                      | Optional                         | Feed page size. Must be a positive integer. Default is `10`.                                                                                        |
-| `NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS`   | Optional                         | Calendar dates query stale time in milliseconds. Must be a positive integer. Default is `600000` (10 minutes).                                      |
-| `NEXT_PUBLIC_SUGGEST_GIG_ENABLED`                 | Optional                         | Shows/hides the public "Suggest a gig" header action. Parsed as boolean. Default: `false`. Admins always see the button when signed in.             |
-| `SITE_PREVIEW_TITLE`                              | Optional                         | SEO/social preview title. Defaults to `Gigs Together!`.                                                                                             |
-| `SITE_PREVIEW_DESCRIPTION`                        | Optional                         | SEO/social preview description. Defaults to a short product blurb.                                                                                  |
-| `BRAND_NAME`                                      | Optional                         | Brand name used in metadata. Defaults to `Gigs Together`.                                                                                           |
-| `ALLOWED_DEV_ORIGINS`                             | Optional                         | Comma-separated development hostnames allowed by Next.js `allowedDevOrigins`, without a protocol or port (for example `dev.example.com,localhost`). |
-| `FEED_REVALIDATE_SECRET`                          | Required for revalidation routes | Secret checked by `/api/revalidate/feed`.                                                                                                           |
-| `TRANSLATIONS_REVALIDATE_SECRET`                  | Required for revalidation routes | Secret checked by `/api/revalidate/translations` (`x-translations-revalidate-secret`).                                                              |
-| `TRANSLATIONS_REVALIDATE_SECONDS`                 | Optional                         | Server-side cache revalidation period for translation fetching. Positive integer in seconds, default `3600`.                                        |
+See the [environment reference](./docs/configuration/ENVIRONMENT.md) for required settings, defaults, and loading rules. Configure public variables before building the app.
 
 ## Telegram Mini App setup
 
@@ -295,11 +271,11 @@ Set `NEXT_PUBLIC_APP_API_BASE_URL` in your local env file and restart the dev se
 
 ### Revalidation endpoint returns `401`
 
-Send the `x-revalidate-secret` header and make sure it matches `FEED_REVALIDATE_SECRET`.
+Use the secret header for the requested route and make sure it matches the corresponding server setting. Feed and translation revalidation use different headers; see [Server variables](./docs/configuration/ENVIRONMENT.md#server-variables).
 
 ### Revalidation endpoint returns `503`
 
-The server is missing `FEED_REVALIDATE_SECRET`.
+Configure the requested route's server-only secret and restart the server. See [Server variables](./docs/configuration/ENVIRONMENT.md#server-variables).
 
 ## License
 
