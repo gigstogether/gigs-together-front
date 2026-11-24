@@ -57,4 +57,4 @@ cloudflared tunnel run <tunnel-name>
 Open `https://<frontend-hostname>`. Keep the tunnel terminal open; stop the tunnel with `Ctrl+C`. If the tunnel is
 already running for another application, restart it after editing `config.yml` instead of starting a second instance.
 
-For Telegram testing, use your frontend URL in the [Mini App setup](../../README.md#telegram-mini-app-setup).
+For Telegram testing, use your frontend URL in the [Mini App setup](../integrations/TELEGRAM.md).
