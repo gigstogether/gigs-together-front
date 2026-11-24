@@ -4,15 +4,19 @@ Copy [`.env.example`](../../.env.example) to `.env`. Set both base URLs before r
 
 ## Loading configuration
 
-Priority: process environment → `.env.<NODE_ENV>.local` → `.env.local` → `.env.<NODE_ENV>` → `.env`. The `.env.local` entry is skipped in test mode; keep env files at the repository root.
+Priority: process environment → `.env.<NODE_ENV>.local` → `.env.local` → `.env.<NODE_ENV>` → `.env`. The `.env.local`
+entry is skipped in test mode; keep env files at the repository root.
 
-Next.js sets `NODE_ENV=development` for dev and `production` for build/start. The schemas also accept `test`; backend aliases `dev` / `prod` are not valid frontend values.
+Next.js sets `NODE_ENV=development` for dev and `production` for build/start. The schemas also accept `test`; backend
+aliases `dev` / `prod` are not valid frontend values.
 
-**`NEXT_PUBLIC_*` values are public and embedded at build time.** Never put secrets there; rebuild after changes. Server-only settings require a restart, and prerendered content may need rebuilding or revalidation.
+**`NEXT_PUBLIC_*` values are public and embedded at build time.** Never put secrets there; rebuild after changes.
+Server-only settings require a restart, and prerendered content may need rebuilding or revalidation.
 
 ## Value formats
 
-Strings are trimmed; blank optional values use defaults or remain unset. Booleans accept `true/false` or `1/0`, ignoring case. Numbers must be positive integers; invalid configured values are rejected. Use absolute URLs.
+Strings are trimmed; blank optional values use defaults or remain unset. Booleans accept `true/false` or `1/0`, ignoring
+case. Numbers must be positive integers; invalid configured values are rejected. Use absolute URLs.
 
 ## Public variables
 
@@ -44,6 +48,8 @@ Strings are trimmed; blank optional values use defaults or remain unset. Boolean
 | `EAGER_INITIAL_POSTER_COUNT`      | No                         | `5` (first visible grid row on 2xl). Initial feed posters loaded eagerly.                           |
 | `ALLOWED_DEV_ORIGINS`             | No; dev only               | Comma-separated hostnames without scheme/port, e.g. `dev.example.com,localhost`.                    |
 
-Revalidation returns `503` for an unconfigured server secret and `401` for a missing/mismatched header. The API must allow the frontend origin in its CORS configuration for browser requests.
+Revalidation returns `503` for an unconfigured server secret and `401` for a missing/mismatched header. The API must
+allow the frontend origin in its CORS configuration for browser requests.
 
-For integration setup, see [Telegram Mini Apps](../../README.md#telegram-mini-app-setup) and [local HTTPS access](../development/CLOUDFLARE_TUNNEL.md).
+For integration setup, see [Telegram Mini Apps](../../README.md#telegram-mini-app-setup) and
+[local HTTPS access](../development/CLOUDFLARE_TUNNEL.md).
