@@ -51,5 +51,5 @@ case. Numbers must be positive integers; invalid configured values are rejected.
 Revalidation returns `503` for an unconfigured server secret and `401` for a missing/mismatched header. The API must
 allow the frontend origin in its CORS configuration for browser requests.
 
-For integration setup, see [Telegram Mini Apps](../../README.md#telegram-mini-app-setup) and
+For integration setup, see [Telegram Mini Apps](../integrations/TELEGRAM.md) and
 [local HTTPS access](../development/CLOUDFLARE_TUNNEL.md).
