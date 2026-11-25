@@ -16,17 +16,18 @@ import type {
 } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import PosterField from '@/components/PosterField';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 
 interface SuggestGigFormClientProps {
   communityOptions: SuggestCommunityOption[];
   countries: CountryDisplayOption[];
+  description?: string;
 }
 
 export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
-  const { communityOptions, countries } = props;
+  const { communityOptions, countries, description } = props;
 
   const defaultValues = createDefaultSuggestGigFormValues(communityOptions);
 
@@ -91,6 +92,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
     <Card className="w-full max-w-md m-auto border-0">
       <CardHeader>
         <CardTitle>Suggest a gig</CardTitle>
+        {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent>
         <form
