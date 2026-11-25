@@ -29,7 +29,7 @@ describe('suggestGigFormSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should accept required Community, Country, Locality, title, and date', () => {
+  it('should accept required Community, Country, Locality, and title', () => {
     const parsed = suggestGigFormSchema.parse({
       ...requiredFields,
       title: 'Band',
@@ -49,11 +49,22 @@ describe('suggestGigFormSchema', () => {
     });
   });
 
-  it('should reject when date is missing', () => {
+  it('should accept when date is missing', () => {
+    const parsed = suggestGigFormSchema.parse({
+      ...requiredFields,
+      title: 'Band',
+      date: '',
+    });
+
+    expect(parsed.date).toBeUndefined();
+  });
+
+  it('should reject when End Date is provided without Date', () => {
     const result = suggestGigFormSchema.safeParse({
       ...requiredFields,
       title: 'Band',
       date: '',
+      endDate: '2026-08-02',
     });
 
     expect(result.success).toBe(false);

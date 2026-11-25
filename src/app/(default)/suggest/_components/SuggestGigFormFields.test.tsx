@@ -112,7 +112,7 @@ describe('SuggestGigFormFields', () => {
     expect(screen.getByLabelText('Title:*')).toBeRequired();
     expect(screen.getByLabelText('Country:*')).toBeRequired();
     expect(screen.getByRole('combobox', { name: 'Locality:' })).toBeRequired();
-    expect(screen.getByLabelText('Date:*')).toBeRequired();
+    expect(screen.getByLabelText('Date:')).not.toBeRequired();
     expect(screen.getByLabelText('End Date:')).not.toBeRequired();
     expect(screen.getByLabelText('Venues:')).not.toBeRequired();
     expect(screen.getByLabelText('Tickets URL:')).not.toBeRequired();
@@ -121,7 +121,7 @@ describe('SuggestGigFormFields', () => {
   it('should stack date fields on mobile and align them horizontally on larger screens', () => {
     renderFields();
 
-    const dateInput = screen.getByLabelText('Date:*');
+    const dateInput = screen.getByLabelText('Date:');
     const dateField = dateInput.closest('[data-slot="field"]');
     const endDateField = screen.getByLabelText('End Date:').closest('[data-slot="field"]');
 

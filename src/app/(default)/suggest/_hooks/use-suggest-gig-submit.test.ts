@@ -90,6 +90,33 @@ describe('useSuggestGigSubmit', () => {
     expect(onSuccess).toHaveBeenCalledWith({ id: '507f1f77bcf86cd799439099' });
   });
 
+  it('should omit date when submitting without one', async () => {
+    const queryClient = createTestQueryClient();
+    createGigCandidateMock.mockResolvedValueOnce({ id: '507f1f77bcf86cd799439099' });
+
+    const { result } = renderHook(
+      () =>
+        useSuggestGigSubmit({
+          posterFile: null,
+          posterUrl: '',
+          onSuccess: vi.fn(),
+        }),
+      {
+        wrapper: createQueryClientWrapper(queryClient),
+      },
+    );
+
+    await act(async () => {
+      await result.current.onSubmit({
+        ...DEFAULT_SUBMIT_VALUES,
+        date: undefined,
+      });
+    });
+
+    const createParams = createGigCandidateMock.mock.calls[0]?.[0];
+    expect(createParams?.gig).not.toHaveProperty('date');
+  });
+
   it('should show validation toast and skip submit when poster URL is invalid', async () => {
     const queryClient = createTestQueryClient();
     const onSuccess = vi.fn();

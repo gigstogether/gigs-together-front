@@ -209,12 +209,10 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
                 htmlFor="suggest-gig-date"
               >
                 Date:
-                <RequiredIndicator />
               </FieldLabel>
               <DateInput
                 {...field}
                 id="suggest-gig-date"
-                required
                 clearLabel="Clear Date"
                 onClear={() => field.onChange('')}
                 aria-labelledby="suggest-gig-date-label"
