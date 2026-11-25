@@ -32,12 +32,11 @@ interface SubmitGigInput {
 
 function buildGigPayload(values: GigFormValues): GigUpsertPayload {
   return {
+    communityIds: values.communityIds,
+    venueIds: values.venueIds,
     title: values.title,
     date: values.date,
     endDate: values.endDate || undefined,
-    city: values.city,
-    country: values.country,
-    venue: values.venue,
     ticketsUrl: values.ticketsUrl,
   };
 }
@@ -71,7 +70,7 @@ export function useGigSubmit(params: UseGigSubmitParams): UseGigSubmitResult {
     },
     onSuccess: async (result) => {
       // TODO: Invalidate only query keys that a gig edit actually affects (e.g. feed events for the
-      // current country/city, calendar-available-dates for that pair, edit-by-public-id for this gig)
+      // current country/community, calendar-available-dates for that pair, edit-by-public-id for this gig)
       // instead of feedKeys.all(). Broad prefixes mark every feed query stale (all locations, anchor
       // dates, calendar lists), which is simple and correct today but may cause extra refetches and
       // network work as the feed surface grows.

@@ -9,7 +9,7 @@ import { Plus } from 'lucide-react';
 import { fetchAdminGigCandidates } from '@/app/admin/_lib/admin-api';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import AdminGigCandidatePreviewCard from '@/app/admin/gig-candidates/_components/AdminGigCandidatePreviewCard';
-import AdminGigCandidateQueueList from '@/app/admin/gig-candidates/_components/AdminGigCandidateQueueList';
+import AdminGigCandidateList from '@/app/admin/gig-candidates/_components/AdminGigCandidateList';
 import AdminGigCandidatesFilterControls from '@/app/admin/gig-candidates/_components/AdminGigCandidatesFilterControls';
 import AdminGigCandidatesSortControls from '@/app/admin/gig-candidates/_components/AdminGigCandidatesSortControls';
 import {
@@ -128,7 +128,7 @@ export default function AdminGigCandidatesPageClient() {
                 Loading gig candidates…
               </p>
             ) : (
-              <AdminGigCandidateQueueList
+              <AdminGigCandidateList
                 gigCandidates={gigCandidates}
                 selectedGigCandidateId={effectiveSelectedGigCandidateId}
                 onSelect={(gigCandidateId) =>

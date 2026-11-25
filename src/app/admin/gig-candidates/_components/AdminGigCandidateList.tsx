@@ -2,14 +2,14 @@ import type { AdminGigCandidate } from '@/app/admin/gig-candidates/_lib/admin-gi
 import { formatAdminEventDate } from '@/app/admin/_lib/admin-event-format';
 import { cn } from '@/lib/utils';
 
-interface AdminGigCandidateQueueListProps {
+interface AdminGigCandidateListProps {
   gigCandidates: readonly AdminGigCandidate[];
   selectedGigCandidateId: string | null;
   onSelect: (gigCandidateId: string) => void;
   emptyMessage: string;
 }
 
-export default function AdminGigCandidateQueueList(props: AdminGigCandidateQueueListProps) {
+export default function AdminGigCandidateList(props: AdminGigCandidateListProps) {
   const { gigCandidates, selectedGigCandidateId, onSelect, emptyMessage } = props;
 
   if (gigCandidates.length === 0) {

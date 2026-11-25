@@ -15,10 +15,10 @@ import type { AdminGigCandidate } from '@/app/admin/gig-candidates/_lib/admin-gi
 import { Button } from '@/components/ui/button';
 import { buildAdminGigPublicIdRoute } from '@/lib/admin-gig-paths';
 import { buildAdminGigCandidatePath } from '@/lib/admin-gig-candidate-paths';
-import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
 import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
 import { cn } from '@/lib/utils';
 import { ShareButton } from '@/components/ShareButton';
+import { VenueMapLinks } from '@/components/VenueMapLinks';
 
 const ADMIN_GIG_CANDIDATE_LOCALE = 'en';
 
@@ -36,11 +36,9 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
   const countryName = gigCandidate.locality
     ? getCountryDisplayName(gigCandidate.locality.countryIso, ADMIN_GIG_CANDIDATE_LOCALE)
     : undefined;
-  const venueNames = gigCandidate.venues?.map((venue) => venue.name).join(', ');
   const locationContext = [localityName, countryName].filter(Boolean).join(', ');
-  const location = [venueNames, locationContext].filter(Boolean).join(' · ');
-  const mapsSearch = [venueNames, localityName, countryName].filter(Boolean).join(' ');
-  const mapsHref = mapsSearch ? buildGoogleMapsSearchUrl(mapsSearch) : undefined;
+  const venues = gigCandidate.venues ?? [];
+  const hasLocation = venues.length > 0 || locationContext.length > 0;
   const sourceLabel = formatAdminGigSource(gigCandidate.source);
   const isIntakePostExpected = !(
     gigCandidate.source.type === 'user' && gigCandidate.source.origin.type === 'admin'
@@ -80,7 +78,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
               {formatAdminEventDate(gigDraft.date, gigDraft.endDate)}
             </AdminPreviewMetaRow>
           ) : null}
-          {location ? (
+          {hasLocation ? (
             <AdminPreviewMetaRow
               icon={
                 <MapPin
@@ -89,16 +87,16 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 />
               }
             >
-              <a
-                href={mapsHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block min-w-0 truncate text-primary underline-offset-4 hover:underline"
-                title="Open in Google Maps"
-                aria-label="Open venue in Google Maps"
-              >
-                {location}
-              </a>
+              {venues.length > 0 && gigCandidate.locality !== undefined ? (
+                <VenueMapLinks
+                  venues={venues}
+                  locality={gigCandidate.locality}
+                  locale={ADMIN_GIG_CANDIDATE_LOCALE}
+                  className="block"
+                />
+              ) : (
+                <span className="block min-w-0 truncate">{locationContext}</span>
+              )}
             </AdminPreviewMetaRow>
           ) : null}
           {gigDraft.ticketsUrl ? (

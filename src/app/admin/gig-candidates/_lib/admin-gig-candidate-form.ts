@@ -2,7 +2,7 @@ import * as z from 'zod';
 
 import type {
   AdminGigCandidate,
-  AdminGigCandidateDraft,
+  AdminGigCandidateGigDraft,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 
@@ -82,7 +82,7 @@ function validateDraft(
   }
 }
 
-export const gigCandidateDraftFormSchema = z
+export const gigCandidateFormSchema = z
   .object({
     ...sharedFields,
     title: optionalTitleSchema,
@@ -90,7 +90,7 @@ export const gigCandidateDraftFormSchema = z
   })
   .superRefine(validateDraft);
 
-export const createGigCandidateDraftFormSchema = z
+export const createGigCandidateFormSchema = z
   .object({
     ...sharedFields,
     countryIso: z.string().min(1, { message: 'Country is required.' }),
@@ -100,11 +100,11 @@ export const createGigCandidateDraftFormSchema = z
   })
   .superRefine(validateDraft);
 
-export type AdminGigCandidateDraftFormValues = z.infer<typeof gigCandidateDraftFormSchema>;
+export type AdminGigCandidateFormValues = z.infer<typeof gigCandidateFormSchema>;
 
-export function createDefaultGigCandidateDraftFormValues(
+export function createDefaultGigCandidateFormValues(
   communityIds: string[],
-): AdminGigCandidateDraftFormValues {
+): AdminGigCandidateFormValues {
   return {
     communityIds: communityIds.length === 1 ? [...communityIds] : [],
     countryIso: 'ES',
@@ -119,7 +119,7 @@ export function createDefaultGigCandidateDraftFormValues(
 
 export function mapGigCandidateToFormValues(
   gigCandidate: AdminGigCandidate,
-): AdminGigCandidateDraftFormValues {
+): AdminGigCandidateFormValues {
   return {
     communityIds: [...gigCandidate.gigDraft.communityIds],
     countryIso: gigCandidate.locality?.countryIso ?? '',
@@ -133,9 +133,9 @@ export function mapGigCandidateToFormValues(
 }
 
 export function mapGigCandidateFormValuesToDraft(
-  values: AdminGigCandidateDraftFormValues,
-): AdminGigCandidateDraft {
-  const gigDraft: AdminGigCandidateDraft = {
+  values: AdminGigCandidateFormValues,
+): AdminGigCandidateGigDraft {
+  const gigDraft: AdminGigCandidateGigDraft = {
     communityIds: [...values.communityIds],
   };
   const title = values.title.trim();

@@ -40,7 +40,8 @@ describe('GigCard', () => {
     expect(screen.getByText('Radiohead')).toHaveClass('truncate');
     expect(screen.queryByRole('link', { name: 'Radiohead' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
-    expect(screen.getByText('· Barcelona (Catalonia), Spain')).toBeInTheDocument();
+    expect(screen.queryByText('· Barcelona (Catalonia), Spain')).not.toBeInTheDocument();
+    expect(screen.getByTitle('Palau Sant Jordi, Sala Apolo')).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: 'Open Palau Sant Jordi in Google Maps' }),
     ).toHaveAttribute(

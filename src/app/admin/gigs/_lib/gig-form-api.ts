@@ -10,12 +10,11 @@ export interface PosterSelection {
 }
 
 export interface GigUpsertPayload {
+  communityIds: string[];
+  venueIds: string[];
   title: string;
   date: string;
   endDate?: string;
-  city: string;
-  country: string;
-  venue: string;
   ticketsUrl: string;
 }
 
@@ -58,12 +57,11 @@ interface SubmitGigParams extends GigUpsertApiParams {
 
 async function submitGig<TResponse = void>(params: SubmitGigParams): Promise<TResponse> {
   const gig: GigUpsertPayload = {
+    communityIds: params.gig.communityIds,
+    venueIds: params.gig.venueIds,
     title: params.gig.title,
     date: params.gig.date,
     endDate: params.gig.endDate || undefined,
-    city: params.gig.city,
-    country: params.gig.country,
-    venue: params.gig.venue,
     ticketsUrl: params.gig.ticketsUrl,
   };
 
