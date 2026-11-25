@@ -12,11 +12,13 @@ import AdminGigPreviewActions from '@/app/admin/gigs/_components/AdminGigPreview
 import AdminPreviewPoster from '@/app/admin/_components/AdminPreviewPoster';
 import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
 import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPreviewTitleRow';
+import { VenueMapLinks } from '@/components/VenueMapLinks';
 import { buildAdminGigEditRoute, buildAdminGigPublicIdPath } from '@/lib/admin-gig-paths';
-import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
+
+const ADMIN_GIG_LOCALE = 'en';
 
 interface AdminGigCardProps {
-  readonly gig: AdminGigDetail | AdminGigFormData;
+  gig: AdminGigDetail | AdminGigFormData;
 }
 
 export default function AdminGigCard(props: AdminGigCardProps) {
@@ -27,14 +29,6 @@ export default function AdminGigCard(props: AdminGigCardProps) {
   const dateLabel = formatAdminGigEventDate(gig.date, gig.endDate);
   const feedHref = buildAdminGigPublicHref(gig);
   const hasPublicLinks = gig.isVisible && !!(feedHref || gig.mainPostUrl);
-  const venueNames = gig.venues.map((venue) => venue.name).join(' · ');
-  const localityName =
-    gig.locality.qualifier === undefined
-      ? gig.locality.name
-      : `${gig.locality.name} (${gig.locality.qualifier})`;
-  const mapsHref = buildGoogleMapsSearchUrl(
-    `${venueNames} ${localityName} ${gig.locality.countryIso}`,
-  );
 
   return (
     <article className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border bg-card shadow-sm">
@@ -64,16 +58,12 @@ export default function AdminGigCard(props: AdminGigCardProps) {
               />
             }
           >
-            <a
-              href={mapsHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block min-w-0 truncate text-primary underline-offset-4 hover:underline"
-              title="Open in Google Maps"
-              aria-label="Open venue in Google Maps"
-            >
-              {venueNames} · {localityName}
-            </a>
+            <VenueMapLinks
+              venues={gig.venues}
+              locality={gig.locality}
+              locale={ADMIN_GIG_LOCALE}
+              className="block"
+            />
           </AdminPreviewMetaRow>
           {gig.ticketsUrl ? (
             <AdminPreviewMetaRow
