@@ -80,7 +80,7 @@ Useful routes:
 - `/suggest/launch` -> Telegram-aware redirect into `/suggest` or the moderator gig flow
 - `/admin` -> moderator dashboard
 - `/admin/telegram` -> Telegram Mini App dispatcher for admin edit actions
-- `/admin/gigs` -> gig moderation queue and create/edit flows
+- `/admin/gigs` -> gig moderation list and create/edit flows
 - `/admin/locales` -> locale activation and ordering
 - `/admin/translations` -> translations placeholder page
 - `/admin/admins` -> moderator access placeholder page

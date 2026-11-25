@@ -3,6 +3,14 @@ import { gigDateToYMD } from '@/lib/feed/feed.mapper';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 
 export const gigFormSchema = z.object({
+  communityIds: z.array(z.string().min(1)).min(1, {
+    message: 'Select at least one Community.',
+  }),
+  countryIso: z.string().length(2, { message: 'Country is required.' }),
+  localityId: z.string().min(1, { message: 'Locality is required.' }),
+  venueIds: z.array(z.string().min(1)).min(1, {
+    message: 'Select at least one Venue.',
+  }),
   title: z
     .string()
     .trim()
@@ -22,9 +30,6 @@ export const gigFormSchema = z.object({
       })
       .optional(),
   ),
-  city: z.string().min(1, { message: 'City is required.' }),
-  country: z.string().min(1, { message: 'Country is required.' }), // ISO code
-  venue: z.string().min(2, { message: 'Please enter venue.' }),
   ticketsUrl: z.string().url({
     message: 'Please enter a valid ticket URL.',
   }),
@@ -33,12 +38,13 @@ export const gigFormSchema = z.object({
 export type GigFormValues = z.infer<typeof gigFormSchema>;
 
 export const defaultGigFormValues: GigFormValues = {
+  communityIds: [],
+  countryIso: '',
+  localityId: '',
+  venueIds: [],
   title: '',
   date: '',
   endDate: '',
-  city: 'Barcelona',
-  country: 'ES',
-  venue: '',
   ticketsUrl: '',
 };
 

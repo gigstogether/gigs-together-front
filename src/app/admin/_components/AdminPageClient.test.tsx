@@ -47,6 +47,6 @@ describe('AdminPageClient', () => {
     renderWithQueryClient();
 
     expect(screen.getByText('Gigs')).toBeInTheDocument();
-    expect(screen.getByText('Translations')).toBeInTheDocument();
+    expect(screen.getByText('Text content')).toBeInTheDocument();
   });
 });

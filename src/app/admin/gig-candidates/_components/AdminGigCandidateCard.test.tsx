@@ -123,11 +123,7 @@ describe('AdminGigCandidateCard', () => {
       },
     });
 
-    expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveClass(
-      'block',
-      'min-w-0',
-      'truncate',
-    );
+    expect(screen.getByTitle('Razzmatazz')).toHaveClass('block', 'min-w-0', 'truncate');
     expect(screen.getByRole('link', { name: ticketsUrl })).toHaveClass(
       'block',
       'min-w-0',
@@ -138,11 +134,19 @@ describe('AdminGigCandidateCard', () => {
   it('should link the location to Google Maps', () => {
     renderCard();
 
-    expect(screen.getByText('Razzmatazz · Barcelona, Spain')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Open venue in Google Maps' })).toHaveAttribute(
+    expect(screen.getByText('Razzmatazz')).toBeInTheDocument();
+    expect(screen.queryByText('Barcelona, Spain')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open Razzmatazz in Google Maps' })).toHaveAttribute(
       'href',
       'https://www.google.com/maps/search/?api=1&query=Razzmatazz%20Barcelona%20Spain',
     );
+  });
+
+  it('should show the Locality as text when a GigCandidate has no Venue', () => {
+    renderCard({ ...gigCandidate, venues: undefined });
+
+    expect(screen.getByText('Barcelona, Spain')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Google Maps/ })).not.toBeInTheDocument();
   });
 
   it('should show Reject on a Reviewing detail view', () => {

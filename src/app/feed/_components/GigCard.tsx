@@ -3,10 +3,9 @@ import { ShareButton } from '@/components/ShareButton';
 import { Calendar, MapPin, Ticket } from 'lucide-react';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { GigPoster } from '@/components/GigPoster';
+import { VenueMapLinks } from '@/components/VenueMapLinks';
 import { clientEnv } from '@/env/client-env';
 import { formatGigDate } from '@/lib/feed/gig-date-format';
-import { buildGoogleMapsSearchUrl } from '@/lib/google-maps';
-import { getCountryDisplayName } from '@/lib/i18n/country-display-name';
 import { useI18n } from '@/providers/I18nProvider';
 
 interface GigCardProps {
@@ -79,48 +78,18 @@ interface GigLocationProps {
 }
 
 function GigLocation(props: GigLocationProps) {
-  const localityName = props.gig.locality.qualifier
-    ? `${props.gig.locality.name} (${props.gig.locality.qualifier})`
-    : props.gig.locality.name;
-  const countryName = getCountryDisplayName(props.gig.locality.countryIso, props.locale);
-  const locationContext = [localityName, countryName].join(', ');
-  const fullLocation = [
-    props.gig.venues.map((venue) => venue.name).join(', '),
-    locationContext,
-  ].join(' · ');
-
   return (
     <>
       <MapPin
         className="h-4 w-4 shrink-0"
         aria-hidden
       />
-      <span
-        className="min-w-0 flex-1 truncate"
-        title={fullLocation}
-      >
-        {props.gig.venues.map((venue, index) => {
-          const mapsHref = buildGoogleMapsSearchUrl(
-            [venue.name, localityName, countryName].join(' '),
-          );
-
-          return (
-            <span key={venue.id}>
-              {index > 0 ? ', ' : null}
-              <a
-                href={mapsHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors hover:text-gray-700 dark:hover:text-violet-400"
-                aria-label={`Open ${venue.name} in Google Maps`}
-              >
-                {venue.name}
-              </a>
-            </span>
-          );
-        })}
-        <span>{` · ${locationContext}`}</span>
-      </span>
+      <VenueMapLinks
+        venues={props.gig.venues}
+        locality={props.gig.locality}
+        locale={props.locale}
+        className="flex-1 [&_a]:text-gray-500 [&_a]:hover:text-gray-700 dark:[&_a]:hover:text-violet-400"
+      />
     </>
   );
 }

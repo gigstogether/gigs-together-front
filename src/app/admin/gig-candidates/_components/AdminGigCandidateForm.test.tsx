@@ -4,14 +4,14 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import type {
   createAdminGigCandidate,
-  lookupAdminGigCandidateDraft,
-  updateAdminGigCandidateDraft,
+  lookupAdminGigDetails,
+  updateAdminGigCandidateGigDraft,
 } from '@/app/admin/_lib/admin-api';
 import type {
   fetchAdminLocalities,
   fetchAdminVenues,
 } from '@/app/admin/locations/_lib/admin-locations-api';
-import AdminGigCandidateDraftForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm';
+import AdminGigCandidateForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateForm';
 import type { AdminGigCandidate } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import { ApiError } from '@/lib/api-errors';
@@ -21,18 +21,18 @@ const {
   createGigCandidateMock,
   fetchLocalitiesMock,
   fetchVenuesMock,
-  lookupGigCandidateDraftMock,
+  lookupGigDetailsMock,
   pushMock,
   toastMock,
-  updateGigCandidateDraftMock,
+  updateGigCandidateGigDraftMock,
 } = vi.hoisted(() => ({
   createGigCandidateMock: vi.fn<typeof createAdminGigCandidate>(),
   fetchLocalitiesMock: vi.fn<typeof fetchAdminLocalities>(),
   fetchVenuesMock: vi.fn<typeof fetchAdminVenues>(),
-  lookupGigCandidateDraftMock: vi.fn<typeof lookupAdminGigCandidateDraft>(),
+  lookupGigDetailsMock: vi.fn<typeof lookupAdminGigDetails>(),
   pushMock: vi.fn(),
   toastMock: vi.fn(),
-  updateGigCandidateDraftMock: vi.fn<typeof updateAdminGigCandidateDraft>(),
+  updateGigCandidateGigDraftMock: vi.fn<typeof updateAdminGigCandidateGigDraft>(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -41,8 +41,8 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/hooks/use-toast', () => ({ toast: toastMock }));
 vi.mock('@/app/admin/_lib/admin-api', () => ({
   createAdminGigCandidate: createGigCandidateMock,
-  lookupAdminGigCandidateDraft: lookupGigCandidateDraftMock,
-  updateAdminGigCandidateDraft: updateGigCandidateDraftMock,
+  lookupAdminGigDetails: lookupGigDetailsMock,
+  updateAdminGigCandidateGigDraft: updateGigCandidateGigDraftMock,
 }));
 vi.mock('@/app/admin/locations/_lib/admin-locations-api', () => ({
   fetchAdminLocalities: fetchLocalitiesMock,
@@ -82,7 +82,7 @@ function renderForm(gigCandidate?: AdminGigCandidate) {
   return {
     queryClient,
     ...render(
-      <AdminGigCandidateDraftForm
+      <AdminGigCandidateForm
         communityOptions={[{ value: 'existing-community-id', label: 'Barcelona' }]}
         countries={[{ iso: 'ES', name: 'Spain' }]}
         gigCandidate={gigCandidate}
@@ -99,7 +99,7 @@ async function selectOption(selectName: RegExp, optionName: string): Promise<voi
   fireEvent.click(await screen.findByRole('option', { name: optionName }));
 }
 
-describe('AdminGigCandidateDraftForm', () => {
+describe('AdminGigCandidateForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fetchLocalitiesMock.mockResolvedValue([
@@ -147,7 +147,7 @@ describe('AdminGigCandidateDraftForm', () => {
 
   it('should update a GigCandidate with multiple Venue assignments', async () => {
     const gigCandidate = createReviewingGigCandidate();
-    updateGigCandidateDraftMock.mockResolvedValueOnce({ ...gigCandidate, version: 5 });
+    updateGigCandidateGigDraftMock.mockResolvedValueOnce({ ...gigCandidate, version: 5 });
     renderForm(gigCandidate);
 
     expect(screen.getByText('Edit Gig Candidate')).toBeInTheDocument();
@@ -155,7 +155,7 @@ describe('AdminGigCandidateDraftForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
     await waitFor(() => {
-      expect(updateGigCandidateDraftMock).toHaveBeenCalledWith({
+      expect(updateGigCandidateGigDraftMock).toHaveBeenCalledWith({
         gigCandidateId: 'gigCandidate-42',
         expectedVersion: 4,
         localityId: BARCELONA_LOCALITY_ID,
@@ -201,7 +201,7 @@ describe('AdminGigCandidateDraftForm', () => {
   });
 
   it('should report a stale GigCandidate version conflict', async () => {
-    updateGigCandidateDraftMock.mockRejectedValueOnce(
+    updateGigCandidateGigDraftMock.mockRejectedValueOnce(
       new ApiError('Version conflict', 409, 'GIG_CANDIDATE_CONFLICT'),
     );
     renderForm(createReviewingGigCandidate());
@@ -219,12 +219,17 @@ describe('AdminGigCandidateDraftForm', () => {
   });
 
   it('should map lookup location text to catalog identifiers', async () => {
-    lookupGigCandidateDraftMock.mockResolvedValueOnce({
-      title: 'Looked-up Band',
-      date: '2026-09-20',
-      city: 'Barcelona',
-      country: 'es',
-      venue: 'Sala Apolo',
+    lookupGigDetailsMock.mockResolvedValueOnce({
+      gigDraft: {
+        title: 'Looked-up Band',
+        date: '2026-09-20',
+        ticketsUrl: 'https://tickets.example/looked-up-band',
+      },
+      locationHint: {
+        locality: 'Barcelona',
+        country: 'es',
+        venue: 'Sala Apolo',
+      },
     });
     renderForm();
 
@@ -234,7 +239,10 @@ describe('AdminGigCandidateDraftForm', () => {
 
     expect(await screen.findByDisplayValue('Looked-up Band')).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: /Venues/ })).toHaveTextContent('Sala Apolo');
-    expect(lookupGigCandidateDraftMock).toHaveBeenCalledWith({
+    expect(
+      screen.getByText('AI suggested location: Sala Apolo · Barcelona · es'),
+    ).toBeInTheDocument();
+    expect(lookupGigDetailsMock).toHaveBeenCalledWith({
       title: 'Band',
       location: 'Barcelona, Spain',
     });

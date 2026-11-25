@@ -65,19 +65,16 @@ export type GigCandidateSourceForAdminView =
   | GigCandidateSourceUserWithProfile
   | GigCandidateSourceProvider;
 
-export interface AdminGigCandidateDraftFields {
+export interface AdminGigCandidateGigDraftFields {
   venueIds?: string[];
   title?: string;
   date?: string;
   endDate?: string;
-  city?: string;
-  country?: string;
-  venue?: string;
   ticketsUrl?: string;
   posterUrl?: string;
 }
 
-export interface AdminGigCandidateDraft extends AdminGigCandidateDraftFields {
+export interface AdminGigCandidateGigDraft extends AdminGigCandidateGigDraftFields {
   communityIds: string[];
 }
 
@@ -104,7 +101,7 @@ export interface AdminGigCandidate {
   source: GigCandidateSourceForAdminView;
   locality?: AdminGigCandidateLocality;
   venues?: AdminGigCandidateVenue[];
-  gigDraft: AdminGigCandidateDraft;
+  gigDraft: AdminGigCandidateGigDraft;
   status: GigCandidateStatusAPI;
   version: number;
   originalMessage?: AdminGigCandidateOriginalMessage;
@@ -121,8 +118,23 @@ export interface AdminGigCandidate {
   updatedAt: string;
 }
 
-export interface AdminGigCandidateLookupResult extends AdminGigCandidateDraftFields {
+export interface AdminGigCandidateLookupGigDraft {
+  title: string;
   date: string;
+  endDate?: string;
+  ticketsUrl: string;
+  posterUrl?: string;
+}
+
+export interface AdminGigCandidateLookupLocationHint {
+  locality: string;
+  country: string;
+  venue: string;
+}
+
+export interface AdminGigCandidateLookupResult {
+  gigDraft: AdminGigCandidateLookupGigDraft;
+  locationHint: AdminGigCandidateLookupLocationHint;
 }
 
 export enum AdminGigCandidatesSortBy {

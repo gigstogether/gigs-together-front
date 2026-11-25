@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -9,34 +9,31 @@ import type { UseFormReturn } from 'react-hook-form';
 
 import {
   createAdminGigCandidate,
-  lookupAdminGigCandidateDraft,
-  updateAdminGigCandidateDraft,
+  lookupAdminGigDetails,
+  updateAdminGigCandidateGigDraft,
 } from '@/app/admin/_lib/admin-api';
 import type {
   CreateAdminGigCandidateParams,
-  LookupAdminGigCandidateDraftParams,
-  UpdateAdminGigCandidateDraftParams,
+  LookupAdminGigDetailsParams,
+  UpdateAdminGigCandidateGigDraftParams,
 } from '@/app/admin/_lib/admin-api';
 import { buildVersionedAdminPosterUrl } from '@/app/admin/_lib/admin-poster-url';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
+import { useAdminLocationCatalog } from '@/app/admin/_hooks/useAdminLocationCatalog';
 import AdminGigCandidateOriginalMessage from '@/app/admin/gig-candidates/_components/AdminGigCandidateOriginalMessage';
-import {
-  fetchAdminLocalities,
-  fetchAdminVenues,
-} from '@/app/admin/locations/_lib/admin-locations-api';
 import type { AdminLocality, AdminVenue } from '@/app/admin/locations/_lib/admin-locations-api';
 import type {
   AdminGigCandidate,
   AdminGigCandidateLookupResult,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import {
-  createGigCandidateDraftFormSchema,
-  createDefaultGigCandidateDraftFormValues,
-  gigCandidateDraftFormSchema,
+  createGigCandidateFormSchema,
+  createDefaultGigCandidateFormValues,
+  gigCandidateFormSchema,
   mapGigCandidateToFormValues,
   mapGigCandidateFormValuesToDraft,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
-import type { AdminGigCandidateDraftFormValues } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
+import type { AdminGigCandidateFormValues } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
 import PosterField from '@/components/PosterField';
 import DateInput from '@/components/DateInput';
 import RequiredIndicator from '@/components/RequiredIndicator';
@@ -53,7 +50,7 @@ import { buildAdminGigCandidateRoute } from '@/lib/admin-gig-candidate-paths';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import { toSearchKey } from '@/lib/search-text';
 
-interface AdminGigCandidateDraftFormProps {
+interface AdminGigCandidateFormProps {
   communityOptions: CommunityDisplayOption[];
   countries: CountryDisplayOption[];
   gigCandidate?: AdminGigCandidate;
@@ -61,36 +58,49 @@ interface AdminGigCandidateDraftFormProps {
 
 interface UseGigCandidateLookupResult {
   isLookingUp: boolean;
-  lookupGigCandidateDraft: () => Promise<void>;
+  lookupGigDetails: () => Promise<void>;
+}
+
+interface UseGigCandidateLookupParams {
+  form: UseFormReturn<AdminGigCandidateFormValues>;
+  countries: CountryDisplayOption[];
+  localities: AdminLocality[];
+  venues: AdminVenue[];
+  setPosterFile: (file: File | null) => void;
+  setPosterUrl: (url: string) => void;
+  setLocationHintText: (value: string) => void;
 }
 
 const GIG_CANDIDATE_LOOKUP_OPTIONAL_FORM_FIELDS = ['title', 'endDate', 'ticketsUrl'] as const;
 
-function useGigCandidateLookup(
-  form: UseFormReturn<AdminGigCandidateDraftFormValues>,
-  countries: CountryDisplayOption[],
-  localities: AdminLocality[],
-  venues: AdminVenue[],
-  setPosterFile: (file: File | null) => void,
-  setPosterUrl: (url: string) => void,
-): UseGigCandidateLookupResult {
+function useGigCandidateLookup(params: UseGigCandidateLookupParams): UseGigCandidateLookupResult {
+  const { form, countries, localities, venues, setPosterFile, setPosterUrl, setLocationHintText } =
+    params;
+
   const lookupMutation = useMutation({
-    mutationFn: (params: LookupAdminGigCandidateDraftParams) =>
-      lookupAdminGigCandidateDraft(params),
+    mutationFn: (params: LookupAdminGigDetailsParams) => lookupAdminGigDetails(params),
   });
 
   function applyGigCandidateLookupResult(result: AdminGigCandidateLookupResult) {
-    form.setValue('date', result.date, { shouldDirty: true });
+    const { gigDraft, locationHint } = result;
+
+    form.setValue('date', gigDraft.date, { shouldDirty: true });
     for (const fieldName of GIG_CANDIDATE_LOOKUP_OPTIONAL_FORM_FIELDS) {
-      const fieldValue = result[fieldName];
+      const fieldValue = gigDraft[fieldName];
       if (fieldValue) {
         form.setValue(fieldName, fieldValue, { shouldDirty: true });
       }
     }
-    if (result.country) {
-      const countryIso = result.country.toUpperCase();
-      form.setValue('countryIso', countryIso, { shouldDirty: true });
-      const localitySearchKey = toSearchKey(result.city ?? '');
+    const locationHintParts = [
+      locationHint.venue,
+      locationHint.locality,
+      locationHint.country,
+    ].filter((part) => part.length > 0);
+    setLocationHintText(locationHintParts.join(' · '));
+
+    if (locationHint.country) {
+      const countryIso = locationHint.country.toUpperCase();
+      const localitySearchKey = toSearchKey(locationHint.locality);
       const locality = localities.find(
         (candidate) =>
           candidate.countryIso === countryIso &&
@@ -98,22 +108,27 @@ function useGigCandidateLookup(
             (name) => toSearchKey(name) === localitySearchKey,
           ),
       );
-      form.setValue('localityId', locality?.id ?? '', { shouldDirty: true });
-      const venueSearchKey = toSearchKey(result.venue ?? '');
+      if (locality === undefined) {
+        return;
+      }
+
+      form.setValue('countryIso', countryIso, { shouldDirty: true });
+      form.setValue('localityId', locality.id, { shouldDirty: true });
+      const venueSearchKey = toSearchKey(locationHint.venue);
       const venue = venues.find(
         (candidate) =>
           candidate.isActive &&
-          candidate.localityId === locality?.id &&
+          candidate.localityId === locality.id &&
           [candidate.name, ...candidate.aliases].some(
             (name) => toSearchKey(name) === venueSearchKey,
           ),
       );
-      form.setValue('venueIds', venue === undefined ? [] : [venue.id], {
-        shouldDirty: true,
-      });
+      if (venue !== undefined) {
+        form.setValue('venueIds', [venue.id], { shouldDirty: true });
+      }
     }
-    if (result.posterUrl) {
-      const nextPosterUrl = result.posterUrl.trim();
+    if (gigDraft.posterUrl) {
+      const nextPosterUrl = gigDraft.posterUrl.trim();
       setPosterFile(null);
       setPosterUrl(nextPosterUrl);
       try {
@@ -128,7 +143,7 @@ function useGigCandidateLookup(
     }
   }
 
-  async function lookupGigCandidateDraft(): Promise<void> {
+  async function lookupGigDetails(): Promise<void> {
     if (lookupMutation.isPending) {
       return;
     }
@@ -164,27 +179,24 @@ function useGigCandidateLookup(
 
   return {
     isLookingUp: lookupMutation.isPending,
-    lookupGigCandidateDraft,
+    lookupGigDetails,
   };
 }
 
-export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraftFormProps) {
+export default function AdminGigCandidateForm(props: AdminGigCandidateFormProps) {
   const { communityOptions, countries, gigCandidate } = props;
 
   const router = useRouter();
   const queryClient = useQueryClient();
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState('');
+  const [locationHintText, setLocationHintText] = useState('');
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
-  const form = useForm<AdminGigCandidateDraftFormValues>({
-    resolver: zodResolver(
-      gigCandidate ? gigCandidateDraftFormSchema : createGigCandidateDraftFormSchema,
-    ),
+  const form = useForm<AdminGigCandidateFormValues>({
+    resolver: zodResolver(gigCandidate ? gigCandidateFormSchema : createGigCandidateFormSchema),
     defaultValues: gigCandidate
       ? mapGigCandidateToFormValues(gigCandidate)
-      : createDefaultGigCandidateDraftFormValues(
-          communityOptions.map((community) => community.value),
-        ),
+      : createDefaultGigCandidateFormValues(communityOptions.map((community) => community.value)),
   });
   const countryIso = useWatch({ control: form.control, name: 'countryIso' });
   const localityId = useWatch({ control: form.control, name: 'localityId' });
@@ -192,55 +204,41 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
     control: form.control,
     name: 'venueIds',
   });
-  const localitiesQuery = useQuery({
-    queryKey: adminKeys.localities(),
-    queryFn: fetchAdminLocalities,
+  const {
+    localitiesQuery,
+    venuesQuery,
+    localities,
+    venues,
+    countryOptions,
+    localityOptions,
+    venueOptions,
+  } = useAdminLocationCatalog({
+    countries,
+    countryIso,
+    localityId,
+    selectedVenueIds,
   });
-  const venuesQuery = useQuery({
-    queryKey: adminKeys.venues(),
-    queryFn: fetchAdminVenues,
-  });
-  const localities = localitiesQuery.data ?? [];
-  const venues = venuesQuery.data ?? [];
-  const countryOptions = countries.map((country) => ({
-    value: country.iso,
-    label: country.name,
-  }));
-  const localityOptions = localities
-    .filter((locality) => locality.countryIso === countryIso)
-    .map((locality) => ({
-      value: locality.id,
-      label:
-        locality.qualifier === undefined
-          ? locality.name
-          : `${locality.name} (${locality.qualifier})`,
-    }));
-  const venueOptions = venues
-    .filter(
-      (venue) =>
-        venue.localityId === localityId && (venue.isActive || selectedVenueIds.includes(venue.id)),
-    )
-    .map((venue) => ({ value: venue.id, label: venue.name }));
-  const { isLookingUp, lookupGigCandidateDraft } = useGigCandidateLookup(
+  const { isLookingUp, lookupGigDetails } = useGigCandidateLookup({
     form,
     countries,
     localities,
     venues,
     setPosterFile,
     setPosterUrl,
-  );
+    setLocationHintText,
+  });
   let existingPosterUrl = gigCandidate?.gigDraft.posterUrl;
   if (existingPosterUrl !== undefined && gigCandidate !== undefined) {
     existingPosterUrl = buildVersionedAdminPosterUrl(existingPosterUrl, gigCandidate.version);
   }
 
   const saveMutation = useMutation({
-    mutationFn: (values: AdminGigCandidateDraftFormValues) => {
+    mutationFn: (values: AdminGigCandidateFormValues) => {
       const gigDraft = mapGigCandidateFormValuesToDraft(values);
       const poster = { file: posterFile, url: posterUrl };
       const localityIdValue = values.localityId.trim();
       if (gigCandidate) {
-        const params: UpdateAdminGigCandidateDraftParams = {
+        const params: UpdateAdminGigCandidateGigDraftParams = {
           gigCandidateId: gigCandidate.id,
           expectedVersion: gigCandidate.version,
           gigDraft,
@@ -249,7 +247,7 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
         if (localityIdValue.length > 0) {
           params.localityId = localityIdValue;
         }
-        return updateAdminGigCandidateDraft(params);
+        return updateAdminGigCandidateGigDraft(params);
       }
 
       const params: CreateAdminGigCandidateParams = {
@@ -445,19 +443,26 @@ export default function AdminGigCandidateDraftForm(props: AdminGigCandidateDraft
             />
           </div>
 
-          <div className="flex items-center gap-3">
-            <FieldSeparator className="flex-1" />
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={isLookingUp || saveMutation.isPending || localityId.length === 0}
-              onClick={() => {
-                void lookupGigCandidateDraft();
-              }}
-            >
-              {isLookingUp ? 'Looking up…' : 'Find info with AI'}
-            </Button>
-            <FieldSeparator className="flex-1" />
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <FieldSeparator className="flex-1" />
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={isLookingUp || saveMutation.isPending || localityId.length === 0}
+                onClick={() => {
+                  void lookupGigDetails();
+                }}
+              >
+                {isLookingUp ? 'Looking up…' : 'Find info with AI'}
+              </Button>
+              <FieldSeparator className="flex-1" />
+            </div>
+            {locationHintText.length > 0 ? (
+              <p className="text-center text-sm text-muted-foreground">
+                AI suggested location: {locationHintText}
+              </p>
+            ) : null}
           </div>
 
           <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">

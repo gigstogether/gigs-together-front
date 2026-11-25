@@ -18,6 +18,10 @@ vi.mock('@/app/admin/gigs/_hooks/use-admin-gig-actions', () => ({
 
 const gig: AdminGigDetail = {
   publicId: 'gig-2026-09-17',
+  communityIds: ['community-id'],
+  venueIds: ['venue-id'],
+  locality: { id: 'locality-id', countryIso: 'ES', name: 'Barcelona' },
+  venues: [{ id: 'venue-id', name: 'Venue' }],
   title: 'Gig',
   isVisible: true,
   version: 3,
@@ -28,9 +32,6 @@ const gig: AdminGigDetail = {
     origin: { type: 'admin' },
   },
   date: '2026-09-17',
-  city: 'barcelona',
-  country: 'ES',
-  venue: 'Venue',
 };
 
 describe('AdminGigPreviewActions', () => {

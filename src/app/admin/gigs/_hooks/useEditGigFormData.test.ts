@@ -39,6 +39,14 @@ interface RenderUseEditGigFormDataResult {
 function createAdminGigFormData(overrides: Partial<AdminGigFormData> = {}): AdminGigFormData {
   return {
     publicId: 'gig-public-id',
+    communityIds: ['community-id'],
+    venueIds: ['venue-id'],
+    locality: {
+      id: 'locality-id',
+      countryIso: 'ES',
+      name: 'Barcelona',
+    },
+    venues: [{ id: 'venue-id', name: 'Razzmatazz' }],
     title: 'Arctic Monkeys',
     isVisible: false,
     version: 3,
@@ -50,9 +58,6 @@ function createAdminGigFormData(overrides: Partial<AdminGigFormData> = {}): Admi
     },
     date: '2026-07-01T20:00:00.000Z',
     endDate: '2026-07-02T22:00:00.000Z',
-    city: 'Barcelona',
-    country: 'es',
-    venue: 'Razzmatazz',
     ticketsUrl: 'https://tickets.example/gig',
     posterUrl: 'https://images.example/poster.png',
     ...overrides,
@@ -116,12 +121,13 @@ describe('useEditGigFormData', () => {
     );
     expect(result.current.editGigData.gigVersion).toBe(3);
     expect(result.current.form.getValues()).toEqual({
+      communityIds: ['community-id'],
+      countryIso: 'ES',
+      localityId: 'locality-id',
+      venueIds: ['venue-id'],
       title: 'Arctic Monkeys',
       date: '2026-07-01',
       endDate: '2026-07-02',
-      city: 'Barcelona',
-      country: 'ES',
-      venue: 'Razzmatazz',
       ticketsUrl: 'https://tickets.example/gig',
     });
   });
@@ -184,12 +190,13 @@ describe('useEditGigFormData', () => {
 
     expect(vi.mocked(fetchAdminGigByPublicId)).toHaveBeenCalledTimes(2);
     expect(result.current.form.getValues()).toEqual({
+      communityIds: ['community-id'],
+      countryIso: 'ES',
+      localityId: 'locality-id',
+      venueIds: ['venue-id'],
       title: 'Arctic Monkeys',
       date: '2026-07-01',
       endDate: '2026-07-02',
-      city: 'Barcelona',
-      country: 'ES',
-      venue: 'Razzmatazz',
       ticketsUrl: 'https://tickets.example/gig',
     });
   });
