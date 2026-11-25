@@ -1,7 +1,7 @@
 import {
-  createDefaultGigCandidateDraftFormValues,
-  createGigCandidateDraftFormSchema,
-  gigCandidateDraftFormSchema,
+  createDefaultGigCandidateFormValues,
+  createGigCandidateFormSchema,
+  gigCandidateFormSchema,
   mapGigCandidateFormValuesToDraft,
   mapGigCandidateToFormValues,
 } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate-form';
@@ -20,12 +20,12 @@ const emptyDraft = {
 
 describe('admin-gig-candidate-form', () => {
   it('should allow an empty location in an existing draft', () => {
-    expect(gigCandidateDraftFormSchema.safeParse(emptyDraft).success).toBe(true);
+    expect(gigCandidateFormSchema.safeParse(emptyDraft).success).toBe(true);
   });
 
   it('should reject a title longer than 300 characters', () => {
     expect(
-      gigCandidateDraftFormSchema.safeParse({
+      gigCandidateFormSchema.safeParse({
         ...emptyDraft,
         title: 'A'.repeat(301),
       }).success,
@@ -33,9 +33,9 @@ describe('admin-gig-candidate-form', () => {
   });
 
   it('should require a Community, Country, Locality, title, and date when creating', () => {
-    expect(createGigCandidateDraftFormSchema.safeParse(emptyDraft).success).toBe(false);
+    expect(createGigCandidateFormSchema.safeParse(emptyDraft).success).toBe(false);
     expect(
-      createGigCandidateDraftFormSchema.safeParse({
+      createGigCandidateFormSchema.safeParse({
         ...emptyDraft,
         countryIso: 'ES',
         localityId: 'locality-id',
@@ -46,11 +46,11 @@ describe('admin-gig-candidate-form', () => {
   });
 
   it('should select the only Community in new draft defaults', () => {
-    expect(createDefaultGigCandidateDraftFormValues(['community-id'])).toEqual({
+    expect(createDefaultGigCandidateFormValues(['community-id'])).toEqual({
       ...emptyDraft,
       countryIso: 'ES',
     });
-    expect(createDefaultGigCandidateDraftFormValues(['one', 'two']).communityIds).toEqual([]);
+    expect(createDefaultGigCandidateFormValues(['one', 'two']).communityIds).toEqual([]);
   });
 
   it('should map the candidate location and Venue assignments to form values', () => {

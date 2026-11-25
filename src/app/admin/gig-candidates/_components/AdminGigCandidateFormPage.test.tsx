@@ -13,7 +13,7 @@ vi.mock('@/lib/countries.server', () => ({ getCountries: getCountriesMock }));
 vi.mock('@/lib/community/community-display-options.server', () => ({
   getCommunityDisplayOptions: getCommunityDisplayOptionsMock,
 }));
-vi.mock('@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm', () => ({
+vi.mock('@/app/admin/gig-candidates/_components/AdminGigCandidateForm', () => ({
   default: (props: { communityOptions: { value: string }[] }) => (
     <div data-community-id={props.communityOptions[0]?.value}>Create Gig Candidate form</div>
   ),

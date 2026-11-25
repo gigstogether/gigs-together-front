@@ -20,14 +20,38 @@ describe('env/server', () => {
     vi.unstubAllEnvs();
   });
 
-  describe('BRAND_NAME', () => {
-    it('should use the branded site name when env var is missing', async () => {
+  describe('metadata defaults', () => {
+    it.each([undefined, '', '   '])(
+      'should use metadata defaults when env vars are %j',
+      async (value) => {
+        vi.stubEnv('NODE_ENV', 'test');
+        vi.stubEnv('BRAND_NAME', value);
+        vi.stubEnv('SITE_PREVIEW_TITLE', value);
+        vi.stubEnv('SITE_PREVIEW_DESCRIPTION', value);
+
+        const serverEnvModule = await importServerEnv();
+
+        expect(serverEnvModule.serverEnv).toMatchObject({
+          brandName: 'Gigs Together!',
+          sitePreviewTitle: 'Gigs Together!',
+          sitePreviewDescription: 'Find gigs and company in your city.',
+        });
+      },
+    );
+
+    it('should use trimmed metadata when custom values are configured', async () => {
       vi.stubEnv('NODE_ENV', 'test');
-      vi.stubEnv('BRAND_NAME', undefined);
+      vi.stubEnv('BRAND_NAME', ' Custom brand ');
+      vi.stubEnv('SITE_PREVIEW_TITLE', ' Custom title ');
+      vi.stubEnv('SITE_PREVIEW_DESCRIPTION', ' Custom description ');
 
       const serverEnvModule = await importServerEnv();
 
-      expect(serverEnvModule.serverEnv.brandName).toBe('Gigs Together!');
+      expect(serverEnvModule.serverEnv).toMatchObject({
+        brandName: 'Custom brand',
+        sitePreviewTitle: 'Custom title',
+        sitePreviewDescription: 'Custom description',
+      });
     });
   });
 

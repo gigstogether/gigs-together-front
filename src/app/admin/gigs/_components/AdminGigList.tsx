@@ -1,15 +1,15 @@
-import type { AdminGigQueueItem } from '@/app/admin/gigs/_lib/types';
+import type { AdminGigListItem } from '@/app/admin/gigs/_lib/types';
 import { formatAdminGigListMeta } from '@/app/admin/gigs/_lib/admin-gig-format';
 import { cn } from '@/lib/utils';
 
-interface AdminGigQueueListProps {
-  readonly gigs: readonly AdminGigQueueItem[];
+interface AdminGigListProps {
+  readonly gigs: readonly AdminGigListItem[];
   readonly selectedPublicId: string | null;
   readonly onSelect: (publicId: string) => void;
   readonly emptyMessage: string;
 }
 
-export default function AdminGigQueueList(props: AdminGigQueueListProps) {
+export default function AdminGigList(props: AdminGigListProps) {
   const { gigs, selectedPublicId, onSelect, emptyMessage } = props;
 
   if (gigs.length === 0) {

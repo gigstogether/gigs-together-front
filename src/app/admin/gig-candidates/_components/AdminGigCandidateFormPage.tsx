@@ -1,6 +1,6 @@
 import AdminGigCandidateBackLink from '@/app/admin/gig-candidates/_components/AdminGigCandidateBackLink';
 import AdminGigCandidateDetailPageClient from '@/app/admin/gig-candidates/_components/AdminGigCandidateDetailPageClient';
-import AdminGigCandidateDraftForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm';
+import AdminGigCandidateForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateForm';
 import { getCountries } from '@/lib/countries.server';
 import { createCountryDisplayOptions } from '@/lib/i18n/country-display-name';
 import { getCommunityDisplayOptions } from '@/lib/community/community-display-options.server';
@@ -33,7 +33,7 @@ export default async function AdminGigCandidateFormPage(props: AdminGigCandidate
       {props.mode === 'create' ? (
         <>
           <AdminGigCandidateBackLink />
-          <AdminGigCandidateDraftForm
+          <AdminGigCandidateForm
             countries={countryOptions}
             communityOptions={communityOptions}
           />

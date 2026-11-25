@@ -15,7 +15,7 @@ const { fetchGigCandidateMock } = vi.hoisted(() => ({
 vi.mock('@/app/admin/_lib/admin-api', () => ({
   fetchAdminGigCandidateById: fetchGigCandidateMock,
 }));
-vi.mock('@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm', () => ({
+vi.mock('@/app/admin/gig-candidates/_components/AdminGigCandidateForm', () => ({
   default: () => <div data-testid="gigCandidate-draft-form" />,
 }));
 vi.mock('@/app/admin/gig-candidates/_components/AdminGigCandidateCard', () => ({

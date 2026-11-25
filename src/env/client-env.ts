@@ -17,14 +17,12 @@ const clientEnvSchema = z
     NEXT_PUBLIC_APP_API_BASE_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_TELEGRAM_URL: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_GITHUB_URL: optionalTrimmedStringFromEnvSchema,
-    NEXT_PUBLIC_SUGGEST_GIG_ENABLED: optionalBooleanFromEnvSchema.default(false),
-    NEXT_PUBLIC_AUTH_ENABLED: optionalBooleanFromEnvSchema.default(false),
+    NEXT_PUBLIC_SUGGEST_GIG_ENABLED: optionalBooleanFromEnvSchema,
+    NEXT_PUBLIC_AUTH_ENABLED: optionalBooleanFromEnvSchema,
     NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID: createOptionalPositiveIntegerFromEnvSchema(
       'NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID',
     ),
-    NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY: optionalTrimmedStringFromEnvSchema.default(
-      DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY,
-    ),
+    NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY: optionalTrimmedStringFromEnvSchema,
     NEXT_PUBLIC_FEED_PAGE_SIZE: createOptionalPositiveIntegerFromEnvSchema(
       'NEXT_PUBLIC_FEED_PAGE_SIZE',
     ),
@@ -68,10 +66,12 @@ export const clientEnv = {
   appApiBaseUrl: parsedClientEnv.NEXT_PUBLIC_APP_API_BASE_URL,
   telegramUrl: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_URL,
   githubUrl: parsedClientEnv.NEXT_PUBLIC_GITHUB_URL,
-  isPublicSuggestGigEnabled: parsedClientEnv.NEXT_PUBLIC_SUGGEST_GIG_ENABLED,
-  isAuthEnabled: parsedClientEnv.NEXT_PUBLIC_AUTH_ENABLED,
+  isPublicSuggestGigEnabled: parsedClientEnv.NEXT_PUBLIC_SUGGEST_GIG_ENABLED ?? false,
+  isAuthEnabled: parsedClientEnv.NEXT_PUBLIC_AUTH_ENABLED ?? false,
   telegramOidcClientId: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID,
-  telegramClientProfileStorageKey: parsedClientEnv.NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY,
+  telegramClientProfileStorageKey:
+    parsedClientEnv.NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY ??
+    DEFAULT_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY,
   feedPageSize: parsedClientEnv.NEXT_PUBLIC_FEED_PAGE_SIZE ?? DEFAULT_FEED_PAGE_SIZE,
   feedCalendarDatesStaleTimeMs:
     parsedClientEnv.NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS ??

@@ -46,12 +46,13 @@ function buildEditGigFormQueryData(data: AdminGigFormData): EditGigFormQueryData
   return {
     formValues: {
       ...defaultGigFormValues,
+      communityIds: data.communityIds,
+      countryIso: data.locality.countryIso,
+      localityId: data.locality.id,
+      venueIds: data.venueIds,
       title: data.title,
       date,
       endDate: endDate ?? '',
-      city: data.city,
-      country: data.country.toUpperCase(),
-      venue: data.venue,
       ticketsUrl: data.ticketsUrl,
     },
     existingPosterUrl,

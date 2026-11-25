@@ -28,7 +28,7 @@ describe('AdminShell', () => {
       'Gigs',
       'Gig candidates',
       'Locations',
-      'Translations',
+      'Text content',
       'Locales',
       'Admins',
     ]);

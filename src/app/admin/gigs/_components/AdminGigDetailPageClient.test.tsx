@@ -12,11 +12,12 @@ vi.mock('@/app/admin/_lib/admin-api', () => ({
 
 const gigFormData: AdminGigFormData = {
   publicId: 'radiohead-barcelona',
+  communityIds: ['community-id'],
+  venueIds: ['venue-id'],
+  locality: { id: 'locality-id', countryIso: 'ES', name: 'Barcelona' },
+  venues: [{ id: 'venue-id', name: 'Palau Sant Jordi' }],
   title: 'Radiohead',
   date: '2026-06-12',
-  city: 'barcelona',
-  country: 'ES',
-  venue: 'Palau Sant Jordi',
   ticketsUrl: 'https://tickets.example',
   isVisible: false,
   version: 3,

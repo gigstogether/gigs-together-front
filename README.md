@@ -37,55 +37,17 @@ npm install
 
 This also runs the `prepare` script and installs Husky git hooks.
 
-### 2. Create environment variables
+### 2. Configure the environment
 
-Copy `.env.example` into a local env file:
+Copy [`.env.example`](./.env.example) to `.env` in the repository root, then configure the API and frontend base URLs.
 
-You can also use `.env`, but `.env.local` is the safer default for machine-specific values.
-
-### 3. Fill in the required env vars
-
-What they are used for:
-
-| Variable                                          | Required?                        | Purpose                                                                                                                                             |
-| ------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_APP_API_BASE_URL`                    | Required                         | Base URL for backend API requests. Without it, direct API calls throw at runtime.                                                                   |
-| `NEXT_PUBLIC_APP_BASE_URL`                        | Optional\*                       | Public site base URL used for metadata, sitemap, and robots. \*Recommended; required at runtime for `/sitemap.xml` and `/robots.txt`.               |
-| `NEXT_PUBLIC_GITHUB_URL`                          | Optional                         | GitHub link rendered in the header.                                                                                                                 |
-| `NEXT_PUBLIC_TELEGRAM_URL`                        | Optional                         | Telegram link used in the header and as a fallback on gig cards.                                                                                    |
-| `NEXT_PUBLIC_AUTH_ENABLED`                        | Optional                         | Shows/hides auth menu button. Parsed as boolean. Default: `false`.                                                                                  |
-| `NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID`             | Required\*                       | Public Telegram Login Client ID from BotFather. Must be a positive integer. \*Required when `NEXT_PUBLIC_AUTH_ENABLED` is `true`.                   |
-| `NEXT_PUBLIC_TELEGRAM_CLIENT_PROFILE_STORAGE_KEY` | Optional                         | localStorage key for the cached Telegram display profile. Default: `gt_tg_client_profile`.                                                          |
-| `NEXT_PUBLIC_FEED_PAGE_SIZE`                      | Optional                         | Feed page size. Must be a positive integer. Default is `10`.                                                                                        |
-| `NEXT_PUBLIC_FEED_CALENDAR_DATES_STALE_TIME_MS`   | Optional                         | Calendar dates query stale time in milliseconds. Must be a positive integer. Default is `600000` (10 minutes).                                      |
-| `NEXT_PUBLIC_SUGGEST_GIG_ENABLED`                 | Optional                         | Shows/hides the public "Suggest a gig" header action. Parsed as boolean. Default: `false`. Admins always see the button when signed in.             |
-| `SITE_PREVIEW_TITLE`                              | Optional                         | SEO/social preview title. Defaults to `Gigs Together!`.                                                                                             |
-| `SITE_PREVIEW_DESCRIPTION`                        | Optional                         | SEO/social preview description. Defaults to a short product blurb.                                                                                  |
-| `BRAND_NAME`                                      | Optional                         | Brand name used in metadata. Defaults to `Gigs Together`.                                                                                           |
-| `ALLOWED_DEV_ORIGINS`                             | Optional                         | Comma-separated development hostnames allowed by Next.js `allowedDevOrigins`, without a protocol or port (for example `dev.example.com,localhost`). |
-| `FEED_REVALIDATE_SECRET`                          | Required for revalidation routes | Secret checked by `/api/revalidate/feed`.                                                                                                           |
-| `TRANSLATIONS_REVALIDATE_SECRET`                  | Required for revalidation routes | Secret checked by `/api/revalidate/translations` (`x-translations-revalidate-secret`).                                                              |
-| `TRANSLATIONS_REVALIDATE_SECONDS`                 | Optional                         | Server-side cache revalidation period for translation fetching. Positive integer in seconds, default `3600`.                                        |
+See the [environment reference](./docs/configuration/ENVIRONMENT.md) for required settings, defaults, and loading rules.
+Configure public variables before building the app.
 
 ## Telegram Mini App setup
 
-BotFather must define two named Mini App direct links for each environment:
-
-- `https://t.me/<bot_username>/suggest` points to `https://<frontend-host>/suggest/launch`. This is the universal suggestion entry point for browsers and the Telegram Mini App.
-- `https://t.me/<bot_username>/admin` points to `https://<frontend-host>/admin/telegram`. This is the Telegram dispatcher for Gig and GigCandidate admin links generated by the backend.
-
-Keep Same-Origin Restriction enabled. Main App and Menu Button are optional and are not used by backend-generated edit links. Browser authentication additionally requires Web Login to allow the frontend origin and its Client ID to match backend `TELEGRAM_OIDC_CLIENT_ID` and frontend `NEXT_PUBLIC_TELEGRAM_OIDC_CLIENT_ID`.
-
-The frontend and backend mirror this launch-action enum contract:
-
-| Action enum member                            | `startapp` value                    | Admin destination                            |
-| --------------------------------------------- | ----------------------------------- | -------------------------------------------- |
-| `TelegramMiniAppStartAction.EditGig`          | `editGig-<publicId>`                | `/admin/gigs/:publicId/edit`                 |
-| `TelegramMiniAppStartAction.EditGigCandidate` | `editGigCandidate-<gigCandidateId>` | `/admin/gig-candidates/:gigCandidateId/edit` |
-| `TelegramMiniAppStartAction.OpenGig`          | `openGig-<publicId>`                | `/admin/gigs/:publicId`                      |
-| `TelegramMiniAppStartAction.OpenGigCandidate` | `openGigCandidate-<gigCandidateId>` | `/admin/gig-candidates/:gigCandidateId`      |
-
-The action separator is a hyphen. The `/admin/telegram` parser removes the exact known action prefix and validates the remaining identifier, so hyphens inside a Gig `publicId` are preserved. Missing, malformed, untyped, and unknown actions show an explicit destructive notification and then return the administrator to `/admin`. `/suggest/launch` does not process admin actions: it sends an administrator to the new GigCandidate form and a non-admin user to `/suggest`.
+See the [Telegram integration guide](./docs/integrations/TELEGRAM.md) for frontend setup and checks, with a link to the
+shared BotFather setup and `startapp` contract.
 
 ## Running the app locally
 
@@ -95,8 +57,8 @@ Start the development server:
 npm run dev
 ```
 
-This uses Webpack for a conservative development setup with reliable Hot Module Replacement.
-Turbopack remains available for comparison or troubleshooting:
+This uses Webpack for a conservative development setup with reliable Hot Module Replacement. Turbopack remains available
+for comparison or troubleshooting:
 
 ```bash
 npm run dev:turbo
@@ -118,11 +80,24 @@ Useful routes:
 - `/suggest/launch` -> Telegram-aware redirect into `/suggest` or the moderator gig flow
 - `/admin` -> moderator dashboard
 - `/admin/telegram` -> Telegram Mini App dispatcher for admin edit actions
-- `/admin/gigs` -> gig moderation queue and create/edit flows
+- `/admin/gigs` -> gig moderation list and create/edit flows
 - `/admin/locales` -> locale activation and ordering
 - `/admin/translations` -> translations placeholder page
 - `/admin/admins` -> moderator access placeholder page
 - `/about` -> about page
+
+## Local HTTPS access with Cloudflare Tunnel
+
+This tunnel provides public HTTPS access to the local frontend for browser and Telegram Mini App testing.
+
+To start an already configured tunnel, use the name chosen during creation:
+
+```text
+cloudflared tunnel run <tunnel-name>
+```
+
+See the [Cloudflare Tunnel development guide](./docs/development/CLOUDFLARE_TUNNEL.md) for frontend routing, environment
+settings, and local startup.
 
 ## Production build and local production run
 
@@ -218,7 +193,8 @@ Key areas:
 - This frontend depends on an external backend API.
 - Most data fetching goes through `NEXT_PUBLIC_APP_API_BASE_URL`.
 - Without a reachable backend, the feed, translations, countries list, and gig forms will not function correctly.
-- The revalidation route `src/app/api/revalidate/feed/route.ts` expects the `x-revalidate-secret` header to match `FEED_REVALIDATE_SECRET`.
+- The revalidation route `src/app/api/revalidate/feed/route.ts` expects the `x-revalidate-secret` header to match
+  `FEED_REVALIDATE_SECRET`.
 
 ## CI and branch automation
 
@@ -253,23 +229,20 @@ Use the same route in three places to identify which development layer is stale:
 2. Open the same route through the public tunnel hostname in a regular browser.
 3. Open the route in the Telegram Mini App.
 
-After saving a source file, wait for a successful compilation in the development-server
-terminal. If it is not obvious whether a functional change worked, make a temporary visible
-marker change alongside it, such as a unique label, and remove the marker after the check.
+After saving a source file, wait for a successful compilation in the development-server terminal. If it is not obvious
+whether a functional change worked, make a temporary visible marker change alongside it, such as a unique label, and
+remove the marker after the check.
 
-- If the marker is missing on `localhost`, the development server did not compile or serve the
-  current source. Check the terminal error and confirm that the server was started from this
-  repository.
-- If `localhost` is current but the public tunnel URL is stale, check the tunnel and make sure its
-  hostname, without `https://` or a port, is present in `ALLOWED_DEV_ORIGINS`. Restart the
-  development server after changing this variable.
-- If the public tunnel URL is current in the regular browser but Telegram is stale, the remaining
-  state is inside Telegram's WebView. Close and reopen only the Mini App before restarting the
-  entire Telegram client.
+- If the marker is missing on `localhost`, the development server did not compile or serve the current source. Check the
+  terminal error and confirm that the server was started from this repository.
+- If `localhost` is current but the public tunnel URL is stale, check the tunnel and make sure its hostname, without
+  `https://` or a port, is present in `ALLOWED_DEV_ORIGINS`. Restart the development server after changing this
+  variable.
+- If the public tunnel URL is current in the regular browser but Telegram is stale, the remaining state is inside
+  Telegram's WebView. Close and reopen only the Mini App before restarting the entire Telegram client.
 
-Do not delete `.next` as part of the normal feedback loop. Stop the development server and remove
-`.next` only when both `localhost` and the tunnel remain stale after a successful compilation and a
-server restart.
+Do not delete `.next` as part of the normal feedback loop. Stop the development server and remove `.next` only when both
+`localhost` and the tunnel remain stale after a successful compilation and a server restart.
 
 For a one-off browser check, a hard refresh without cache is:
 
@@ -283,11 +256,14 @@ Set `NEXT_PUBLIC_APP_API_BASE_URL` in your local env file and restart the dev se
 
 ### Revalidation endpoint returns `401`
 
-Send the `x-revalidate-secret` header and make sure it matches `FEED_REVALIDATE_SECRET`.
+Use the secret header for the requested route and make sure it matches the corresponding server setting. Feed and
+translation revalidation use different headers; see
+[Server variables](./docs/configuration/ENVIRONMENT.md#server-variables).
 
 ### Revalidation endpoint returns `503`
 
-The server is missing `FEED_REVALIDATE_SECRET`.
+Configure the requested route's server-only secret and restart the server. See
+[Server variables](./docs/configuration/ENVIRONMENT.md#server-variables).
 
 ## License
 

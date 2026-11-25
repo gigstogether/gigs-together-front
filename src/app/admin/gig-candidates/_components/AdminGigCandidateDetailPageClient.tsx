@@ -7,7 +7,7 @@ import { fetchAdminGigCandidateById } from '@/app/admin/_lib/admin-api';
 import { adminKeys } from '@/app/admin/_lib/adminKeys';
 import AdminGigCandidateBackLink from '@/app/admin/gig-candidates/_components/AdminGigCandidateBackLink';
 import AdminGigCandidateCard from '@/app/admin/gig-candidates/_components/AdminGigCandidateCard';
-import AdminGigCandidateDraftForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateDraftForm';
+import AdminGigCandidateForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateForm';
 import { GigCandidateStatusAPI } from '@/app/admin/gig-candidates/_lib/admin-gig-candidate';
 import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
@@ -56,7 +56,7 @@ export default function AdminGigCandidateDetailPageClient(
     const gigCandidate = gigCandidateQuery.data;
 
     content = (
-      <AdminGigCandidateDraftForm
+      <AdminGigCandidateForm
         key={`${gigCandidate.id}:${gigCandidate.version}`}
         countries={props.countries}
         communityOptions={props.communityOptions}

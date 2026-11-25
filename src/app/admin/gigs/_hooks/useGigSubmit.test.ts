@@ -22,11 +22,12 @@ vi.mock('@/hooks/use-toast', () => ({
 
 const DEFAULT_SUBMIT_VALUES: GigFormValues = {
   ...defaultGigFormValues,
+  communityIds: ['community-id'],
+  countryIso: 'ES',
+  localityId: 'locality-id',
+  venueIds: ['venue-id'],
   title: 'Arctic Monkeys',
   date: '2026-07-01',
-  city: 'Barcelona',
-  country: 'ES',
-  venue: 'Razzmatazz',
   ticketsUrl: 'https://tickets.example/gig',
 };
 
@@ -69,12 +70,11 @@ describe('useGigSubmit', () => {
 
     expect(apiCall).toHaveBeenCalledWith({
       gig: {
+        communityIds: ['community-id'],
+        venueIds: ['venue-id'],
         title: 'Arctic Monkeys',
         date: '2026-07-01',
         endDate: undefined,
-        city: 'Barcelona',
-        country: 'ES',
-        venue: 'Razzmatazz',
         ticketsUrl: 'https://tickets.example/gig',
       },
       poster: {
