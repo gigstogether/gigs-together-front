@@ -83,11 +83,7 @@ function GigLocation(props: GigLocationProps) {
     ? `${props.gig.locality.name} (${props.gig.locality.qualifier})`
     : props.gig.locality.name;
   const countryName = getCountryDisplayName(props.gig.locality.countryIso, props.locale);
-  const locationContext = [localityName, countryName].join(', ');
-  const fullLocation = [
-    props.gig.venues.map((venue) => venue.name).join(', '),
-    locationContext,
-  ].join(' · ');
+  const venueNames = props.gig.venues.map((venue) => venue.name).join(', ');
 
   return (
     <>
@@ -97,7 +93,7 @@ function GigLocation(props: GigLocationProps) {
       />
       <span
         className="min-w-0 flex-1 truncate"
-        title={fullLocation}
+        title={venueNames}
       >
         {props.gig.venues.map((venue, index) => {
           const mapsHref = buildGoogleMapsSearchUrl(
@@ -119,7 +115,6 @@ function GigLocation(props: GigLocationProps) {
             </span>
           );
         })}
-        <span>{` · ${locationContext}`}</span>
       </span>
     </>
   );
