@@ -158,7 +158,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
         onSubmit={form.handleSubmit(onSubmit, handleInvalidSubmit)}
         aria-labelledby="suggest-gig-heading"
         aria-describedby={description ? 'suggest-gig-description' : undefined}
-        className="flex min-h-0 flex-col overflow-hidden rounded-[inherit]"
+        className="flex min-h-0 flex-col overflow-clip rounded-[inherit]"
       >
         <div className="min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-gutter:stable_both-edges]">
           <CardHeader className="px-6 sm:px-2">
