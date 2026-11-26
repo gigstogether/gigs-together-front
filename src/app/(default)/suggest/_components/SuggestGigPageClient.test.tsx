@@ -28,11 +28,12 @@ const LOCALITY = {
   timeZone: 'Europe/Madrid',
 };
 
-function renderPage(communityOptions = COMMUNITY_OPTIONS) {
+function renderPage(communityOptions = COMMUNITY_OPTIONS, communitySelectionHint?: string) {
   return render(
     <SuggestGigPageClient
       communityOptions={communityOptions}
       countries={[{ iso: 'ES', name: 'Spain' }]}
+      communitySelectionHint={communitySelectionHint}
     />,
     { wrapper: createQueryClientWrapper(createTestQueryClient()) },
   );
@@ -116,5 +117,11 @@ describe('SuggestGigPageClient', () => {
     fireEvent.click(screen.getByRole('combobox', { name: 'Choose a community' }));
 
     expect(screen.getByText('No communities found.')).toBeInTheDocument();
+  });
+
+  it('should omit selection information when the full gig form is displayed', () => {
+    renderPage([COMMUNITY_OPTIONS[0]], 'Choose a community to share your gig with.');
+
+    expect(screen.queryByRole('button', { name: 'Community information' })).not.toBeInTheDocument();
   });
 });

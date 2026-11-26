@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import SuggestPage from './page';
 import type { V1TranslationsByNamespace } from '@/lib/api-boundary-schemas';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 
-interface MissingDescriptionCase {
+interface MissingTranslationCase {
   condition: string;
   translations: V1TranslationsByNamespace;
 }
@@ -71,7 +71,7 @@ describe('SuggestPage', () => {
     );
   });
 
-  it.each<MissingDescriptionCase>([
+  it.each<MissingTranslationCase>([
     { condition: 'the namespace is absent', translations: {} },
     { condition: 'the key is absent', translations: { suggest: {} } },
     {
@@ -88,5 +88,40 @@ describe('SuggestPage', () => {
     expect(screen.getByRole('form', { name: 'Suggest a gig' })).not.toHaveAttribute(
       'aria-describedby',
     );
+  });
+
+  it('should display community information from the backend when the hint translation exists', async () => {
+    const hint = 'Choose the community you would like to share this gig with.';
+
+    await renderPage({
+      suggest: {
+        communitySelectionHint: { value: hint, format: 'plain', kind: 'text' },
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Community information' }));
+
+    expect(screen.getByRole('dialog', { name: 'Community information' })).toHaveTextContent(hint);
+    expect(screen.getByRole('combobox', { name: 'Choose a community' })).not.toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+  });
+
+  it.each<MissingTranslationCase>([
+    { condition: 'the namespace is absent', translations: {} },
+    { condition: 'the key is absent', translations: { suggest: {} } },
+    {
+      condition: 'the translation is empty',
+      translations: {
+        suggest: {
+          communitySelectionHint: { value: '', format: 'plain', kind: 'text' },
+        },
+      },
+    },
+  ])('should omit the information icon when $condition', async ({ translations }) => {
+    await renderPage(translations);
+
+    expect(screen.queryByRole('button', { name: 'Community information' })).not.toBeInTheDocument();
   });
 });

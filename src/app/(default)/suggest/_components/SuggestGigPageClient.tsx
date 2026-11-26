@@ -11,10 +11,11 @@ interface SuggestGigPageClientProps {
   communityOptions: CommunityDisplayOption[];
   countries: CountryDisplayOption[];
   description?: string;
+  communitySelectionHint?: string;
 }
 
 export default function SuggestGigPageClient(props: SuggestGigPageClientProps) {
-  const { communityOptions, countries, description } = props;
+  const { communityOptions, countries, description, communitySelectionHint } = props;
 
   const [initialCommunityId, setInitialCommunityId] = useState<string | null>(() =>
     communityOptions.length === 1 ? communityOptions[0].value : null,
@@ -25,6 +26,7 @@ export default function SuggestGigPageClient(props: SuggestGigPageClientProps) {
       <SuggestGigCommunitySelection
         communityOptions={communityOptions}
         description={description}
+        communitySelectionHint={communitySelectionHint}
         onSelect={setInitialCommunityId}
       />
     );

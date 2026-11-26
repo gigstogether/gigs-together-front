@@ -23,6 +23,16 @@ export default async function SuggestPage() {
           namespace: TRANSLATION_NAMESPACE,
           key: 'description',
         });
+  const communitySelectionHintEntry =
+    i18n.translations[TRANSLATION_NAMESPACE]?.communitySelectionHint;
+  const communitySelectionHint =
+    communitySelectionHintEntry === undefined
+      ? undefined
+      : resolveTranslationValue({
+          entry: communitySelectionHintEntry,
+          namespace: TRANSLATION_NAMESPACE,
+          key: 'communitySelectionHint',
+        });
   const countryOptions = createCountryDisplayOptions(
     countries.map((country) => country.iso),
     'en',
@@ -34,6 +44,7 @@ export default async function SuggestPage() {
           communityOptions={communityOptions}
           countries={countryOptions}
           description={description}
+          communitySelectionHint={communitySelectionHint}
         />
       </SuggestAuthGate>
     </div>
