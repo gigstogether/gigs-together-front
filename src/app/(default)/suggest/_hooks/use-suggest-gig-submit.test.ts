@@ -7,7 +7,6 @@ import type {
   GigCandidateCreateResponse,
   GigCandidateCreateApiParams,
 } from '@/app/(default)/suggest/_lib/gig-candidate-api';
-import { createDefaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 import { ApiNetworkError } from '@/lib/api-errors';
@@ -30,7 +29,8 @@ vi.mock('@/app/(default)/suggest/_lib/gig-candidate-api', () => ({
 }));
 
 const DEFAULT_SUBMIT_VALUES: SuggestGigFormValues = {
-  ...createDefaultSuggestGigFormValues('community-id'),
+  communityId: 'community-id',
+  countryIso: 'ES',
   localityId: 'locality-id',
   title: 'Arctic Monkeys',
   date: '2026-07-01',

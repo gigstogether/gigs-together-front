@@ -4,10 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import SuggestGigFormFields from '@/app/(default)/suggest/_components/SuggestGigFormFields';
 import { useSuggestGigSubmit } from '@/app/(default)/suggest/_hooks/use-suggest-gig-submit';
-import {
-  createDefaultSuggestGigFormValues,
-  suggestGigFormSchema,
-} from '@/app/(default)/suggest/_lib/suggest-form.shared';
+import { suggestGigFormSchema } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import PosterField from '@/components/PosterField';
 import { SearchableSelect } from '@/components/SearchableSelect';
@@ -23,6 +20,19 @@ interface SuggestGigFormProps {
   communityOptions: CommunityDisplayOption[];
   countries: CountryDisplayOption[];
   description?: string;
+}
+
+function createDefaultSuggestGigFormValues(communityId: string): SuggestGigFormValues {
+  return {
+    communityId,
+    countryIso: 'ES',
+    localityId: '',
+    venueIds: [],
+    title: '',
+    date: '',
+    endDate: '',
+    ticketsUrl: '',
+  };
 }
 
 export default function SuggestGigForm(props: SuggestGigFormProps) {

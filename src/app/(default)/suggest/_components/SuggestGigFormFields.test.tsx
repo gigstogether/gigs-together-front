@@ -4,7 +4,6 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
 import SuggestGigFormFields from '@/app/(default)/suggest/_components/SuggestGigFormFields';
-import { createDefaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 
@@ -18,7 +17,16 @@ vi.mock('@/lib/api-public', () => ({
 
 function SuggestGigFormFieldsTestSubject() {
   const form = useForm<SuggestGigFormValues>({
-    defaultValues: createDefaultSuggestGigFormValues('community-id'),
+    defaultValues: {
+      communityId: 'community-id',
+      countryIso: 'ES',
+      localityId: '',
+      venueIds: [],
+      title: '',
+      date: '',
+      endDate: '',
+      ticketsUrl: '',
+    },
   });
 
   return (

@@ -38,6 +38,24 @@ function renderPage(communityOptions = COMMUNITY_OPTIONS) {
   );
 }
 
+async function submitGigForMadrid(): Promise<void> {
+  renderPage();
+  fireEvent.click(screen.getByRole('combobox', { name: 'Choose a community' }));
+  fireEvent.click(screen.getByRole('option', { name: 'Barcelona' }));
+  fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Muse' } });
+  fireEvent.click(screen.getByRole('combobox', { name: 'Community' }));
+  fireEvent.change(screen.getByRole('textbox', { name: 'Search communities' }), {
+    target: { value: 'Madrid' },
+  });
+  fireEvent.click(screen.getByRole('option', { name: 'Madrid' }));
+  const localitySelect = screen.getByRole('combobox', { name: 'Locality:' });
+  await waitFor(() => expect(localitySelect).toBeEnabled());
+  fireEvent.click(localitySelect);
+  fireEvent.click(screen.getByRole('option', { name: 'Madrid' }));
+  fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
+  await screen.findByText('Suggestion received');
+}
+
 describe('SuggestGigPageClient', () => {
   beforeEach(() => {
     createGigCandidateMock.mockReset().mockResolvedValue({ id: 'candidate-id' });
@@ -66,30 +84,17 @@ describe('SuggestGigPageClient', () => {
   });
 
   it('should submit the selected community when a user changes it in the header', async () => {
-    renderPage();
-    fireEvent.click(screen.getByRole('combobox', { name: 'Choose a community' }));
-    fireEvent.click(screen.getByRole('option', { name: 'Barcelona' }));
-    fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Muse' } });
-    fireEvent.click(screen.getByRole('combobox', { name: 'Community' }));
-    fireEvent.change(screen.getByRole('textbox', { name: 'Search communities' }), {
-      target: { value: 'Madrid' },
+    await submitGigForMadrid();
+
+    expect(createGigCandidateMock).toHaveBeenCalledWith({
+      gig: { communityId: 'madrid', localityId: 'madrid-locality', title: 'Muse' },
+      poster: { mode: 'url', file: null, url: '' },
     });
-    fireEvent.click(screen.getByRole('option', { name: 'Madrid' }));
-    const localitySelect = screen.getByRole('combobox', { name: 'Locality:' });
-    await waitFor(() => expect(localitySelect).toBeEnabled());
-    fireEvent.click(localitySelect);
-    fireEvent.click(screen.getByRole('option', { name: 'Madrid' }));
+  });
 
-    fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
+  it('should reopen an empty gig form for the last selected community when Suggest another is clicked', async () => {
+    await submitGigForMadrid();
 
-    await waitFor(() =>
-      expect(createGigCandidateMock).toHaveBeenCalledWith({
-        gig: { communityId: 'madrid', localityId: 'madrid-locality', title: 'Muse' },
-        poster: { mode: 'url', file: null, url: '' },
-      }),
-    );
-
-    await screen.findByText('Suggestion received');
     fireEvent.click(screen.getByRole('button', { name: 'Suggest another' }));
 
     expect(screen.getByRole('combobox', { name: 'Community' })).toHaveTextContent('Madrid');

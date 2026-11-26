@@ -54,16 +54,3 @@ export const suggestGigFormSchema = z
   );
 
 export type SuggestGigFormValues = z.infer<typeof suggestGigFormSchema>;
-
-export function createDefaultSuggestGigFormValues(communityId: string): SuggestGigFormValues {
-  return {
-    communityId,
-    countryIso: 'ES',
-    localityId: '',
-    venueIds: [],
-    title: '',
-    date: '',
-    endDate: '',
-    ticketsUrl: '',
-  };
-}

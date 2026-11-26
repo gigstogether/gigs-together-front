@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createDefaultSuggestGigFormValues, suggestGigFormSchema } from './suggest-form.shared';
+import { suggestGigFormSchema } from './suggest-form.shared';
 
 describe('suggestGigFormSchema', () => {
   const requiredFields = {
@@ -100,13 +100,5 @@ describe('suggestGigFormSchema', () => {
     });
 
     expect(result.success).toBe(false);
-  });
-});
-
-describe('createDefaultSuggestGigFormValues', () => {
-  it('should initialize Community with the provided ID', () => {
-    const values = createDefaultSuggestGigFormValues('community-id');
-
-    expect(values.communityId).toBe('community-id');
   });
 });
