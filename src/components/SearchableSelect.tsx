@@ -125,7 +125,7 @@ function SearchableSelect(props: SearchableSelectProps) {
       )}
       onBlur={onBlur}
     >
-      <span className="truncate">
+      <span className={cn('truncate', selectedLabels.length === 0 && 'text-muted-foreground')}>
         {selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}
       </span>
       {variant === 'default' ? (
