@@ -78,12 +78,12 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
 
   if (isSubmitted) {
     return (
-      <Card className="mx-auto flex min-h-0 max-h-full w-full max-w-md flex-col border-0">
+      <Card className="mx-auto flex min-h-0 max-h-full w-full flex-col border-0 sm:max-w-md">
         <div className="min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] [scrollbar-gutter:stable_both-edges]">
-          <CardHeader className="px-4 sm:px-2">
+          <CardHeader className="px-6 sm:px-2">
             <CardTitle>Suggestion received</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 px-4 sm:px-2">
+          <CardContent className="space-y-4 px-6 sm:px-2">
             <p className="text-sm text-muted-foreground">
               Your gig is in the review queue. You can suggest another one if you want.
             </p>
@@ -100,14 +100,14 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
   }
 
   return (
-    <Card className="mx-auto flex min-h-0 max-h-full w-full max-w-md flex-col border-0">
+    <Card className="mx-auto flex min-h-0 max-h-full w-full flex-col border-0 sm:max-w-md">
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         aria-labelledby="suggest-gig-heading"
         aria-describedby={description ? 'suggest-gig-description' : undefined}
         className="min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] [scrollbar-gutter:stable_both-edges]"
       >
-        <CardHeader className="px-4 sm:px-2">
+        <CardHeader className="px-6 sm:px-2">
           <Controller
             control={form.control}
             name="communityId"
@@ -161,7 +161,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
             </CardDescription>
           ) : null}
         </CardHeader>
-        <CardContent className="space-y-6 px-4 sm:px-2">
+        <CardContent className="space-y-6 px-6 sm:px-2">
           <SuggestGigFormFields
             form={form}
             countries={countries}

@@ -26,8 +26,8 @@ export default function SuggestAuthGate(props: SuggestAuthGateProps) {
 
   if (!authState) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center py-6 px-4">
-        <Card className="w-full max-w-md border-0">
+      <div className="flex items-center justify-center sm:min-h-[50vh] sm:py-6 sm:px-4">
+        <Card className="w-full border-0 sm:max-w-md">
           <CardHeader>
             <CardTitle>Sign in to suggest a gig</CardTitle>
             <CardDescription>
