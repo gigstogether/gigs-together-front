@@ -14,6 +14,7 @@ export default async function SuggestPage() {
     getCommunityDisplayOptions('en'),
     getTranslations('en', TRANSLATION_NAMESPACE),
   ]);
+  // TODO: maybe extract this logic of retrieving a translation
   const descriptionEntry = i18n.translations[TRANSLATION_NAMESPACE]?.description;
   const description =
     descriptionEntry === undefined

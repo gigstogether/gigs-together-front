@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
 import { Minus, Plus } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import type { FieldErrors } from 'react-hook-form';
 
@@ -66,6 +66,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
     resolver: zodResolver(suggestGigFormSchema),
     defaultValues,
   });
+  const { setValue } = form;
 
   const countryOptions = countries.map((country) => ({
     value: country.iso,
@@ -114,6 +115,13 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
       }
     },
   });
+
+  useEffect(() => {
+    const localities = localitiesQuery.data?.localities;
+    if (localityId.length === 0 && localitiesQuery.isSuccess && localities?.length === 1) {
+      setValue('localityId', localities[0].id, { shouldValidate: true });
+    }
+  }, [localitiesQuery.data, localitiesQuery.isSuccess, localityId, setValue]);
 
   function handleInvalidSubmit(errors: FieldErrors<SuggestGigFormValues>): void {
     const hasAdditionalFieldErrors =

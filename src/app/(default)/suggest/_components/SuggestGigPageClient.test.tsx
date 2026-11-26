@@ -56,9 +56,7 @@ async function submitGigForMadrid(ticketsUrl?: string): Promise<void> {
     fireEvent.click(screen.getByRole('button', { name: 'Hide details' }));
   }
   const localitySelect = screen.getByRole('combobox', { name: 'City / area:' });
-  await waitFor(() => expect(localitySelect).toBeEnabled());
-  fireEvent.click(localitySelect);
-  fireEvent.click(screen.getByRole('option', { name: 'Madrid' }));
+  await waitFor(() => expect(localitySelect).toHaveTextContent('Madrid'));
   fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
   await screen.findByText('Suggestion received');
 }
@@ -116,6 +114,9 @@ describe('SuggestGigPageClient', () => {
       'false',
     );
     expect(screen.getByLabelText('Tickets URL:')).toHaveValue('');
+    await waitFor(() =>
+      expect(screen.getByRole('combobox', { name: 'City / area:' })).toHaveTextContent('Madrid'),
+    );
   });
 
   it('should submit retained optional values when extra details are collapsed', async () => {

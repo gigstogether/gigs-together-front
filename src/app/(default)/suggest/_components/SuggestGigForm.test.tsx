@@ -41,9 +41,7 @@ function renderForm() {
 async function fillRequiredFields(): Promise<void> {
   fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Muse' } });
   const localitySelect = screen.getByRole('combobox', { name: 'City / area:' });
-  await waitFor(() => expect(localitySelect).toBeEnabled());
-  fireEvent.click(localitySelect);
-  fireEvent.click(screen.getByRole('option', { name: 'Barcelona (Catalonia)' }));
+  await waitFor(() => expect(localitySelect).toHaveTextContent('Barcelona (Catalonia)'));
 }
 
 async function selectFirstVenue(): Promise<void> {
@@ -61,7 +59,10 @@ describe('SuggestGigForm', () => {
     createGigCandidateMock.mockReset().mockResolvedValue({ id: 'candidate-id' });
     apiPublicRequestMock.mockReset();
     apiPublicRequestMock.mockImplementation((endpoint: string) => {
-      if (endpoint.startsWith('/v1/localities?')) {
+      if (endpoint === '/v1/localities?countryIso=FR') {
+        return Promise.resolve({ localities: [] });
+      }
+      if (endpoint === '/v1/localities?countryIso=ES') {
         return Promise.resolve({
           localities: [
             {
@@ -274,14 +275,8 @@ describe('SuggestGigForm', () => {
     renderForm();
     fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
 
-    const venueSelect = screen.getByRole('combobox', { name: 'Venue:' });
-    expect(venueSelect).toBeDisabled();
-    expect(venueSelect).toHaveTextContent('Select a city or area first');
-
     const localitySelect = screen.getByRole('combobox', { name: 'City / area:' });
-    await waitFor(() => expect(localitySelect).toBeEnabled());
-    fireEvent.click(localitySelect);
-    fireEvent.click(screen.getByRole('option', { name: 'Barcelona (Catalonia)' }));
+    await waitFor(() => expect(localitySelect).toHaveTextContent('Barcelona (Catalonia)'));
 
     expect(apiPublicRequestMock).toHaveBeenCalledWith('/v1/venues?localityId=locality-id', 'GET');
     await waitFor(() => expect(screen.getByRole('combobox', { name: 'Venue:' })).toBeEnabled());
@@ -484,5 +479,80 @@ describe('SuggestGigForm', () => {
 
     expect(screen.getByRole('combobox', { name: 'Venue:' })).toHaveTextContent('Razzmatazz');
     expect(screen.getByRole('combobox', { name: 'Venue 2' })).toHaveTextContent('Sala Apolo');
+  });
+
+  it('should select the only locality when its catalog finishes loading', async () => {
+    renderForm();
+
+    await waitFor(() =>
+      expect(screen.getByRole('combobox', { name: 'City / area:' })).toHaveTextContent(
+        'Barcelona (Catalonia)',
+      ),
+    );
+  });
+
+  it.each([
+    { condition: 'no choices', localities: [] },
+    {
+      condition: 'multiple choices',
+      localities: [
+        { id: 'barcelona', countryIso: 'ES', name: 'Barcelona', timeZone: 'Europe/Madrid' },
+        { id: 'madrid', countryIso: 'ES', name: 'Madrid', timeZone: 'Europe/Madrid' },
+      ],
+    },
+  ])(
+    'should leave the locality unselected when its catalog has $condition',
+    async ({ localities }) => {
+      apiPublicRequestMock.mockResolvedValueOnce({ localities });
+      renderForm();
+      const localitySelect = screen.getByRole('combobox', { name: 'City / area:' });
+
+      await waitFor(() => expect(localitySelect).toBeEnabled());
+
+      expect(localitySelect).toHaveTextContent('Select a city or area');
+    },
+  );
+
+  it('should leave the locality unselected when its catalog fails to load', async () => {
+    apiPublicRequestMock.mockRejectedValueOnce(new Error('Locality catalog unavailable'));
+    renderForm();
+
+    await screen.findByText('Could not load cities and areas.');
+
+    expect(screen.getByRole('combobox', { name: 'City / area:' })).toHaveTextContent(
+      'Select a city or area',
+    );
+  });
+
+  it('should select the only locality in the new country when the country changes', async () => {
+    renderForm();
+    await waitFor(() =>
+      expect(screen.getByRole('combobox', { name: 'City / area:' })).toHaveTextContent('Barcelona'),
+    );
+    apiPublicRequestMock.mockResolvedValueOnce({
+      localities: [{ id: 'lyon', countryIso: 'FR', name: 'Lyon', timeZone: 'Europe/Paris' }],
+    });
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Country:' }));
+    fireEvent.click(screen.getByRole('option', { name: 'France' }));
+
+    await waitFor(() =>
+      expect(screen.getByRole('combobox', { name: 'City / area:' })).toHaveTextContent('Lyon'),
+    );
+  });
+
+  it('should select the cached sole locality when returning to a country', async () => {
+    renderForm();
+    const localitySelect = screen.getByRole('combobox', { name: 'City / area:' });
+    await waitFor(() => expect(localitySelect).toHaveTextContent('Barcelona'));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Country:' }));
+    fireEvent.click(screen.getByRole('option', { name: 'France' }));
+    await waitFor(() => expect(localitySelect).toBeEnabled());
+    expect(localitySelect).toHaveTextContent('Select a city or area');
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Country:' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Spain' }));
+
+    await waitFor(() => expect(localitySelect).toHaveTextContent('Barcelona'));
   });
 });
