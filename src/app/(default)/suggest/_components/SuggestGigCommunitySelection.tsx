@@ -18,7 +18,7 @@ export default function SuggestGigCommunitySelection(props: SuggestGigCommunityS
   const { communityOptions, onSelect, description, communitySelectionHint } = props;
 
   return (
-    <Card className="mx-auto w-full border-0 shadow-none sm:max-w-md sm:shadow">
+    <Card className="mx-auto w-full rounded-none border-0 shadow-none sm:max-w-md sm:rounded-xl sm:shadow">
       <form
         onSubmit={(event) => event.preventDefault()}
         aria-labelledby="suggest-gig-heading"

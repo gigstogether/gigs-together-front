@@ -131,7 +131,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
 
   if (isSubmitted) {
     return (
-      <Card className="mx-auto flex min-h-0 max-h-full w-full flex-col border-0 shadow-none sm:max-w-md sm:shadow">
+      <Card className="mx-auto flex min-h-0 max-h-full w-full flex-col rounded-none border-0 shadow-none sm:max-w-md sm:rounded-xl sm:shadow">
         <div className="min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] [scrollbar-gutter:stable_both-edges]">
           <CardHeader className="px-6 sm:px-2">
             <CardTitle>Suggestion received</CardTitle>
@@ -153,7 +153,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
   }
 
   return (
-    <Card className="mx-auto flex min-h-0 max-h-full w-full flex-col border-0 shadow-none sm:max-w-md sm:shadow">
+    <Card className="mx-auto flex min-h-0 max-h-full w-full flex-col rounded-none border-0 shadow-none sm:max-w-md sm:rounded-xl sm:shadow">
       <form
         onSubmit={form.handleSubmit(onSubmit, handleInvalidSubmit)}
         aria-labelledby="suggest-gig-heading"
