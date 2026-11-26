@@ -16,7 +16,7 @@ export interface GigCandidateCreatePayload {
   localityId: string;
   venueIds?: string[];
   title: string;
-  date: string;
+  date?: string;
   endDate?: string;
   ticketsUrl?: string;
 }
@@ -61,8 +61,10 @@ export async function createGigCandidate(
     communityId: params.gig.communityId,
     localityId: params.gig.localityId,
     title: params.gig.title,
-    date: params.gig.date,
   };
+  if (params.gig.date !== undefined) {
+    gig.date = params.gig.date;
+  }
   if (params.gig.venueIds !== undefined) {
     gig.venueIds = [...params.gig.venueIds];
   }
