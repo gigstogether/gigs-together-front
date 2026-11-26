@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import SuggestGigPageClient from './SuggestGigPageClient';
 import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
+import { stubResizeObserver } from '@/test/moderator-telegram-session-mock';
 
 const { apiPublicRequestMock, createGigCandidateMock } = vi.hoisted(() => ({
   apiPublicRequestMock: vi.fn(),
@@ -64,6 +65,7 @@ async function submitGigForMadrid(ticketsUrl?: string): Promise<void> {
 
 describe('SuggestGigPageClient', () => {
   beforeEach(() => {
+    stubResizeObserver();
     createGigCandidateMock.mockReset().mockResolvedValue({ id: 'candidate-id' });
     apiPublicRequestMock.mockReset().mockImplementation((endpoint: string) => {
       if (endpoint === '/v1/localities?countryIso=ES') {
@@ -74,6 +76,10 @@ describe('SuggestGigPageClient', () => {
       }
       throw new Error(`Unexpected endpoint: ${endpoint}`);
     });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('should display one required community selector when only one community is available', () => {

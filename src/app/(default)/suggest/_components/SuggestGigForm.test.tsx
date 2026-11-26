@@ -4,9 +4,11 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import SuggestGigForm from './SuggestGigForm';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
+import { stubResizeObserver } from '@/test/moderator-telegram-session-mock';
 
-const { apiPublicRequestMock } = vi.hoisted(() => ({
+const { apiPublicRequestMock, createGigCandidateMock } = vi.hoisted(() => ({
   apiPublicRequestMock: vi.fn(),
+  createGigCandidateMock: vi.fn(),
 }));
 
 vi.mock('@/lib/api-public', () => ({
@@ -14,7 +16,7 @@ vi.mock('@/lib/api-public', () => ({
 }));
 
 vi.mock('../_lib/gig-candidate-api', () => ({
-  createGigCandidate: vi.fn(),
+  createGigCandidate: createGigCandidateMock,
 }));
 
 const COMMUNITY_OPTIONS = [
@@ -36,8 +38,18 @@ function renderForm() {
   );
 }
 
+async function fillRequiredFields(): Promise<void> {
+  fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Muse' } });
+  const localitySelect = screen.getByRole('combobox', { name: 'City / area:' });
+  await waitFor(() => expect(localitySelect).toBeEnabled());
+  fireEvent.click(localitySelect);
+  fireEvent.click(screen.getByRole('option', { name: 'Barcelona (Catalonia)' }));
+}
+
 describe('SuggestGigForm', () => {
   beforeEach(() => {
+    stubResizeObserver();
+    createGigCandidateMock.mockReset().mockResolvedValue({ id: 'candidate-id' });
     apiPublicRequestMock.mockReset();
     apiPublicRequestMock.mockImplementation((endpoint: string) => {
       if (endpoint.startsWith('/v1/localities?')) {
@@ -68,6 +80,10 @@ describe('SuggestGigForm', () => {
         ],
       });
     });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('should initialize the community when an initial ID is provided', () => {
@@ -196,6 +212,7 @@ describe('SuggestGigForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
 
     expect(screen.getByLabelText('Date:')).not.toBeRequired();
+    fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
     expect(screen.getByLabelText('End Date:')).not.toBeRequired();
     expect(screen.getByLabelText('Venues:')).not.toBeRequired();
     expect(screen.getByLabelText('Tickets URL:')).not.toBeRequired();
@@ -204,6 +221,7 @@ describe('SuggestGigForm', () => {
   it('should stack date fields on mobile and align them horizontally on larger screens', () => {
     renderForm();
     fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+    fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
 
     const dateInput = screen.getByLabelText('Date:');
     const dateField = dateInput.closest('[data-slot="field"]');
@@ -266,5 +284,98 @@ describe('SuggestGigForm', () => {
     expect(screen.getByRole('combobox', { name: 'Venues:' })).toHaveTextContent(
       'Razzmatazz, Sala Apolo',
     );
+  });
+
+  it('should show only one date input when additional details are opened', () => {
+    renderForm();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    expect(screen.getByLabelText('Date:')).toBeVisible();
+    expect(screen.queryByLabelText('End Date:')).not.toBeInTheDocument();
+    expect(screen.getByRole('switch', { name: 'Multi-day event' })).not.toBeChecked();
+  });
+
+  it('should preserve both dates when additional details are collapsed and reopened', () => {
+    renderForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+    fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
+    fireEvent.change(screen.getByLabelText('Date:'), { target: { value: '2026-08-01' } });
+    fireEvent.change(screen.getByLabelText('End Date:'), { target: { value: '2026-08-03' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide details' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    expect(screen.getByLabelText('Date:')).toHaveValue('2026-08-01');
+    expect(screen.getByLabelText('End Date:')).toHaveValue('2026-08-03');
+    expect(screen.getByRole('switch', { name: 'Multi-day event' })).toBeChecked();
+  });
+
+  it('should clear the dependent date error when multiple days are disabled', async () => {
+    renderForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+    fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
+    fireEvent.change(screen.getByLabelText('End Date:'), { target: { value: '2026-08-03' } });
+    fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
+    expect(await screen.findByText('Date is required when End Date is provided.')).toBeVisible();
+
+    fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText('Date is required when End Date is provided.'),
+      ).not.toBeInTheDocument(),
+    );
+    expect(screen.queryByLabelText('End Date:')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
+    expect(screen.getByLabelText('End Date:')).toHaveValue('');
+  });
+
+  it.each([false, true])(
+    'should submit the expected date range when multiple days are %s',
+    async (isEndDateEnabled) => {
+      renderForm();
+      await fillRequiredFields();
+      fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+      fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
+      fireEvent.change(screen.getByLabelText('Date:'), { target: { value: '2026-08-01' } });
+      fireEvent.change(screen.getByLabelText('End Date:'), { target: { value: '2026-08-03' } });
+      if (!isEndDateEnabled) {
+        fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
+      }
+
+      fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
+      await screen.findByText('Suggestion received');
+
+      const gig = {
+        communityId: 'barcelona',
+        localityId: 'locality-id',
+        title: 'Muse',
+        date: '2026-08-01',
+      };
+      const expectedGig = isEndDateEnabled ? { ...gig, endDate: '2026-08-03' } : gig;
+      expect(createGigCandidateMock).toHaveBeenCalledWith({
+        gig: expectedGig,
+        poster: { mode: 'url', file: null, url: '' },
+      });
+    },
+  );
+
+  it('should disable the end date when another suggestion is started after a successful submission', async () => {
+    renderForm();
+    await fillRequiredFields();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+    fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
+    fireEvent.change(screen.getByLabelText('Date:'), { target: { value: '2026-08-01' } });
+    fireEvent.change(screen.getByLabelText('End Date:'), { target: { value: '2026-08-03' } });
+    fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
+    await screen.findByText('Suggestion received');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Suggest another' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    expect(screen.getByRole('switch', { name: 'Multi-day event' })).not.toBeChecked();
+    expect(screen.getByLabelText('Date:')).toHaveValue('');
+    expect(screen.queryByLabelText('End Date:')).not.toBeInTheDocument();
   });
 });

@@ -21,10 +21,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
 import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
 import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
+import { cn } from '@/lib/utils';
 
 interface SuggestGigFormProps {
   initialCommunityId: string;
@@ -55,6 +57,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
   const [posterUrl, setPosterUrl] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isAdditionalInfoExpanded, setIsAdditionalInfoExpanded] = useState(false);
+  const [isEndDateEnabled, setIsEndDateEnabled] = useState(false);
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<SuggestGigFormValues>({
@@ -100,6 +103,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
       });
       setIsSubmitted(true);
       setIsAdditionalInfoExpanded(false);
+      setIsEndDateEnabled(false);
       form.reset(createDefaultSuggestGigFormValues(form.getValues('communityId')));
       setPosterFile(null);
       setPosterUrl('');
@@ -118,6 +122,14 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
 
     if (hasAdditionalFieldErrors) {
       setIsAdditionalInfoExpanded(true);
+    }
+  }
+
+  async function handleEndDateToggle(isEnabled: boolean): Promise<void> {
+    setIsEndDateEnabled(isEnabled);
+    if (!isEnabled) {
+      form.resetField('endDate');
+      await form.trigger(['date', 'endDate']);
     }
   }
 
@@ -358,7 +370,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
                 ) : null}
               </span>
             </Button>
-            {/* Keep optional inputs mounted to preserve values and the poster; disable hidden controls to avoid native validation. */}
+            {/* Keep this section mounted while collapsed to preserve values and the poster; disable hidden controls to avoid native validation. */}
             <fieldset
               id="suggest-gig-additional-fields"
               aria-label="Additional gig details"
@@ -366,62 +378,84 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
               disabled={!isAdditionalInfoExpanded}
               className="min-w-0 space-y-6"
             >
-              <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
-                <Controller
-                  control={form.control}
-                  name="date"
-                  render={({ field, fieldState }) => (
-                    <Field
-                      className="min-w-0"
-                      data-invalid={fieldState.invalid}
-                    >
-                      <FieldLabel
-                        id="suggest-gig-date-label"
-                        htmlFor="suggest-gig-date"
-                      >
-                        Date:
-                      </FieldLabel>
-                      <DateInput
-                        {...field}
-                        id="suggest-gig-date"
-                        clearLabel="Clear Date"
-                        onClear={() => field.onChange('')}
-                        aria-labelledby="suggest-gig-date-label"
-                        aria-invalid={fieldState.invalid}
-                        value={field.value ?? ''}
-                      />
-                      <FieldError errors={[fieldState.error]} />
-                    </Field>
+              <div className="space-y-3">
+                <div
+                  className={cn(
+                    'grid min-w-0 grid-cols-1 gap-4',
+                    isEndDateEnabled && 'sm:grid-cols-2',
                   )}
-                />
+                >
+                  <Controller
+                    control={form.control}
+                    name="date"
+                    render={({ field, fieldState }) => (
+                      <Field
+                        className="min-w-0"
+                        data-invalid={fieldState.invalid}
+                      >
+                        <FieldLabel
+                          id="suggest-gig-date-label"
+                          htmlFor="suggest-gig-date"
+                        >
+                          Date:
+                        </FieldLabel>
+                        <DateInput
+                          {...field}
+                          id="suggest-gig-date"
+                          clearLabel="Clear Date"
+                          onClear={() => field.onChange('')}
+                          aria-labelledby="suggest-gig-date-label"
+                          aria-invalid={fieldState.invalid}
+                          value={field.value ?? ''}
+                        />
+                        <FieldError errors={[fieldState.error]} />
+                      </Field>
+                    )}
+                  />
 
-                <Controller
-                  control={form.control}
-                  name="endDate"
-                  render={({ field, fieldState }) => (
-                    <Field
-                      className="min-w-0"
-                      data-invalid={fieldState.invalid}
-                    >
-                      <FieldLabel
-                        id="suggest-gig-end-date-label"
-                        htmlFor="suggest-gig-end-date"
-                      >
-                        End Date:
-                      </FieldLabel>
-                      <DateInput
-                        {...field}
-                        id="suggest-gig-end-date"
-                        clearLabel="Clear End Date"
-                        onClear={() => field.onChange('')}
-                        aria-labelledby="suggest-gig-end-date-label"
-                        aria-invalid={fieldState.invalid}
-                        value={field.value ?? ''}
-                      />
-                      <FieldError errors={[fieldState.error]} />
-                    </Field>
-                  )}
-                />
+                  {isEndDateEnabled ? (
+                    <Controller
+                      control={form.control}
+                      name="endDate"
+                      render={({ field, fieldState }) => (
+                        <Field
+                          className="min-w-0"
+                          data-invalid={fieldState.invalid}
+                        >
+                          <FieldLabel
+                            id="suggest-gig-end-date-label"
+                            htmlFor="suggest-gig-end-date"
+                          >
+                            End Date:
+                          </FieldLabel>
+                          <DateInput
+                            {...field}
+                            id="suggest-gig-end-date"
+                            clearLabel="Clear End Date"
+                            onClear={() => field.onChange('')}
+                            aria-labelledby="suggest-gig-end-date-label"
+                            aria-invalid={fieldState.invalid}
+                            value={field.value ?? ''}
+                          />
+                          <FieldError errors={[fieldState.error]} />
+                        </Field>
+                      )}
+                    />
+                  ) : null}
+                </div>
+                <div className="flex items-center gap-3">
+                  <FieldLabel
+                    htmlFor="suggest-gig-multiple-days"
+                    className="font-normal text-muted-foreground"
+                  >
+                    Multi-day event
+                  </FieldLabel>
+                  <Switch
+                    id="suggest-gig-multiple-days"
+                    checked={isEndDateEnabled}
+                    onCheckedChange={handleEndDateToggle}
+                  />
+                </div>
               </div>
 
               <Controller
