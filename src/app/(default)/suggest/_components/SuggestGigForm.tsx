@@ -167,10 +167,10 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
               name="communityId"
               render={({ field, fieldState }) => (
                 <div>
-                  <CardTitle className="flex flex-wrap items-baseline gap-x-1 text-base font-normal leading-normal text-foreground">
+                  <CardTitle className="flex flex-wrap items-baseline gap-x-1 text-base font-semibold leading-normal text-foreground">
                     <h1
                       id="suggest-gig-heading"
-                      className="text-base font-normal text-foreground"
+                      className="text-base font-semibold text-foreground"
                     >
                       Suggest a gig
                     </h1>
@@ -188,6 +188,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
                         value={field.value}
                         options={communityOptions}
                         variant="inline"
+                        className="font-semibold"
                         title="Change community"
                         placeholder="Select community"
                         searchPlaceholder="Search communities"

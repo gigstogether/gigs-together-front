@@ -19,6 +19,7 @@ interface SearchableSelectBaseProps {
   emptyText: string;
   ariaLabelledBy: string;
   title?: string;
+  className?: string;
   variant?: 'default' | 'inline';
   isDisabled?: boolean;
   isRequired?: boolean;
@@ -51,6 +52,7 @@ function SearchableSelect(props: SearchableSelectProps) {
     emptyText,
     ariaLabelledBy,
     title,
+    className,
     variant = 'default',
     isDisabled = false,
     isRequired = false,
@@ -122,6 +124,7 @@ function SearchableSelect(props: SearchableSelectProps) {
         variant === 'inline'
           ? 'h-auto min-w-0 max-w-full gap-1 rounded-sm bg-transparent px-0 py-0 text-base font-normal leading-normal text-foreground underline decoration-foreground/30 underline-offset-4 shadow-none hover:bg-transparent hover:decoration-foreground focus-visible:decoration-foreground'
           : 'h-9 min-w-0 w-full justify-between bg-transparent px-3 font-normal shadow-sm',
+        className,
       )}
       onBlur={onBlur}
     >

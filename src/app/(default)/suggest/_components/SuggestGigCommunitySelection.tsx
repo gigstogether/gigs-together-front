@@ -25,10 +25,10 @@ export default function SuggestGigCommunitySelection(props: SuggestGigCommunityS
         aria-describedby={description ? 'suggest-gig-description' : undefined}
       >
         <CardHeader>
-          <CardTitle className="text-base font-normal leading-normal text-foreground">
+          <CardTitle className="text-base font-semibold leading-normal text-foreground">
             <h1
               id="suggest-gig-heading"
-              className="text-base font-normal text-foreground"
+              className="text-base font-semibold text-foreground"
             >
               Suggest a gig
             </h1>
