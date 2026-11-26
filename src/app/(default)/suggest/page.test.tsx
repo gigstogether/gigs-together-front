@@ -60,7 +60,9 @@ describe('SuggestPage', () => {
       },
     });
 
-    expect(screen.getByText('Suggest a gig').nextElementSibling).toHaveTextContent(description);
+    expect(screen.getByRole('form', { name: 'Suggest a gig' })).toHaveAccessibleDescription(
+      description,
+    );
     expect(apiPublicRequestMock).toHaveBeenCalledWith(
       '/v1/translations?namespaces=suggest',
       'GET',
@@ -83,6 +85,8 @@ describe('SuggestPage', () => {
   ])('should omit the description when $condition', async ({ translations }) => {
     await renderPage(translations);
 
-    expect(screen.getByText('Suggest a gig').nextElementSibling).toBeNull();
+    expect(screen.getByRole('form', { name: 'Suggest a gig' })).not.toHaveAttribute(
+      'aria-describedby',
+    );
   });
 });

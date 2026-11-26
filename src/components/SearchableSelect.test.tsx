@@ -1,9 +1,39 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createRef } from 'react';
 
 import { SearchableSelect } from '@/components/SearchableSelect';
 
 describe('SearchableSelect', () => {
+  it('should restore focus to the inline trigger when the search is closed with Escape', async () => {
+    render(
+      <div>
+        <span id="community-label">Community</span>
+        <SearchableSelect
+          id="community"
+          variant="inline"
+          value="barcelona"
+          options={[{ value: 'barcelona', label: 'Barcelona' }]}
+          placeholder="a community"
+          searchPlaceholder="Search communities"
+          emptyText="No communities found."
+          ariaLabelledBy="community-label"
+          onValueChange={vi.fn()}
+        />
+      </div>,
+    );
+    const trigger = screen.getByRole('combobox', { name: 'Community' });
+    fireEvent.click(trigger);
+    const searchInput = screen.getByRole('textbox', { name: 'Search communities' });
+    fireEvent.change(searchInput, { target: { value: 'Madrid' } });
+
+    fireEvent.keyDown(searchInput, { key: 'Escape' });
+
+    await waitFor(() => expect(trigger).toHaveFocus());
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    fireEvent.click(trigger);
+    expect(screen.getByRole('textbox', { name: 'Search communities' })).toHaveValue('');
+  });
+
   it('should filter options and select a matching value', () => {
     const onValueChange = vi.fn();
 

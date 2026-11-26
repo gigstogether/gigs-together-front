@@ -10,10 +10,7 @@ import { Input } from '@/components/ui/input';
 import RequiredIndicator from '@/components/RequiredIndicator';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
-import type {
-  SuggestCommunityOption,
-  SuggestGigFormValues,
-} from '@/app/(default)/suggest/_lib/suggest-form.shared';
+import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import {
   fetchPublicLocalities,
   fetchPublicVenues,
@@ -23,12 +20,11 @@ import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 
 interface SuggestGigFormFieldsProps {
   form: UseFormReturn<SuggestGigFormValues>;
-  communityOptions: SuggestCommunityOption[];
   countries: CountryDisplayOption[];
 }
 
 export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
-  const { form, communityOptions, countries } = props;
+  const { form, countries } = props;
 
   const countryOptions = countries.map((country) => ({
     value: country.iso,
@@ -80,38 +76,6 @@ export default function SuggestGigFormFields(props: SuggestGigFormFieldsProps) {
               aria-invalid={fieldState.invalid}
               placeholder="e.g. Arctic Monkeys"
               value={field.value ?? ''}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
-
-      <Controller
-        control={form.control}
-        name="communityId"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel
-              id="suggest-gig-community-label"
-              htmlFor="suggest-gig-community"
-            >
-              Community:
-              <RequiredIndicator />
-            </FieldLabel>
-            <SearchableSelect
-              id="suggest-gig-community"
-              name={field.name}
-              value={field.value}
-              options={communityOptions}
-              placeholder="Select community"
-              searchPlaceholder="Search communities"
-              emptyText="No communities found."
-              ariaLabelledBy="suggest-gig-community-label"
-              isRequired
-              isInvalid={fieldState.invalid}
-              triggerRef={field.ref}
-              onBlur={field.onBlur}
-              onValueChange={field.onChange}
             />
             <FieldError errors={[fieldState.error]} />
           </Field>

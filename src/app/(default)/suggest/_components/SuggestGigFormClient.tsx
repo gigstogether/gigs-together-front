@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 import SuggestGigFormFields from '@/app/(default)/suggest/_components/SuggestGigFormFields';
 import { useSuggestGigSubmit } from '@/app/(default)/suggest/_hooks/use-suggest-gig-submit';
@@ -15,8 +15,10 @@ import type {
   SuggestGigFormValues,
 } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import PosterField from '@/components/PosterField';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { FieldError } from '@/components/ui/field';
 import { toast } from '@/hooks/use-toast';
 import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 
@@ -90,18 +92,68 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
 
   return (
     <Card className="w-full max-w-md m-auto border-0">
-      <CardHeader>
-        <CardTitle>Suggest a gig</CardTitle>
-        {description ? <CardDescription>{description}</CardDescription> : null}
-      </CardHeader>
-      <CardContent>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-6"
-        >
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        aria-labelledby="suggest-gig-heading"
+        aria-describedby={description ? 'suggest-gig-description' : undefined}
+      >
+        <CardHeader>
+          <Controller
+            control={form.control}
+            name="communityId"
+            render={({ field, fieldState }) => (
+              <div>
+                <CardTitle className="flex flex-wrap items-baseline gap-x-1 text-base font-normal leading-normal text-foreground">
+                  <h1
+                    id="suggest-gig-heading"
+                    className="text-base font-normal text-foreground"
+                  >
+                    Suggest a gig
+                  </h1>
+                  <div className="inline-flex min-w-0 max-w-full items-baseline gap-x-1">
+                    <span className="shrink-0">for{field.value ? ' the' : ''}</span>
+                    <span
+                      id="suggest-gig-community-label"
+                      className="sr-only"
+                    >
+                      Community
+                    </span>
+                    <SearchableSelect
+                      id="suggest-gig-community"
+                      name={field.name}
+                      value={field.value}
+                      options={communityOptions}
+                      variant="inline"
+                      title="Change community"
+                      placeholder="a community"
+                      searchPlaceholder="Search communities"
+                      emptyText="No communities found."
+                      ariaLabelledBy="suggest-gig-community-label"
+                      isRequired
+                      isInvalid={fieldState.invalid}
+                      triggerRef={field.ref}
+                      onBlur={field.onBlur}
+                      onValueChange={field.onChange}
+                    />
+                    {field.value ? <span className="shrink-0">community</span> : null}
+                  </div>
+                </CardTitle>
+                <FieldError errors={[fieldState.error]} />
+              </div>
+            )}
+          />
+          {description ? (
+            <CardDescription
+              id="suggest-gig-description"
+              className="text-sm"
+            >
+              {description}
+            </CardDescription>
+          ) : null}
+        </CardHeader>
+        <CardContent className="space-y-6">
           <SuggestGigFormFields
             form={form}
-            communityOptions={communityOptions}
             countries={countries}
           />
           <PosterField
@@ -120,8 +172,8 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
           >
             {isSubmitting ? 'Submitting…' : 'Submit suggestion'}
           </Button>
-        </form>
-      </CardContent>
+        </CardContent>
+      </form>
     </Card>
   );
 }

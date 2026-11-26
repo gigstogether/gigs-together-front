@@ -26,7 +26,6 @@ function SuggestGigFormFieldsTestSubject() {
   return (
     <SuggestGigFormFields
       form={form}
-      communityOptions={COMMUNITY_OPTIONS}
       countries={[
         { iso: 'ES', name: 'Spain' },
         { iso: 'FR', name: 'France' },
@@ -108,7 +107,6 @@ describe('SuggestGigFormFields', () => {
   it('should mark required fields', () => {
     renderFields();
 
-    expect(screen.getByRole('combobox', { name: 'Community:' })).toBeRequired();
     expect(screen.getByLabelText('Title:*')).toBeRequired();
     expect(screen.getByLabelText('Country:*')).toBeRequired();
     expect(screen.getByRole('combobox', { name: 'Locality:' })).toBeRequired();
