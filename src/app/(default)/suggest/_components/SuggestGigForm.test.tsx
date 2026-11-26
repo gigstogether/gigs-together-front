@@ -46,6 +46,15 @@ async function fillRequiredFields(): Promise<void> {
   fireEvent.click(screen.getByRole('option', { name: 'Barcelona (Catalonia)' }));
 }
 
+async function selectFirstVenue(): Promise<void> {
+  await fillRequiredFields();
+  fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+  const venueSelect = screen.getByRole('combobox', { name: 'Venue:' });
+  await waitFor(() => expect(venueSelect).toBeEnabled());
+  fireEvent.click(venueSelect);
+  fireEvent.click(screen.getByRole('option', { name: 'Razzmatazz' }));
+}
+
 describe('SuggestGigForm', () => {
   beforeEach(() => {
     stubResizeObserver();
@@ -214,7 +223,7 @@ describe('SuggestGigForm', () => {
     expect(screen.getByLabelText('Date:')).not.toBeRequired();
     fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
     expect(screen.getByLabelText('End Date:')).not.toBeRequired();
-    expect(screen.getByLabelText('Venues:')).not.toBeRequired();
+    expect(screen.getByLabelText('Venue:')).not.toBeRequired();
     expect(screen.getByLabelText('Tickets URL:')).not.toBeRequired();
   });
 
@@ -265,7 +274,7 @@ describe('SuggestGigForm', () => {
     renderForm();
     fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
 
-    const venueSelect = screen.getByRole('combobox', { name: 'Venues:' });
+    const venueSelect = screen.getByRole('combobox', { name: 'Venue:' });
     expect(venueSelect).toBeDisabled();
     expect(venueSelect).toHaveTextContent('Select a city or area first');
 
@@ -275,15 +284,18 @@ describe('SuggestGigForm', () => {
     fireEvent.click(screen.getByRole('option', { name: 'Barcelona (Catalonia)' }));
 
     expect(apiPublicRequestMock).toHaveBeenCalledWith('/v1/venues?localityId=locality-id', 'GET');
-    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Venues:' })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Venue:' })).toBeEnabled());
 
-    fireEvent.click(screen.getByRole('combobox', { name: 'Venues:' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Venue:' }));
     fireEvent.click(screen.getByRole('option', { name: 'Razzmatazz' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add another venue' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Venue 2' }));
+    expect(screen.queryByRole('option', { name: 'Razzmatazz' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('option', { name: 'Sala Apolo' }));
 
-    expect(screen.getByRole('combobox', { name: 'Venues:' })).toHaveTextContent(
-      'Razzmatazz, Sala Apolo',
-    );
+    expect(screen.getByRole('combobox', { name: 'Venue:' })).toHaveTextContent('Razzmatazz');
+    expect(screen.getByRole('combobox', { name: 'Venue 2' })).toHaveTextContent('Sala Apolo');
+    expect(screen.queryByRole('button', { name: 'Add another venue' })).not.toBeInTheDocument();
   });
 
   it('should show only one date input when additional details are opened', () => {
@@ -377,5 +389,100 @@ describe('SuggestGigForm', () => {
     expect(screen.getByRole('switch', { name: 'Multi-day event' })).not.toBeChecked();
     expect(screen.getByLabelText('Date:')).toHaveValue('');
     expect(screen.queryByLabelText('End Date:')).not.toBeInTheDocument();
+  });
+
+  it('should show one venue selector when additional details are opened', () => {
+    renderForm();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    expect(screen.getByRole('combobox', { name: 'Venue:' })).toBeVisible();
+    expect(screen.queryByRole('combobox', { name: 'Venue 2' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add another venue' })).not.toBeInTheDocument();
+  });
+
+  it('should submit only selected venues when an additional selector is left empty', async () => {
+    renderForm();
+    await selectFirstVenue();
+    fireEvent.click(screen.getByRole('button', { name: 'Add another venue' }));
+    expect(screen.getByRole('combobox', { name: 'Venue 2' })).toHaveTextContent('Select a venue');
+
+    fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
+    await screen.findByText('Suggestion received');
+
+    expect(createGigCandidateMock).toHaveBeenCalledWith({
+      gig: {
+        communityId: 'barcelona',
+        localityId: 'locality-id',
+        title: 'Muse',
+        venueIds: ['venue-id-1'],
+      },
+      poster: { mode: 'url', file: null, url: '' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Suggest another' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+    expect(screen.queryByRole('combobox', { name: 'Venue 2' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Remove venue 1' })).not.toBeInTheDocument();
+  });
+
+  it('should submit the remaining venue when the first selected venue is removed', async () => {
+    renderForm();
+    await selectFirstVenue();
+    fireEvent.click(screen.getByRole('button', { name: 'Add another venue' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Venue 2' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Sala Apolo' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove venue 1' }));
+    fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
+    await screen.findByText('Suggestion received');
+
+    expect(createGigCandidateMock).toHaveBeenCalledWith({
+      gig: {
+        communityId: 'barcelona',
+        localityId: 'locality-id',
+        title: 'Muse',
+        venueIds: ['venue-id-2'],
+      },
+      poster: { mode: 'url', file: null, url: '' },
+    });
+  });
+
+  it('should dismiss an empty additional venue selector when its remove button is clicked', async () => {
+    renderForm();
+    await selectFirstVenue();
+    fireEvent.click(screen.getByRole('button', { name: 'Add another venue' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove venue 2' }));
+
+    expect(screen.queryByRole('combobox', { name: 'Venue 2' })).not.toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Venue:' })).toHaveTextContent('Razzmatazz');
+    expect(screen.getByRole('button', { name: 'Add another venue' })).toBeVisible();
+  });
+
+  it('should clear venue selections and the additional selector when the country changes', async () => {
+    renderForm();
+    await selectFirstVenue();
+    fireEvent.click(screen.getByRole('button', { name: 'Add another venue' }));
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Country:' }));
+    fireEvent.click(screen.getByRole('option', { name: 'France' }));
+
+    expect(screen.queryByRole('combobox', { name: 'Venue 2' })).not.toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Venue:' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Remove venue 1' })).not.toBeInTheDocument();
+  });
+
+  it('should retain selected venues when additional details are collapsed and reopened', async () => {
+    renderForm();
+    await selectFirstVenue();
+    fireEvent.click(screen.getByRole('button', { name: 'Add another venue' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Venue 2' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Sala Apolo' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide details' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    expect(screen.getByRole('combobox', { name: 'Venue:' })).toHaveTextContent('Razzmatazz');
+    expect(screen.getByRole('combobox', { name: 'Venue 2' })).toHaveTextContent('Sala Apolo');
   });
 });
