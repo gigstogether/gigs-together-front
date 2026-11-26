@@ -105,76 +105,80 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
         onSubmit={form.handleSubmit(onSubmit)}
         aria-labelledby="suggest-gig-heading"
         aria-describedby={description ? 'suggest-gig-description' : undefined}
-        className="min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] [scrollbar-gutter:stable_both-edges]"
+        className="flex min-h-0 flex-col overflow-hidden rounded-[inherit]"
       >
-        <CardHeader className="px-6 sm:px-2">
-          <Controller
-            control={form.control}
-            name="communityId"
-            render={({ field, fieldState }) => (
-              <div>
-                <CardTitle className="flex flex-wrap items-baseline gap-x-1 text-base font-normal leading-normal text-foreground">
-                  <h1
-                    id="suggest-gig-heading"
-                    className="text-base font-normal text-foreground"
-                  >
-                    Suggest a gig
-                  </h1>
-                  <div className="inline-flex min-w-0 max-w-full items-baseline gap-x-1">
-                    <span className="shrink-0">for the</span>
-                    <span
-                      id="suggest-gig-community-label"
-                      className="sr-only"
+        <div className="min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-gutter:stable_both-edges]">
+          <CardHeader className="px-6 sm:px-2">
+            <Controller
+              control={form.control}
+              name="communityId"
+              render={({ field, fieldState }) => (
+                <div>
+                  <CardTitle className="flex flex-wrap items-baseline gap-x-1 text-base font-normal leading-normal text-foreground">
+                    <h1
+                      id="suggest-gig-heading"
+                      className="text-base font-normal text-foreground"
                     >
-                      Community
-                    </span>
-                    <SearchableSelect
-                      id="suggest-gig-community"
-                      name={field.name}
-                      value={field.value}
-                      options={communityOptions}
-                      variant="inline"
-                      title="Change community"
-                      placeholder="Select community"
-                      searchPlaceholder="Search communities"
-                      emptyText="No communities found."
-                      ariaLabelledBy="suggest-gig-community-label"
-                      isRequired
-                      isInvalid={fieldState.invalid}
-                      triggerRef={field.ref}
-                      onBlur={field.onBlur}
-                      onValueChange={field.onChange}
-                    />
-                    <span className="shrink-0">community</span>
-                  </div>
-                </CardTitle>
-                <FieldError errors={[fieldState.error]} />
-              </div>
-            )}
-          />
-          {description ? (
-            <CardDescription
-              id="suggest-gig-description"
-              className="text-sm"
-            >
-              {description}
-            </CardDescription>
-          ) : null}
-        </CardHeader>
-        <CardContent className="space-y-6 px-6 sm:px-2">
-          <SuggestGigFormFields
-            form={form}
-            countries={countries}
-          />
-          <PosterField
-            posterFile={posterFile}
-            onPosterFileChange={setPosterFile}
-            posterUrl={posterUrl}
-            onPosterUrlChange={setPosterUrl}
-            onClearPoster={clearPoster}
-            posterFileInputRef={posterFileInputRef}
-            isUrlInputEnabled={false}
-          />
+                      Suggest a gig
+                    </h1>
+                    <div className="inline-flex min-w-0 max-w-full items-baseline gap-x-1">
+                      <span className="shrink-0">for the</span>
+                      <span
+                        id="suggest-gig-community-label"
+                        className="sr-only"
+                      >
+                        Community
+                      </span>
+                      <SearchableSelect
+                        id="suggest-gig-community"
+                        name={field.name}
+                        value={field.value}
+                        options={communityOptions}
+                        variant="inline"
+                        title="Change community"
+                        placeholder="Select community"
+                        searchPlaceholder="Search communities"
+                        emptyText="No communities found."
+                        ariaLabelledBy="suggest-gig-community-label"
+                        isRequired
+                        isInvalid={fieldState.invalid}
+                        triggerRef={field.ref}
+                        onBlur={field.onBlur}
+                        onValueChange={field.onChange}
+                      />
+                      <span className="shrink-0">community</span>
+                    </div>
+                  </CardTitle>
+                  <FieldError errors={[fieldState.error]} />
+                </div>
+              )}
+            />
+            {description ? (
+              <CardDescription
+                id="suggest-gig-description"
+                className="text-sm"
+              >
+                {description}
+              </CardDescription>
+            ) : null}
+          </CardHeader>
+          <CardContent className="space-y-6 px-6 sm:px-2">
+            <SuggestGigFormFields
+              form={form}
+              countries={countries}
+            />
+            <PosterField
+              posterFile={posterFile}
+              onPosterFileChange={setPosterFile}
+              posterUrl={posterUrl}
+              onPosterUrlChange={setPosterUrl}
+              onClearPoster={clearPoster}
+              posterFileInputRef={posterFileInputRef}
+              isUrlInputEnabled={false}
+            />
+          </CardContent>
+        </div>
+        <div className="shrink-0 overflow-hidden border-t bg-card px-6 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] [scrollbar-gutter:stable_both-edges] sm:px-2">
           <Button
             type="submit"
             disabled={isSubmitting}
@@ -182,7 +186,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
           >
             {isSubmitting ? 'Submitting…' : 'Submit suggestion'}
           </Button>
-        </CardContent>
+        </div>
       </form>
     </Card>
   );
