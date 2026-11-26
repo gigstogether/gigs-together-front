@@ -1,4 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+// @vitest-environment jsdom
+
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import SuggestGigForm from './SuggestGigForm';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
@@ -20,9 +22,52 @@ const COMMUNITY_OPTIONS = [
   { value: 'madrid', label: 'Madrid' },
 ];
 
+function renderForm() {
+  return render(
+    <SuggestGigForm
+      initialCommunityId="barcelona"
+      communityOptions={COMMUNITY_OPTIONS}
+      countries={[
+        { iso: 'ES', name: 'Spain' },
+        { iso: 'FR', name: 'France' },
+      ]}
+    />,
+    { wrapper: createQueryClientWrapper(createTestQueryClient()) },
+  );
+}
+
 describe('SuggestGigForm', () => {
   beforeEach(() => {
-    apiPublicRequestMock.mockReset().mockResolvedValue({ localities: [] });
+    apiPublicRequestMock.mockReset();
+    apiPublicRequestMock.mockImplementation((endpoint: string) => {
+      if (endpoint.startsWith('/v1/localities?')) {
+        return Promise.resolve({
+          localities: [
+            {
+              id: 'locality-id',
+              countryIso: 'ES',
+              name: 'Barcelona',
+              qualifier: 'Catalonia',
+              timeZone: 'Europe/Madrid',
+            },
+          ],
+        });
+      }
+
+      return Promise.resolve({
+        locality: {
+          id: 'locality-id',
+          countryIso: 'ES',
+          name: 'Barcelona',
+          qualifier: 'Catalonia',
+          timeZone: 'Europe/Madrid',
+        },
+        venues: [
+          { id: 'venue-id-1', name: 'Razzmatazz' },
+          { id: 'venue-id-2', name: 'Sala Apolo' },
+        ],
+      });
+    });
   });
 
   it('should initialize the community when an initial ID is provided', () => {
@@ -90,7 +135,7 @@ describe('SuggestGigForm', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
     fireEvent.change(screen.getByLabelText('Tickets URL:'), { target: { value: 'invalid-url' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Hide optional details' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Hide details' }));
 
     fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
 
@@ -111,5 +156,115 @@ describe('SuggestGigForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
 
     expect(screen.getByText('Poster:')).toBeVisible();
+  });
+
+  it('should display the resolved country name', () => {
+    renderForm();
+
+    expect(screen.getByRole('combobox', { name: 'Country:' })).toHaveTextContent('Spain');
+  });
+
+  it('should search and select a country', () => {
+    renderForm();
+
+    const countrySelect = screen.getByRole('combobox', { name: 'Country:' });
+
+    fireEvent.click(countrySelect);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search countries' }), {
+      target: { value: 'France' },
+    });
+
+    expect(screen.queryByRole('option', { name: 'Spain' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('option', { name: 'France' }));
+
+    expect(countrySelect).toHaveTextContent('France');
+  });
+
+  it('should limit the title input to 300 characters', () => {
+    renderForm();
+
+    expect(screen.getByLabelText('Title:*')).toHaveAttribute('maxlength', '300');
+  });
+
+  it('should mark required fields', () => {
+    renderForm();
+
+    expect(screen.getByLabelText('Title:*')).toBeRequired();
+    expect(screen.getByLabelText('Country:*')).toBeRequired();
+    expect(screen.getByRole('combobox', { name: 'Locality:' })).toBeRequired();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    expect(screen.getByLabelText('Date:')).not.toBeRequired();
+    expect(screen.getByLabelText('End Date:')).not.toBeRequired();
+    expect(screen.getByLabelText('Venues:')).not.toBeRequired();
+    expect(screen.getByLabelText('Tickets URL:')).not.toBeRequired();
+  });
+
+  it('should stack date fields on mobile and align them horizontally on larger screens', () => {
+    renderForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    const dateInput = screen.getByLabelText('Date:');
+    const dateField = dateInput.closest('[data-slot="field"]');
+    const endDateField = screen.getByLabelText('End Date:').closest('[data-slot="field"]');
+
+    expect(dateField?.parentElement).toBe(endDateField?.parentElement);
+    expect(dateField?.parentElement).toHaveClass('grid-cols-1', 'sm:grid-cols-2');
+    expect(dateInput.closest('[data-slot="date-input-frame"]')).toHaveClass(
+      'h-9',
+      'max-w-full',
+      'overflow-hidden',
+    );
+  });
+
+  it('should hide optional inputs when the form first opens', () => {
+    renderForm();
+
+    expect(screen.getByLabelText('Tickets URL:')).not.toBeVisible();
+    expect(screen.getByLabelText('Date:')).not.toBeVisible();
+    expect(screen.getByRole('button', { name: 'Add details' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+  });
+
+  it('should preserve optional values when extra details are collapsed and reopened', () => {
+    renderForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+    fireEvent.change(screen.getByLabelText('Tickets URL:'), {
+      target: { value: 'https://tickets.example/gig' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide details' }));
+    expect(screen.getByLabelText('Tickets URL:')).not.toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    expect(screen.getByLabelText('Tickets URL:')).toHaveValue('https://tickets.example/gig');
+  });
+
+  it('should show the Locality qualifier and enable only matching Venues', async () => {
+    renderForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    const venueSelect = screen.getByRole('combobox', { name: 'Venues:' });
+    expect(venueSelect).toBeDisabled();
+    expect(venueSelect).toHaveTextContent('Select a locality first');
+
+    const localitySelect = screen.getByRole('combobox', { name: 'Locality:' });
+    await waitFor(() => expect(localitySelect).toBeEnabled());
+    fireEvent.click(localitySelect);
+    fireEvent.click(screen.getByRole('option', { name: 'Barcelona (Catalonia)' }));
+
+    expect(apiPublicRequestMock).toHaveBeenCalledWith('/v1/venues?localityId=locality-id', 'GET');
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Venues:' })).toBeEnabled());
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Venues:' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Razzmatazz' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Sala Apolo' }));
+
+    expect(screen.getByRole('combobox', { name: 'Venues:' })).toHaveTextContent(
+      'Razzmatazz, Sala Apolo',
+    );
   });
 });

@@ -52,7 +52,7 @@ async function submitGigForMadrid(ticketsUrl?: string): Promise<void> {
   if (ticketsUrl !== undefined) {
     fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
     fireEvent.change(screen.getByLabelText('Tickets URL:'), { target: { value: ticketsUrl } });
-    fireEvent.click(screen.getByRole('button', { name: 'Hide optional details' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Hide details' }));
   }
   const localitySelect = screen.getByRole('combobox', { name: 'Locality:' });
   await waitFor(() => expect(localitySelect).toBeEnabled());
