@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
-import { Minus, Plus, X } from 'lucide-react';
+import { Minus, Plus } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import type { FieldErrors } from 'react-hook-form';
+
+import SuggestGigVenuesField from './SuggestGigVenuesField';
 
 import { useSuggestGigSubmit } from '@/app/(default)/suggest/_hooks/use-suggest-gig-submit';
 import {
@@ -58,7 +60,6 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isAdditionalInfoExpanded, setIsAdditionalInfoExpanded] = useState(false);
   const [isEndDateEnabled, setIsEndDateEnabled] = useState(false);
-  const [isAddingVenue, setIsAddingVenue] = useState(false);
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<SuggestGigFormValues>({
@@ -105,7 +106,6 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
       setIsSubmitted(true);
       setIsAdditionalInfoExpanded(false);
       setIsEndDateEnabled(false);
-      setIsAddingVenue(false);
       form.reset(createDefaultSuggestGigFormValues(form.getValues('communityId')));
       setPosterFile(null);
       setPosterUrl('');
@@ -288,7 +288,6 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
                         field.onChange(value);
                         form.setValue('localityId', '');
                         form.setValue('venueIds', []);
-                        setIsAddingVenue(false);
                       }}
                     />
                     <FieldError errors={[fieldState.error]} />
@@ -329,7 +328,6 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
                       onValueChange={(value) => {
                         field.onChange(value);
                         form.setValue('venueIds', []);
-                        setIsAddingVenue(false);
                       }}
                     />
                     <FieldError errors={[fieldState.error]} />
@@ -465,124 +463,33 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
               <Controller
                 control={form.control}
                 name="venueIds"
-                render={({ field, fieldState }) => {
-                  const venueIds = field.value.length === 0 ? [''] : [...field.value];
-                  if (isAddingVenue && field.value.length > 0) {
-                    venueIds.push('');
-                  }
-                  const canAddVenue =
-                    field.value.length > 0 &&
-                    !isAddingVenue &&
-                    venueOptions.some((option) => !field.value.includes(option.value));
-
-                  return (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel
-                        id="suggest-gig-venue-label"
-                        htmlFor="suggest-gig-venue"
-                      >
-                        Venue:
-                      </FieldLabel>
-                      <div className="space-y-3">
-                        {venueIds.map((venueId, index) => {
-                          const inputId =
-                            index === 0 ? 'suggest-gig-venue' : `suggest-gig-venue-${index + 1}`;
-                          const labelId = `${inputId}-label`;
-                          const options = venueOptions.filter(
-                            (option) =>
-                              option.value === venueId || !field.value.includes(option.value),
-                          );
-
-                          return (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2"
-                            >
-                              {index > 0 ? (
-                                <span
-                                  id={labelId}
-                                  className="sr-only"
-                                >
-                                  Venue {index + 1}
-                                </span>
-                              ) : null}
-                              <SearchableSelect
-                                id={inputId}
-                                name={field.name}
-                                value={venueId}
-                                options={options}
-                                placeholder={
-                                  localityId.length === 0
-                                    ? 'Select a city or area first'
-                                    : venuesQuery.isPending
-                                      ? 'Loading venues…'
-                                      : 'Select a venue'
-                                }
-                                searchPlaceholder="Search venues"
-                                emptyText="No venues found."
-                                ariaLabelledBy={labelId}
-                                isDisabled={localityId.length === 0 || venuesQuery.isPending}
-                                isInvalid={fieldState.invalid || venuesQuery.isError}
-                                triggerRef={index === 0 ? field.ref : undefined}
-                                onBlur={field.onBlur}
-                                onValueChange={(value) => {
-                                  const nextVenueIds = [...field.value];
-                                  nextVenueIds[index] = value;
-                                  field.onChange(nextVenueIds);
-                                  if (index === field.value.length) {
-                                    setIsAddingVenue(false);
-                                  }
-                                }}
-                              />
-                              {venueId.length > 0 || isAddingVenue ? (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-9 w-9 shrink-0 text-muted-foreground hover:text-foreground"
-                                  aria-label={`Remove venue ${index + 1}`}
-                                  onClick={() => {
-                                    if (venueId.length > 0) {
-                                      field.onChange(
-                                        field.value.filter((_, venueIndex) => venueIndex !== index),
-                                      );
-                                    }
-                                    if (venueId.length === 0 || field.value.length === 1) {
-                                      setIsAddingVenue(false);
-                                    }
-                                  }}
-                                >
-                                  <X
-                                    className="size-4"
-                                    aria-hidden
-                                  />
-                                </Button>
-                              ) : null}
-                            </div>
-                          );
-                        })}
-                        {canAddVenue ? (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            className="h-auto justify-start gap-2 px-0 py-1 text-sm font-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
-                            onClick={() => setIsAddingVenue(true)}
-                          >
-                            <Plus
-                              className="size-4"
-                              aria-hidden
-                            />
-                            Add another venue
-                          </Button>
-                        ) : null}
-                      </div>
-                      <FieldError errors={[fieldState.error]} />
-                      {venuesQuery.isError ? (
-                        <p className="text-sm text-destructive">Could not load venues.</p>
-                      ) : null}
-                    </Field>
-                  );
-                }}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    {/* Reset the unfinished venue row when the locality changes. */}
+                    <SuggestGigVenuesField
+                      key={localityId}
+                      name={field.name}
+                      value={field.value}
+                      options={venueOptions}
+                      placeholder={
+                        localityId.length === 0
+                          ? 'Select a city or area first'
+                          : venuesQuery.isPending
+                            ? 'Loading venues…'
+                            : 'Select a venue'
+                      }
+                      isDisabled={localityId.length === 0 || venuesQuery.isPending}
+                      isInvalid={fieldState.invalid || venuesQuery.isError}
+                      triggerRef={field.ref}
+                      onBlur={field.onBlur}
+                      onValueChange={field.onChange}
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                    {venuesQuery.isError ? (
+                      <p className="text-sm text-destructive">Could not load venues.</p>
+                    ) : null}
+                  </Field>
+                )}
               />
 
               <Controller
