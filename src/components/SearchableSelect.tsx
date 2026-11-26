@@ -8,7 +8,6 @@ import type { SelectOption } from '@/components/Select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useDismissOnPointerDownOutside } from '@/hooks/use-dismiss-on-pointer-down-outside';
 import { toSearchKey } from '@/lib/search-text';
 import { cn } from '@/lib/utils';
 
@@ -63,13 +62,6 @@ function SearchableSelect(props: SearchableSelectProps) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const containerRef = useDismissOnPointerDownOutside({
-    isOpen: isOpen && variant === 'default',
-    onDismiss: () => {
-      setIsOpen(false);
-      setSearch('');
-    },
-  });
   const normalizedSearch = toSearchKey(search);
   const filteredOptions = useMemo(() => {
     if (normalizedSearch.length === 0) {
@@ -90,14 +82,6 @@ function SearchableSelect(props: SearchableSelectProps) {
   const selectedLabels = options
     .filter((option) => selectedValues.includes(option.value))
     .map((option) => option.label);
-
-  const handleToggle = () => {
-    if (isOpen) {
-      setSearch('');
-    }
-
-    setIsOpen((current) => !current);
-  };
 
   const handleSelect = (option: SelectOption) => {
     if (option.isDisabled) {
@@ -137,10 +121,9 @@ function SearchableSelect(props: SearchableSelectProps) {
       className={cn(
         variant === 'inline'
           ? 'h-auto min-w-0 max-w-full gap-1 rounded-sm bg-transparent px-0 py-0 text-base font-normal leading-normal text-foreground underline decoration-foreground/30 underline-offset-4 shadow-none hover:bg-transparent hover:decoration-foreground focus-visible:decoration-foreground'
-          : 'h-9 w-full justify-between bg-transparent px-3 font-normal shadow-sm',
+          : 'h-9 min-w-0 w-full justify-between bg-transparent px-3 font-normal shadow-sm',
       )}
       onBlur={onBlur}
-      onClick={variant === 'default' ? handleToggle : undefined}
     >
       <span className="truncate">
         {selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}
@@ -156,7 +139,7 @@ function SearchableSelect(props: SearchableSelectProps) {
 
   const content = (
     <>
-      <div className="relative border-b p-1">
+      <div className="relative shrink-0 border-b p-1">
         <Search
           className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
           aria-hidden
@@ -181,7 +164,7 @@ function SearchableSelect(props: SearchableSelectProps) {
         role="listbox"
         aria-multiselectable={props.selectionMode === 'multiple' ? true : undefined}
         aria-labelledby={ariaLabelledBy}
-        className="max-h-48 space-y-0.5 overflow-y-auto p-1"
+        className="min-h-0 max-h-48 space-y-0.5 overflow-y-auto p-1"
       >
         {filteredOptions.map((option) => {
           const isSelected = selectedValues.includes(option.value);
@@ -222,41 +205,29 @@ function SearchableSelect(props: SearchableSelectProps) {
     </>
   );
 
-  if (variant === 'inline') {
-    return (
-      <Popover
-        open={isOpen}
-        onOpenChange={(isNextOpen) => {
-          setIsOpen(isNextOpen);
-          if (!isNextOpen) {
-            setSearch('');
-          }
-        }}
-      >
-        <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-        <PopoverContent
-          align="start"
-          collisionPadding={16}
-          className="w-64 max-w-[calc(100vw-2rem)] p-0"
-        >
-          {content}
-        </PopoverContent>
-      </Popover>
-    );
-  }
-
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full"
+    <Popover
+      open={isOpen}
+      onOpenChange={(isNextOpen) => {
+        setIsOpen(isNextOpen);
+        if (!isNextOpen) {
+          setSearch('');
+        }
+      }}
     >
-      {trigger}
-      {isOpen ? (
-        <div className="absolute top-full right-0 left-0 z-50 mt-1 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
-          {content}
-        </div>
-      ) : null}
-    </div>
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverContent
+        align="start"
+        collisionPadding={16}
+        className={cn(
+          'flex max-h-[var(--radix-popover-content-available-height)] max-w-[calc(100vw-2rem)] flex-col p-0',
+          variant === 'inline' ? 'w-64' : 'w-[var(--radix-popover-trigger-width)]',
+        )}
+        aria-labelledby={ariaLabelledBy}
+      >
+        {content}
+      </PopoverContent>
+    </Popover>
   );
 }
 

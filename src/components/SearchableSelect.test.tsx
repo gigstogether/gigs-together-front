@@ -4,34 +4,91 @@ import { createRef } from 'react';
 import { SearchableSelect } from '@/components/SearchableSelect';
 
 describe('SearchableSelect', () => {
-  it('should restore focus to the inline trigger when the search is closed with Escape', async () => {
+  it.each<'default' | 'inline'>(['default', 'inline'])(
+    'should restore focus to the %s trigger when the search is closed with Escape',
+    async (variant) => {
+      render(
+        <div>
+          <span id="community-label">Community</span>
+          <SearchableSelect
+            id="community"
+            variant={variant}
+            value="barcelona"
+            options={[{ value: 'barcelona', label: 'Barcelona' }]}
+            placeholder="a community"
+            searchPlaceholder="Search communities"
+            emptyText="No communities found."
+            ariaLabelledBy="community-label"
+            onValueChange={vi.fn()}
+          />
+        </div>,
+      );
+      const trigger = screen.getByRole('combobox', { name: 'Community' });
+      fireEvent.click(trigger);
+      const searchInput = screen.getByRole('textbox', { name: 'Search communities' });
+      fireEvent.change(searchInput, { target: { value: 'Madrid' } });
+
+      fireEvent.keyDown(searchInput, { key: 'Escape' });
+
+      await waitFor(() => expect(trigger).toHaveFocus());
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      fireEvent.click(trigger);
+      expect(screen.getByRole('textbox', { name: 'Search communities' })).toHaveValue('');
+    },
+  );
+
+  it('should keep options outside a clipping container when a selector inside it opens', () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <div style={{ maxHeight: 100, overflow: 'hidden' }}>
+        <span id="country-label">Country</span>
+        <SearchableSelect
+          id="country"
+          value=""
+          options={[{ value: 'ES', label: 'Spain' }]}
+          placeholder="Select country"
+          searchPlaceholder="Search countries"
+          emptyText="No countries found."
+          ariaLabelledBy="country-label"
+          onValueChange={onValueChange}
+        />
+      </div>,
+    );
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Country' }));
+
+    expect(container).not.toContainElement(screen.getByRole('listbox', { name: 'Country' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Spain' }));
+    expect(onValueChange).toHaveBeenCalledWith('ES');
+  });
+
+  it('should clear the search when the selector is closed by its trigger', () => {
     render(
       <div>
-        <span id="community-label">Community</span>
+        <span id="country-label">Country</span>
         <SearchableSelect
-          id="community"
-          variant="inline"
-          value="barcelona"
-          options={[{ value: 'barcelona', label: 'Barcelona' }]}
-          placeholder="a community"
-          searchPlaceholder="Search communities"
-          emptyText="No communities found."
-          ariaLabelledBy="community-label"
+          id="country"
+          value=""
+          options={[{ value: 'ES', label: 'Spain' }]}
+          placeholder="Select country"
+          searchPlaceholder="Search countries"
+          emptyText="No countries found."
+          ariaLabelledBy="country-label"
           onValueChange={vi.fn()}
         />
       </div>,
     );
-    const trigger = screen.getByRole('combobox', { name: 'Community' });
+    const trigger = screen.getByRole('combobox', { name: 'Country' });
     fireEvent.click(trigger);
-    const searchInput = screen.getByRole('textbox', { name: 'Search communities' });
-    fireEvent.change(searchInput, { target: { value: 'Madrid' } });
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search countries' }), {
+      target: { value: 'France' },
+    });
 
-    fireEvent.keyDown(searchInput, { key: 'Escape' });
-
-    await waitFor(() => expect(trigger).toHaveFocus());
+    fireEvent.click(trigger);
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
     fireEvent.click(trigger);
-    expect(screen.getByRole('textbox', { name: 'Search communities' })).toHaveValue('');
+
+    expect(screen.getByRole('textbox', { name: 'Search countries' })).toHaveValue('');
   });
 
   it('should filter options and select a matching value', () => {

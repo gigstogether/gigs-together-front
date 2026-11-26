@@ -38,7 +38,7 @@ export default async function SuggestPage() {
     'en',
   );
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-var(--header-h))] w-full max-w-md items-start px-4 py-6">
+    <div className="mx-auto flex h-[calc(100dvh-var(--header-h))] min-h-0 w-full max-w-md flex-col overflow-hidden px-4 py-6">
       <SuggestAuthGate>
         <SuggestGigPageClient
           communityOptions={communityOptions}

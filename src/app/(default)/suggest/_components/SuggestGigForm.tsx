@@ -78,31 +78,34 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
 
   if (isSubmitted) {
     return (
-      <Card className="w-full border-0">
-        <CardHeader>
-          <CardTitle>Suggestion received</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Your gig is in the review queue. You can suggest another one if you want.
-          </p>
-          <Button
-            type="button"
-            onClick={() => setIsSubmitted(false)}
-          >
-            Suggest another
-          </Button>
-        </CardContent>
+      <Card className="mx-auto flex min-h-0 max-h-full w-full max-w-md flex-col border-0">
+        <div className="min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] [scrollbar-gutter:stable]">
+          <CardHeader>
+            <CardTitle>Suggestion received</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Your gig is in the review queue. You can suggest another one if you want.
+            </p>
+            <Button
+              type="button"
+              onClick={() => setIsSubmitted(false)}
+            >
+              Suggest another
+            </Button>
+          </CardContent>
+        </div>
       </Card>
     );
   }
 
   return (
-    <Card className="mx-auto w-full max-w-md border-0">
+    <Card className="mx-auto flex min-h-0 max-h-full w-full max-w-md flex-col border-0">
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         aria-labelledby="suggest-gig-heading"
         aria-describedby={description ? 'suggest-gig-description' : undefined}
+        className="min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[inherit] [scrollbar-gutter:stable]"
       >
         <CardHeader>
           <Controller
