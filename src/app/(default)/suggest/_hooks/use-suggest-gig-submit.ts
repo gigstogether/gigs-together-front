@@ -36,8 +36,10 @@ function buildPayload(params: BuildPayloadParams): GigCandidateCreatePayload {
     communityId: values.communityId,
     localityId: values.localityId,
     title: values.title,
-    date: values.date,
   };
+  if (values.date !== undefined) {
+    payload.date = values.date;
+  }
   if (values.venueIds.length > 0) {
     payload.venueIds = [...values.venueIds];
   }

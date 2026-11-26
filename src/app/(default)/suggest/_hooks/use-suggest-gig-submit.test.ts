@@ -7,7 +7,6 @@ import type {
   GigCandidateCreateResponse,
   GigCandidateCreateApiParams,
 } from '@/app/(default)/suggest/_lib/gig-candidate-api';
-import { createDefaultSuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 import { ApiNetworkError } from '@/lib/api-errors';
@@ -30,7 +29,8 @@ vi.mock('@/app/(default)/suggest/_lib/gig-candidate-api', () => ({
 }));
 
 const DEFAULT_SUBMIT_VALUES: SuggestGigFormValues = {
-  ...createDefaultSuggestGigFormValues([{ value: 'community-id', label: 'Barcelona' }]),
+  communityId: 'community-id',
+  countryIso: 'ES',
   localityId: 'locality-id',
   title: 'Arctic Monkeys',
   date: '2026-07-01',
@@ -88,6 +88,33 @@ describe('useSuggestGigSubmit', () => {
       },
     });
     expect(onSuccess).toHaveBeenCalledWith({ id: '507f1f77bcf86cd799439099' });
+  });
+
+  it('should omit date when submitting without one', async () => {
+    const queryClient = createTestQueryClient();
+    createGigCandidateMock.mockResolvedValueOnce({ id: '507f1f77bcf86cd799439099' });
+
+    const { result } = renderHook(
+      () =>
+        useSuggestGigSubmit({
+          posterFile: null,
+          posterUrl: '',
+          onSuccess: vi.fn(),
+        }),
+      {
+        wrapper: createQueryClientWrapper(queryClient),
+      },
+    );
+
+    await act(async () => {
+      await result.current.onSubmit({
+        ...DEFAULT_SUBMIT_VALUES,
+        date: undefined,
+      });
+    });
+
+    const createParams = createGigCandidateMock.mock.calls[0]?.[0];
+    expect(createParams?.gig).not.toHaveProperty('date');
   });
 
   it('should show validation toast and skip submit when poster URL is invalid', async () => {

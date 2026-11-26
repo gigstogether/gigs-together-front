@@ -41,6 +41,27 @@ describe('createGigCandidate', () => {
     expect(result).toEqual({ id: '507f1f77bcf86cd799439099' });
   });
 
+  it('should omit date when it is not provided', async () => {
+    apiClientRequestMock.mockResolvedValue({ id: '507f1f77bcf86cd799439099' });
+
+    await createGigCandidate({
+      gig: {
+        communityId: 'community-id',
+        localityId: 'locality-id',
+        title: 'Band',
+      },
+      poster: { mode: 'url', file: null, url: '' },
+    });
+
+    expect(apiClientRequestMock).toHaveBeenCalledWith('v1/gig-candidates', 'POST', {
+      gig: {
+        communityId: 'community-id',
+        localityId: 'locality-id',
+        title: 'Band',
+      },
+    });
+  });
+
   it('should POST JSON with posterUrl when url mode has a valid URL', async () => {
     apiClientRequestMock.mockResolvedValue({ id: '507f1f77bcf86cd799439099' });
 
