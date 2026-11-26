@@ -16,11 +16,9 @@ vi.mock('@/lib/api-public', () => ({
   apiPublicRequest: apiPublicRequestMock,
 }));
 
-const COMMUNITY_OPTIONS = [{ value: 'community-id', label: 'Barcelona' }];
-
 function SuggestGigFormFieldsTestSubject() {
   const form = useForm<SuggestGigFormValues>({
-    defaultValues: createDefaultSuggestGigFormValues(COMMUNITY_OPTIONS),
+    defaultValues: createDefaultSuggestGigFormValues('community-id'),
   });
 
   return (

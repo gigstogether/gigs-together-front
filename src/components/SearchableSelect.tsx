@@ -136,7 +136,7 @@ function SearchableSelect(props: SearchableSelectProps) {
       aria-invalid={isInvalid}
       className={cn(
         variant === 'inline'
-          ? 'h-auto min-w-0 max-w-full gap-1 rounded-sm bg-transparent px-0 py-1 text-base font-normal leading-normal text-foreground underline decoration-foreground/30 underline-offset-4 shadow-none hover:bg-transparent hover:decoration-foreground focus-visible:decoration-foreground'
+          ? 'h-auto min-w-0 max-w-full gap-1 rounded-sm bg-transparent px-0 py-0 text-base font-normal leading-normal text-foreground underline decoration-foreground/30 underline-offset-4 shadow-none hover:bg-transparent hover:decoration-foreground focus-visible:decoration-foreground'
           : 'h-9 w-full justify-between bg-transparent px-3 font-normal shadow-sm',
       )}
       onBlur={onBlur}

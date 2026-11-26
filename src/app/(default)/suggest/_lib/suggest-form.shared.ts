@@ -1,6 +1,5 @@
 import * as z from 'zod';
 import { GIG_TITLE_MAX_LENGTH } from '@/lib/gig.constants';
-import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
 
 const yyyyMmDdSchema = z
   .string()
@@ -56,13 +55,9 @@ export const suggestGigFormSchema = z
 
 export type SuggestGigFormValues = z.infer<typeof suggestGigFormSchema>;
 
-export type SuggestCommunityOption = CommunityDisplayOption;
-
-export function createDefaultSuggestGigFormValues(
-  communityOptions: SuggestCommunityOption[],
-): SuggestGigFormValues {
+export function createDefaultSuggestGigFormValues(communityId: string): SuggestGigFormValues {
   return {
-    communityId: communityOptions.length === 1 ? (communityOptions[0]?.value ?? '') : '',
+    communityId,
     countryIso: 'ES',
     localityId: '',
     venueIds: [],

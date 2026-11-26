@@ -1,5 +1,5 @@
 import SuggestAuthGate from '@/app/(default)/suggest/_components/SuggestAuthGate';
-import SuggestGigFormClient from '@/app/(default)/suggest/_components/SuggestGigFormClient';
+import SuggestGigPageClient from '@/app/(default)/suggest/_components/SuggestGigPageClient';
 import { getCountries } from '@/lib/countries.server';
 import { createCountryDisplayOptions } from '@/lib/i18n/country-display-name';
 import { getCommunityDisplayOptions } from '@/lib/community/community-display-options.server';
@@ -30,7 +30,7 @@ export default async function SuggestPage() {
   return (
     <div className="mx-auto flex min-h-[calc(100dvh-var(--header-h))] w-full max-w-md items-start px-4 py-6">
       <SuggestAuthGate>
-        <SuggestGigFormClient
+        <SuggestGigPageClient
           communityOptions={communityOptions}
           countries={countryOptions}
           description={description}

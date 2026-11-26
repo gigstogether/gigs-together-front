@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import SuggestGigFormClient from './SuggestGigFormClient';
-import type { SuggestCommunityOption } from '../_lib/suggest-form.shared';
+import SuggestGigPageClient from './SuggestGigPageClient';
+import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
 import { createQueryClientWrapper, createTestQueryClient } from '@/test/react-query-client';
 
 const { apiPublicRequestMock, createGigCandidateMock } = vi.hoisted(() => ({
@@ -17,7 +17,7 @@ vi.mock('../_lib/gig-candidate-api', () => ({
   createGigCandidate: createGigCandidateMock,
 }));
 
-const COMMUNITY_OPTIONS: SuggestCommunityOption[] = [
+const COMMUNITY_OPTIONS: CommunityDisplayOption[] = [
   { value: 'barcelona', label: 'Barcelona' },
   { value: 'madrid', label: 'Madrid' },
 ];
@@ -28,9 +28,9 @@ const LOCALITY = {
   timeZone: 'Europe/Madrid',
 };
 
-function renderForm(communityOptions = COMMUNITY_OPTIONS) {
+function renderPage(communityOptions = COMMUNITY_OPTIONS) {
   return render(
-    <SuggestGigFormClient
+    <SuggestGigPageClient
       communityOptions={communityOptions}
       countries={[{ iso: 'ES', name: 'Spain' }]}
     />,
@@ -38,7 +38,7 @@ function renderForm(communityOptions = COMMUNITY_OPTIONS) {
   );
 }
 
-describe('SuggestGigFormClient', () => {
+describe('SuggestGigPageClient', () => {
   beforeEach(() => {
     createGigCandidateMock.mockReset().mockResolvedValue({ id: 'candidate-id' });
     apiPublicRequestMock.mockReset().mockImplementation((endpoint: string) => {
@@ -53,7 +53,7 @@ describe('SuggestGigFormClient', () => {
   });
 
   it('should display one required community selector when only one community is available', () => {
-    renderForm([COMMUNITY_OPTIONS[0]]);
+    renderPage([COMMUNITY_OPTIONS[0]]);
 
     const communitySelect = screen.getByRole('combobox', { name: 'Community' });
 
@@ -66,7 +66,9 @@ describe('SuggestGigFormClient', () => {
   });
 
   it('should submit the selected community when a user changes it in the header', async () => {
-    renderForm();
+    renderPage();
+    fireEvent.click(screen.getByRole('combobox', { name: 'Choose a community' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Barcelona' }));
     fireEvent.change(screen.getByLabelText('Title:*'), { target: { value: 'Muse' } });
     fireEvent.click(screen.getByRole('combobox', { name: 'Community' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Search communities' }), {
@@ -86,13 +88,28 @@ describe('SuggestGigFormClient', () => {
         poster: { mode: 'url', file: null, url: '' },
       }),
     );
+
+    await screen.findByText('Suggestion received');
+    fireEvent.click(screen.getByRole('button', { name: 'Suggest another' }));
+
+    expect(screen.getByRole('combobox', { name: 'Community' })).toHaveTextContent('Madrid');
+    expect(screen.getByLabelText('Title:*')).toHaveValue('');
   });
 
-  it('should show a validation error when no community is selected', async () => {
-    renderForm();
+  it('should show only the community selector when no community is selected', () => {
+    renderPage();
 
-    fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
+    expect(screen.getByRole('combobox', { name: 'Choose a community' })).toBeRequired();
+    expect(screen.queryByLabelText('Title:*')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Submit suggestion' })).not.toBeInTheDocument();
+    expect(apiPublicRequestMock).not.toHaveBeenCalled();
+  });
 
-    expect(await screen.findByText('Community is required.')).toHaveAttribute('role', 'alert');
+  it('should show an empty state when no communities are available', () => {
+    renderPage([]);
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Choose a community' }));
+
+    expect(screen.getByText('No communities found.')).toBeInTheDocument();
   });
 });

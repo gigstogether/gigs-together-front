@@ -104,20 +104,9 @@ describe('suggestGigFormSchema', () => {
 });
 
 describe('createDefaultSuggestGigFormValues', () => {
-  it('should preselect Community when exactly one option is available', () => {
-    const values = createDefaultSuggestGigFormValues([
-      { value: 'community-id', label: 'Barcelona' },
-    ]);
+  it('should initialize Community with the provided ID', () => {
+    const values = createDefaultSuggestGigFormValues('community-id');
 
     expect(values.communityId).toBe('community-id');
-  });
-
-  it('should require an explicit Community choice when multiple options are available', () => {
-    const values = createDefaultSuggestGigFormValues([
-      { value: 'barcelona-id', label: 'Barcelona' },
-      { value: 'madrid-id', label: 'Madrid' },
-    ]);
-
-    expect(values.communityId).toBe('');
   });
 });

@@ -1,5 +1,3 @@
-'use client';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -10,28 +8,27 @@ import {
   createDefaultSuggestGigFormValues,
   suggestGigFormSchema,
 } from '@/app/(default)/suggest/_lib/suggest-form.shared';
-import type {
-  SuggestCommunityOption,
-  SuggestGigFormValues,
-} from '@/app/(default)/suggest/_lib/suggest-form.shared';
+import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
 import PosterField from '@/components/PosterField';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FieldError } from '@/components/ui/field';
 import { toast } from '@/hooks/use-toast';
+import type { CommunityDisplayOption } from '@/lib/community/community-display-option';
 import type { CountryDisplayOption } from '@/lib/i18n/country-display-name';
 
-interface SuggestGigFormClientProps {
-  communityOptions: SuggestCommunityOption[];
+interface SuggestGigFormProps {
+  initialCommunityId: string;
+  communityOptions: CommunityDisplayOption[];
   countries: CountryDisplayOption[];
   description?: string;
 }
 
-export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
-  const { communityOptions, countries, description } = props;
+export default function SuggestGigForm(props: SuggestGigFormProps) {
+  const { initialCommunityId, communityOptions, countries, description } = props;
 
-  const defaultValues = createDefaultSuggestGigFormValues(communityOptions);
+  const defaultValues = createDefaultSuggestGigFormValues(initialCommunityId);
 
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState<string>('');
@@ -52,7 +49,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
         description: "Thanks — we'll review your suggestion soon.",
       });
       setIsSubmitted(true);
-      form.reset(defaultValues);
+      form.reset(createDefaultSuggestGigFormValues(form.getValues('communityId')));
       setPosterFile(null);
       setPosterUrl('');
       if (posterFileInputRef.current) {
@@ -91,7 +88,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
   }
 
   return (
-    <Card className="w-full max-w-md m-auto border-0">
+    <Card className="mx-auto w-full max-w-md border-0">
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         aria-labelledby="suggest-gig-heading"
@@ -111,7 +108,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
                     Suggest a gig
                   </h1>
                   <div className="inline-flex min-w-0 max-w-full items-baseline gap-x-1">
-                    <span className="shrink-0">for{field.value ? ' the' : ''}</span>
+                    <span className="shrink-0">for the</span>
                     <span
                       id="suggest-gig-community-label"
                       className="sr-only"
@@ -125,7 +122,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
                       options={communityOptions}
                       variant="inline"
                       title="Change community"
-                      placeholder="a community"
+                      placeholder="Select community"
                       searchPlaceholder="Search communities"
                       emptyText="No communities found."
                       ariaLabelledBy="suggest-gig-community-label"
@@ -135,7 +132,7 @@ export default function SuggestGigFormClient(props: SuggestGigFormClientProps) {
                       onBlur={field.onBlur}
                       onValueChange={field.onChange}
                     />
-                    {field.value ? <span className="shrink-0">community</span> : null}
+                    <span className="shrink-0">community</span>
                   </div>
                 </CardTitle>
                 <FieldError errors={[fieldState.error]} />

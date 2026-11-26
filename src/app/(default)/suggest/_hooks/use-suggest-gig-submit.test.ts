@@ -30,7 +30,7 @@ vi.mock('@/app/(default)/suggest/_lib/gig-candidate-api', () => ({
 }));
 
 const DEFAULT_SUBMIT_VALUES: SuggestGigFormValues = {
-  ...createDefaultSuggestGigFormValues([{ value: 'community-id', label: 'Barcelona' }]),
+  ...createDefaultSuggestGigFormValues('community-id'),
   localityId: 'locality-id',
   title: 'Arctic Monkeys',
   date: '2026-07-01',
