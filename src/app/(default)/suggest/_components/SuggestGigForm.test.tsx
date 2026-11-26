@@ -78,4 +78,38 @@ describe('SuggestGigForm', () => {
     expect(screen.getByRole('combobox', { name: 'Community' })).toHaveTextContent('Barcelona');
     expect(screen.getByLabelText('Title:*')).toHaveValue('Muse');
   });
+
+  it('should reveal optional errors when a collapsed optional field is invalid', async () => {
+    render(
+      <SuggestGigForm
+        initialCommunityId="barcelona"
+        communityOptions={COMMUNITY_OPTIONS}
+        countries={[]}
+      />,
+      { wrapper: createQueryClientWrapper(createTestQueryClient()) },
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+    fireEvent.change(screen.getByLabelText('Tickets URL:'), { target: { value: 'invalid-url' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Hide optional details' }));
+
+    fireEvent.submit(screen.getByRole('form', { name: 'Suggest a gig' }));
+
+    expect(await screen.findByText('Please enter a valid ticket URL.')).toBeVisible();
+  });
+
+  it('should reveal the poster field when extra gig details are expanded', () => {
+    render(
+      <SuggestGigForm
+        initialCommunityId="barcelona"
+        communityOptions={COMMUNITY_OPTIONS}
+        countries={[]}
+      />,
+      { wrapper: createQueryClientWrapper(createTestQueryClient()) },
+    );
+    expect(screen.getByText('Poster:')).not.toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    expect(screen.getByText('Poster:')).toBeVisible();
+  });
 });

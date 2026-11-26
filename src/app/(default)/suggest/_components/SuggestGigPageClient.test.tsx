@@ -39,7 +39,7 @@ function renderPage(communityOptions = COMMUNITY_OPTIONS, communitySelectionHint
   );
 }
 
-async function submitGigForMadrid(): Promise<void> {
+async function submitGigForMadrid(ticketsUrl?: string): Promise<void> {
   renderPage();
   fireEvent.click(screen.getByRole('combobox', { name: 'Choose a community' }));
   fireEvent.click(screen.getByRole('option', { name: 'Barcelona' }));
@@ -49,6 +49,11 @@ async function submitGigForMadrid(): Promise<void> {
     target: { value: 'Madrid' },
   });
   fireEvent.click(screen.getByRole('option', { name: 'Madrid' }));
+  if (ticketsUrl !== undefined) {
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+    fireEvent.change(screen.getByLabelText('Tickets URL:'), { target: { value: ticketsUrl } });
+    fireEvent.click(screen.getByRole('button', { name: 'Hide optional details' }));
+  }
   const localitySelect = screen.getByRole('combobox', { name: 'Locality:' });
   await waitFor(() => expect(localitySelect).toBeEnabled());
   fireEvent.click(localitySelect);
@@ -94,12 +99,31 @@ describe('SuggestGigPageClient', () => {
   });
 
   it('should reopen an empty gig form for the last selected community when Suggest another is clicked', async () => {
-    await submitGigForMadrid();
+    await submitGigForMadrid('https://tickets.example/gig');
 
     fireEvent.click(screen.getByRole('button', { name: 'Suggest another' }));
 
     expect(screen.getByRole('combobox', { name: 'Community' })).toHaveTextContent('Madrid');
     expect(screen.getByLabelText('Title:*')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Add details' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+    expect(screen.getByLabelText('Tickets URL:')).toHaveValue('');
+  });
+
+  it('should submit retained optional values when extra details are collapsed', async () => {
+    await submitGigForMadrid('https://tickets.example/gig');
+
+    expect(createGigCandidateMock).toHaveBeenCalledWith({
+      gig: {
+        communityId: 'madrid',
+        localityId: 'madrid-locality',
+        title: 'Muse',
+        ticketsUrl: 'https://tickets.example/gig',
+      },
+      poster: { mode: 'url', file: null, url: '' },
+    });
   });
 
   it('should show only the community selector when no community is selected', () => {

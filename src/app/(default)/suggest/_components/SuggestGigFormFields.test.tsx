@@ -2,6 +2,7 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
+import { useState } from 'react';
 
 import SuggestGigFormFields from '@/app/(default)/suggest/_components/SuggestGigFormFields';
 import type { SuggestGigFormValues } from '@/app/(default)/suggest/_lib/suggest-form.shared';
@@ -16,6 +17,7 @@ vi.mock('@/lib/api-public', () => ({
 }));
 
 function SuggestGigFormFieldsTestSubject() {
+  const [isAdditionalInfoExpanded, setIsAdditionalInfoExpanded] = useState(false);
   const form = useForm<SuggestGigFormValues>({
     defaultValues: {
       communityId: 'community-id',
@@ -32,6 +34,8 @@ function SuggestGigFormFieldsTestSubject() {
   return (
     <SuggestGigFormFields
       form={form}
+      isAdditionalInfoExpanded={isAdditionalInfoExpanded}
+      onAdditionalInfoToggle={() => setIsAdditionalInfoExpanded((isExpanded) => !isExpanded)}
       countries={[
         { iso: 'ES', name: 'Spain' },
         { iso: 'FR', name: 'France' },
@@ -116,6 +120,9 @@ describe('SuggestGigFormFields', () => {
     expect(screen.getByLabelText('Title:*')).toBeRequired();
     expect(screen.getByLabelText('Country:*')).toBeRequired();
     expect(screen.getByRole('combobox', { name: 'Locality:' })).toBeRequired();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
     expect(screen.getByLabelText('Date:')).not.toBeRequired();
     expect(screen.getByLabelText('End Date:')).not.toBeRequired();
     expect(screen.getByLabelText('Venues:')).not.toBeRequired();
@@ -124,6 +131,7 @@ describe('SuggestGigFormFields', () => {
 
   it('should stack date fields on mobile and align them horizontally on larger screens', () => {
     renderFields();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
 
     const dateInput = screen.getByLabelText('Date:');
     const dateField = dateInput.closest('[data-slot="field"]');
@@ -138,8 +146,34 @@ describe('SuggestGigFormFields', () => {
     );
   });
 
+  it('should hide optional inputs when the form first opens', () => {
+    renderFields();
+
+    expect(screen.getByLabelText('Tickets URL:')).not.toBeVisible();
+    expect(screen.getByLabelText('Date:')).not.toBeVisible();
+    expect(screen.getByRole('button', { name: 'Add details' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+  });
+
+  it('should preserve optional values when extra details are collapsed and reopened', () => {
+    renderFields();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+    fireEvent.change(screen.getByLabelText('Tickets URL:'), {
+      target: { value: 'https://tickets.example/gig' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide optional details' }));
+    expect(screen.getByLabelText('Tickets URL:')).not.toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
+
+    expect(screen.getByLabelText('Tickets URL:')).toHaveValue('https://tickets.example/gig');
+  });
+
   it('should show the Locality qualifier and enable only matching Venues', async () => {
     renderFields();
+    fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
 
     const venueSelect = screen.getByRole('combobox', { name: 'Venues:' });
     expect(venueSelect).toBeDisabled();

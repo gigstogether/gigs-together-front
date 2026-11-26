@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import type { FieldErrors } from 'react-hook-form';
 
 import SuggestGigFormFields from '@/app/(default)/suggest/_components/SuggestGigFormFields';
 import { useSuggestGigSubmit } from '@/app/(default)/suggest/_hooks/use-suggest-gig-submit';
@@ -43,6 +44,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isAdditionalInfoExpanded, setIsAdditionalInfoExpanded] = useState(false);
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<SuggestGigFormValues>({
@@ -59,6 +61,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
         description: "Thanks — we'll review your suggestion soon.",
       });
       setIsSubmitted(true);
+      setIsAdditionalInfoExpanded(false);
       form.reset(createDefaultSuggestGigFormValues(form.getValues('communityId')));
       setPosterFile(null);
       setPosterUrl('');
@@ -67,6 +70,18 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
       }
     },
   });
+
+  function handleInvalidSubmit(errors: FieldErrors<SuggestGigFormValues>): void {
+    const hasAdditionalFieldErrors =
+      errors.date !== undefined ||
+      errors.endDate !== undefined ||
+      errors.venueIds !== undefined ||
+      errors.ticketsUrl !== undefined;
+
+    if (hasAdditionalFieldErrors) {
+      setIsAdditionalInfoExpanded(true);
+    }
+  }
 
   function clearPoster() {
     setPosterFile(null);
@@ -102,7 +117,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
   return (
     <Card className="mx-auto flex min-h-0 max-h-full w-full flex-col border-0 shadow-none sm:max-w-md sm:shadow">
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, handleInvalidSubmit)}
         aria-labelledby="suggest-gig-heading"
         aria-describedby={description ? 'suggest-gig-description' : undefined}
         className="flex min-h-0 flex-col overflow-hidden rounded-[inherit]"
@@ -166,16 +181,21 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
             <SuggestGigFormFields
               form={form}
               countries={countries}
-            />
-            <PosterField
-              posterFile={posterFile}
-              onPosterFileChange={setPosterFile}
-              posterUrl={posterUrl}
-              onPosterUrlChange={setPosterUrl}
-              onClearPoster={clearPoster}
-              posterFileInputRef={posterFileInputRef}
-              isUrlInputEnabled={false}
-            />
+              isAdditionalInfoExpanded={isAdditionalInfoExpanded}
+              onAdditionalInfoToggle={() =>
+                setIsAdditionalInfoExpanded((isExpanded) => !isExpanded)
+              }
+            >
+              <PosterField
+                posterFile={posterFile}
+                onPosterFileChange={setPosterFile}
+                posterUrl={posterUrl}
+                onPosterUrlChange={setPosterUrl}
+                onClearPoster={clearPoster}
+                posterFileInputRef={posterFileInputRef}
+                isUrlInputEnabled={false}
+              />
+            </SuggestGigFormFields>
           </CardContent>
         </div>
         <div className="shrink-0 overflow-hidden border-t bg-card px-6 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] [scrollbar-gutter:stable_both-edges] sm:px-2">
