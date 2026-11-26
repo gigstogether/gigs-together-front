@@ -382,7 +382,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
                 <div
                   className={cn(
                     'grid min-w-0 grid-cols-1 gap-4',
-                    isEndDateEnabled && 'sm:grid-cols-2',
+                    isEndDateEnabled && 'grid-cols-2',
                   )}
                 >
                   <Controller

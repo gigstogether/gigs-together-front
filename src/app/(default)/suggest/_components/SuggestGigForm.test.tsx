@@ -218,7 +218,7 @@ describe('SuggestGigForm', () => {
     expect(screen.getByLabelText('Tickets URL:')).not.toBeRequired();
   });
 
-  it('should stack date fields on mobile and align them horizontally on larger screens', () => {
+  it('should align date fields horizontally on all screen sizes when multiple days are enabled', () => {
     renderForm();
     fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
     fireEvent.click(screen.getByRole('switch', { name: 'Multi-day event' }));
@@ -228,7 +228,7 @@ describe('SuggestGigForm', () => {
     const endDateField = screen.getByLabelText('End Date:').closest('[data-slot="field"]');
 
     expect(dateField?.parentElement).toBe(endDateField?.parentElement);
-    expect(dateField?.parentElement).toHaveClass('grid-cols-1', 'sm:grid-cols-2');
+    expect(dateField?.parentElement).toHaveClass('grid-cols-2');
     expect(dateInput.closest('[data-slot="date-input-frame"]')).toHaveClass(
       'h-9',
       'max-w-full',
