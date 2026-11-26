@@ -191,7 +191,7 @@ describe('SuggestGigForm', () => {
 
     expect(screen.getByLabelText('Title:*')).toBeRequired();
     expect(screen.getByLabelText('Country:*')).toBeRequired();
-    expect(screen.getByRole('combobox', { name: 'Locality:' })).toBeRequired();
+    expect(screen.getByRole('combobox', { name: 'City / area:' })).toBeRequired();
 
     fireEvent.click(screen.getByRole('button', { name: 'Add details' }));
 
@@ -249,9 +249,9 @@ describe('SuggestGigForm', () => {
 
     const venueSelect = screen.getByRole('combobox', { name: 'Venues:' });
     expect(venueSelect).toBeDisabled();
-    expect(venueSelect).toHaveTextContent('Select a locality first');
+    expect(venueSelect).toHaveTextContent('Select a city or area first');
 
-    const localitySelect = screen.getByRole('combobox', { name: 'Locality:' });
+    const localitySelect = screen.getByRole('combobox', { name: 'City / area:' });
     await waitFor(() => expect(localitySelect).toBeEnabled());
     fireEvent.click(localitySelect);
     fireEvent.click(screen.getByRole('option', { name: 'Barcelona (Catalonia)' }));

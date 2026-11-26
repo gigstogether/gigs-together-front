@@ -24,7 +24,7 @@ export const suggestGigFormSchema = z
   .object({
     communityId: z.string().min(1, { message: 'Community is required.' }),
     countryIso: z.string().min(1, { message: 'Country is required.' }),
-    localityId: z.string().min(1, { message: 'Locality is required.' }),
+    localityId: z.string().min(1, { message: 'Please select a city or area.' }),
     venueIds: z.array(z.string().min(1)).default([]),
     title: z
       .string()

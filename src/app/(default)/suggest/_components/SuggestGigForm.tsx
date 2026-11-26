@@ -289,7 +289,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
                       id="suggest-gig-locality-label"
                       htmlFor="suggest-gig-locality"
                     >
-                      Locality:
+                      City / area:
                       <RequiredIndicator />
                     </FieldLabel>
                     <SearchableSelect
@@ -298,10 +298,12 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
                       value={field.value}
                       options={localityOptions}
                       placeholder={
-                        localitiesQuery.isPending ? 'Loading localities…' : 'Select locality'
+                        localitiesQuery.isPending
+                          ? 'Loading cities and areas…'
+                          : 'Select a city or area'
                       }
-                      searchPlaceholder="Search localities"
-                      emptyText="No localities found."
+                      searchPlaceholder="Search cities and areas"
+                      emptyText="No cities or areas found."
                       ariaLabelledBy="suggest-gig-locality-label"
                       isDisabled={countryIso.length === 0 || localitiesQuery.isPending}
                       isRequired
@@ -315,7 +317,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
                     />
                     <FieldError errors={[fieldState.error]} />
                     {localitiesQuery.isError ? (
-                      <p className="text-sm text-destructive">Could not load localities.</p>
+                      <p className="text-sm text-destructive">Could not load cities and areas.</p>
                     ) : null}
                   </Field>
                 )}
@@ -440,7 +442,7 @@ export default function SuggestGigForm(props: SuggestGigFormProps) {
                       options={venueOptions}
                       placeholder={
                         localityId.length === 0
-                          ? 'Select a locality first'
+                          ? 'Select a city or area first'
                           : venuesQuery.isPending
                             ? 'Loading venues…'
                             : 'Select venues'
