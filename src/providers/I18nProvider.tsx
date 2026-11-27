@@ -9,6 +9,7 @@ import {
   TranslationValueResolutionError,
 } from '@/lib/i18n/translation-value';
 import { isValidTranslationNamespace } from '@/lib/i18n/translation-identifiers';
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 
 export type { TParams };
 
@@ -63,7 +64,7 @@ export function useI18n(): I18nContextValue {
       void params;
       return key;
     };
-    return { locale: 'en', translations: {}, t };
+    return { locale: DEFAULT_LOCALE_ISO, translations: {}, t };
   }
   return ctx;
 }

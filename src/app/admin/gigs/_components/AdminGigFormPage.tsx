@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 import EditGigFormClient from '@/app/admin/gigs/_components/EditGigFormClient';
 import AdminGigDetailBackLink from '@/app/admin/gigs/_components/AdminGigDetailBackLink';
 import { getCountries } from '@/lib/countries.server';
@@ -12,11 +13,11 @@ export default async function AdminGigFormPage(props: AdminGigFormPageProps) {
   const { gigPublicId } = props;
   const [countries, communityOptions] = await Promise.all([
     getCountries(),
-    getCommunityDisplayOptions('en'),
+    getCommunityDisplayOptions(DEFAULT_LOCALE_ISO),
   ]);
   const countryOptions = createCountryDisplayOptions(
     countries.map((country) => country.iso),
-    'en',
+    DEFAULT_LOCALE_ISO,
   );
 
   return (

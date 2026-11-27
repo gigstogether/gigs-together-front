@@ -1,5 +1,7 @@
 'use client';
 
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
@@ -14,7 +16,6 @@ import {
   matchesLocationSearch,
 } from '../shared/admin-location-catalog';
 import type { AdminLocationCatalogProps } from '../shared/admin-location-catalog';
-import { ADMIN_LOCATION_LOCALE } from '../shared/admin-location-display';
 import {
   createAdminVenue,
   deleteAdminVenue,
@@ -59,7 +60,7 @@ export default function AdminVenues(props: AdminLocationCatalogProps) {
             locality?.name ?? '',
             locality?.qualifier ?? '',
             locality?.countryIso ?? '',
-            locality ? getCountryDisplayName(locality.countryIso, ADMIN_LOCATION_LOCALE) : '',
+            locality ? getCountryDisplayName(locality.countryIso, DEFAULT_LOCALE_ISO) : '',
           ],
           search,
         );

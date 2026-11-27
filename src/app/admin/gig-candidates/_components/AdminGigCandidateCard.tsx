@@ -1,5 +1,7 @@
 'use client';
 
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
+
 import { MapPin, AlertTriangle, Calendar, Clock3, ExternalLink, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -20,8 +22,6 @@ import { cn } from '@/lib/utils';
 import { ShareButton } from '@/components/ShareButton';
 import { VenueMapLinks } from '@/components/VenueMapLinks';
 
-const ADMIN_GIG_CANDIDATE_LOCALE = 'en';
-
 interface AdminGigCandidateCardProps {
   gigCandidate: AdminGigCandidate;
 }
@@ -34,7 +34,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
     ? `${gigCandidate.locality.name} (${gigCandidate.locality.qualifier})`
     : gigCandidate.locality?.name;
   const countryName = gigCandidate.locality
-    ? getCountryDisplayName(gigCandidate.locality.countryIso, ADMIN_GIG_CANDIDATE_LOCALE)
+    ? getCountryDisplayName(gigCandidate.locality.countryIso, DEFAULT_LOCALE_ISO)
     : undefined;
   const locationContext = [localityName, countryName].filter(Boolean).join(', ');
   const venues = gigCandidate.venues ?? [];
@@ -91,7 +91,7 @@ export default function AdminGigCandidateCard(props: AdminGigCandidateCardProps)
                 <VenueMapLinks
                   venues={venues}
                   locality={gigCandidate.locality}
-                  locale={ADMIN_GIG_CANDIDATE_LOCALE}
+                  locale={DEFAULT_LOCALE_ISO}
                   className="block"
                 />
               ) : (

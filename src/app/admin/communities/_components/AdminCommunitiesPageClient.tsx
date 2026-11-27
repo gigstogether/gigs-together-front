@@ -1,5 +1,7 @@
 'use client';
 
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -36,8 +38,8 @@ export default function AdminCommunitiesPageClient() {
     queryFn: () => fetchCountries(),
   });
   const namesQuery = useQuery({
-    queryKey: adminKeys.translations('community', 'en'),
-    queryFn: () => fetchAdminTranslations({ namespace: 'community', locale: 'en' }),
+    queryKey: adminKeys.translations('community', DEFAULT_LOCALE_ISO),
+    queryFn: () => fetchAdminTranslations({ namespace: 'community', locale: DEFAULT_LOCALE_ISO }),
   });
   const invalidateCommunities = (): Promise<void> =>
     queryClient.invalidateQueries({ queryKey: adminKeys.communities() });
@@ -114,19 +116,19 @@ export default function AdminCommunitiesPageClient() {
     )
     .map((record) => ({ value: record.key, label: record.value }));
   const namesByKey = new Map(nameOptions.map((option) => [option.value, option.label]));
-  const searchKey = toSearchKey(search, 'en');
+  const searchKey = toSearchKey(search, DEFAULT_LOCALE_ISO);
   const visibleCommunities = communitiesQuery.data.filter((community) =>
     toSearchKey(
       [
         community.slug,
         community.countryIso,
-        getCountryDisplayName(community.countryIso, 'en'),
+        getCountryDisplayName(community.countryIso, DEFAULT_LOCALE_ISO),
         community.nameTranslationKey,
         namesByKey.get(community.nameTranslationKey) ?? '',
         community.timeZone,
         community.isActive ? 'active' : 'inactive',
       ].join(' '),
-      'en',
+      DEFAULT_LOCALE_ISO,
     ).includes(searchKey),
   );
 

@@ -1,5 +1,7 @@
 'use client';
 
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
+
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -40,7 +42,7 @@ export default function AdminCommunityFormDialog(props: AdminCommunityFormDialog
 
   const countryOptions = countries.map((country) => ({
     value: country.iso,
-    label: getCountryDisplayName(country.iso, 'en'),
+    label: getCountryDisplayName(country.iso, DEFAULT_LOCALE_ISO),
   }));
   const timeZones = new Set(['UTC', ...Intl.supportedValuesOf('timeZone')]);
   if (value !== null) timeZones.add(value.timeZone);
@@ -54,7 +56,7 @@ export default function AdminCommunityFormDialog(props: AdminCommunityFormDialog
   ) {
     availableNameOptions.push({
       value: value.nameTranslationKey,
-      label: `${value.nameTranslationKey} (missing active English name)`,
+      label: `${value.nameTranslationKey} (missing active name in the default language)`,
     });
   }
   const hasActiveName = nameOptions.some((option) => option.value === nameTranslationKey);
@@ -153,7 +155,7 @@ export default function AdminCommunityFormDialog(props: AdminCommunityFormDialog
               options={availableNameOptions}
               placeholder="Select translated name"
               searchPlaceholder="Search community names"
-              emptyText="No active English names found."
+              emptyText="No active names found in the default language."
               ariaLabelledBy="community-name-label"
               isDisabled={isSaving}
               isRequired
@@ -173,7 +175,7 @@ export default function AdminCommunityFormDialog(props: AdminCommunityFormDialog
             </FieldDescription>
             {isActive && nameTranslationKey.length > 0 && !hasActiveName ? (
               <p className="text-sm text-destructive">
-                An active English name is required to activate this community.
+                An active name in the default language is required to activate this community.
               </p>
             ) : null}
           </Field>

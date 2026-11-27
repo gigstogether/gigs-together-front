@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 import AdminGigCandidateBackLink from '@/app/admin/gig-candidates/_components/AdminGigCandidateBackLink';
 import AdminGigCandidateDetailPageClient from '@/app/admin/gig-candidates/_components/AdminGigCandidateDetailPageClient';
 import AdminGigCandidateForm from '@/app/admin/gig-candidates/_components/AdminGigCandidateForm';
@@ -21,11 +22,11 @@ type AdminGigCandidateFormPageProps =
 export default async function AdminGigCandidateFormPage(props: AdminGigCandidateFormPageProps) {
   const [countries, communityOptions] = await Promise.all([
     getCountries(),
-    getCommunityDisplayOptions('en'),
+    getCommunityDisplayOptions(DEFAULT_LOCALE_ISO),
   ]);
   const countryOptions = createCountryDisplayOptions(
     countries.map((country) => country.iso),
-    'en',
+    DEFAULT_LOCALE_ISO,
   );
 
   return (

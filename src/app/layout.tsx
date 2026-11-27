@@ -8,6 +8,7 @@ import { clientEnv } from '@/env/client-env';
 import { serverEnv } from '@/env/server-env';
 import { createOpenGraphMetadata, getSitePreviewImageUrl } from '@/lib/open-graph';
 import SignInHost from '@/components/auth/SignInHost';
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 
 const SITE_BASE_URL = serverEnv.appBaseUrl;
 const GOATCOUNTER_ENDPOINT = serverEnv.isProductionSite ? clientEnv.goatCounterEndpoint : undefined;
@@ -88,7 +89,7 @@ interface RootLayoutProps {
 
 export default async function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
-    <html lang="en">
+    <html lang={DEFAULT_LOCALE_ISO}>
       <body>
         <GoatCounterAnalytics endpoint={GOATCOUNTER_ENDPOINT} />
         <QueryProvider>

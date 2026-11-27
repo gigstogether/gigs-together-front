@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 import { clientEnv } from '@/env/client-env';
 import { getAppBaseUrlOrThrow, serverEnv } from '@/env/server-env';
 import {
@@ -13,7 +14,7 @@ export async function GET(): Promise<Response> {
   }
 
   try {
-    const i18n = await getTranslations('en', LLMS_TRANSLATION_NAMESPACE);
+    const i18n = await getTranslations(DEFAULT_LOCALE_ISO, LLMS_TRANSLATION_NAMESPACE);
     const llmsTranslations = i18n.translations[LLMS_TRANSLATION_NAMESPACE];
 
     if (llmsTranslations === undefined) {

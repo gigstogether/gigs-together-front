@@ -1,5 +1,7 @@
 'use client';
 
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
+
 import { MapPin, AlertTriangle, Calendar, ExternalLink, Rss, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -14,8 +16,6 @@ import AdminPreviewMetaRow from '@/app/admin/_components/AdminPreviewMetaRow';
 import AdminGigPreviewTitleRow from '@/app/admin/gigs/_components/AdminGigPreviewTitleRow';
 import { VenueMapLinks } from '@/components/VenueMapLinks';
 import { buildAdminGigEditRoute, buildAdminGigPublicIdPath } from '@/lib/admin-gig-paths';
-
-const ADMIN_GIG_LOCALE = 'en';
 
 interface AdminGigCardProps {
   gig: AdminGigDetail | AdminGigFormData;
@@ -61,7 +61,7 @@ export default function AdminGigCard(props: AdminGigCardProps) {
             <VenueMapLinks
               venues={gig.venues}
               locality={gig.locality}
-              locale={ADMIN_GIG_LOCALE}
+              locale={DEFAULT_LOCALE_ISO}
               className="block"
             />
           </AdminPreviewMetaRow>

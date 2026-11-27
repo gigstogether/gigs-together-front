@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 import { Pencil } from 'lucide-react';
 
 import type { AdminCommunity } from '../_lib/admin-communities-api';
@@ -40,12 +41,12 @@ export default function AdminCommunitiesCatalog(props: AdminCommunitiesCatalogPr
                     </span>
                   </div>
                   <p className="break-words text-sm text-muted-foreground">
-                    {getCountryDisplayName(community.countryIso, 'en')} · /feed/
+                    {getCountryDisplayName(community.countryIso, DEFAULT_LOCALE_ISO)} · /feed/
                     {community.countryIso.toLowerCase()}/{community.slug} · {community.timeZone}
                   </p>
                   {name === undefined ? (
                     <p className="text-sm text-destructive">
-                      Missing active English name: {community.nameTranslationKey}
+                      Missing active name in the default language: {community.nameTranslationKey}
                     </p>
                   ) : null}
                 </div>

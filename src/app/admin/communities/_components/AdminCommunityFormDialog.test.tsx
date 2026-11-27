@@ -83,7 +83,7 @@ describe('AdminCommunityFormDialog', () => {
     );
   });
 
-  it('should permit deactivation when an active English name is missing', () => {
+  it('should permit deactivation when an active name in the default language is missing', () => {
     render(
       <AdminCommunityFormDialog
         value={COMMUNITY}

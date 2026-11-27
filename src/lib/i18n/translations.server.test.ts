@@ -23,6 +23,32 @@ describe('getTranslations', () => {
     });
   });
 
+  it('should send the application default locale when the locale argument is omitted', async () => {
+    const { getTranslations } = await import('@/lib/i18n/translations.server');
+
+    await getTranslations(undefined, 'about');
+
+    expect(getTranslationsApiPublicRequestMock).toHaveBeenCalledWith(
+      '/v1/translations?namespaces=about',
+      'GET',
+      undefined,
+      expect.objectContaining({ headers: { 'accept-language': 'en' } }),
+    );
+  });
+
+  it('should retain the requested locale when an explicit locale is supplied', async () => {
+    const { getTranslations } = await import('@/lib/i18n/translations.server');
+
+    await getTranslations('es', 'about');
+
+    expect(getTranslationsApiPublicRequestMock).toHaveBeenCalledWith(
+      '/v1/translations?namespaces=about',
+      'GET',
+      undefined,
+      expect.objectContaining({ headers: { 'accept-language': 'es' } }),
+    );
+  });
+
   it('should throw GetTranslationsError when namespaces are omitted', async () => {
     const { GetTranslationsError, getTranslations } = await import(
       '@/lib/i18n/translations.server'

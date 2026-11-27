@@ -1,5 +1,7 @@
 'use client';
 
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
@@ -14,7 +16,7 @@ import {
   matchesLocationSearch,
 } from '../shared/admin-location-catalog';
 import type { AdminLocationCatalogProps } from '../shared/admin-location-catalog';
-import { ADMIN_LOCATION_LOCALE, getAdminLocalityLabel } from '../shared/admin-location-display';
+import { getAdminLocalityLabel } from '../shared/admin-location-display';
 import {
   createAdminLocality,
   deleteAdminLocality,
@@ -54,7 +56,7 @@ export default function AdminLocalities(props: AdminLocationCatalogProps) {
             locality.timeZone,
             ...locality.aliases,
             locality.countryIso,
-            getCountryDisplayName(locality.countryIso, ADMIN_LOCATION_LOCALE),
+            getCountryDisplayName(locality.countryIso, DEFAULT_LOCALE_ISO),
           ],
           search,
         ),

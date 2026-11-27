@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 import type { Metadata } from 'next';
 import FeedClient from '../../_components/FeedClient';
 import { clientEnv } from '@/env/client-env';
@@ -50,7 +51,7 @@ export async function generateMetadata(props: FeedCommunityPageProps): Promise<M
   }
 
   const feedPath = buildFeedPath({ country, communitySlug });
-  const i18n = await getTranslations('en', [resolved.nameTranslationNamespace]);
+  const i18n = await getTranslations(DEFAULT_LOCALE_ISO, [resolved.nameTranslationNamespace]);
   const communityName = resolveTranslationValue({
     entry:
       i18n.translations[resolved.nameTranslationNamespace]?.[resolved.community.nameTranslationKey],
@@ -87,7 +88,7 @@ export default async function Page(props: FeedCommunityPageProps) {
   }
 
   const [i18n, feed] = await Promise.all([
-    getTranslations('en', [resolved.nameTranslationNamespace]),
+    getTranslations(DEFAULT_LOCALE_ISO, [resolved.nameTranslationNamespace]),
     getFeed({
       limit: PAGE_SIZE,
       country: normalizedCountry,

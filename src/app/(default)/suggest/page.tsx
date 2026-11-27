@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 import SuggestAuthGate from '@/app/(default)/suggest/_components/SuggestAuthGate';
 import SuggestGigPageClient from '@/app/(default)/suggest/_components/SuggestGigPageClient';
 import { getCountries } from '@/lib/countries.server';
@@ -11,8 +12,8 @@ const TRANSLATION_NAMESPACE = 'suggest';
 export default async function SuggestPage() {
   const [countries, communityOptions, i18n] = await Promise.all([
     getCountries(),
-    getCommunityDisplayOptions('en'),
-    getTranslations('en', TRANSLATION_NAMESPACE),
+    getCommunityDisplayOptions(DEFAULT_LOCALE_ISO),
+    getTranslations(DEFAULT_LOCALE_ISO, TRANSLATION_NAMESPACE),
   ]);
   // TODO: maybe extract this logic of retrieving a translation
   const descriptionEntry = i18n.translations[TRANSLATION_NAMESPACE]?.description;
@@ -36,7 +37,7 @@ export default async function SuggestPage() {
         });
   const countryOptions = createCountryDisplayOptions(
     countries.map((country) => country.iso),
-    'en',
+    DEFAULT_LOCALE_ISO,
   );
   return (
     <div className="mx-auto flex h-[calc(100dvh-var(--header-h))] min-h-0 w-full flex-col overflow-clip sm:max-w-md sm:px-4 sm:py-6">

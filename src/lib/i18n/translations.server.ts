@@ -9,6 +9,7 @@ import {
 } from '@/lib/i18n/translation-identifiers';
 import { serverEnv } from '@/env/server-env';
 import type { LocaleIso } from '@/lib/types';
+import { DEFAULT_LOCALE_ISO } from './locale.constants';
 
 export type {
   TranslationFormat,
@@ -24,8 +25,6 @@ export class GetTranslationsError extends Error {
     this.name = 'GetTranslationsError';
   }
 }
-
-const DEFAULT_LOCALE: LocaleIso = 'en';
 
 function parseRequestedTranslationNamespaces(
   namespaces: string | readonly string[],
@@ -48,7 +47,7 @@ function parseRequestedTranslationNamespaces(
  * - Uses `accept-language` header by default (primary locale tag like "en", "es", "ru")
  */
 export async function getTranslations(
-  locale: LocaleIso = DEFAULT_LOCALE,
+  locale: LocaleIso = DEFAULT_LOCALE_ISO,
   namespaces: string | readonly string[],
 ): Promise<V1LocaleGetTranslationsResponseBody> {
   const namespacesList = parseRequestedTranslationNamespaces(namespaces);

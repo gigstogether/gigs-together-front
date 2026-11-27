@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 import type { Metadata } from 'next';
 import ReactMarkdown from 'react-markdown';
 import { getTranslations } from '@/lib/i18n/translations.server';
@@ -19,7 +20,7 @@ const t = (translations: V1TranslationsByNamespace, key: string): string =>
   });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const i18n = await getTranslations('en', NS);
+  const i18n = await getTranslations(DEFAULT_LOCALE_ISO, NS);
   const title = t(i18n.translations, 'title');
   const description = t(i18n.translations, 'metaDescription');
   return {
@@ -37,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const i18n = await getTranslations('en', NS);
+  const i18n = await getTranslations(DEFAULT_LOCALE_ISO, NS);
   const title = t(i18n.translations, 'title');
   const content = t(i18n.translations, 'content');
 

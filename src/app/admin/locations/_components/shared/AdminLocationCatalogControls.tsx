@@ -1,8 +1,8 @@
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 import { Plus } from 'lucide-react';
 
 import { getCatalogPluralLabel, LOCATION_CATALOG_KINDS } from './admin-location-catalog';
 import type { AdminLocationCatalogProps } from './admin-location-catalog';
-import { ADMIN_LOCATION_LOCALE } from './admin-location-display';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -21,7 +21,7 @@ interface AdminLocationCatalogControlsProps extends AdminLocationCatalogProps {
 export default function AdminLocationCatalogControls(props: AdminLocationCatalogControlsProps) {
   const { activeCatalog, actionLabel, isActionDisabled, search, onCatalogChange, onAction } = props;
 
-  const searchLabel = `Search ${getCatalogPluralLabel(activeCatalog).toLocaleLowerCase(ADMIN_LOCATION_LOCALE)}`;
+  const searchLabel = `Search ${getCatalogPluralLabel(activeCatalog).toLocaleLowerCase(DEFAULT_LOCALE_ISO)}`;
 
   return (
     <div

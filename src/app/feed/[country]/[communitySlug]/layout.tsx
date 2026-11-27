@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE_ISO } from '@/lib/i18n/locale.constants';
 import type { ReactNode } from 'react';
 
 import Header from '@/components/header/Header';
@@ -33,7 +34,7 @@ export default async function FeedLayout(props: FeedLayoutProps) {
     handleMissingFeedCommunity();
   }
 
-  const i18n = await getTranslations('en', [resolved.nameTranslationNamespace]);
+  const i18n = await getTranslations(DEFAULT_LOCALE_ISO, [resolved.nameTranslationNamespace]);
   const communityName = resolveTranslationValue({
     entry:
       i18n.translations[resolved.nameTranslationNamespace]?.[resolved.community.nameTranslationKey],
