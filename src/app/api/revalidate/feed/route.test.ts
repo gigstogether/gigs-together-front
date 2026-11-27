@@ -3,6 +3,7 @@ import { POST } from '@/app/api/revalidate/feed/route';
 
 const getFeedRevalidateSecretOrThrowMock = vi.hoisted(() => vi.fn());
 const revalidatePathMock = vi.hoisted(() => vi.fn());
+const revalidateTagMock = vi.hoisted(() => vi.fn());
 const getCommunitiesFreshMock = vi.hoisted(() => vi.fn());
 
 vi.mock('@/env/server-env', () => ({
@@ -11,6 +12,7 @@ vi.mock('@/env/server-env', () => ({
 
 vi.mock('next/cache', () => ({
   revalidatePath: revalidatePathMock,
+  revalidateTag: revalidateTagMock,
 }));
 
 vi.mock('@/lib/community/community.server', () => ({
@@ -41,6 +43,7 @@ describe('POST', () => {
   beforeEach(() => {
     getFeedRevalidateSecretOrThrowMock.mockReset();
     revalidatePathMock.mockReset();
+    revalidateTagMock.mockReset();
     getCommunitiesFreshMock.mockReset();
     getFeedRevalidateSecretOrThrowMock.mockReturnValue('top-secret');
     getCommunitiesFreshMock.mockResolvedValue({
@@ -55,6 +58,37 @@ describe('POST', () => {
         },
       ],
     });
+  });
+
+  it('should clear catalog and route caches when Community settings change', async () => {
+    const response = await POST(
+      createRequest({
+        secret: 'top-secret',
+        contentType: 'application/json',
+        body: {
+          paths: ['/feed/es/old-name', '/feed/es/new-name'],
+          isCommunityCatalogChanged: true,
+        },
+      }),
+    );
+    expect(response.status).toBe(204);
+    expect(revalidateTagMock).toHaveBeenCalledWith('communityCatalog', { expire: 0 });
+    expect(revalidatePathMock).toHaveBeenCalledWith('/feed/es/old-name');
+    expect(revalidatePathMock).toHaveBeenCalledWith('/feed/es/new-name');
+    expect(revalidatePathMock).toHaveBeenCalledWith('/suggest');
+    expect(revalidatePathMock).toHaveBeenCalledWith('/sitemap.xml');
+  });
+
+  it('should reject an invalid catalog flag when validating a revalidation request', async () => {
+    const response = await POST(
+      createRequest({
+        secret: 'top-secret',
+        contentType: 'application/json',
+        body: { isCommunityCatalogChanged: 'yes' },
+      }),
+    );
+    expect(response.status).toBe(400);
+    expect(revalidateTagMock).not.toHaveBeenCalled();
   });
 
   it('should return 503 when feed revalidate secret is not configured', async () => {

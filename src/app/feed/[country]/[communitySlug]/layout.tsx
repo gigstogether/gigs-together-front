@@ -3,11 +3,11 @@ import type { ReactNode } from 'react';
 import Header from '@/components/header/Header';
 import { HeaderConfigProvider } from '@/app/feed/_providers/HeaderConfigProvider';
 import HeaderCalendar from '@/app/feed/_components/HeaderCalendar';
-import { DEFAULT_FEED_ROUTE, normalizeSegment } from '@/lib/feed/feed.routes';
+import { normalizeSegment } from '@/lib/feed/feed.routes';
+import { handleMissingFeedCommunity } from '@/app/feed/_lib/community-feed-navigation.server';
 import { getCommunityByRoute } from '@/lib/community/community.server';
 import { getTranslations } from '@/lib/i18n/translations.server';
 import { resolveTranslationValue } from '@/lib/i18n/translation-value';
-import { redirect } from 'next/navigation';
 
 interface FeedLayoutRouteParams {
   country: string;
@@ -30,7 +30,7 @@ export default async function FeedLayout(props: FeedLayoutProps) {
   });
 
   if (!resolved) {
-    redirect(DEFAULT_FEED_ROUTE);
+    handleMissingFeedCommunity();
   }
 
   const i18n = await getTranslations('en', [resolved.nameTranslationNamespace]);

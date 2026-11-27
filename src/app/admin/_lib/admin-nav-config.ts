@@ -1,4 +1,4 @@
-import { MapPin, BookA } from 'lucide-react';
+import { MapPin, BookA, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Route } from 'next';
 
@@ -17,6 +17,7 @@ const ADMIN_DASHBOARD_ROUTE: Route = '/admin';
 const ADMIN_TRANSLATIONS_ROUTE: Route = '/admin/translations';
 const ADMIN_LOCALES_ROUTE: Route = '/admin/locales';
 const ADMIN_LOCATIONS_ROUTE: Route = '/admin/locations';
+const ADMIN_COMMUNITIES_ROUTE: Route = '/admin/communities';
 const ADMIN_ADMINS_ROUTE: Route = '/admin/admins';
 
 export const adminNavItems: readonly AdminNavItem[] = [
@@ -44,6 +45,13 @@ export const adminNavItems: readonly AdminNavItem[] = [
     description: 'Countries and location catalogs',
     isEnabled: true,
     icon: MapPin,
+  },
+  {
+    href: ADMIN_COMMUNITIES_ROUTE,
+    label: 'Communities',
+    description: 'Manage communities',
+    isEnabled: true,
+    icon: Users,
   },
   {
     href: ADMIN_TRANSLATIONS_ROUTE,

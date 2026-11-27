@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { fetchCommunities } from '@/lib/community/community.api';
+import { COMMUNITY_CATALOG_CACHE_TAG, fetchCommunities } from '@/lib/community/community.api';
 import type { CommunitiesResponse, Community } from '@/lib/api-boundary-schemas';
 
 const COMMUNITY_CATALOG_REVALIDATE_SECONDS = 60; // 60 seconds (1 minute)
@@ -20,6 +20,7 @@ export async function getCommunities(): Promise<CommunitiesResponse> {
     requestInit: {
       next: {
         revalidate: COMMUNITY_CATALOG_REVALIDATE_SECONDS,
+        tags: [COMMUNITY_CATALOG_CACHE_TAG],
       },
     },
   });

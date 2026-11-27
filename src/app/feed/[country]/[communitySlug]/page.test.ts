@@ -1,11 +1,17 @@
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { notFound } from 'next/navigation';
 
 const feedClientMock = vi.hoisted(() => vi.fn(() => null));
 const getFeedMock = vi.hoisted(() => vi.fn());
 
 vi.mock('../../_components/FeedClient', () => ({ default: feedClientMock }));
 vi.mock('@/app/feed/_lib/feed.server', () => ({ getFeed: getFeedMock }));
+vi.mock('next/navigation', () => ({
+  notFound: vi.fn(() => {
+    throw new Error('NEXT_NOT_FOUND');
+  }),
+}));
 vi.mock('@/env/client-env', () => ({ clientEnv: { feedPageSize: 10 } }));
 const getTranslationsMock = vi.hoisted(() => vi.fn());
 const getCommunitiesMock = vi.hoisted(() => vi.fn());
@@ -33,7 +39,7 @@ import Page, { generateMetadata } from './page';
 
 describe('feed community page', () => {
   beforeEach(() => {
-    feedClientMock.mockClear();
+    vi.clearAllMocks();
     getFeedMock.mockResolvedValue({
       gigs: [],
       prevCursor: undefined,
@@ -74,6 +80,35 @@ describe('feed community page', () => {
       nameTranslationNamespace: 'community',
     });
   });
+
+  it.each([
+    { country: 'ES', communitySlug: 'Barcelona' },
+    { country: 'FR', communitySlug: 'unknown' },
+  ])(
+    'should return not found when the feed Community is unavailable at $country/$communitySlug',
+    async (params) => {
+      getCommunityByRouteMock.mockResolvedValue(undefined);
+      await expect(Page({ params: Promise.resolve(params) })).rejects.toThrow(
+        new Error('NEXT_NOT_FOUND'),
+      );
+      expect(notFound).toHaveBeenCalledOnce();
+      expect(getFeedMock).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    { country: 'ES', communitySlug: 'Barcelona' },
+    { country: 'FR', communitySlug: 'unknown' },
+  ])(
+    'should return not found when generating metadata for an unavailable Community at $country/$communitySlug',
+    async (params) => {
+      getCommunityByRouteMock.mockResolvedValue(undefined);
+      await expect(generateMetadata({ params: Promise.resolve(params) })).rejects.toThrow(
+        new Error('NEXT_NOT_FOUND'),
+      );
+      expect(notFound).toHaveBeenCalledOnce();
+    },
+  );
 
   it('should generate feed routes from the Community catalog', async () => {
     const { generateStaticParams } = await import('./page');

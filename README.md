@@ -8,6 +8,8 @@ Frontend for the Gigs Together platform. This repository contains a Next.js app 
 - exposes a public `/suggest` placeholder and a Telegram-aware `/suggest/launch` entry
 - exposes a moderator-only `/admin` area with gig moderation, posting/create/edit flows, and locale management
 - exposes revalidation endpoints for cached content
+- manages Communities at `/admin/communities` through create/edit dialogs, including inactive entries; names use
+  existing English records in the `community` namespace under Text content
 
 At the moment, the default public feed points to `es/barcelona`.
 

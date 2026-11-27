@@ -26,6 +26,10 @@ export const adminKeys = {
     return ['admin', 'locales'];
   },
 
+  communities(): ['admin', 'communities'] {
+    return ['admin', 'communities'];
+  },
+
   countryReferences(): readonly ['admin', 'countryReferences'] {
     return ['admin', 'countryReferences'];
   },

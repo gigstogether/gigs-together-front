@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 import FeedClient from '../../_components/FeedClient';
 import { clientEnv } from '@/env/client-env';
 import { serverEnv } from '@/env/server-env';
 import { getFeed } from '@/app/feed/_lib/feed.server';
+import { handleMissingFeedCommunity } from '@/app/feed/_lib/community-feed-navigation.server';
 import { gigToEvent } from '@/lib/feed/feed.mapper';
-import { DEFAULT_FEED_ROUTE, buildFeedPath, normalizeSegment } from '@/lib/feed/feed.routes';
+import { buildFeedPath, normalizeSegment } from '@/lib/feed/feed.routes';
 import { I18nProvider } from '@/providers/I18nProvider';
 import { resolveTranslationValue } from '@/lib/i18n/translation-value';
 import { getTranslations } from '@/lib/i18n/translations.server';
@@ -46,7 +46,7 @@ export async function generateMetadata(props: FeedCommunityPageProps): Promise<M
   const resolved = await getCommunityByRoute({ country, communitySlug });
 
   if (!resolved) {
-    redirect(DEFAULT_FEED_ROUTE);
+    handleMissingFeedCommunity();
   }
 
   const feedPath = buildFeedPath({ country, communitySlug });
@@ -83,7 +83,7 @@ export default async function Page(props: FeedCommunityPageProps) {
   });
 
   if (!resolved) {
-    redirect(DEFAULT_FEED_ROUTE);
+    handleMissingFeedCommunity();
   }
 
   const [i18n, feed] = await Promise.all([

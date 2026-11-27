@@ -1,20 +1,27 @@
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getFeedRevalidateSecretOrThrow } from '@/env/server-env';
 import { buildFeedPath } from '@/lib/feed/feed.routes';
 import { getCommunitiesFresh } from '@/lib/community/community.server';
+import { COMMUNITY_CATALOG_CACHE_TAG } from '@/lib/community/community.api';
 import { isRecord } from '@/lib/is-record';
 
 export const runtime = 'nodejs';
 
 interface RevalidateFeedRequestBody {
-  readonly paths?: readonly string[];
+  paths?: string[];
+  isCommunityCatalogChanged?: boolean;
 }
 
 const isRevalidateFeedRequestBody = (x: unknown): x is RevalidateFeedRequestBody => {
   if (!isRecord(x)) return false;
   const body = x;
+  if (
+    body.isCommunityCatalogChanged !== undefined &&
+    typeof body.isCommunityCatalogChanged !== 'boolean'
+  )
+    return false;
   if (body.paths === undefined) return true;
   if (!Array.isArray(body.paths)) return false;
   return body.paths.every((p) => typeof p === 'string');
@@ -45,12 +52,21 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  let bodyPaths: readonly string[] | undefined;
+  let bodyPaths: string[] | undefined;
+  let isCommunityCatalogChanged = false;
   if (body !== undefined) {
     if (!isRevalidateFeedRequestBody(body)) {
       return NextResponse.json({ ok: false, error: 'Invalid body' }, { status: 400 });
     }
     bodyPaths = body.paths;
+    isCommunityCatalogChanged = body.isCommunityCatalogChanged === true;
+  }
+
+  if (isCommunityCatalogChanged) {
+    revalidateTag(COMMUNITY_CATALOG_CACHE_TAG, { expire: 0 });
+    revalidatePath('/feed/[country]/[communitySlug]', 'layout');
+    revalidatePath('/suggest');
+    revalidatePath('/sitemap.xml');
   }
 
   let paths = bodyPaths;

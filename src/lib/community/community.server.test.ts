@@ -4,6 +4,7 @@ vi.mock('server-only', () => ({}));
 
 vi.mock('@/lib/community/community.api', () => ({
   fetchCommunities: fetchCommunitiesMock,
+  COMMUNITY_CATALOG_CACHE_TAG: 'communityCatalog',
 }));
 
 import {
@@ -36,7 +37,7 @@ describe('community.server', () => {
     await getCommunities();
 
     expect(fetchCommunitiesMock).toHaveBeenCalledWith({
-      requestInit: { next: { revalidate: 60 } },
+      requestInit: { next: { revalidate: 60, tags: ['communityCatalog'] } },
     });
   });
 

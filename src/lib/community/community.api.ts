@@ -3,6 +3,8 @@ import type { ApiPublicRequestInit } from '@/lib/api-public';
 import { parseCommunitiesResponse } from '@/lib/api-boundary-schemas';
 import type { CommunitiesResponse } from '@/lib/api-boundary-schemas';
 
+export const COMMUNITY_CATALOG_CACHE_TAG = 'communityCatalog';
+
 export interface FetchCommunitiesParams {
   requestInit?: ApiPublicRequestInit;
 }
